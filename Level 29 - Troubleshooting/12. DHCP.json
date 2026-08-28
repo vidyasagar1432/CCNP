@@ -1,0 +1,23 @@
+{
+  "title": "DHCP",
+  "level": 29,
+  "levelTitle": "Level 29 - Troubleshooting",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "12. DHCP.md",
+  "cards": [
+    { "q": "What does DHCP troubleshooting trace?", "a": "The DORA process and common blockers: no relay (helper), pool exhaustion, or port conflicts. Verify with show ip dhcp binding, debug ip dhcp server, and pool config.", "tag": "Overview", "context": "Both" },
+    { "q": "What are the four steps of the DHCP DORA process and their directions?", "a": "Discover (client to server), Offer (server to client), Request (client to server), Acknowledge (server to client).", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What proves that DHCP leases have been issued?", "a": "The binding table with show ip dhcp binding.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What does the IP address 169.254.x.x indicate?", "a": "APIPA, meaning the client could not reach a DHCP server and self-assigned an address.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "What enables DHCP to work across VLANs (cross-subnet)?", "a": "The ip helper-address command on the client VLAN interface, which converts the DHCP broadcast into a unicast to the server and sets the giaddr.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What ports does the DHCP relay use?", "a": "UDP 67 (server) and 68 (client).", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What must the DHCP pool match for clients to get an address?", "a": "The client subnet and mask, and it must have available (non-excluded) addresses.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What command configures the DHCP default gateway in a pool?", "a": "The default-router command in the DHCP pool configuration.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "How do you exclude addresses from a DHCP pool?", "a": "With the excluded-address command.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What feature stops rogue DHCP servers?", "a": "DHCP snooping, which blocks unauthorized DHCP servers.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "A duplicate IP address assignment in DHCP is most likely caused by what?", "a": "An address conflict, checked with show ip dhcp conflict, which uses ping or ARP detection.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "No DHCP reply across a router is most likely caused by what?", "a": "A missing relay (ip helper-address) on the client subnet interface.", "tag": "Quick Review", "context": "Practical" },
+    { "q": "What command shows DHCP server packet flow for debugging?", "a": "debug ip dhcp server packets (also debug ip dhcp server packet).", "tag": "Core Concept", "context": "Practical" }
+  ]
+}

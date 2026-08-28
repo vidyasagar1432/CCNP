@@ -1,0 +1,148 @@
+{
+  "title": "LDAP (Lightweight Directory Access Protocol)",
+  "level": 16,
+  "levelTitle": "Level 16 - Network Services",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "17. LDAP.md",
+  "cards": [
+    {
+      "q": "What is LDAP and on which ports does it run?",
+      "a": "LDAP (Lightweight Directory Access Protocol) accesses and manages directory services that hold identities such as users, groups, computers, and organizational data; it uses TCP 389 for LDAP, StartTLS on 389 for an encrypted upgrade, and TCP 636 for LDAPS where TLS starts immediately.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the LDAP Directory Information Tree (DIT)?",
+      "a": "The DIT is the hierarchical structure that organizes LDAP entries, for example dc=corp,dc=example above ou=Users above cn=Bob.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a DN in LDAP?",
+      "a": "A Distinguished Name (DN) is the path that uniquely identifies an entry in the DIT, such as cn=Bob,ou=Users,dc=corp,dc=example.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What do the LDAP naming components mean?",
+      "a": "dc is the domain component, ou is the organizational unit, cn is the common name, and the DN is the full distinguished name identifying the entry.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does LDAP compare to a relational database?",
+      "a": "LDAP uses a hierarchical DIT with entries plus attributes identified by Distinguished Names and directory-oriented queries, while a relational database uses tables and relationships with rows, columns, primary/foreign keys, and SQL.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the LDAP data model?",
+      "a": "An entry is a directory object such as a user or group, an attribute is a property of that object, the DN uniquely identifies the entry, and objectClass defines the schema rules applicable to the entry.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is objectClass in LDAP?",
+      "a": "It defines the types and schema rules applicable to an entry, such as person, which controls the required and allowed attributes like cn, sn, and mail.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the main LDAP operations?",
+      "a": "BIND establishes and authenticates a session, SEARCH finds entries, ADD creates an entry, MODIFY changes attributes, DELETE removes an entry, MODIFY DN renames or moves an entry, and UNBIND ends the session.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the forms of the LDAP BIND operation?",
+      "a": "Simple Bind typically uses a DN and password, SASL Bind uses SASL authentication mechanisms, and Anonymous Bind uses no user credentials.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does BIND always mean password authentication in LDAP?",
+      "a": "No. BIND establishes the LDAP session context, and it supports multiple mechanisms including anonymous and SASL, not only password-based Simple Bind.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How are LDAP search filters written and what are the operators?",
+      "a": "A filter is parenthesized, for example (&(objectClass=user)(sAMAccountName=bob)); the operators are & for AND, | for OR, and ! for NOT, plus attribute=value equality, attribute=* existence, and attribute=value* wildcard/prefix matching.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which ports does Active Directory use for LDAP and the Global Catalog?",
+      "a": "TCP 389 is LDAP, TCP 636 is LDAPS, TCP 3268 is the Global Catalog without TLS, and TCP 3269 is the Global Catalog over SSL/TLS.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is StartTLS in LDAP?",
+      "a": "It upgrades an existing LDAP connection on TCP 389 to TLS, so encryption is negotiated after the connection starts rather than at the beginning as with LDAPS on 636.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do LDAP and Active Directory differ?",
+      "a": "LDAP is a protocol for directory access, while Active Directory (AD DS) is a directory service/product that supports LDAP; the terms are not interchangeable.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the classic enterprise identity/AAA design with LDAP?",
+      "a": "The network device uses RADIUS or TACACS+ for AAA, and the AAA server consults LDAP/Active Directory as the identity backend to verify users and obtain group and attribute information.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the relationship of 802.1X, RADIUS, and LDAP/AD?",
+      "a": "802.1X is port-based access control that commonly authenticates through a RADIUS server, and that RADIUS server may use LDAP/AD as its identity source; the switch does not typically perform ordinary AAA directly against LDAP.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do LDAP, RADIUS, and TACACS+ compare?",
+      "a": "LDAP is a directory-access protocol on TCP 389 used as an identity backend; RADIUS is network-access AAA on UDP 1812/1813; TACACS+ is network-device AAA on TCP 49 with authorization and accounting as primary roles.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does an LDAP schema define?",
+      "a": "It defines object classes, attribute types, syntax, matching rules, and which attributes are required or allowed for an entry.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the Active Directory Global Catalog?",
+      "a": "It is an AD service that holds a partial replica of attributes for objects across an AD forest, enabling forest-wide searches on TCP 3268 (TLS on 3269) without querying every domain separately.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the LDAP troubleshooting sequence?",
+      "a": "Check reachability to the server, then TCP 389/636 connectivity, TLS or StartTLS success, BIND success, the search base, the LDAP filter, and finally that the expected attributes and groups are returned.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why is security important for LDAP traffic?",
+      "a": "LDAP on 389 can be unencrypted, so credentials and directory data are not protected; use StartTLS or LDAPS, validate server certificates, restrict anonymous access, apply least privilege, monitor access, and protect LDAP servers with network access controls.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the memorizable LDAP port facts for the exam?",
+      "a": "389 = LDAP (with StartTLS possible), 636 = LDAPS, 3268 = AD Global Catalog, 3269 = AD Global Catalog over SSL/TLS; LDAP is a directory protocol, not a replacement for RADIUS or TACACS+.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the core CCNP ENCOR takeaway on LDAP?",
+      "a": "LDAP is a directory-access protocol for identity information; remember DIT, DN, BIND, SEARCH, filters, TCP 389, LDAPS on 636, and that LDAP/AD is the identity backend while RADIUS and TACACS+ are the network AAA protocols.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

@@ -1,0 +1,202 @@
+{
+  "title": "AAA",
+  "level": 17,
+  "levelTitle": "Level 17 - Security",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "01. AAA.md",
+  "cards": [
+    {
+      "q": "What does AAA stand for and what do the three functions control?",
+      "a": "Authentication (who are you?), Authorization (what are you allowed to do?), and Accounting (what did you do?).",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What command enables the IOS AAA framework?",
+      "a": "aaa new-model",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the three major components that AAA is built around?",
+      "a": "aaa new-model, AAA method lists, and AAA services such as authentication, authorization, and accounting.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the 'aaa authentication login default group tacacs+ local' command do, and in what order?",
+      "a": "It attempts TACACS+ authentication first and uses the local database as a fallback when the TACACS+ method is unavailable according to AAA fallback rules.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What can AAA authorization control?",
+      "a": "EXEC access, commands, network services, privilege levels, and other supported IOS services.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does accounting grant or deny access?",
+      "a": "No. Accounting records activity for auditing and tracking but never grants or denies access.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Why must you verify management-access fallback after enabling aaa new-model?",
+      "a": "Enabling aaa new-model can change existing line authentication behavior; a pre-existing 'login local' does not automatically replace a newly configured AAA method list, so you must verify effective config and fallback before testing remote access.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What is a AAA method list?",
+      "a": "It defines how IOS performs a particular AAA operation, including the methods and their order of use.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does 'commands N' in 'aaa authorization commands N' mean?",
+      "a": "It refers to the IOS privilege level N, NOT the number of commands. For example, commands 15 controls commands executed at privilege level 15.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "How does a named method list differ from the default method list?",
+      "a": "The default list is used automatically when no named list is specified for a service; a named list must be explicitly applied (e.g., with 'login authentication VTY-AUTH').",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "With 'aaa authentication login default group tacacs+ local', when does fallback to local occur?",
+      "a": "Fallback to local occurs when the TACACS+ method is unavailable or times out according to AAA fallback rules; a definitive authentication rejection from the server generally does not trigger local fallback.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why does an explicit AAA server rejection not automatically fall back to the next method?",
+      "a": "AAA distinguishes a definitive authentication rejection (which should not be bypassed) from a server timeout/unavailability, so a central server's explicit denial is not accidentally bypassed by local authentication.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is TACACS+ transport and ports, compared to RADIUS?",
+      "a": "TACACS+ uses TCP port 49 for both authentication and accounting; RADIUS uses UDP 1812 for authentication and UDP 1813 for accounting.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is TACACS+ commonly preferred for network-device administrative access?",
+      "a": "Because it provides strong separation of authentication and authorization and supports granular command authorization.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How do TACACS+ and RADIUS differ in encryption of AAA data?",
+      "a": "TACACS+ encrypts the AAA packet body; RADIUS traditionally encrypts only the password field (though modern deployments vary).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What command creates a local user with privilege 15 and a secret?",
+      "a": "username admin privilege 15 secret StrongPassword",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the difference between EXEC authorization and command authorization?",
+      "a": "EXEC authorization controls whether a user can obtain an EXEC shell; command authorization controls which commands a user can run, based on privilege level.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What privilege levels are commonly used in Cisco IOS?",
+      "a": "Level 0 (very limited commands), level 1 (user EXEC), and level 15 (privileged EXEC).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the common accounting keywords and their meanings?",
+      "a": "start-stop (send start and stop records), stop-only (send only stop records), and none (no accounting).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does 'aaa authorization network' control?",
+      "a": "Network-service authorization relevant to network-access services such as supported PPP/VPN-related AAA functions.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is authentication success not automatically authorization success?",
+      "a": "Authentication and authorization are separate AAA functions; a user can authenticate successfully yet still fail authorization, so troubleshooting must check both separately.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between 'login', 'login local', and 'login authentication <method-list>'?",
+      "a": "'login' uses the line password, 'login local' uses the local username database, and 'login authentication <method-list>' uses the specified AAA method list; they are not interchangeable.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "Why is a local user database required for a 'local' AAA fallback?",
+      "a": "The 'local' method references the local username database; without an existing username it cannot authenticate, so a local fallback is not useful unless local users exist.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "What command verifies AAA server status and configuration?",
+      "a": "show aaa servers, and show aaa sessions to view AAA sessions; show running-config | section aaa shows the AAA configuration.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What command tests AAA authentication against a TACACS+ group?",
+      "a": "test aaa group tacacs+ username password legacy (exact syntax varies by IOS/platform).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What debug commands are used to troubleshoot AAA authentication, authorization, and accounting?",
+      "a": "debug aaa authentication, debug aaa authorization, and debug aaa accounting; additionally debug tacacs and debug radius for the respective protocols.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What ordering is used when troubleshooting failing AAA?",
+      "a": "Check AAA config, then reachability to the server, then the server group, then shared secret, then authentication, then EXEC authorization, then command authorization, then accounting.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the best practices to avoid AAA lockout on a remote device?",
+      "a": "Keep an existing admin session open, configure the new AAA method with a local fallback and emergency account, open a second test session, test authentication/authorization/accounting, and only then close the original session; maintain console/OOB access.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the legacy RADIUS ports versus modern ports?",
+      "a": "Legacy RADIUS used UDP 1645 (auth) and UDP 1646 (accounting); modern deployments use UDP 1812 (auth) and UDP 1813 (accounting).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Identify which of the following is a named method list: 'aaa authentication login default group tacacs+ local' or 'aaa authentication login VTY-AUTH group tacacs+ local'?",
+      "a": "The VTY-AUTH one is a named method list (it must be explicitly applied); 'default' is the default method list used automatically when no named list is specified.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the overall role of AAA on a Cisco device?",
+      "a": "AAA is a policy framework combining authentication, authorization, and accounting, built with aaa new-model, method lists, and services, using local or centralized TACACS+/RADIUS servers.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What does 'aaa authorization commands 15 default group tacacs+ local' control?",
+      "a": "It authorizes commands executed at privilege level 15, using TACACS+ first with local fallback according to AAA rules.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    }
+  ]
+}

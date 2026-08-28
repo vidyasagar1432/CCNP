@@ -1,0 +1,94 @@
+{
+  "title": "Route Tags",
+  "level": 13,
+  "levelTitle": "Level 13 - Route Redistribution",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "06. Route Tags.md",
+  "cards": [
+    {
+      "q": "What are route tags and what role do they play in redistribution?", 
+      "a": "Route tags label routes as they enter a protocol so downstream routers can identify their origin and apply consistent policy (filter, metric, AD). Tags survive redistribution boundaries and are the core tool for loop prevention.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How do OSPF, EIGRP, BGP, and RIP represent route tags?", 
+      "a": "OSPF uses an external route tag (32-bit, a route-ID-style value on external routes); EIGRP uses a route tag (32-bit); BGP uses the community as its tag analog; RIP uses a route tag (16-bit).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you set a route tag at redistribution?", 
+      "a": "Use a route-map with 'set tag 100' matched by a prefix-list, and apply it to the redistribute command. Matched routes leave the boundary carrying the tag value.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you match a tag downstream to apply policy?", 
+      "a": "Use a route-map with 'match tag 100' in a route-map, distribute-list, or filter to pick routes by tag number and set attributes like metric.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Describe the classic tag-based loop-prevention workflow.", 
+      "a": "1) Tag OSPF routes entering EIGRP as 100; 2) On EIGRP-to-OSPF redistribution, deny tag 100; 3) Result: OSPF routes never bounce back into EIGRP, breaking the redistribution feedback loop deterministically.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do route tags compare with BGP communities?", 
+      "a": "A tag is a single numeric field used on IGP routes (OSPF/EIGRP/RIP), while a BGP community is a 4-byte ASN:value carrying richer, transitive policy. Both serve the same 'mark the origin' job within their protocols.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What are some administrative uses of route tag value schemes?", 
+      "a": "Origin AS (tag = AS number), L3VPN/MPLS (VPN tag), per-customer values, and deny lists using a reserved range such as 4290000000+.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which command shows route tags and the BGP community analog?", 
+      "a": "'show ip route <prefix>' shows the tag if present, 'show ip eigrp topology' shows the tag field, 'show ip ospf database' shows external routes carrying tags, and 'show ip bgp community' shows the BGP analog.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What must be true for tags to be effective in a multi-protocol design?", 
+      "a": "Tags must be set at the boundary and matched downstream; they are lost if not set at the source, and the match must be the exact tag value.",
+      "tag": "Exam Trap",
+      "context": "Interview"
+    },
+    {
+      "q": "On which OSPF routes can tags be carried?", 
+      "a": "Tags are carried only on OSPF external routes (E1/E2); internal routes do not carry the tag.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the relationship between route tags and loop prevention?", 
+      "a": "Tags are the backbone of loop-prevention designs: tag routes entering a protocol, then deny that tag on the reverse redistribution so the routes never return.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is BGP's tag analog?", 
+      "a": "The BGP community attribute.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "In the route tag quick review, what is the summary of tagging?", 
+      "a": "Field is a 32-bit tag; carried by OSPF external, EIGRP, and RIP; set at the redistribution boundary; matched with 'match tag'; used for origin/policy/loop prevention; BGP analog is community; verify with show ip route tag.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "Policy is not being applied to redistributed routes downstream. What is a likely cause?", 
+      "a": "The tag was either not set at the redistribution boundary, or it is being matched with the wrong value; check the set tag/match tag values and confirm the route-map is applied.",
+      "tag": "Quick Review",
+      "context": "Practical"
+    }
+  ]
+}

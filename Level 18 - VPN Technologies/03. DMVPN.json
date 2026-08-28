@@ -1,0 +1,88 @@
+{
+  "title": "DMVPN",
+  "level": 18,
+  "levelTitle": "Level 18 - VPN Technologies",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "03. DMVPN.md",
+  "cards": [
+    {
+      "q": "What is DMVPN and what are its three building blocks?",
+      "a": "DMVPN (Dynamic Multipoint VPN) builds dynamic, full-mesh IPsec tunnels from a hub-and-spoke design using three building blocks: mGRE (multipoint GRE), NHRP (spoke discovery), and IPsec. Spokes talk directly to each other via spoke-to-spoke shortcuts after NHRP maps them, so data does not hair-pin through the hub.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What role does mGRE play in DMVPN?",
+      "a": "mGRE provides a single tunnel interface that can peer dynamically with many destinations, instead of one tunnel per peer.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What role does NHRP play in DMVPN?",
+      "a": "NHRP resolves the spokes' public addresses (maps) so spokes can discover each other. The hub acts as a next-hop server (NHS) for spoke registration.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does a spoke-to-spoke shortcut work in DMVPN?",
+      "a": "Each spoke registers with the hub (NHS) via NHRP. When spoke A wants spoke B, A sends an NHRP query to the hub, which answers with 'B is at X.X.X.X', and A builds a direct IPsec GRE tunnel to B. Control stays at the hub but data goes directly between spokes.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the DMVPN phases?",
+      "a": "Phase 1 is hub-and-spoke only with no shortcuts; Phase 2 enables spoke-to-spoke shortcuts and is the default; Phase 3 adds NHRP redirect for best-path routing.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands configure the NHRP hub mapping on a DMVPN spoke?",
+      "a": "ip nhrp map for the static hub mapping, ip nhrp network-id for identity, ip nhrp nhs to set the hub as server, tunnel source for the underlay, tunnel mode gre multipoint for mGRE, and tunnel protection ipsec profile to tie IPsec to the tunnel.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the main benefits of DMVPN?",
+      "a": "Scale (one hub tunnel config supports many spokes), a direct spoke-to-spoke data path with no hub bottleneck, zero-touch automatic registration of new spokes, and resilience through dynamic re-establishment. It is the classic branch/roaming overlay.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which commands verify DMVPN operation?",
+      "a": "show dmvpn (and show dmvpn detail), show ip nhrp, show ip nhrp summary, show crypto session, show ip route, debug nhrp, and debug dmvpn.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Data is being hair-pinned through the hub in DMVPN; what is a likely cause?",
+      "a": "The deployment is running phase 1 with no shortcuts enabled, or the shortcut path failed. Verify with show dmvpn; phase 2 is required for dynamic spoke-to-spoke shortcuts.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "A spoke cannot register with the hub in DMVPN; what should you check?",
+      "a": "The NHS mapping is wrong; check the ip nhrp map command, or NHRP traffic is blocked or the network-id is mismatched. Verify with show ip nhrp.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does the command tunnel protection ipsec profile do in DMVPN?",
+      "a": "It ties IPsec to the mGRE tunnel so the GRE tunnel traffic is encrypted with the specified IPsec profile.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the DMVPN quick-review summary?",
+      "a": "The building blocks are mGRE, NHRP, and IPsec; the hub acts as the NHRP server; spoke discovery uses NHRP; the data path is direct spoke-to-spoke; phase 2 enables shortcuts; the tunnel is gre multipoint; it scales with one hub tunnel; and verification uses show dmvpn.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What does NHRP resolve in a DMVPN deployment?",
+      "a": "NHRP resolves the spokes' public IP addresses via the hub (NHS), enabling spokes to discover each other's real underlay addresses for direct tunnels.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

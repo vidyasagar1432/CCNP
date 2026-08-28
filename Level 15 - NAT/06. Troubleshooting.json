@@ -1,0 +1,148 @@
+{
+  "title": "NAT Troubleshooting",
+  "level": 15,
+  "levelTitle": "Level 15 - NAT",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "06. Troubleshooting.md",
+  "cards": [
+    {
+      "q": "What structured path should NAT troubleshooting follow?",
+      "a": "Interface classification, rule matching, translation creation, forwarding, and return traffic. Most NAT failures fall into those areas, plus dynamic pool exhaustion and application/protocol-specific behavior.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Ping works but an application fails across NAT. Is the problem an ALG issue?",
+      "a": "Not necessarily. Do not assume a NAT problem is an ALG problem just because ping works while an application fails; verify the NAT state, routing, ports, and protocol behavior first.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "List the Core NAT Troubleshooting sequence with its primary commands.",
+      "a": "1) Verify inside/outside interfaces with show ip nat statistics, 2) verify NAT rule/ACL matching with show access-lists, 3) check whether a translation is created with show ip nat translations, 4) verify routing and forwarding with show ip route, 5) test return traffic from outside, 6) observe live NAT processing with debug ip nat, 7) test application/protocol-specific behavior.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Where does a NAT packet journey stop when the setup is broken?",
+      "a": "Walk the chain: did the packet enter through the correct NAT inside interface, does the NAT rule match, can a translation be created, is the packet routed toward the outside, does return traffic reach the NAT device, and is the return packet reverse-translated? If IP connectivity works, then check application/protocol compatibility. NAT troubleshooting is not just about finding a translation.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What symptoms indicate an interface classification problem in NAT?",
+      "a": "No translations when the interface is not marked ip nat inside/outside, some traffic untranslated when traffic enters or exits through an incorrectly classified interface, and unexpected NAT behavior when the roles are reversed or applied to the wrong interfaces. NAT is direction-aware, which is why inside/outside classification matters.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "An ACL hits traffic, yet no NAT occurs. What is wrong?",
+      "a": "An ACL match does not by itself guarantee NAT will occur. Interface classification, the NAT rule configuration, pool availability, and packet forwarding must also be correct, so verify all of them together.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What happens to new inside hosts when a Dynamic NAT pool is exhausted?",
+      "a": "Without overload, each inside host generally requires a separate translated address, so when the pool is exhausted new inside hosts cannot obtain a translation.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Is PAT immune to exhaustion?",
+      "a": "No. Do not describe PAT as completely immune to exhaustion: it has a finite number of available translation resources, including ports and platform resources, and can exhaust them, especially under heavy load.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What should you look for in show ip nat translations, and what common problems does the table reveal?",
+      "a": "Look for the expected inside local and inside global addresses, the correct outside destination, protocol, and correct TCP/UDP ports for PAT, and whether the translation exists while the session is active. Common problems: no translation (rule/interface/routing issue), translation disappears (timeout or session termination), unexpected translation (wrong rule/classification), and an old translation that remains because the session has not yet expired.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What should you consider before running clear ip nat translation *?",
+      "a": "Clearing translations can terminate or disrupt active NAT sessions, so use it deliberately, especially on production devices.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Can ICMP be translated by IOS NAT even though it has no TCP/UDP ports?",
+      "a": "Yes. ICMP does not use TCP/UDP ports, but IOS NAT can maintain state for ICMP using the ICMP identifier to distinguish sessions. 'No ICMP translation because ICMP cannot be translated' is incorrect; instead investigate interface classification, ACL/rule matching, routing, existing state, ICMP filtering, and platform behavior.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Outbound traffic leaves through NAT but no reply comes back. What is likely wrong?",
+      "a": "A return-path or routing problem: the return traffic must be able to reach the NAT device. Likely causes are a missing/incorrect return route, return traffic bypassing the NAT device, or asymmetric routing causing intermittent connectivity. NAT does not replace routing.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Does return traffic for an existing outbound NAT session require a separate static mapping?",
+      "a": "No. Return traffic for an existing dynamic NAT/PAT session uses the existing translation state, so no static rule is needed merely because the return packet is inbound. An unsolicited inbound connection, however, normally requires a static NAT or static PAT mapping.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What should you verify when troubleshooting a Static NAT or Static PAT inbound service?",
+      "a": "The correct inside local address, inside global address, protocol, and TCP/UDP port, correct inside/outside interface classification, return routing, and ACL/firewall policy. NAT translation alone does not guarantee a connection; security policy, routing, and the server/application must also permit the traffic.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What application/protocol issues typically require investigation beyond basic NAT connectivity?",
+      "a": "FTP and SIP, protocols that embed IP addresses in their payloads, applications that dynamically negotiate additional connections, and protocols affected by NAT traversal. If basic IP connectivity works but the application fails, investigate protocol-specific behavior.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "FTP works at the IP level but fails across NAT. What should you examine?",
+      "a": "FTP can establish additional data connections depending on the mode, so examine active vs passive FTP, NAT behavior, firewall/inspection policy, and control/data connection handling.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Is 'SIP/RTP requires ALG' a memorizable rule?",
+      "a": "No. Do not memorize that SIP/RTP requires an ALG; NAT behavior depends on platform, software version, application, and network design. SIP signaling and RTP media can be affected by NAT, firewall policies, SIP inspection/ALG behavior, NAT traversal mechanisms, incorrect advertised addresses, and asymmetric paths.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the role of debug ip nat, and what caution applies?",
+      "a": "debug ip nat provides real-time information about NAT processing and is useful for observing whether packets are actually being translated. Use it carefully on production devices because it consumes CPU and generates large output; stop it with undebug all or no debug all. Command availability varies by IOS/IOS XE release and platform.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands show NAT state, configuration, ACL matching, routing, interfaces, and live processing?",
+      "a": "State: show ip nat translations, show ip nat translations verbose, show ip nat statistics. Configuration: show running-config | include ip nat. ACL matching: show access-lists. Routing: show ip route. Interfaces: show ip interface brief. Live processing: debug ip nat. Clear dynamic state: clear ip nat translation *.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Describe the recommended procedure when an inside host cannot access an external server.",
+      "a": "Verify interfaces (show ip nat statistics), verify NAT configuration (show running-config | include ip nat), verify ACL matching (show access-lists), generate traffic, check translations (show ip nat translations), check statistics (active translations, hits, misses, pool utilization), verify routing and the return path (show ip route), and use debug ip nat only if necessary, disabling it afterward with undebug all.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "debug ip nat shows no translation for a packet. What does that mean?",
+      "a": "The packet does not match the NAT conditions: the ACL/rule, interface classification, or traffic direction is failing, so NAT is never even considered for that packet.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "For a NAT fault, what is the first check in each case?",
+      "a": "No translation, first check inside/outside interfaces; no ACL matches, check the NAT ACL; partial translation, check ACL scope/NAT policy; pool exhausted, check NAT pool statistics; PAT problems, check translation/resource utilization; traffic fails with a translation, check routing/filtering; outbound works but reply fails, check the return path; inbound service fails, check static NAT/PAT and security policy; ICMP fails, check NAT matching, routing, and ICMP filtering; application fails, check ports/protocol/NAT behavior; need live evidence, use debug ip nat.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "State the CCNP NAT troubleshooting mindset.",
+      "a": "Ask in order: did the packet enter through the correct NAT inside interface, does the NAT rule match, can IOS create the translation, was the packet forwarded toward the correct destination, did the return packet reach the NAT device, did NAT reverse-translate it, and if IP connectivity works is the application/protocol compatible with the NAT path? Determine where the packet stops: classification, matching, translation, forwarding, return traffic, or application behavior.",
+      "tag": "Core Concept",
+      "context": "Both"
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "title": "OSPF Summarization (Route Aggregation)",
+  "level": 10,
+  "levelTitle": "Level 10 - OSPF",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "14. Summarization.md",
+  "cards": [
+    {
+      "q": "Where does OSPF summarize routes and what commands are used?",
+      "a": "OSPF summarizes routes only at the ABR using area X range for inter-area routes, and at the ASBR using summary-address for external (redistributed) routes. OSPF cannot summarize inside an area - LSAs are always exact within the area. Summarization shrinks the LSDB, reduces SPF, and contains flaps.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the two commands that answer 'how do I summarize OSPF?'",
+      "a": "area X range at the ABR aggregates inter-area routes (Type 3), and summary-address at the ASBR aggregates external redistributed routes (Type 5/7). Summarization inside an area is not possible - intra-area must be exact.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you use area X range on the ABR?",
+      "a": "Enter router ospf 1 and area 1 range 10.1.0.0 255.255.0.0 to aggregate area-1 internal routes into a single Type 3. The not-advertise option suppresses the aggregate as a filter, multiple ranges are allowed, and the most specific covering summary wins.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you use summary-address on the ASBR?",
+      "a": "Enter router ospf 1 and summary-address 10.2.0.0 255.255.0.0 with redistribute static subnets to aggregate Type 5 external routes at the ASBR. It also applies to Type 7 (NSSA) external routes on the translating ABR.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the benefits of OSPF summarization?",
+      "a": "Smaller LSDB (fewer Type 3/5 LSAs), less SPF CPU (shorter SPF run), stability (a flap inside the summarized range doesn't propagate), determinism (one aggregate at the boundary), and a smaller routing table in the RIB/FIB.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is the null0/discard concern with OSPF summarization?",
+      "a": "A router advertising an aggregate must discard traffic to sub-ranges it doesn't have, otherwise it could re-advertise or loop. The ABR/ASBR generating the summary also needs a matching path or a Null0 for the covered ranges. The discard-route option generates the discard on some platforms.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands verify OSPF summarization?",
+      "a": "show ip ospf database summary shows the Type 3 summaries, show ip ospf database external shows the Type 5 view, and show ip route ospf shows resulting routes.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does the not-advertise option do in OSPF summarization?",
+      "a": "not-advertise suppresses the aggregate route, effectively using the range as a filter rather than advertising it.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Can OSPF summarize routes inside an area?",
+      "a": "No. OSPF cannot summarize inside an area - intra-area LSAs are always exact. Summarization only happens at the ABR (inter-area, area X range) and ASBR (external, summary-address).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does OSPF have classful auto-summarization?",
+      "a": "No. OSPF summarization is not auto-summarization - there is no classful auto behavior. You must explicitly configure area X range or summary-address at the boundary routers.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does OSPF summarization apply to Type 7 NSSA external routes?",
+      "a": "Yes. summary-address at the ASBR applies to Type 5 external routes and also to Type 7 (NSSA) external routes on the translating ABR.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Summarize the OSPF summarization quick-review facts.",
+      "a": "Inter-area uses ABR area X range; external uses ASBR summary-address; inside an area is not possible; Type 3 target for inter-area summaries; Type 5/7 target for external; not-advertise suppresses the range; discard-route drops covered ranges; benefit is smaller LSDB and less SPF; flaps are contained at the boundary.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

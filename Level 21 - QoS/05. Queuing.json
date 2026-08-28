@@ -1,0 +1,82 @@
+{
+  "title": "Queuing",
+  "level": 21,
+  "levelTitle": "Level 21 - QoS",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "05. Queuing.md",
+  "cards": [
+    {
+      "q": "What is queuing in QoS and what is the modern answer?",
+      "a": "Queuing decides the order packets leave an interface when it is congested. The modern answer is CBWFQ (class-based weighted fair queuing) with LLQ (low latency queuing) for delay-sensitive voice.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "List the queuing mechanisms and the need each one maps to.",
+      "a": "FIFO (first in first out, no QoS), WFQ (per-flow fair, default legacy), PQ (strict priority, critical only), CBWFQ (per-class weights, modern default), and LLQ (priority plus CBWFQ, for voice).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is CBWFQ and what does each class receive?",
+      "a": "CBWFQ is class-based weighted fair queuing where each class (matched by class-map) gets a guaranteed bandwidth share using the bandwidth command, services packets by proportional weight, and uses per-queue tail drop.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is LLQ and what risk does its priority class carry?",
+      "a": "LLQ is a strict priority queue added to CBWFQ (priority queue + CBWFQ). Its priority class is served first but is rate-limited (policed) with pq bandwidth, because an unconstrained priority class can starve other traffic.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do the commands 'priority', 'bandwidth', 'queue-limit', and 'fair-queue' differ in queuing config?",
+      "a": "priority defines a strict priority class (LLQ), bandwidth gives a guaranteed share, queue-limit sets per-class queue depth, and fair-queue enables per-flow queuing inside a class.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why can PQ starve lower queues and how does LLQ avoid that?",
+      "a": "PQ is strict so it can starve lower queues; LLQ polices its priority class so it cannot consume all the bandwidth.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "Where does queuing occur and under what condition does it matter?",
+      "a": "Queuing is applied egress and only matters under congestion.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Voice traffic is experiencing jitter; what is the likely cause and fix?",
+      "a": "No LLQ/priority class is configured for voice. Place voice in a priority (LLQ) class so it is served first.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "Other classes are being starved on an interface with a priority queue; what is the likely cause?",
+      "a": "The priority class is too large (over-provisioned). Reduce the priority bandwidth limit so lower queues still get service.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "A queue is filling and causing drops; what command-level setting controls it?",
+      "a": "queue-limit controls per-class queue depth to manage tail drop.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the difference between PQ and WFQ in selection and priority?",
+      "a": "PQ selects by strict priority and risks starvation; WFQ selects per-flow and provides fairness.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What command shows queuing statistics on an interface?",
+      "a": "show policy-map interface (or show policy-map interface Gi0/1) and show queueing interface.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    }
+  ]
+}

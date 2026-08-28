@@ -1,0 +1,232 @@
+{
+  "title": "HSRP (Hot Standby Router Protocol)",
+  "level": 14,
+  "levelTitle": "Level 14 - First Hop Redundancy",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "01. HSRP.md",
+  "cards": [
+    {
+      "q": "What is HSRP?",
+      "a": "HSRP (Hot Standby Router Protocol) is a Cisco-developed First Hop Redundancy Protocol (FHRP) that provides a redundant default gateway for hosts by sharing a virtual IP and virtual MAC among multiple routers.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the Active and Standby roles in HSRP?",
+      "a": "One router becomes Active and forwards traffic for the virtual gateway. Another router becomes Standby and monitors the Active router; when the Active fails, the Standby takes over the same virtual gateway.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the HSRPv1 transport parameters?",
+      "a": "HSRPv1 uses UDP port 1985, multicast address 224.0.0.2, virtual MAC 0000.0c07.acXX, and supports group numbers 0-255.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the HSRPv2 transport parameters?",
+      "a": "HSRPv2 uses UDP port 1985, multicast address 224.0.0.102, virtual MAC 0000.0c9f.fXXX, and supports group numbers 0-4095.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the HSRP state sequence?",
+      "a": "The HSRP states in order are Initial, Learn, Listen, Speak, Standby, and Active.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does a router do in the Listen state?",
+      "a": "In the Listen state the router knows the virtual IP but is neither Active nor Standby; it listens to HSRP messages.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does a router do in the Speak state?",
+      "a": "In the Speak state the router participates in the HSRP election and sends hello messages.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the default HSRP priority and how is Active selected?",
+      "a": "The default HSRP priority is 100, and the router with the highest priority wins and becomes Active. Priority is configurable in the range 1-255.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does HSRP break a priority tie during election?",
+      "a": "When two routers have equal priority, the router with the higher IP address wins the election and becomes Active.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the HSRP default hello and hold timers?",
+      "a": "HSRP default hello is 3 seconds and default hold is 10 seconds. The hold timer should be at least 3 times the hello timer.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the HSRP preemption behavior by default?",
+      "a": "By default HSRP does not preempt: a higher-priority router does not automatically reclaim the Active role after it recovers. Preemption must be enabled with the standby preempt command for priority-based role recovery.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does HSRP tracking do?",
+      "a": "HSRP can track an interface or object; when the tracked object fails, HSRP reduces the router's priority by the configured decrement, allowing a backup router to become preferred.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why does object tracking matter in an HSRP design?",
+      "a": "Tracking matters because a router can have a healthy LAN interface while its upstream or WAN path is broken; tracking responds to path failure rather than only gateway-router failure.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is the role of IP SLA in HSRP tracking?",
+      "a": "IP SLA tests a remote destination for reachability; when the test fails the track object goes down, HSRP priority decreases, and another router can become Active. This is more intelligent than tracking interface state alone.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does an HSRP priority of 0 indicate?",
+      "a": "A priority of 0 sent in an HSRP message indicates that the current Active router is relinquishing the Active role, allowing a transition without waiting for the normal hold timer.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the HSRPv1 virtual MAC for group 10?",
+      "a": "The HSRPv1 virtual MAC for group 10 is 0000.0c07.ac0a, where 0a is the group number in hexadecimal.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do hosts resolve the HSRP virtual IP address?",
+      "a": "Hosts use ARP to resolve the HSRP VIP to the virtual MAC; after failover the same VIP and virtual MAC are used, so hosts do not need a new default gateway.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How is HSRP traffic encapsulated?",
+      "a": "HSRP is carried over IP and UDP, using UDP port 1985 for both source and destination ports.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How are multiple HSRP groups used for gateway load sharing?",
+      "a": "Multiple HSRP groups on the same LAN, each with its own virtual IP, MAC, Active, Standby, and priority, can be used so one router is Active for one group and Standby for another, distributing forwarding responsibility.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the result of HSRP split-brain or dual-active?",
+      "a": "If HSRP routers cannot receive each other's hellos due to a VLAN partition, trunk failure, Layer-2 connectivity problem, or multicast filtering, each router may independently become Active, producing a dual-active split-brain condition.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands verify and troubleshoot HSRP?",
+      "a": "Useful HSRP commands are show standby, show standby brief, show standby all, show ip arp, show vlan brief, show interfaces trunk, show spanning-tree, and debug standby.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What happens when the HSRP Standby router fails?",
+      "a": "When the Standby fails, the Active router remains Active, there is no gateway interruption, but redundancy is temporarily lost.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the relationship between HSRP and Spanning Tree?",
+      "a": "HSRP and STP solve different problems: STP controls Layer-2 loops and path selection, while HSRP provides default-gateway redundancy. A common campus design aligns STP root placement with HSRP gateway preference.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the HSRP failover sequence when the Active fails?",
+      "a": "When the Active fails, the Standby stops receiving hellos, the hold timer expires, the Standby becomes Active, and it forwards for the same VIP and virtual MAC so hosts continue using the same gateway.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which FHRP values does 224.0.0.2 and 0000.0c07.acXX correspond to?",
+      "a": "224.0.0.2 and 0000.0c07.acXX are specifically HSRPv1 values; HSRPv2 uses 224.0.0.102 and 0000.0c9f.fXXX.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is preemption required for basic HSRP failover?",
+      "a": "No, preemption is not required for basic failover, which is handled by the Standby taking over. Preemption is required only for automatic priority-based role recovery.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does HSRP learning differ from the other states?",
+      "a": "In the Learn state the router does not yet know the virtual IP and attempts to learn it from HSRP messages.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the typical failure detection time with default HSRP timers?",
+      "a": "With default HSRP timers (hello 3s, hold 10s), the Standby can take up to approximately 10 seconds to detect loss of the Active router, though actual recovery can be longer due to additional convergence.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do the LAN switch and hosts learn the HSRP virtual MAC?",
+      "a": "Hosts learn the VIP-to-virtual-MAC mapping via ARP; switches learn the virtual MAC to the Active router's switchport via CAM, and after failover the switch relearns where the same virtual MAC is reachable.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the HSRP 'Wrong Active router' troubleshooting cause?",
+      "a": "When the wrong Active router is chosen, the likely cause is a priority or tie-break issue, so check priority and IP address selection in the HSRP configuration.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How is a tracked static route tied to IP SLA in object tracking?",
+      "a": "An IP SLA tests reachability and drives a track object; when the SLA succeeds the tracked static route is installed, and when it fails the route is removed so a backup route can become preferred.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does the HSRP troubleshooting workflow check?",
+      "a": "The HSRP troubleshooting workflow checks interface state, VLAN, trunk, HSRP group, VIP, HSRP version, priority, preemption, timers, tracking, authentication, then captures HSRP packets if required.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the core idea of HSRP?",
+      "a": "HSRP provides a Cisco-developed virtual default gateway: the Active router forwards for the virtual IP/MAC, the Standby monitors it and takes over on Active failure, with priority, preemption, tracking, and multiple groups controlling gateway selection and traffic distribution.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Which HSRP packet fields matter for troubleshooting?",
+      "a": "Important HSRP hello fields for troubleshooting include State, Priority, Hello Time, Hold Time, Group, and Virtual IP.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What distinguishes HSRP from VRRP in terms of standard and preemption?",
+      "a": "HSRP is Cisco-developed with preemption disabled by default, while VRRP is an IETF standard with preemption enabled by default.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the HSRPv2 virtual MAC for group 10?",
+      "a": "The HSRPv2 virtual MAC for group 10 is 0000.0c9f.f00a, where the group number is represented in the final portion.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which HSRP version multicast address is 224.0.0.2?",
+      "a": "224.0.0.2 is the HSRPv1 multicast address (all routers); if a question gives 224.0.0.102, think HSRPv2.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

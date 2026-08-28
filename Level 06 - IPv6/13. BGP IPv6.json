@@ -1,0 +1,88 @@
+{
+  "title": "BGP IPv6",
+  "level": 6,
+  "levelTitle": "Level 06 - IPv6",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "13. BGP IPv6.md",
+  "cards": [
+    {
+      "q": "How does BGP carry IPv6 routes?",
+      "a": "BGP carries IPv6 via MP-BGP (Multiprotocol BGP) over the same TCP 179 transport, using the MP_REACH and MP_UNREACH attributes and address families (AFI 2 / SAFI 1) to tag the next hop and NLRI as IPv6. Whether peers speak to each other over IPv6 or over IPv4 is a separate knob.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What do the MP-BGP attributes MP_REACH_NLRI and MP_UNREACH_NLRI carry?",
+      "a": "MP_REACH_NLRI carries the address family, SAFI, the IPv6 next hop, NLRI prefixes, and labels; MP_UNREACH_NLRI carries route withdrawals. The IPv6 unicast family is AFI 2 / SAFI 1.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Can BGP transport IPv4 routes over an IPv6 session or IPv6 routes over IPv4?",
+      "a": "Yes. Peers can use global IPv6 addresses with IPv6 transport, or peer over an IPv4 session while exchanging IPv6 NLRI; regardless of transport, the neighbor must be activated in the IPv6 unicast address family to send or receive IPv6 routes.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do you configure dual-stack BGP on Cisco IOS?",
+      "a": "Define router bgp 65001 with a router-id and a neighbor remote-as, then under address-family ipv6 unicast activate that neighbor and optionally apply a route-map; a network 2001:db8:1:10::/64 statement advertises your local prefix when peering over an IPv4 session.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What IPv6 BGP mechanisms are identical to IPv4 BGP?",
+      "a": "AS_PATH, local-preference, MED, and communities work exactly as in IPv4, and path selection rules are unchanged; aggregation uses aggregate-address and filters use ipv6 prefix-list. The IPv6 next hop lives in MP_REACH, and iBGP often needs next-hop-self or next-hop-unchanged.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the real-world uses of BGP for IPv6?",
+      "a": "ISP edges advertise GUA prefixes via eBGP and accept customer /48s; enterprises use it for dual-stack Internet peering or MP-BGP in MPLS/VPNv6 and EVPN; and anycast DNS or cloud deployments advertise the same prefix from multiple sites with multi-path BGP.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What commands verify BGP IPv6?",
+      "a": "show bgp ipv6 unicast summary, show bgp ipv6 unicast neighbors 2001:db8:1::1, and show bgp ipv6 unicast; filtering uses ipv6 prefix-list V6 permit 2001:db8:1:10::/64 le 48.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Is activating a BGP neighbor in the IPv6 AF optional?",
+      "a": "No. Activation is mandatory; a neighbor that is not activated in the address family carries nothing, so the session may run but the route table stays empty.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Can IPv6 routes be exchanged over an IPv4 BGP session?",
+      "a": "Yes. Transport is separate from NLRI: an IPv4 session can still exchange IPv6 routes using MP-BGP.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Where is the BGP IPv6 next hop carried?",
+      "a": "In the MP_REACH attribute, not in the regular NEXT_HOP attribute.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does BGP for IPv6 use different best-path selection rules?",
+      "a": "No. Path selection is the same as IPv4 BGP, so do not invent IPv6-specific best-path rules.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between network and aggregate-address in BGP IPv6?",
+      "a": "The network x/y statement under the IPv6 address family advertises your own local prefix, while aggregate-address summarizes prefixes.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does iBGP IPv6 still require for reachability between peers?",
+      "a": "Loopback peering and next-hop-self logic, the same as iBGP in IPv4.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

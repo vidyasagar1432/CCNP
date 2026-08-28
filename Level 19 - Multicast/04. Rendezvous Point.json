@@ -1,0 +1,88 @@
+{
+  "title": "Rendezvous Point (RP)",
+  "level": 19,
+  "levelTitle": "Level 19 - Multicast",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "04. Rendezvous Point.md",
+  "cards": [
+    {
+      "q": "What is the RP (Rendezvous Point) in PIM-SM?",
+      "a": "The RP is the router where receivers' (*,G) joins meet the source's register traffic; it is the hub of PIM-SM. Every PIM-SM router must know the group-to-RP mapping.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What tasks does the RP perform for a PIM-SM group?",
+      "a": "Receivers join (*,G) toward it, the source's FHR registers to it, and shared-tree traffic flows through it; routers depend on the group-to-RP mapping.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the three ways to learn the group-to-RP mapping?",
+      "a": "Static (manual ip pim rp-address), Auto-RP (Cisco proprietary, dynamic), and BSR (PIM draft standard, vendor-neutral). Static is the simplest and an exam favorite; Auto-RP and BSR provide dynamic mapping and redundancy.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does Auto-RP discover and distribute RP mappings?",
+      "a": "Candidate RPs send RP-announcements to the RP-discovery agent, which maps and distributes them, and a mapping agent picks the winner by election based on IP or weight, with the highest RP IP typically winning ties.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does BSR distribute RP mappings?",
+      "a": "An elected bootstrap router (BSR) receives announcements from candidate RPs and floods the resulting mapping to all PIM routers; election favors the highest priority/IP.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands configure static, Auto-RP, and BSR RP mapping?",
+      "a": "Static: ip pim rp-address <IP>; Auto-RP: ip pim send-rp-announce Loopback0 scope 32 and ip pim send-rp-discovery Loopback0 scope 32; BSR: ip pim bsr-candidate Loopback0 0 and ip pim rp-candidate Loopback0.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the RP placement and redundancy strategies?",
+      "a": "A central RP is simple but a single point of failure; anycast RP uses a shared loopback plus MSDP for redundancy and shared load; per-group RP gives control over scale.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which commands verify RP mapping and configuration?",
+      "a": "show ip pim rp mapping, show ip pim rp hash, show ip pim neighbor, and show ip mroute; debug ip pim auto-rp for Auto-RP issues.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "No RP mapping is being learned; what do you check?",
+      "a": "Whether static or auto announcements are configured and reaching the routers; verify with show ip pim rp mapping.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Multicast traffic is flowing via the wrong RP; what do you check?",
+      "a": "An RP mapping conflict; run show ip pim rp hash to see how the group hashes to an RP.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Auto-RP shows no mappings; what is missing?",
+      "a": "Both the announce and discovery functions with proper scope; check with show ip pim rp mapping and debug ip pim auto-rp.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which groups does Auto-RP use, and what is the catch?",
+      "a": "Auto-RP uses 224.0.1.39 and 224.0.1.40; these groups are Cisco proprietary and considered legacy.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens if there is no RP for a PIM-SM group?",
+      "a": "No shared tree can be built, so PIM-SM cannot operate for that group; every PIM-SM router must have the group-to-RP mapping.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

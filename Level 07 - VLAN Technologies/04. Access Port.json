@@ -1,0 +1,148 @@
+{
+  "title": "Access Port",
+  "level": 7,
+  "levelTitle": "Level 07 - VLAN Technologies",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "04. Access Port.md",
+  "cards": [
+    {
+      "q": "What is an access port?",
+      "a": "An access port is a switch port associated with one access VLAN and is normally used to connect endpoint devices such as PCs, printers, cameras, or other single-VLAN devices. Traffic to an endpoint is normally untagged, and received untagged frames are associated with the configured access VLAN.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the main characteristics of an access port?",
+      "a": "It is assigned one access VLAN, normally receives and sends endpoint traffic untagged, associates received untagged frames with the configured access VLAN, does not operate as an 802.1Q trunk, and uses 'switchport mode access' to explicitly force access mode.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do access and trunk ports differ?",
+      "a": "An access port supports one access VLAN with untagged endpoint traffic and typical peers of PC, printer, or camera; a trunk port carries multiple VLANs with 802.1Q tagged traffic and typical peers of switch, router, firewall, or AP.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Can an access port carry a voice VLAN in addition to its access VLAN?",
+      "a": "Yes. A Cisco access port can support an access VLAN for data plus a voice VLAN for voice traffic. The switch distinguishes untagged data (access VLAN) from 802.1Q-tagged voice (voice VLAN), and the port remains an access port, not a normal trunk.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the exam trap about 'access port = only one VLAN under all circumstances'?",
+      "a": "It is a trap. An access port can have an access VLAN plus a voice VLAN, so it is not limited to only one VLAN under all circumstances.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Do access ports participate in Spanning Tree Protocol (STP), and what does PortFast do?",
+      "a": "Yes, access ports still participate in STP. PortFast allows an edge/host port to transition rapidly to the forwarding state, avoiding the normal STP startup delay, but it does not disable STP.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Where should PortFast normally be used?",
+      "a": "PortFast should normally be used on ports connected to end devices (host/edge ports), not between switches.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What Layer 2 security features are commonly configured on access ports?",
+      "a": "Port Security, BPDU Guard, 802.1X, DHCP Snooping trust/untrust configuration, IP Source Guard, and Dynamic ARP Inspection.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Is PoE required for access-port operation?",
+      "a": "No. PoE is a power-delivery feature, not a requirement of access-port operation. An access port can exist without PoE, and PoE can also be used on other connection types.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does 'switchport mode dynamic desirable' do?",
+      "a": "The port actively attempts to negotiate trunking using DTP, so depending on the neighbor's configuration the link can become a trunk. Using dynamic desirable on an endpoint-facing port is generally undesirable from a security and operational perspective.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does 'switchport mode dynamic auto' do?",
+      "a": "The port is willing to become a trunk if the neighbor actively negotiates trunking, but it does not actively initiate trunking itself. Desirable+Auto can negotiate a trunk, while Auto+Auto remains non-trunking.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the best practice for configuring endpoint-facing ports to prevent DTP trunking?",
+      "a": "Explicitly configure endpoint-facing ports with 'switchport mode access'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the basic access port configuration?",
+      "a": "interface GigabitEthernet0/1: switchport mode access, switchport access vlan 10, and no shutdown.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What command and fields verify an access port's switchport configuration?",
+      "a": "'show interfaces GigabitEthernet0/1 switchport'. Useful fields include Administrative Mode, Operational Mode, Access Mode VLAN, Voice VLAN, Trunking status, Native VLAN, and Negotiation settings.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does 'show interfaces GigabitEthernet0/1 status' show?",
+      "a": "It quickly checks port status, VLAN, duplex, speed, and type.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What problems can a wrong access VLAN cause?",
+      "a": "DHCP failure, ARP failure, wrong IP subnet, inability to reach expected hosts, and unexpected Layer 2 connectivity.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What should you investigate when a port is err-disabled?",
+      "a": "Investigate the cause, such as BPDU Guard, Port Security, Link Flap, or other configured errdisable conditions. Do not assume every err-disabled port is simply down.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Does PortFast disable STP?",
+      "a": "No. PortFast changes how an edge port enters the forwarding state; the port remains part of the STP topology. Access ports normally participate in STP even with PortFast.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is 'dynamic desirable' safe for host ports?",
+      "a": "No. dynamic desirable actively participates in DTP negotiation and can result in trunking with a compatible neighbor; use 'switchport mode access' for endpoint-facing ports.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Do wireless APs always use access ports?",
+      "a": "No. A simple AP may use an access port, but an enterprise AP carrying multiple SSIDs/VLANs commonly uses a trunk.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Are the access VLAN and the native VLAN the same thing?",
+      "a": "No. The access VLAN is the VLAN associated with an access port, while the native VLAN is the VLAN whose traffic is normally sent untagged on an 802.1Q trunk. The native VLAN is a trunk concept.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Summarize the access port quick review key points.",
+      "a": "Access port primary purpose is endpoint connectivity, one access VLAN, untagged normal endpoint traffic, no 802.1Q trunk, typical peer PC/printer/camera/phone; AP may be access or trunk; STP participates; PortFast recommended for edge ports; security features commonly applied; PoE optional; DTP disabled by forced access mode.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the one-minute access port mental model?",
+      "a": "Access port = endpoint-facing Layer 2 port associated with one access VLAN; normal traffic is untagged; no 802.1Q trunk negotiation; PortFast commonly used; a voice VLAN can add tagged voice traffic. Key commands: switchport mode access, switchport access vlan 10, show interfaces switchport.",
+      "tag": "Core Concept",
+      "context": "Both"
+    }
+  ]
+}

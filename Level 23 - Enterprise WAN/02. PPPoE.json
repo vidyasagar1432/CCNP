@@ -1,0 +1,88 @@
+{
+  "title": "PPPoE (PPP over Ethernet)",
+  "level": 23,
+  "levelTitle": "Level 23 - Enterprise WAN",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "02. PPPoE.md",
+  "cards": [
+    {
+      "q": "What is PPPoE (PPP over Ethernet)?",
+      "a": "A protocol that carries PPP sessions over Ethernet, the standard for DSL/broadband. It uses PADI/PADO/PADR/PADS discovery to set up the session, then LCP/CHAP/IPCP run as usual.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Why use PPPoE on broadband?",
+      "a": "It gives broadband Ethernet the authentication and addressing of PPP: per-subscriber sessions, PPP CHAP/PAP authentication, and IPCP addressing.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the four PPPoE discovery messages in order?",
+      "a": "PADI (client broadcast), PADO (server offer), PADR (client requests), then PADS (session established). The session ID is issued by the access concentrator.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens after PPPoE discovery completes?",
+      "a": "It behaves like classic PPP over a session: LCP configures the link, authentication runs via CHAP/PAP, IPCP assigns IP addressing, then data flows as PPP frames.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the role of the access concentrator (AC/BNG) in PPPoE?",
+      "a": "It terminates PPPoE sessions, authenticates clients (often via RADIUS/CHAP), and routes them to the Internet.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How is a PPPoE client configured on IOS-XE?",
+      "a": "Create a Dialer1 virtual interface with ip address negotiated, encapsulation ppp, dialer pool 1, ppp authentication chap callin, and bind the physical interface with pppoe enable and pppoe-client dial-pool-number 1.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which command links a PPPoE client's physical interface to the dialer pool?",
+      "a": "pppoe-client dial-pool-number 1 on the physical interface, combined with dialer pool on the Dialer interface.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands verify a PPPoE session?",
+      "a": "show ip interface dialer and show interface Dialer1 verify the interface; show pppoe session shows sessions; debug pppoe events troubleshoots discovery.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why is the MTU set to 1492 on a PPPoE link?",
+      "a": "Because of the 8-byte PPPoE header overhead, the effective MTU is reduced to 1492, so the link MTU should be set to 1492.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "A PPPoE client cannot establish a session. What is the likely cause and check?",
+      "a": "Discovery being blocked is the likely cause; check with show pppoe session and debug pppoe events.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A PPPoE client authenticates but gets no IP address. What is the likely cause and check?",
+      "a": "An IPCP issue is likely; verify ip address negotiated is configured on the Dialer and debug ppp to see negotiation.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "PPPoE is slow with fragmentation. What is the likely cause and fix?",
+      "a": "MTU mismatch; adjust to mtu 1492 on the link to account for PPPoE overhead.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the PPPoE session model when connecting a DSL subscriber?",
+      "a": "The Dialer interface hosts the virtual PPPoE session, the physical interface is bound via pppoe-client dial-pool-number, and authentication rides PPP (CHAP/PAP).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

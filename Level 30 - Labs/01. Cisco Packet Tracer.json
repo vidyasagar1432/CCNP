@@ -1,0 +1,112 @@
+{
+  "title": "Cisco Packet Tracer",
+  "level": 30,
+  "levelTitle": "Level 30 - Labs",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "01. Cisco Packet Tracer.md",
+  "cards": [
+    {
+      "q": "What is Cisco Packet Tracer?",
+      "a": "A free, low-fidelity network simulator useful for topology practice and ENCOR basics (L2/L3, routing, wireless, some automation), but not a CCNP-grade lab.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Why is Packet Tracer not considered a CCNP-grade lab tool?",
+      "a": "It lacks full IOS features such as DMVPN, advanced QoS, deep IPsec, MPLS, and SD-WAN, so it should be treated as a learning sandbox rather than for serious CCNP prep.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Which topic areas does Packet Tracer handle well?",
+      "a": "Campus L2/L3 and OSPF/EIGRP are good; wireless and basic security are basic; automation is limited; advanced topics are not supported.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are Packet Tracer's main limitations compared to CCNP needs?",
+      "a": "It cannot do DMVPN, advanced QoS, or MPLS, and its IPsec and SD-WAN support is limited or absent; those deep topics require CML, GNS3, or EVE-NG.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the typical Packet Tracer lab flow?",
+      "a": "Build topology, cable links, configure IP and VLANs, configure routing, verify, then save the .pkt file.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is Simulation mode used for in Packet Tracer?",
+      "a": "It provides packet animation and lets you follow PDUs to visualize how packets flow through the network.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which Packet Tracer features support verification in a lab?",
+      "a": "Simulation mode for packet animation, the CLI for full config, PDU tracing to follow a packet, ping/traceroute for connectivity, and Multiuser mode to connect peers.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does Packet Tracer compare to other lab tools on fidelity and cost?",
+      "a": "PT has low fidelity, high speed, is free, uses no real device images, and is best for beginners and ENCOR basics.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the key tip for building CCNP skills in Packet Tracer?",
+      "a": "Practice the CLI rather than the GUI, save work often as .pkt files, and repeat labs for exam-style repetition.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the best way to use Packet Tracer versus other simulators?",
+      "a": "Use PT for topology and config practice on ENCOR basics, and switch to CML, GNS3, or EVE-NG for advanced topics like DMVPN, MPLS, and SD-WAN.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which config and verification commands are standard in Packet Tracer?",
+      "a": "Standard IOS CLI commands including ping, traceroute, show vlan, and show ip route, with simulation mode used for viewing packets.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "The number of routing protocol types supported by Packet Tracer matches full CCNP requirements.",
+      "a": "False — PT supports OSPF and EIGRP well but lacks the deep advanced feature set CCNP requires.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What file format does Packet Tracer use to save lab work?",
+      "a": ".pkt files, so you should save often during a lab session.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "A lab has no link between two devices. What is the likely cause and check in Packet Tracer?",
+      "a": "The likely cause is a cable type issue, so check the physical cable selection and connection.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A Packet Tracer simulation shows an empty packet list when verifying a flow. What should you check?",
+      "a": "Check that Simulation mode is actively tracking and use the PDU list to follow the packet, confirming the mode and events are enabled.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "No route appears in a Packet Tracer lab. What should you verify?",
+      "a": "Verify routing configuration by checking the routing table with show ip route and confirm IP and VLAN addressing is correct.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which tool should you upgrade to when Packet Tracer hits its limits for CCNP study?",
+      "a": "CML, GNS3, or EVE-NG, which cover the deep topics PT lacks such as DMVPN, MPLS, and SD-WAN.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

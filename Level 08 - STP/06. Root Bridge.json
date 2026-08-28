@@ -1,0 +1,160 @@
+{
+  "title": "Root Bridge",
+  "level": 8,
+  "levelTitle": "Level 08 - STP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "06. Root Bridge.md",
+  "cards": [
+    {
+      "q": "What is the Root Bridge and how is it elected?",
+      "a": "The Root Bridge is the reference point of an STP topology. It is elected using the lowest Bridge ID: lowest Bridge Priority first, then lowest MAC Address if tied.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How many Root Bridges exist per spanning-tree instance across STP variants?",
+      "a": "One Root Bridge per spanning-tree instance: PVST+/Rapid PVST+ has one root per VLAN, MST has one root per MST instance, and classic STP/RSTP has one root per instance.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does the Root Bridge have a Root Port, and what roles do its participating ports take?",
+      "a": "No. The Root Bridge has no Root Port; its participating active ports are normally Designated Ports.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does the Root Bridge's Root Path Cost compare to a non-root switch?",
+      "a": "The Root Bridge has a Root Path Cost of 0 to itself, while a non-root switch has the cumulative cost toward the Root.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does the Extended System ID factor into the Bridge ID?",
+      "a": "Cisco uses the 12-bit System ID Extension when enabled, incorporating the VLAN ID into the Bridge ID (e.g., configured 32768 in VLAN 10 gives effective priority ≈ 32778). Configured priorities are in increments of 4096.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Describe how STP root election happens when switches first start up.",
+      "a": "Each switch initially considers itself root and advertises that in BPDUs. Switches compare the received BPDU information and converge on the elected root; non-root switches then advertise the best root information they have learned with their own bridge/port info.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How does each non-root switch select its Root Port?",
+      "a": "Each non-root switch normally selects one Root Port per instance, primarily based on lowest Root Path Cost, then lowest upstream Bridge ID, then lowest upstream Port ID, then local Port ID as a final tie-break.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Given SW1 (root) → 1G → SW2 → 1G → SW3, what are the Root Path Costs?",
+      "a": "Each 1G link has cost 4, so SW2's Root Path Cost = 4 and SW3's = 8 (4+4). The switch chooses the lowest total path cost subject to STP tie-breakers.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "In PVST+/Rapid PVST+, what is the root election rule?",
+      "a": "Root per VLAN: each VLAN independently elects its Root Bridge, enabling STP-based Layer-2 load balancing.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "In MST, at what level is the root elected?",
+      "a": "Root is elected per MST instance (e.g., MSTI 1 root = SW1, MSTI 2 root = SW2), not per VLAN. All VLANs in an MSTI share that instance's root topology.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Where should the Root Bridge normally be placed in a Layer-2 topology?",
+      "a": "At an appropriate core/distribution location, centrally positioned, stable/highly available, with high-bandwidth paths toward it, and where access switches are prevented from accidentally becoming root.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What command manually sets the Root Bridge priority for a VLAN?",
+      "a": "spanning-tree vlan 10 priority 4096 (effective/displayed priority = 4106). A lower priority makes the switch more likely to become root.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the root primary and root secondary macros, and what values do they commonly yield?",
+      "a": "spanning-tree vlan 10 root primary adjusts priority to make a switch the likely root; root secondary makes it a likely backup. Under default conditions they commonly yield primary 24576 and secondary 28672, but they are priority-adjustment macros, not universal guarantees.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why is root primary not simply always priority 24576?",
+      "a": "It is a Cisco macro that adjusts priority based on the existing root priority, so it can select a lower (better) priority when necessary rather than always 24576.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "In an election with SW1 (32768), SW2 (24576), SW3 (32768), which is root and why?",
+      "a": "SW2, because it has the lowest bridge priority (24576). If priorities are tied (e.g., both 32768), the lower MAC address wins.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What can cause root misplacement or an unexpected Root Bridge?",
+      "a": "An access switch accidentally winning election, a new switch with unexpectedly low priority, uncontrolled STP participation, rogue/legacy switches, switch reboots, or incorrect priority configuration can force suboptimal paths or frequent reconvergence.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is Root Guard and how does it protect root placement?",
+      "a": "Root Guard protects a designated port from becoming a path toward a superior root; if a superior BPDU arrives, it puts the port in root-inconsistent state. Configure it on ports where downstream switches must never influence root election (spanning-tree guard root).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands verify the Root Bridge and STP summary?",
+      "a": "show spanning-tree root shows root info across VLANs/instances; show spanning-tree vlan 10 shows a VLAN's root/root port/cost/designated ports; show spanning-tree summary shows mode and protection features; show spanning-tree shows all.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A new downstream switch with a superior Bridge ID just changed the root. What is the safest fix?",
+      "a": "Explicitly configure the intended root priority (e.g., spanning-tree vlan 10 root primary) and use Root Guard toward downstream/untrusted switches to prevent root takeover.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why is it wrong to think the switch with the highest priority or highest MAC becomes root?",
+      "a": "The switch with the lowest Bridge ID becomes root. MAC is only compared when Bridge Priority is tied, and the lowest MAC wins.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is it wrong to say every switch has a Root Port?",
+      "a": "Every non-root switch normally has one Root Port per instance, but the Root Bridge has no Root Port.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Do non-root switches forward the root's BPDU unchanged?",
+      "a": "No. Non-root switches transmit BPDUs containing the best root information they have learned, with their own bridge/port information used in the BPDU.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Are all ports on the Root Bridge automatically forwarding?",
+      "a": "No. The Root Bridge has no Root Port and its active participating ports are Designated Ports, but administratively down/disabled interfaces are not forwarding simply because the switch is root.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the key Root Bridge facts in quick review?",
+      "a": "Election by lowest Bridge ID (lowest priority, then lowest MAC); Root Port = None; Root Path Cost = 0; root's participating ports normally Designated; PVST+/Rapid PVST+ root per VLAN; MST root per MSTI; typical placement core/distribution; default priority 32768; protection Root Guard.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the core exam sequence for Root Bridge understanding?",
+      "a": "Lowest Bridge ID → Root Bridge → non-root switches find best path → select Root Port → STP determines Designated/Alternate paths → loops prevented.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

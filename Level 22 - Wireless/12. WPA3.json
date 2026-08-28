@@ -1,0 +1,94 @@
+{
+  "title": "WPA3",
+  "level": 22,
+  "levelTitle": "Level 22 - Wireless",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "12. WPA3.md",
+  "cards": [
+    {
+      "q": "What is WPA3?",
+      "a": "WPA3 is the security upgrade over WPA2: SAE (Simultaneous Authentication of Equals) replaces the PSK dictionary-prone handshake, forward secrecy protects past traffic, and enterprise 192-bit plus mandatory PMF harden enforcement.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is WPA3 Personal (SAE)?",
+      "a": "WPA3 Personal replaces the PSK 4-way handshake with SAE (dragonfly), sweeps the passphrase through PBKDF2, prevents offline attacks, and provides forward secrecy. It resists offline dictionary attacks, so there is no pre-shared passphrase guessing.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does WPA3 Enterprise provide?",
+      "a": "WPA3 Enterprise uses 802.1X/RADIUS authentication with mutual server and client certificates and supports a 192-bit (CNSA) security suite for higher assurance networks.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is PMF and what is its role in WPA3?",
+      "a": "PMF (management frame protection) protects management frames against deauth and forgery attacks and improves roaming safety. In WPA3 it is mandatory, stopping deauth/association attacks.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does WPA3 compare to WPA2?",
+      "a": "Personal auth is PSK 4-way handshake in WPA2 versus SAE in WPA3; WPA2 is vulnerable to dictionary attacks while WPA3 is resistant; forward secrecy is absent in WPA2 but present in WPA3; PMF is optional in WPA2 and mandatory in WPA3; Enterprise adds 192-bit in WPA3. The offline dictionary attack is the headline WPA3 fix.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is WPA3 transition mode and when do you use it?",
+      "a": "Transition mode allows WPA2 devices to join while WPA3-capable clients use the stronger mode; WPA3-only is secure but incompatible with legacy devices. Use transition mode for compatibility, but prefer WPA3-only where possible since mixed mode exposes weaker security.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands configure WPA3 on a WLC WLAN?",
+      "a": "security wpa psk sae sets WPA3 personal (SAE), security pmf enables management frame protection, and security wpa ccmp selects the encryption. The akm sae command means WPA3 personal.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands verify WPA3 and wireless security?",
+      "a": "show wlan summary, show wlan id 3, show wireless client summary, show ap dot11 5ghz security, and show auth-list.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Legacy clients cannot join and SAE/PMF errors occur. What should you check?",
+      "a": "Legacy clients that cannot join indicate WPA3-only mode, so enable transition mode; SAE failures indicate a passphrase or performance issue (check akm sae); PMF errors indicate a security mismatch.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Joins are slow and the network mixes security levels. What could be happening?",
+      "a": "Slow joins may be SAE CPU cost on the AP, so check device capabilities; a mixed weak environment means transition mode is letting WPA2 devices in, so tighten the security policy.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What replaces the PSK 4-way handshake in WPA3?",
+      "a": "SAE (Simultaneous Authentication of Equals) replaces the PSK 4-way handshake model in WPA3 Personal, eliminating the offline dictionary attack surface.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which WPA3 features are mandatory?",
+      "a": "Forward secrecy and mandatory PMF (management frame protection). PMF was optional in WPA2.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does WPA3 Enterprise harden security and when is 192-bit used?",
+      "a": "WPA3 Enterprise uses 802.1X/RADIUS with mutual certificates and can add a 192-bit (CNSA) suite for high-assurance networks; the 192-bit option is applied where stronger assurance is required.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which WPA3 quick review facts should you remember?",
+      "a": "Personal uses SAE; Enterprise uses 802.1X/192-bit; forward secrecy is present; PMF is mandatory; dictionary attacks are stopped; legacy devices need transition mode; encryption is GCMP/AES; WPA3 is hardened versus WPA2.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

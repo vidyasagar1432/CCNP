@@ -1,0 +1,118 @@
+{
+  "title": "EIGRP Variance (Unequal-Cost Load Balancing)",
+  "level": 11,
+  "levelTitle": "Level 11 - EIGRP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "09. Variance.md",
+  "cards": [
+    {
+      "q": "What does the EIGRP variance command do?",
+      "a": "Variance lets EIGRP install multiple unequal-metric paths to the same destination, providing unequal-cost load balancing. A candidate path must satisfy two requirements: the feasibility condition, and a metric within the configured variance relative to the successor. The default, variance 1, permits only normal equal-cost multipath behavior.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the successoral and feasibility concepts used by variance?",
+      "a": "The successor is the best loop-free path; its metric becomes the Feasible Distance (FD). A feasible successor is a backup path satisfying RD < FD, which guarantees the neighbor is closer to the destination than the local router's current FD and provides the loop-free property.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the variance rule for a candidate path to be eligible?",
+      "a": "The candidate metric must satisfy metric(candidate) <= variance × metric(successor) AND the feasibility condition RD(candidate) < FD(successor). For example, with successor FD 100 and variance 2 the maximum candidate metric is 200; a candidate at 250 fails the variance requirement.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "With variance 2, FD 100, candidate B (metric 150, RD 60) and candidate C (metric 300, RD 120), which candidates are installed?",
+      "a": "The variance limit is 200. B passes both checks (150 <= 200 and 60 < 100) so B is eligible and installed. C fails: 300 > 200 fails the variance check and 120 > 100 fails the feasibility condition, so C is excluded. Successor A and candidate B are installed.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What do variance 1, variance 2, and variance 3 mean?",
+      "a": "variance 1 is the default and provides no unequal-cost load balancing; only paths with the same metric as the successor qualify (equal-cost multipath). variance 2 allows a candidate metric up to 2 × the successor metric, and variance 3 up to 3 × the successor metric, provided the feasibility condition is still satisfied.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does increasing variance make a loop-prone path usable?",
+      "a": "No. Variance controls the acceptable metric range; the feasibility condition preserves loop freedom. A candidate with RD 120, metric 150, and a successor FD of 100 passes the variance check (150 <= 200 for variance 2) but fails feasibility (120 < 100 is false), so it is not eligible.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do the feasibility check, variance check, and maximum-paths interact?",
+      "a": "They form a two-stage filter: first RD < FD (reject if not), then metric <= variance × FD (reject if not), and if eligible, maximum-paths then limits how many qualifying paths can actually be installed. Formula: EIGRP Variance = Feasibility (RD < FD) + Metric Bound + maximum-paths.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between variance and maximum-paths?",
+      "a": "Variance determines which unequal-cost paths may qualify (the acceptable metric range). Maximum-paths determines how many paths can be installed. Increasing variance does not necessarily mean every qualifying route appears in the routing table because the maximum-path limit still applies.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does EIGRP distribute traffic across unequal-cost paths?",
+      "a": "Forwarding can use multiple next hops when unequal-cost paths are installed. Do not assume EIGRP always distributes traffic using a strict inverse-metric mathematical ratio; the actual distribution depends on the router's forwarding implementation and CEF/load-sharing behavior.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Where is variance configured in named EIGRP for IPv4 and IPv6?",
+      "a": "Under the address-family topology base, for example router eigrp CAMPUS → address-family ipv4 unicast autonomous-system 100 → topology base → variance 2 and maximum-paths 4. The same fundamental concept applies to IPv4 and IPv6.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Where is variance configured in classic EIGRP?",
+      "a": "Under the EIGRP routing process, for example router eigrp 100 followed by variance 2 and maximum-paths 4. Named mode moves these settings into topology base.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does the routing table look like with unequal-cost EIGRP paths installed?",
+      "a": "The routing table contains multiple next hops for the same destination, for example D 10.10.10.0/24 [90/100] via 10.1.1.2 and via 10.1.2.2. One destination can have multiple qualifying EIGRP paths and therefore multiple next hops.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why might a candidate path exist in the EIGRP topology table but not be installed?",
+      "a": "It may fail the feasibility condition (RD >= FD), its metric may be outside the variance range, maximum-paths may limit installation, or another route-selection condition may prevent installation. Use show ip eigrp topology to check the successor, FD, RD, and candidate paths.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you troubleshoot a missing unequal-cost EIGRP path?",
+      "a": "Check RD vs FD (candidate fails feasibility), check variance (set too low), check maximum-paths (too few paths installed), and compare the candidate metric with variance × successor FD. If load sharing seems uneven, investigate CEF and forwarding behavior.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands verify variance behavior?",
+      "a": "show ip eigrp topology checks FD, RD, successors, feasible successors, and candidate paths. show ip route <prefix> checks whether multiple next hops were installed. show eigrp address-family ipv4 topology works in named mode. show ip cef <prefix> shows how multiple next hops appear in the forwarding plane.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the troubleshooting workflow for unequal-cost load balancing?",
+      "a": "1. Identify the successor. 2. Record successor FD. 3. Identify candidate paths. 4. Check candidate RD. 5. Verify RD < FD. 6. Calculate the variance limit. 7. Compare candidate metric. 8. Check maximum-paths. 9. Check the routing table. 10. Check CEF if forwarding behavior is the issue.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which distance is used in the EIGRP feasibility condition, RD or AD?",
+      "a": "RD (Reported Distance). The feasibility condition is RD < FD. Do not confuse it with AD (Administrative Distance), which is a separate route-source preference mechanism.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is EIGRP's major load-balancing distinction from protocols that normally install only equal-cost paths?",
+      "a": "EIGRP supports unequal-cost load balancing through variance, which is one of its major distinctions from protocols that normally install only equal-cost paths.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

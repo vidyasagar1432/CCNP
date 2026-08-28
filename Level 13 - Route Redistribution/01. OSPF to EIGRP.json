@@ -1,0 +1,94 @@
+{
+  "title": "OSPF to EIGRP Redistribution",
+  "level": 13,
+  "levelTitle": "Level 13 - Route Redistribution",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "01. OSPF to EIGRP.md",
+  "cards": [
+    {
+      "q": "What is redistribution and what is the critical catch when moving OSPF routes into EIGRP?",
+      "a": "Redistribution injects routes from one routing domain into another at a boundary router (ASBR / redistribution point). The critical catch is that EIGRP requires a seed metric: OSPF cost does not map to the EIGRP composite metric, so without a seed metric the routes are not advertised.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the five values in an EIGRP seed metric, and in what order are they given?",
+      "a": "Bandwidth (kbps), delay (microseconds/10), reliability, load, and MTU. Example: metric 1000 100 255 1 1500.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Under redistribute ospf, which route sources are redistributed by default versus only with a keyword?",
+      "a": "OSPF routes are redistributed (excluding own subnet/max) with the keyword. Static routes need 'redistribute static', connected routes need 'redistribute connected', and the default route only appears with include-connected or default-information.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "When OSPF routes are redistributed into EIGRP, what kind of EIGRP routes do OSPF external type 1/2 and internal routes become?",
+      "a": "They all propagate as EIGRP external routes.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does the OSPF metric map to the EIGRP metric when redistributing OSPF into EIGRP?",
+      "a": "It does not map: the OSPF cost is meaningless inside EIGRP, and the boundary router must assign a seed metric for the redistributed routes.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How can a route-map be used to selectively redistribute OSPF into EIGRP?",
+      "a": "A route-map matches prefixes with 'match ip address prefix-list' and sets the seed metric with 'set metric 10000 100 255 1 1500', then the route-map is applied to the redistribute ospf command. Matched prefixes get the seed metric while others are dropped.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What must be configured for bidirectional (two-way) OSPF-to-EIGRP redistribution?",
+      "a": "Both directions must be independently seeded: OSPF uses 'redistribute eigrp 100 subnets metric-type 1' and EIGRP uses 'redistribute ospf 1 metric 10000 100 255 1 1500'. Missing one side breaks reachability, and OSPF needs the 'subnets' keyword to redistribute non-classful prefixes.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the key redistribution design rules for OSPF-to-EIGRP?",
+      "a": "Use one boundary router for cleanliness, always seed metrics or routes vanish, filter at both edges to prevent feedback loops, and set route tags to mark origin for later policy.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Which command shows EIGRP redistribution and route-map filter behavior along with the routes?",
+      "a": "'show ip protocols' shows redistribution and filters; 'show ip eigrp topology', 'show ip ospf database', and 'show ip route' are used to verify redistributed routes.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "No EIGRP routes appear for a redistributed OSPF domain. What is the most likely cause and check?",
+      "a": "A missing seed metric is the likely cause; check with 'show ip eigrp topology'. Route-map mismatches, a missing 'subnets' keyword, or wrong default-metric values are other causes.",
+      "tag": "Quick Review",
+      "context": "Practical"
+    },
+    {
+      "q": "What does EIGRP do if you try to redistribute OSPF routes without a seed metric?",
+      "a": "EIGRP refuses the redistributed routes — they are not advertised at all.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "When OSPF is redistributed into EIGRP, what is the resulting route type and source in EIGRP?",
+      "a": "The OSPF routes become EIGRP external routes (the source of route is external).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the 'subnets' keyword do in OSPF redistribution?",
+      "a": "It allows non-classful prefixes to be redistributed; without it, only classful routes are redistributed.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "If you configure OSPF-to-EIGRP redistribution in only one direction on one router, what happens?",
+      "a": "Reachability is only one-way: one-directional configuration on one router gives one-way reachability unless the reverse direction is also configured.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

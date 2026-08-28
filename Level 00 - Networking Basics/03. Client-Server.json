@@ -1,0 +1,94 @@
+{
+  "title": "Client-Server",
+  "level": 0,
+  "levelTitle": "Level 00 - Networking Basics",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "03. Client-Server.md",
+  "cards": [
+    {
+      "q": "What is the client-server model?",
+      "a": "A model that centralizes services on dedicated servers that clients request work from. Servers provide a service (spool, share, resolve, host) while clients consume it, making it the dominant model for enterprise networks because it centralizes control, authentication, and data.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the role of a client versus a server?",
+      "a": "A client initiates requests and typically is a user device (PC, phone, browser, NMS, DHCP client) that does not share most of its resources; a server listens passively, waits for requests, and answers them by providing computing, storage, or application service.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Can a single device be both a client and a server?",
+      "a": "Yes. One device can be a client of one service and a server of another, for example a file server that is a client of DNS and NTP. The role is specific to the protocol or port.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Describe the typical client-server request-response flow.",
+      "a": "The client resolves the server via DNS, opens a connection via a TCP handshake (for TCP-based services), sends a request (HTTP GET, DHCP Discover, LDAP bind, SQL query), the server processes and replies, and session/application layer logic may keep state such as cookies or sessions.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Why do enterprises prefer the client-server model?",
+      "a": "It provides centralized management and security, scalability where servers and clusters scale at the load point, data integrity and backup from a single source of truth, support for thin clients (web apps, VDI), and standard interfaces with well-known ports and protocols for interoperability.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What port and protocol does web traffic use?",
+      "a": "Web traffic uses TCP port 80 for HTTP and TCP port 443 for HTTPS, between a browser client and an HTTP/HTTPS server.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What ports do DHCP and DNS use, and on what protocol?",
+      "a": "DHCP uses UDP ports 67/68, and DNS uses port 53 over both UDP and TCP.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What port does file sharing (SMB) use and what port does SSH use?",
+      "a": "File sharing using SMB/CIFS uses TCP port 445, and remote access via SSH uses TCP port 22.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is the client-server model scaled for capacity and high availability?",
+      "a": "A server farm or cluster places multiple servers behind a load balancer for capacity and high availability, and an N-tier design separates web, app, and DB tiers so each can scale independently.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Is a server defined by its hardware size or its role?",
+      "a": "A server is defined by its role, not by being a 'bigger PC'. Servers are not always larger or more powerful machines; the role of providing and answering requests is what defines them.",
+      "tag": "Exam Trap",
+      "context": "Interview"
+    },
+    {
+      "q": "Are DNS and DHCP client-server services?",
+      "a": "Yes. DNS (the naming layer) and DHCP (bootstrap provisioning) are themselves client-server models, even though they are infrastructure services.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is all network traffic client-server?",
+      "a": "No. Routing protocol peerings such as OSPF/BGP neighbors are historically modeled as peers or equal partners rather than client-server, though modern designs may still use centralized controllers where it helps.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "In the Quick Review comparison, what ports do clients typically use versus servers?",
+      "a": "Clients typically use ephemeral source ports above 1023, while servers use well-known ports such as 22, 80, 443, and 53.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "On Linux, what command lists listening server sockets?",
+      "a": "ss -tlnp lists listening server sockets. Web servers such as nginx or httpd are common examples.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    }
+  ]
+}

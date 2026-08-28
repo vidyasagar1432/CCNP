@@ -1,0 +1,94 @@
+{
+  "title": "Marking",
+  "level": 21,
+  "levelTitle": "Level 21 - QoS",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "02. Marking.md",
+  "cards": [
+    {
+      "q": "What is marking in QoS?",
+      "a": "Marking writes a QoS value into the packet/frame so downstream devices can treat it consistently. Markers exist at Layer 2 (802.1p CoS), Layer 3 (IP precedence, DSCP), and MPLS (EXP). Marking is trusted across the network so the core reads DSCP without re-classifying.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What layers and bit sizes do the marking fields 802.1p CoS, IP precedence, DSCP, and MPLS EXP use?",
+      "a": "802.1p CoS is L2 (3 bits), IP precedence is L3 (3 bits), DSCP is L3 (6 bits), and MPLS EXP is 3 bits. DSCP (6 bits) is the modern standard; CoS is LAN-only.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do IP precedence and DSCP compare in bits, classes, and default?",
+      "a": "IP precedence uses 3 bits (8 classes, default CS0, legacy); DSCP uses 6 bits (64 classes, default BE, preferred/modern). DSCP includes the precedence as CSx (class selector).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What DSCP value and name are used for voice, and what is its numeric value?",
+      "a": "EF (Expedited Forwarding), numeric value 46, is used for voice.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What DSCP class is used for video conferencing, and what numbers map to AF41, AF31, and AF21?",
+      "a": "AF4x is used for video conferencing. AF41 = 34, AF31 = 26, and AF21 = 18. AF4x = video conf, AF3x = video stream, AF2x = OAM/signaling.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What DSCP classes are used for control traffic and best effort?",
+      "a": "CS6/CS7 (48/56) are used for control/routing, and CS0 (0) is best effort.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands write a QoS mark into a packet, and what does each do?",
+      "a": "set dscp (writes DSCP), set precedence (writes IP precedence), and set cos (writes CoS). They are configured inside a policy-map class.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do edge and core devices treat marking, and what is needed when crossing L2/L3?",
+      "a": "The edge sets/re-marks, while the core trusts (does not re-mark) and queues by DSCP. CoS and DSCP need mapping tables when crossing L2/L3 boundaries.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the classification/marking pairing model across the network?",
+      "a": "Classify then mark at the edge; the core does trust plus queue by DSCP.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Marking is not being applied to traffic; what is the likely cause and what should you check?",
+      "a": "The policy is not attached to the interface (no service-policy). Check the policy-map is attached and that the set statement is correct.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "CoS markings appear lost on traffic; what is the likely cause?",
+      "a": "CoS is lost at an L2/L3 boundary; you need a CoS-to-DSCP mapping table when crossing between LAN and routed traffic.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the difference between marking and classification?",
+      "a": "Marking writes a value into the packet; classification reads/identifies traffic.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "What commands verify marking configuration?",
+      "a": "show policy-map, show class-map, show mls qos interface, and show run policy-map.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Where should DSCP be set, and what should the core do?",
+      "a": "Set DSCP at the edge; the core trusts the marking and does not re-mark.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

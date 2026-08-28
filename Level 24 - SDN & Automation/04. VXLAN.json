@@ -1,0 +1,82 @@
+{
+  "title": "VXLAN",
+  "level": 24,
+  "levelTitle": "Level 24 - SDN & Automation",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "04. VXLAN.md",
+  "cards": [
+    {
+      "q": "What is VXLAN?",
+      "a": "VXLAN is an overlay data-plane technology that encapsulates L2 frames in UDP (port 4789) over an IP underlay, scaling VLANs to about 16 million VNIs and letting L2 domains stretch across L3. It is the data plane of SD-Access and modern data center fabrics.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Why was VXLAN created and what problem does it solve?",
+      "a": "VLANs are limited to 4094 IDs by their 12-bit field and cannot stretch L2 across L3. VXLAN escapes that limit with a 24-bit VNI (about 16 million), provides overlay L2 stretch over an IP underlay, and uses the VNI for multi-tenant isolation.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does VXLAN encapsulate a frame?",
+      "a": "The original L2 frame is wrapped in a VXLAN header (24-bit VNI), then in an outer UDP/IP header with UDP destination port 4789, producing MAC-in-UDP encapsulation over the IP underlay.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the VNI in VXLAN?",
+      "a": "The VNI is a 24-bit ID (16,777,216 possible values) that acts like the overlay VLAN: it maps to a VLAN/segment, separates tenants, and provides isolation.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What role do VTEPs play in VXLAN?",
+      "a": "VTEP (VXLAN tunnel endpoint) devices sit at the edges: they encapsulate traffic at ingress and decapsulate it at egress, using IP addresses for the underlay.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is broadcast, unknown-unicast, and multicast (BUM) traffic handled in VXLAN?",
+      "a": "BUM traffic reaches the VNI via underlay multicast, head-end replication (sending unicast copies), or EVPN (BGP-based control plane).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does VXLAN compare to VLAN?",
+      "a": "VLAN uses a 12-bit ID (4094 segments) and its domain is L2 over switches; VXLAN uses a 24-bit ID (about 16 million) with an overlay L3 domain transported over UDP/IP. VXLAN decouples L2 from the physical topology.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands verify VXLAN operation?",
+      "a": "show vxlan vni, show nve peers, show interface nve1, show l2vpn evpn, and show vlan vn-segment.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you troubleshoot missing VXLAN peers or unlearned MACs?",
+      "a": "If VXLAN is down, check the VNI mapping (show vxlan vni); no peers means the underlay/IP reachability is broken (show nve peers); broken BUM points to multicast/HER/EVPN; MACs not learned points to the VTEP; and a tenant leak means VNI overlap in vn-segment.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What encapsulation does VXLAN actually use and on which UDP port?",
+      "a": "VXLAN is MAC-in-UDP, not MAC-in-IP: frames are carried inside UDP segments with destination port 4789.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does VXLAN scale beyond the VLAN limit?",
+      "a": "The 24-bit VNI provides roughly 16 million network identifiers versus the 12-bit VLAN's 4094, so multi-tenancy scales far beyond traditional VLANs.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What role does VXLAN play in SD-Access?",
+      "a": "VXLAN is the data plane of SD-Access, tunneling traffic between VTEPs across the campus fabric.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

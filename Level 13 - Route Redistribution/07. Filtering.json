@@ -1,0 +1,88 @@
+{
+  "title": "Redistribution Filtering",
+  "level": 13,
+  "levelTitle": "Level 13 - Route Redistribution",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "07. Filtering.md",
+  "cards": [
+    {
+      "q": "What does filtering control in redistribution and which tools are used?", 
+      "a": "Filtering decides which routes cross the redistribution boundary. Blind redistribution creates loops, black holes, and metric surprises. The tools are route-maps (the modern standard), distribute-lists, and prefix-lists, applied at the boundary router on the redistributing protocol.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Where are redistribution filters placed and in which direction do they run?", 
+      "a": "Filters run at the boundary router, before routes enter the receiving protocol, using route-maps on the redistribute command, distribute-lists (EIGRP in/out; OSPF in only), or prefix-lists matched inside a route-map.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does a route-map filter and set metrics during redistribution?", 
+      "a": "A route-map matches prefixes with a prefix-list and sets the metric (e.g., set metric 10000 100 255 1 1500), applied to redistribute. Only matched prefixes redistribute; everything else is dropped by the implicit deny.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the role of the implicit deny at the end of a route-map?", 
+      "a": "Non-matched routes are dropped by the implicit deny at the end of a route-map, so only the prefixes explicitly matched by a permit statement redistribute.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How do distribute-lists 'in' and 'out' directions work?", 
+      "a": "The 'in' filter filters routes received, and 'out' filters routes sent, on the local router. OSPF only supports 'in' on Cisco IOS.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between filtering at redistribution versus filtering to a BGP neighbor?", 
+      "a": "'redistribute ospf ... route-map RM' filters what enters EIGRP locally, while 'neighbor ... route-map RM out' filters what leaves to a BGP peer. The in/out direction is on the local router, not the neighbor — misplacing the direction lets routes slip through.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the goals of filtering in redistribution and the matching methods?", 
+      "a": "Loop prevention (deny own-origin prefixes back in), keeping the table small (advertise only needed prefixes), avoiding feedback (deny tagged routes), controlling MED (route-map set metric), and policy at the edge (prefix-list/as-path).",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Which commands verify filtered routes and route-map counters?", 
+      "a": "'show route-map' shows counters, 'show ip prefix-list' shows ACL state, 'show ip eigrp topology' shows absence of blocked routes, and 'debug ip routing' traces.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why does OSPF only support the distribute-list 'in' direction on Cisco IOS?", 
+      "a": "Because of how OSPF builds its best-path tree on interfaces; on Cisco IOS OSPF distribute-list is restricted to filtering received/interface-based routes (in) only, not outgoing.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the strongest loop defense in redistribution filtering?", 
+      "a": "Tag-based denies — filter routes already carrying a loop-prevention tag so they never return to their origin protocol.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Too many routes are being redistributed. What could be the cause and check?", 
+      "a": "A missing filter or wrong filter direction; check 'show ip protocols' and the direction of the route-map/distribute-list.",
+      "tag": "Quick Review",
+      "context": "Practical"
+    },
+    {
+      "q": "A redistributed route is missing even though it should pass. What is the likely cause?", 
+      "a": "The filter is too strict — the route-map or prefix-list is not matching the prefix; check 'show route-map' counters and 'show ip prefix-list detail'.",
+      "tag": "Quick Review",
+      "context": "Practical"
+    },
+    {
+      "q": "In the filtering quick review, what are the key tools and behaviors?", 
+      "a": "Standard approach is a route-map on redistribute; alternative is distribute-list; selector is prefix-list/ACL; OSPF is distribute in only; direction is local in/out; implicit deny at the end; loop fix via tag-based deny; verify with show route-map.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

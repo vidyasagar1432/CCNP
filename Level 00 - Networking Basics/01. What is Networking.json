@@ -1,0 +1,94 @@
+{
+  "title": "What is Networking?",
+  "level": 0,
+  "levelTitle": "Level 00 - Networking Basics",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "01. What is Networking.md",
+  "cards": [
+    {
+      "q": "What is networking?",
+      "a": "Networking is the practice of connecting two or more computing devices so they can exchange data, share resources, and communicate. A network is defined not by the number of devices but by the ability to transmit and receive information between endpoints using agreed-upon standards and protocols.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What business value does networking provide?",
+      "a": "Networking enables resource sharing (files, printers, compute, storage) and communication (email, voice, video, web) between endpoints regardless of their physical location.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What five elements does a network need to function?",
+      "a": "Endpoints/hosts, transmission media, intermediary devices, protocols, and addressing. Endpoints originate or consume traffic, media carries signals, intermediary devices move or secure data, protocols define formatting and delivery, and addressing (MAC/IP) lets data reach its destination.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What problems must networking solve?",
+      "a": "Connecting heterogeneous devices, addressing and naming so packets reach the right destination, path determination/routing across multiple networks, reliability and error recovery, security, and management and monitoring.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How does layering solve networking problems?",
+      "a": "Each layer has a specific job and hands work to the layer below or above via encapsulation, adding headers/trailers as data travels down and removing them as it travels up at the receiver.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is simplex communication?",
+      "a": "Communication in one direction only, for example broadcast TV or legacy one-way sensors.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is half-duplex communication and what is a common example?",
+      "a": "Communication that can occur in either direction but not simultaneously, such as walkie-talkies or legacy hub-based Ethernet.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is full-duplex communication and what uses it?",
+      "a": "Communication in both directions simultaneously, used by modern switched Ethernet and fiber.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between a network and the Internet?",
+      "a": "A network is two or more devices exchanging data via agreed standards, while the Internet is a network of networks interconnected by routing and peering. A network can be as small as two devices; size is not part of the definition.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is modern Ethernet full-duplex considered an exam-relevant point?",
+      "a": "Half-duplex and full-duplex are frequently tested; modern Ethernet is full-duplex, while hub-based (legacy) Ethernet is half-duplex.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is encapsulation in the context of layered networking?",
+      "a": "Adding headers (and trailers) to data as it descends the layers, and removing them as it travels up at the receiver. It is needed by every protocol in this course.",
+      "tag": "Quick Review",
+      "context": "Both"
+    },
+    {
+      "q": "What do intermediary devices such as switches, routers, firewalls, and APs do?",
+      "a": "They forward or secure data; they rarely originate or consume traffic themselves.",
+      "tag": "Quick Review",
+      "context": "Both"
+    },
+    {
+      "q": "On Windows, what command displays IP, MAC, and default gateway information?",
+      "a": "ipconfig /all. On Linux/macOS the alternative is ip addr.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands verify connectivity and show the path packets take?",
+      "a": "ping verifies connectivity to a destination, and traceroute (tracert on Windows) shows the path packets take.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    }
+  ]
+}

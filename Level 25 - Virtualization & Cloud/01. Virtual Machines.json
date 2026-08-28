@@ -1,0 +1,94 @@
+{
+  "title": "Virtual Machines",
+  "level": 25,
+  "levelTitle": "Level 25 - Virtualization & Cloud",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "01. Virtual Machines.md",
+  "cards": [
+    {
+      "q": "What is a virtual machine (VM)?",
+      "a": "A software-emulated computer: a full guest OS running on virtualized hardware (vCPU, vRAM, vNIC, vDisk) atop a hypervisor.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What do VMs provide, and at what cost?",
+      "a": "They provide strong isolation and workload mobility, at the cost of resource overhead. They also give you density for containers.",
+      "tag": "Overview",
+      "context": "Exam"
+    },
+    {
+      "q": "What components make up a VM?",
+      "a": "Virtual CPU (vCPU), virtual RAM (vRAM), virtual NIC (vNIC), virtual disk (vDisk), a full guest OS, and a hypervisor as the host layer.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How strongly isolated is a VM?",
+      "a": "VMs are hard-isolated: each has a separate kernel, apps are isolated, a crash stays contained inside the VM, and the security boundary is strong.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is the key difference between a VM and a container?",
+      "a": "A VM has its own kernel, higher overhead, stronger isolation, and boots in minutes; a container shares the host kernel, has low overhead, lighter isolation, and boots in seconds.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which Cisco network functions commonly ship as virtual appliances?",
+      "a": "CSR1000v (router), vWLC (wireless controller), ASAv (firewall), and vManage/vSmart (SD-WAN). They use the same configuration as their hardware counterparts.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between a VM snapshot, clone, migration, and export?",
+      "a": "A snapshot saves the VM state, a clone makes a copy, migration moves a live VM between hosts, and export packages it as OVF/OVA.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the trade-offs of VMs versus containers?",
+      "a": "VMs trade density for isolation: they duplicate the kernel per VM, boot slower, and achieve lower density, but gain a strong isolation boundary.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does a network engineer manage a Cisco VM-based appliance?",
+      "a": "There is no direct CLI for the VM itself; it is managed via the hypervisor or cloud platform. On-box commands such as show vm-host or show platform software are used where supported.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A VM is slow and its vNIC is down. What checks apply?",
+      "a": "For slowness, check vCPU and vRAM allocation; for a down vNIC, check the driver and the virtual switch connection.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A VM migration fails. What should you check?",
+      "a": "Check storage and host compatibility, because migration commonly fails due to storage availability or host issues.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does a VM differ from a container in terms of kernel and isolation?",
+      "a": "A VM runs a full guest OS on virtualized hardware with its own kernel and strong isolation; a container shares the host kernel with lighter, namespace-based isolation.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a CSR1000v?",
+      "a": "A virtual router appliance (a VM) that runs the same IOS-XE configuration as a physical router.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "How do vNIC and virtual appliances appear in the VM quick review?",
+      "a": "The vNIC is virtual, the appliance example is CSR1000v, snapshots save state, and versus containers the kernel is per-VM.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

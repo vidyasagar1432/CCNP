@@ -1,0 +1,82 @@
+{
+  "title": "vSmart",
+  "level": 23,
+  "levelTitle": "Level 23 - Enterprise WAN",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "09. vSmart.md",
+  "cards": [
+    {
+      "q": "What is vSmart in Cisco SD-WAN?",
+      "a": "The control plane of Cisco SD-WAN. It runs OMP (Overlay Management Protocol) with all WAN edges, computes the overlay topology, and distributes centralized policy (routing, data, cflowd).",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are vSmart's main roles?",
+      "a": "Running OMP as the control protocol, distributing edge routes, enforcing centralized policy, computing the topology, and managing SLA/app-aware paths — it is the brain of the overlay control plane.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does OMP carry between vSmart and the edges?",
+      "a": "OMP (overlay management protocol) carries routes and TLOCs between vSmart and the edges, with policy attached.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the route types advertised in the OMP overlay?",
+      "a": "OMP routes (prefix/origin), TLOCs (transport location), service routes (VPN/ETR), and policy routes — routes are advertised as OMP routes with TLOCs.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the SD-WAN policy model around vSmart?",
+      "a": "Centralized policy lives on vSmart and is pushed to edges; local policy is edge-based; app-route policy uses SLA; control policy does route filtering.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Why use centralized control via vSmart?",
+      "a": "It provides one consistent policy source, agility in changing config centrally, scale because edges stay light, and global app-aware SLA — edges stay simple while vSmart does the thinking.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What happens in SD-WAN if vSmart is down?",
+      "a": "No vSmart means no overlay control or policy, so the fabric loses control/routing intelligence.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands verify vSmart and OMP?",
+      "a": "show omp peers, show omp routes, show omp tlocs, show sdwan control, and show sdwan policy.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "OMP peers are not establishing with vSmart. What is the likely cause and check?",
+      "a": "vSmart being down or unreachable is likely; check show omp peers and show sdwan control.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Routes are missing from the overlay. What is the likely cause and check?",
+      "a": "A policy filter is likely; check show omp routes.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "No TLOCs are being advertised. What is the likely cause and check?",
+      "a": "A transport issue is likely; check show omp tlocs.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you distinguish vSmart from vBond and vManage?",
+      "a": "vBond opens the door (orchestration), vSmart steers (control plane + OMP + centralized policy), and vManage runs the GUI (management).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

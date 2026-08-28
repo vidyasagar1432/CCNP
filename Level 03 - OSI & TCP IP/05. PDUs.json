@@ -1,0 +1,82 @@
+{
+  "title": "PDUs (Protocol Data Units)",
+  "level": 3,
+  "levelTitle": "Level 03 - OSI & TCP IP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "05. PDUs.md",
+  "cards": [
+    {
+      "q": "What is a Protocol Data Unit (PDU)?",
+      "a": "A PDU is the unit of data at a given layer of the stack: that layer's header (plus trailer) together with the payload it carries from the layer above. Each layer has a specific PDU name such as data, segment, packet, frame, or bits.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the PDU names at each OSI layer group?",
+      "a": "Application (7/6/5): Data (also message). Transport (4): Segment for TCP, Datagram for UDP. Network (3): Packet. Data Link (2): Frame. Physical (1): Bits (symbols/signals).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Describe the PDU chain construction during encapsulation.",
+      "a": "DATA gets an L4 header to become a SEGMENT, an L3 header to become a PACKET, an L2 header and FCS to become a FRAME, and then is sent as BITS. The segment is the payload of the packet, and the packet is the payload of the frame.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the relationship between a PDU and an SDU?",
+      "a": "The PDU of layer N is the SDU (service data unit) plus a header for layer N, and it becomes the SDU for layer N-1.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is the official IPv4 unit name per RFC 791?",
+      "a": "The IPv4 unit is officially called a 'datagram' per RFC 791, though Cisco exams usually say 'packet' for L3/IPv6 and may also use 'datagram' for UDP/IP. Be prepared for both words.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What controls PDU sizes at the segment and packet levels?",
+      "a": "Segment and packet sizes are controlled by MSS (for TCP) and MTU (for IP), and the frame must fit the link MTU. If the size exceeds MTU, packets are fragmented or dropped.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the single most-asked PDU fact?",
+      "a": "Segment = TCP, packet = IP, and frame = Ethernet. These are the PDU names for the Transport, Network, and Data Link layers respectively.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the 'two-datagram' trap?",
+      "a": "Both UDP and IP use the term 'datagram'. UDP datagram is the L4 PDU, while 'IP packet' is the L3 PDU, and IP itself is officially a datagram. Know which term applies to which layer.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "When a packet is sent over a link, what does it become?",
+      "a": "A packet becomes a frame after the L2 (Ethernet) header is added. Do not call a frame a packet; they are distinct PDU names at different layers.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What PDU name does the exam use at the Physical layer?",
+      "a": "The exam uses 'bits' for the Physical layer PDU, even though the physical truth is symbols or codewords.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you calculate frame size from MTU?",
+      "a": "Frame size equals MTU plus overhead (approximately 18 or 22 bytes for Ethernet), so it is the MTU plus the L2 header and FCS.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What command relates PDU sizes to MTU on a Cisco interface?",
+      "a": "Use ip mtu to set the interface L3 packet maximum, verify with show ip interface, and test with ping using a packet-size with the df-bit, for example ping 10.0.0.2 size 1472 df-bit.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    }
+  ]
+}

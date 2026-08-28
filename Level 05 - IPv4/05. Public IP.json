@@ -1,0 +1,106 @@
+{
+  "title": "Public IP",
+  "level": 5,
+  "levelTitle": "Level 05 - IPv4",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "05. Public IP.md",
+  "cards": [
+    {
+      "q": "What is a public IPv4 address?",
+      "a": "A globally unicast IPv4 address that is not reserved for private or other special-purpose use and is eligible for routing on the public Internet.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How are public IPv4 addresses allocated globally?",
+      "a": "Through the hierarchy IANA → RIR → ISP/LIR → customer/organization; IPv4 scarcity led to widespread NAT/PAT use and accelerated IPv6 adoption.",
+      "tag": "Overview",
+      "context": "Interview"
+    },
+    {
+      "q": "What are the five regional Internet registries (RIRs) and their regions?",
+      "a": "ARIN (North America), RIPE NCC (Europe, Middle East, parts of Central Asia), APNIC (Asia-Pacific), LACNIC (Latin America and Caribbean), and AFRINIC (Africa); IANA coordinates globally while RIRs manage regional allocation and registration.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What makes an IPv4 address public?",
+      "a": "It must be globally unicast, not RFC 1918 private space, not reserved for another special purpose, and eligible for Internet routing, and it should be globally coordinated so it is not normally duplicated as independent unicast assignments.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Is every non-RFC-1918 address automatically a usable public IPv4 address?",
+      "a": "No; an address can be non-RFC-1918 and still be reserved for another special purpose such as loopback, link-local/APIPA, multicast, or documentation, so not RFC 1918 does not equal public.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the RFC 5737 documentation IPv4 ranges?",
+      "a": "192.0.2.0/24, 198.51.100.0/24, and 203.0.113.0/24; they are intended for documentation and examples and should not be treated as normal Internet-routable production addresses.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is anycast and how does it relate to public IPv4 addressing?",
+      "a": "Anycast intentionally advertises the same IP address from multiple locations, so Internet routing directs users to an appropriate/nearest available path; a public address therefore does not always identify one physical location or device.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between NAT and PAT?",
+      "a": "NAT can provide one-to-one translation, for example 192.168.1.10 ↔ 203.x.x.10, while PAT/NAT overload lets many private hosts share one public IPv4 address by using different transport-layer ports.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does NAT always mean many-to-one translation?",
+      "a": "No; NAT can be one-to-one. The many-private-hosts-to-one-public-address model is specifically PAT/NAT overload.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are common uses of public IPv4 addresses?",
+      "a": "Internet-facing servers (web, mail, DNS), edge router WAN-facing interfaces, NAT/PAT for Internet access, static NAT to internal servers, publicly reachable cloud endpoints, and anycast.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Does a public IP mean every service and port is reachable?",
+      "a": "No; reachability depends on routing, ACLs, firewalls, NAT rules, service configuration, and host-based security, so a public address is only potentially reachable and Internet-facing systems should be hardened (ACLs, stateful firewalls, IDS/IPS, rate limiting, minimal exposed services).",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do you configure and test with documentation space instead of real public addresses?",
+      "a": "Use RFC 5737 space in examples, e.g. interface GigabitEthernet0/0 with ip address 198.51.100.2 255.255.255.0 and no shutdown; a sample ACL is access-list 100 permit tcp any host 198.51.100.10 eq 443.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Can RFC 1918 private addresses be routed at all?",
+      "a": "Yes; they can be routed normally inside private networks, but they are not globally routable across the public Internet.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Is 8.8.8.8 a private or public IPv4 address?",
+      "a": "Public; it is used by Google's public DNS service and is not in the RFC 1918 private space.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "State the one-line exam definition and test for a public IPv4 address.",
+      "a": "A public IPv4 address is a globally unicast address that is not reserved for private or other special-purpose use and is eligible for Internet routing; test it by asking whether it is a globally unicast address eligible for Internet routing.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "Why did public IPv4 address scarcity matter to networking?",
+      "a": "It drove NAT/PAT deployment, address conservation, IPv4 transfer markets, and IPv6 adoption; IPv6 provides a vastly larger address space without IPv4-scale address exhaustion.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    }
+  ]
+}

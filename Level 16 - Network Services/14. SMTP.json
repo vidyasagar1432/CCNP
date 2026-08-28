@@ -1,0 +1,76 @@
+{
+  "title": "SMTP",
+  "level": 16,
+  "levelTitle": "Level 16 - Network Services",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "14. SMTP.md",
+  "cards": [
+    {
+      "q": "What is SMTP and its core role in email?",
+      "a": "SMTP (TCP 25) is the protocol that sends and relays email between servers; it is a push model where senders push messages onward and clients download their mail via POP3 or IMAP.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the SMTP port conventions?",
+      "a": "25 is the legacy relay/MTA port, 587 is the submission port used with client authentication, and 465 is SMTPS (implicit TLS); modern mail relies on 587 submission and STARTTLS.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Where does SMTP fit in the mail delivery path?",
+      "a": "Client to server submission uses SMTP (25/587), server to server relay uses SMTP (25), and server to client download uses POP3 or IMAP; SMTP is server-to-server and send-side.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does a basic SMTP dialog look like?",
+      "a": "EHLO greets the server, MAIL FROM: starts the sender, RCPT TO: sets the recipient, DATA begins the message body, a lone period on its own line ends the DATA section, and QUIT closes the session.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What are the key SMTP reply codes and the 4xx/5xx rule?",
+      "a": "220 ready, 250 OK, 354 start mail input (DATA), 550 mailbox unavailable, and 421/450/451 temporary failures; 5xx codes are permanent failures and 4xx are transient and should be retried later.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is SMTP secured against its classic threats?",
+      "a": "Open relay abuse is blocked by rejecting non-local RCPT, spoofing is countered with SPF/DKIM/DMARC, cleartext is fixed with STARTTLS and 587 authentication, and password sniffing is prevented with SMTP AUTH over TLS.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is an SMTP open relay and why must it be blocked?",
+      "a": "An open relay forwards mail from anywhere to anywhere; spammers abuse it to relay spam, so reject non-local recipients.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does SMTP appear in the enterprise networking context?",
+      "a": "Cisco gear rarely runs SMTP itself since mail gateways/MTAs do, but SNMP traps and syslog reports can ride email via SMTP reporting.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is the practical way to test SMTP manually?",
+      "a": "A manual telnet mailhost 25 conversation sends SMTP commands and reads server replies to diagnose the service.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you interpret common SMTP failures?",
+      "a": "550 means an invalid recipient (check RCPT address), 421 timeout means the server is busy (retry window), relay denied means open-relay protection is working (check auth and permitted senders), and 4xx means a temporary queue delay.",
+      "tag": "Quick Review",
+      "context": "Practical"
+    },
+    {
+      "q": "Which retry rule should you remember for SMTP reply codes?",
+      "a": "4xx = transient, retry later; 5xx = permanent, do not retry the same thing.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "title": "Virtual Tunnel Interface (VTI)",
+  "level": 18,
+  "levelTitle": "Level 18 - VPN Technologies",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "08. Virtual Tunnel Interface.md",
+  "cards": [
+    {
+      "q": "What is a Virtual Tunnel Interface (VTI)?",
+      "a": "A VTI is a route-based IPsec tunnel interface that carries IPsec directly over a virtual interface, using routing (not an interesting-traffic ACL) to select traffic and binding IPsec with tunnel protection ipsec profile.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between route-based and policy-based IPsec?",
+      "a": "Policy-based IPsec (crypto map) uses an interesting-traffic ACL to select what gets encrypted, while route-based IPsec (VTI) encrypts whatever the routing table sends into the tunnel, simplifying configuration.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does VTI differ from GRE over IPsec?",
+      "a": "VTI carries IPsec directly without a GRE wrapper, dropping the 4-byte GRE header; GRE over IPsec encapsulates in GRE first. Both support multicast and routing protocols over the tunnel.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which command makes a tunnel interface an IPsec VTI?",
+      "a": "The command is tunnel mode ipsec ipv4; combined with tunnel source, tunnel destination, and tunnel protection ipsec profile it defines a route-based IPsec tunnel.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How is IPsec enabled on a VTI?",
+      "a": "IPsec is enabled with tunnel protection ipsec profile NAME, which binds an IPsec profile (transform-set and IKEv2 profile) to the virtual tunnel interface.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why can routing protocols run over a VTI?",
+      "a": "A VTI is a normal virtual L3 interface with an IP address, so OSPF, EIGRP, or BGP can form neighbors over it and multicast is carried through the encrypted tunnel.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the advantage of VTI over a legacy crypto map?",
+      "a": "VTI removes the interesting-traffic ACL and crypto map, uses routing as the trigger, supports multicast and dynamic routing, and scales better with profile-based configuration.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which commands verify a VTI and its IPsec state?",
+      "a": "show ip interface brief (include Tunnel), show interface Tunnel0, show crypto ipsec sa, show crypto session, and show ip route.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A VTI is administratively down and no IPsec SA forms; what should you check?",
+      "a": "Verify the tunnel is configured with an IP address, tunnel source/destination are set, tunnel mode ipsec ipv4 is present, and the IPsec profile is bound with tunnel protection; also confirm no crypto map is attached.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the key exam distinction between VTI and crypto-map IPsec?",
+      "a": "VTI is route-based (routing triggers encryption, no ACL) while crypto-map IPsec is policy-based (interesting-traffic ACL triggers encryption); VTI is the modern approach.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the VTI quick-review summary?",
+      "a": "VTI is route-based IPsec configured with tunnel mode ipsec ipv4 and tunnel protection ipsec profile, uses routing rather than an ACL to trigger encryption, supports multicast and dynamic routing, and is the modern replacement for crypto-map IPsec.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

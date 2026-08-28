@@ -1,0 +1,82 @@
+{
+  "title": "IaaS",
+  "level": 25,
+  "levelTitle": "Level 25 - Virtualization & Cloud",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "13. IaaS.md",
+  "cards": [
+    {
+      "q": "What is IaaS?",
+      "a": "Infrastructure as a Service delivers raw compute, storage, and networking as a service. You rent VMs and virtual networks and manage the OS, apps, and data yourself (AWS EC2, Azure VMs, GCP Compute).",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How is responsibility split in IaaS?",
+      "a": "Provider manages hardware and the hypervisor; customer manages the OS, apps, data, and networking above the hypervisor.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does IaaS deliver and what do you access?",
+      "a": "It delivers compute, storage, and networking; you rent raw infrastructure and access VMs and virtual networks. VMs, virtual networks, and storage (S3/Blob) are the IaaS building blocks.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are examples of IaaS services?",
+      "a": "AWS EC2 (VMs), Azure VM (compute), VPC/VNet (networks), and S3/Blob storage.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Where does IaaS sit in the IaaS/PaaS/SaaS control spectrum?",
+      "a": "It offers the most control: you manage OS + app + data. PaaS manages app + data, and SaaS only data + users, so most control is IaaS and least is SaaS.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What does a network engineer design in an IaaS environment?",
+      "a": "Virtual networking: VPC/VNet isolation, subnets for segmentation, security groups as filters, LB/NAT services, and VPN or Direct Connect links.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the pros and cons of IaaS?",
+      "a": "Pros: full control, familiar infrastructure, elastic, and lift-and-shift friendly. Cons: you manage the OS, patching burden, cost discipline required, and more to operate.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Which cloud commands manage IaaS resources?",
+      "a": "az vm list or aws ec2 describe-instances, plus management of VPC, subnet, and security-group resources via cloud consoles/CLI.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "An IaaS VM is unreachable or has no route. What do you check?",
+      "a": "For unreachability check the security group rules; for no route check the subnet and VPC; also check OS patching, VM sizing for cost, and region placement for latency.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which service model has the customer managing the OS?",
+      "a": "IaaS. The provider manages only hardware and the hypervisor; you manage the OS, apps, data, and networking, making it the most control and closest to classic infrastructure.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What set of facts is unique to IaaS in networking?",
+      "a": "Virtual networking is designed by the network engineer: VPC/subnet/security groups provide isolation and filtering, and lift-and-shift migrations target IaaS.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "Match the quick review: deliverable, provider, customer, examples, control, network, storage, vs SaaS.",
+      "a": "Deliverable = infra; provider = hosts; customer = OS+app; examples = EC2; control = most; network = VPC; storage = S3; vs SaaS = most management.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

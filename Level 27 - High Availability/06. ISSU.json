@@ -1,0 +1,70 @@
+{
+  "title": "ISSU (In-Service Software Upgrade)",
+  "level": 27,
+  "levelTitle": "Level 27 - High Availability",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "06. ISSU.md",
+  "cards": [
+    {
+      "q": "What is ISSU (In-Service Software Upgrade)?",
+      "a": "ISSU is a method to upgrade IOS XE software on a dual-supervisor device without taking the network down, using SSO stateful switchover and NSF forwarding so control moves with minimal or zero traffic loss.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the prerequisites for ISSU?",
+      "a": "ISSU requires dual supervisors, SSO (stateful switchover) for control-plane state, and NSF or graceful restart so forwarding continues during the switchover.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the ISSU upgrade stages in order?",
+      "a": "The stages are loadnew (install new image on standby), runversion (standby runs the new image), switchover (control moves to standby via SSO), loadold (load the old image on the now-standby old active), and commit.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the two phases of ISSU?",
+      "a": "Phase 1 (pre-switchover) upgrades the standby supervisor, and phase 2 (post-switchover) upgrades the old active to match after control switches over.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Why does ISSU achieve zero or near-zero downtime?",
+      "a": "ISSU relies on SSO to synchronize control-plane state so the switchover causes no forwarding interruption, and NSF lets the routing build gracefully during the swap.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "When is ISSU not usable?",
+      "a": "ISSU is not usable for major version jumps or image pairs that are not compatible, which may force a full reload instead of an in-service upgrade.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands verify ISSU and SSO state?",
+      "a": "show redundancy states, show issu state, show install summary, and show version; the upgrade itself can use install add file bootflash:image.bin activate.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "ISSU is blocked on a device; what is the most likely cause?",
+      "a": "The device likely does not have SSO enabled or does not have dual supervisors; ISSU requires the redundancy mode sso and NSF in place.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the key exam distinction between ISSU and a plain reload upgrade?",
+      "a": "ISSU performs the upgrade with near-zero downtime because it uses SSO switchover and NSF on a dual-supervisor box, while a plain reload upgrade causes an outage and needs no SSO.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the ISSU quick-review summary?",
+      "a": "ISSU upgrades a dual-supervisor IOS XE box in service using loadnew, runversion, switchover (SSO/NSF), loadold, and commit, giving near-zero downtime but only for compatible images, and is verified with show issu state.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

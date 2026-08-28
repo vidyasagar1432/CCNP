@@ -1,0 +1,70 @@
+{
+  "title": "SPAN",
+  "level": 26,
+  "levelTitle": "Level 26 - Monitoring & Telemetry",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "04. SPAN.md",
+  "cards": [
+    {
+      "q": "What is SPAN (Switched Port Analyzer)?",
+      "a": "SPAN mirrors traffic from one or more source interfaces (or VLANs) to a destination analyzer port for analysis. It is local to the same switch and one-way.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the source, destination, and scope of a SPAN session?",
+      "a": "The source is an interface or VLAN, the destination is an analyzer/IDS port, direction can be rx/tx/both, and scope is a single local switch.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What do the SPAN direction keywords rx, tx, and both mean?",
+      "a": "rx mirrors received traffic, tx mirrors transmitted traffic, and both mirrors traffic in both directions. Configure via monitor session 1 source ... rx/tx/both.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do SPAN, RSPAN, and ERSPAN differ in scope?",
+      "a": "SPAN is local to the same switch, RSPAN is remote via a VLAN, and ERSPAN is remote via IP/GRE.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands build a SPAN session?",
+      "a": "monitor session N source interface Gi x/y (rx/tx/both) defines the source, monitor session N destination interface Gi a/b defines the analyzer, and monitor session N vlan X sets a VLAN source. Use no monitor session N to remove it.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the limitations of SPAN?",
+      "a": "SPAN is local only with no routing, uses TCAM/session resources, can cause loops when mirroring VLANs, and mirroring everything can overload and drop traffic.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do you verify a SPAN session?",
+      "a": "Use show monitor session 1 or show monitor to check the configuration and confirm the session.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A SPAN capture is empty; what is the likely cause and check?",
+      "a": "Likely a direction issue; check whether rx/tx/both is set correctly. Also confirm the destination session with show monitor.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the classic exam trap about SPAN destinations?",
+      "a": "SPAN destinations are analyzer ports that are not routable like normal ports; SPAN itself does not route and is local only.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between local SPAN and remote RSPAN/ERSPAN?",
+      "a": "SPAN is local port mirroring on one switch; RSPAN and ERSPAN are remote and require separation (VLAN or IP/GRE), so remote mirroring cannot be done with plain local SPAN.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

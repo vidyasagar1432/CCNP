@@ -1,0 +1,88 @@
+{
+  "title": "OSPF Troubleshooting",
+  "level": 10,
+  "levelTitle": "Level 10 - OSPF",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "15. Troubleshooting.md",
+  "cards": [
+    {
+      "q": "What is the layer model for OSPF troubleshooting?",
+      "a": "OSPF troubleshooting follows: neighbor adjacency, then LSDB sync, then SPF, then route installation, then traffic. Most exam scenarios hang on neighbor-state issues (MTU, hello/dead, area, network type, auth) or area/type misconfiguration. Use a strict show-command progression to isolate the fault level.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "List the top-down OSPF troubleshooting flow with its commands.",
+      "a": "1. Interface: is the link up? show ip interface brief. 2. Neighbor: adjacency formed? show ip ospf neighbor. 3. LSDB: databases synchronized? show ip ospf database. 4. Routes: SPF produced routes? show ip route ospf. 5. Forwarding: CEF has it? show ip cef or ping.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Match each stuck OSPF neighbor state to its classic cause.",
+      "a": "Down: no hellos (link/ACL/multicast). Init: one-way hello visibility. 2-Way (no Full): DR/BDR election issue. ExStart: MTU mismatch. Exchange: DBD issue/MTU. Loading: LSA request unfulfilled.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "List the OSPF parameters that must match between neighbors.",
+      "a": "Hello/dead timers, area ID, network type (broadcast vs P2P), authentication type and key, MTU (else ExStart stuck), subnet/address family, and the stub flag (all routers in a stub/NSSA area must match).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the fix for a neighbor stuck in ExStart due to MTU mismatch?",
+      "a": "Match the MTU on both sides or use ip ospf mtu-ignore. MTU mismatch is the single most-tested OSPF fault and the classic cause of ExStart stuck.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the common OSPF operational issues and their fixes?",
+      "a": "Adjacency forms but no routes: LSDB not identical; check show ip ospf database. Routes flap: flapping interface or dead timer; tune hello/dead. External routes missing: stub area blocking Type 5; use NSSA or default. Cost unexpectedly equal: default reference 100 Mbps; set auto-cost reference-bandwidth. SPF storm/high CPU: area too big or flap; summarize + ISPF + throttle.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What do the clear ip ospf commands do?",
+      "a": "clear ip ospf process resets neighbors and reconverges, causing a brief outage; clear ip ospf neighbor resets specific neighbor adjacencies; clear ip ospf counters clears counters. These are maintenance actions, not configuration fixes.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What command triggers an adjacency when a neighbor is stuck?",
+      "a": "debug ip ospf adjacency (or debug ip ospf events) can reveal why, but must be used carefully in production. The stuck-state commands include show ip ospf neighbor detail and show ip ospf interface.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the single most-tested OSPF fault?",
+      "a": "MTU mismatch, which causes a neighbor stuck in ExStart. This is the memorized answer for the classic neighbor-stuck-in-ExStart scenario.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What must match on all routers in a stub or NSSA area or adjacencies fail?",
+      "a": "The stub flag (area type). All routers in a stub/NSSA area must have the same stub/NSSA configuration or adjacencies will fail to form.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What neighbor state does a hello/dead timer or auth mismatch cause?",
+      "a": "Hello/dead mismatch causes a neighbor stuck in Init or Down, never Full. An authentication mismatch also causes a neighbor stuck in Init.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is clear ip ospf process not a configuration fix?",
+      "a": "Because it only reconverges the OSPF process (resets neighbors and rebuilds adjacencies with a brief outage). It does not fix the underlying configuration problem that caused the fault.",
+      "tag": "Exam Trap",
+      "context": "Interview"
+    },
+    {
+      "q": "Match each OSPF fault to its remedy.",
+      "a": "MTU mismatch to ExStart, fix by matching MTU or mtu-ignore; hello/dead mismatch to Down/Init, fix by matching timers; auth mismatch to Init, fix by matching type and key; network type mismatch to neighbor issues; stub flag mismatch to no adjacency; DR issue to 2-Way stuck, fix with priorities or point-to-point; external blocked to missing routes, fix with area type or NSSA; SPF storm to high CPU, fix with summarize plus ISPF.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "title": "YANG & RESTCONF on IOS XE",
+  "level": 28,
+  "levelTitle": "Level 28 - Cisco IOS and IOS XE",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "10. YANG & RESTCONF.md",
+  "cards": [
+    {
+      "q": "What are YANG, NETCONF, and RESTCONF?",
+      "a": "YANG is a data-modeling language that describes device configuration and state as a structured tree, while NETCONF and RESTCONF are the model-driven protocols that read and write that model over the network, enabling programmatic configuration and telemetry.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between NETCONF and RESTCONF?",
+      "a": "NETCONF runs over SSH (port 830) using XML and RPC-style operations, while RESTCONF runs over HTTPS (port 443) using JSON or XML with RESTful methods such as GET, PUT, POST, and DELETE.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does a YANG data model define?",
+      "a": "A YANG model defines the device's configuration and operational state as a structured tree of nodes, forming the contract that NETCONF and RESTCONF operate on.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which commands enable NETCONF and RESTCONF on IOS XE?",
+      "a": "The commands are netconf-yang to enable NETCONF (SSH 830) and restconf to enable RESTCONF (HTTPS 443), with ip http secure-server for HTTPS support.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the Cisco-IOS-XE-native YANG model?",
+      "a": "It is the Cisco native YANG model that maps directly to the device's native CLI configuration, compared to OpenConfig which is vendor-neutral.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which RESTful methods or NETCONF operations perform create, read, update, and delete?",
+      "a": "In RESTCONF, GET reads, PUT/POST/PATCH create or update, and DELETE removes; in NETCONF, get/get-config read and edit-config performs create, update, and delete.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Why do YANG models and these protocols matter for network automation?",
+      "a": "They replace CLI screen-scraping with structured, model-driven configuration and streaming telemetry, enabling scripting, SDN controllers, and cross-vendor automation.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which commands verify NETCONF and RESTCONF state?",
+      "a": "show restconf, show netconf-yang sessions, and show netconf-yang datastore.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A RESTCONF client cannot reach the IOS XE device; what is likely wrong?",
+      "a": "RESTCONF may not be enabled with the restconf command, HTTPS may not be available on port 443, or AAA/privilege is rejecting the client; check the config and reachability.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the key exam distinction between YANG and NETCONF/RESTCONF?",
+      "a": "YANG is the data model describing the device, while NETCONF (SSH 830, XML, RPC) and RESTCONF (HTTPS 443, JSON, REST) are the protocols that transport it; they are different layers.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the YANG/RESTCONF quick-review summary?",
+      "a": "YANG is the structured data model of the device, NETCONF transports it over SSH 830 with XML/RPC, RESTCONF over HTTPS 443 with JSON/REST, enabled with netconf-yang and restconf, and the native Cisco model mirrors the CLI.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

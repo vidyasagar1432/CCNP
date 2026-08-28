@@ -1,0 +1,70 @@
+{
+  "title": "OSPF Stub Area",
+  "level": 10,
+  "levelTitle": "Level 10 - OSPF",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "09. Stub.md",
+  "cards": [
+    {
+      "q": "What is an OSPF stub area?",
+      "a": "A stub area is a non-backbone area that blocks Type 5 (AS-external) LSAs from entering. Routers inside see no external routes; instead the ABR injects a default route (Type 3) so outbound traffic still works. Stub areas shrink the LSDB and reduce CPU but cannot contain an ASBR and cannot be Area 0.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Which LSA types does a stub area allow and which does it block?",
+      "a": "A stub area allows Type 1 Router, Type 2 Network, and Type 3 Summary LSAs, plus the ABR-injected default (Type 3). It blocks Type 4 ASBR-Summary and Type 5 External LSAs. Net effect: stub routers know intra-area, inter-area, and a default to leave the area.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "List the rules of OSPF stub areas.",
+      "a": "1. No ASBR inside the stub area. 2. Cannot be Area 0. 3. All routers in the area must be configured stub or adjacency fails. 4. No virtual link traversal through a stub area. 5. External routes are reachable only via the ABR-injected default route.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the benefits of using a stub area?",
+      "a": "Smaller LSDB (no Type 5 flooding), less CPU (SPF over fewer LSAs), stability (external flaps don't reach the stub), and simplicity (a default route out). It is ideal for a remote office or branch area.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How do you configure a stub area and its default cost?",
+      "a": "On all routers use area 2 stub. On the ABR, add area 2 default-cost 10 to set the metric of the injected 0.0.0.0/0 default route. The default-cost is optional.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do stub, totally stubby, and NSSA areas differ in what they block and inject?",
+      "a": "Stub blocks Type 5 and injects a default route. Totally stubby blocks Type 3, 4, 5 and injects a default. NSSA blocks inbound Type 5, allows Type 7, and the default is optional.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why does a stub area block Type 4 as well as Type 5?",
+      "a": "Because a stub area cannot contain an ASBR, there is no need for the Type 4 ASBR-Summary LSA (which tells routers how to reach an ASBR). Both Type 4 and Type 5 are blocked in a stub area.",
+      "tag": "Exam Trap",
+      "context": "Interview"
+    },
+    {
+      "q": "Can you redistribute routes inside a stub area?",
+      "a": "No. Stub areas do not permit an ASBR, so external routes cannot be injected inside the area. If you need a local ASBR, you must use an NSSA instead.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens if only one side of a segment is configured as a stub area?",
+      "a": "Adjacency fails - the neighbor gets stuck at 2-Way or Down. All routers in the area must be configured as stub for adjacencies to form.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the key stub area quick-review facts?",
+      "a": "Stub blocks Type 4 and Type 5, keeps Type 1/2/3, and injects a default (Type 3). No ASBR allowed, not Area 0, no virtual link transit, all routers must be stub, default cost set with area N default-cost, and it gives a smaller LSDB with less CPU.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

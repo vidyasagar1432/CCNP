@@ -1,0 +1,166 @@
+{
+  "title": "Ethernet Frame",
+  "level": 4,
+  "levelTitle": "Level 04 - Ethernet & Switching",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "02. Ethernet Frame.md",
+  "cards": [
+    {
+      "q": "What is an Ethernet frame?",
+      "a": "An Ethernet frame is the Layer 2 data unit used to transport upper-layer protocols such as IPv4, IPv6, and ARP across an Ethernet network. A switch examines the destination MAC, source MAC, VLAN information, and other Layer 2 fields to make forwarding decisions.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the overall structure of a standard Ethernet frame?",
+      "a": "Preamble (7 B) | SFD (1 B) | Dest MAC (6 B) | Src MAC (6 B) | optional 802.1Q tag (4 B) | Type/Length (2 B) | Payload (46-1500 B) | FCS (4 B).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the Preamble and SFD in an Ethernet frame?",
+      "a": "The Preamble is 7 bytes and provides synchronization. The SFD (Start Frame Delimiter) is 1 byte and indicates the frame is about to begin. Together they are 8 bytes transmitted on the wire but are not normally included in the Ethernet frame size.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What forwarding behavior does an Ethernet switch apply based on the destination MAC?",
+      "a": "Known unicast is forwarded toward the learned port, unknown unicast is flooded within the VLAN, broadcast is flooded within the VLAN, and multicast forwarding depends on multicast/switch configuration.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the switch exam rule for Destination MAC and Source MAC?",
+      "a": "Destination MAC is used for the forwarding decision, while Source MAC is used for MAC address learning. Source MAC -> learn, Destination MAC -> forward.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the 2-byte Type/Length field represent?",
+      "a": "It can represent a Length in IEEE 802.3 framing or an EtherType in Ethernet II framing. Values greater than or equal to 0x0600 are interpreted as EtherTypes.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which EtherTypes map to which protocols?",
+      "a": "0x0800 = IPv4, 0x0806 = ARP, 0x86DD = IPv6, 0x8100 = IEEE 802.1Q, 0x88A8 = IEEE 802.1ad S-Tag / QinQ.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you distinguish an EtherType from a 802.3 Length value?",
+      "a": "Values up to 1500 decimal mean Length; values from 1536 decimal (0x0600) mean EtherType; values 1501 through 1535 are reserved for this distinction.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does Ethernet II framing differ from IEEE 802.3 framing?",
+      "a": "Ethernet II uses the 2-byte field as an EtherType and is the dominant framing for modern IP networks. IEEE 802.3 can use it as a Length field followed by LLC and sometimes SNAP to identify the upper-layer protocol.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the structure of an 802.1Q VLAN tag?",
+      "a": "The 802.1Q tag adds 4 bytes: TPID (2 bytes, standard 0x8100) and TCI (2 bytes) which contains PCP (3 bits, Layer 2 priority/802.1p), DEI (1 bit, Drop Eligibility Indicator), and VLAN ID (12 bits).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the range of usable VLAN IDs?",
+      "a": "The VLAN ID field is 12 bits, giving 0-4095, but 0 is reserved for priority tagging and 4095 is reserved, so usable VLAN IDs are commonly 1-4094.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does QinQ (IEEE 802.1ad) tagging work?",
+      "a": "QinQ stacks multiple VLAN tags: an outer/provider tag with a common TPID of 0x88A8 plus an inner customer tag using 0x8100. This lets service providers transport customer VLANs while adding their own VLAN tag.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the Ethernet payload size range and when is padding used?",
+      "a": "The standard Ethernet payload range is 46-1500 bytes. If actual data is smaller than 46 bytes, padding is added to satisfy the minimum Ethernet frame size.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the FCS and what does it do?",
+      "a": "The FCS (Frame Check Sequence) is a 4-byte trailer at the end of the frame that uses a CRC-based mechanism to detect transmission errors; a frame that fails the check is discarded. It provides error detection, not correction, and does not cover Preamble/SFD.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the minimum standard Ethernet frame size and what does it include?",
+      "a": "64 bytes, counted from the Destination MAC through the FCS: Dest MAC 6 + Src MAC 6 + Type/Length 2 + Payload/Pad 46 + FCS 4 = 64 bytes. Preamble and SFD are not included.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the maximum standard Ethernet frame sizes?",
+      "a": "1518 bytes for an untagged frame (6+6+2+1500+4) and 1522 bytes for an 802.1Q-tagged frame (the extra 4-byte tag).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between MTU and Ethernet frame size?",
+      "a": "MTU is the maximum Layer 3 packet size carried without fragmentation (typically 1500 bytes IP MTU on Ethernet). Frame size is the Layer 2 header + payload + Layer 2 trailer: 14 + 1500 + 4 = 1518 bytes, or 1522 with an 802.1Q tag.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "What is a runt and what causes it?",
+      "a": "A runt is an Ethernet frame smaller than the minimum required size, typically under 64 bytes from Destination MAC through FCS. Causes include physical-layer problems, collisions on legacy shared Ethernet, duplex mismatch, and faulty hardware.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are giants and baby giants?",
+      "a": "A giant exceeds the maximum frame size supported by the interface or platform. A baby giant is slightly larger than the traditional 1518-byte maximum but still accepted by some devices, with 802.1Q-tagged frames (1522 B) as a classic example.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Is every frame larger than 1518 bytes an error?",
+      "a": "No. Legitimate encapsulation can increase Layer 2 size, so frames like 1522-byte 802.1Q-tagged frames are valid. Do not automatically assume oversized frames are errors.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a jumbo frame?",
+      "a": "A jumbo frame is an Ethernet frame larger than the standard Ethernet maximum (commonly configured near an MTU of 9000 bytes), but its exact size is implementation-dependent and all devices along the path must support the frame size.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the core switching model roles for Source MAC, Destination MAC, VLAN Tag, EtherType, and FCS?",
+      "a": "Source MAC -> Learn, Destination MAC -> Forward, VLAN Tag -> VLAN context, EtherType -> Protocol identification, FCS -> Error detection.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Do switches rewrite MAC addresses when forwarding frames?",
+      "a": "No. Switches normally forward the existing Ethernet frame without rewriting source and destination MAC addresses, which remain the same across the Layer 2 switching path. A router, in contrast, creates a new Layer 2 frame per outgoing segment.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands verify interface errors, MAC table, ARP, trunks, and MTU?",
+      "a": "show interfaces GigabitEthernet0/1 (look for input errors, CRC, frame, overrun, ignored, output errors), show mac address-table, show arp, show interfaces trunk, and show interfaces GigabitEthernet0/1 | include MTU.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which field values must be memorized for the Ethernet frame quick review?",
+      "a": "Preamble 7 B, SFD 1 B, Dest MAC 6 B, Src MAC 6 B, 802.1Q tag 4 B, Type/Length 2 B, Payload 46-1500 B, FCS 4 B, minimum frame 64 B, maximum untagged 1518 B, maximum tagged 1522 B, standard IP MTU 1500 B.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the one-minute mental model of the Ethernet frame?",
+      "a": "The frame is a Layer 2 container: Destination MAC drives forwarding, Source MAC drives learning, Type/Length identifies the protocol (EtherType), and FCS provides error detection. Sizes: preamble 7 B, SFD 1 B, tag 4 B optional, payload 46-1500 B, FCS 4 B; min 64 B, max untagged 1518 B, max tagged 1522 B, IP MTU 1500 B.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

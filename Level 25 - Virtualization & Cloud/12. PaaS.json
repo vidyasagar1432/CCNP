@@ -1,0 +1,70 @@
+{
+  "title": "PaaS",
+  "level": 25,
+  "levelTitle": "Level 25 - Virtualization & Cloud",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "12. PaaS.md",
+  "cards": [
+    {
+      "q": "What is PaaS?",
+      "a": "Platform as a Service provides a managed platform (runtime, database, middleware) where developers deploy code without managing servers/OS. The provider handles infra plus platform; you manage app and data.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are examples of PaaS?",
+      "a": "Azure App Service (web apps), AWS Elastic Beanstalk (deploy), Google App Engine (scale), and managed databases. Managed DBs and app runtimes are the classic PaaS services.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is responsibility split in PaaS?",
+      "a": "Provider owns infra, OS, and runtime/middleware; customer owns the app and data. You rent the platform and bring the app.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Where does PaaS sit in the IaaS/PaaS/SaaS control spectrum?",
+      "a": "In the middle: you manage app + data (like SaaS minus users), but the provider manages infra, OS, and runtime. Less control than IaaS, more control than SaaS.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is the networking angle for PaaS?",
+      "a": "Apps get public endpoints via the provider's load balancer, are still isolated within VNet/VPC, integrate via APIs, and rely on app-level security.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the pros and cons of PaaS?",
+      "a": "Pros: no infrastructure management, fast development, auto-scaling, managed DB. Cons: platform limits, vendor lock-in, cost control, and data residency concerns.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How is a PaaS deployment managed?",
+      "a": "Via the cloud console or CLI, for example az appservice or aws elasticbeanstalk commands.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A PaaS app is down or its DB is slow. What do you check?",
+      "a": "For an app outage check the platform console; for a slow DB check the managed DB instance sizing; for deploy failures check runtime config, and for access issues check the VNet/network.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which service model lets you avoid managing OS and runtime but still own the app?",
+      "a": "PaaS. The provider manages infra, OS, and runtime; you manage app + data, with auto-scaling as a built-in PaaS feature.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Match the quick review: deliverable, provider, customer, examples, control, auto scale, managed DB, vs IaaS.",
+      "a": "Deliverable = platform; provider = infra+OS; customer = app+data; examples = App Service; control = middle; auto scale = yes; managed DB = yes; vs IaaS = less OS management.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

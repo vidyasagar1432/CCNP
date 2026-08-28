@@ -1,0 +1,76 @@
+{
+  "title": "BGP Path Selection (Best Path Algorithm)",
+  "level": 12,
+  "levelTitle": "Level 12 - BGP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "03. Path Selection.md",
+  "cards": [
+    {
+      "q": "What is the BGP best-path algorithm?",
+      "a": "A deterministic strict priority list run when BGP receives multiple paths for the same prefix. The router keeps one best path per prefix in the BGP table and installs it in the RIB; the first tie-breaker that differs decides the winner and later steps only run if earlier ones tie.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "List the full BGP best-path algorithm in order.",
+      "a": "1 Highest Weight, 2 Highest Local Preference, 3 Prefer locally originated, 4 Shortest AS_PATH, 5 Lowest Origin (IGP < EGP < incomplete), 6 Lowest MED, 7 Prefer eBGP over iBGP, 8 Lowest IGP metric to next hop, 9 tie-breakers (oldest eBGP path, lowest router ID). Steps 7-9 are the secret tail; the exam usually stops at MED/eBGP.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is Weight and where does it sit in path selection?",
+      "a": "Weight is a Cisco-proprietary attribute (best-path step 1). It is local-only, set per neighbor, never advertised, and acts as the first differentiator inside a single router.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What do the Origin values i, e, and ? mean?",
+      "a": "Origin i is IGP (from a network command), e is EGP, and ? is incomplete (redistributed). Order of preference is i < e < ?, so i beats ? and redistributed routes are ?.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which best-path steps apply to local, eBGP, and iBGP paths?",
+      "a": "Local paths: weight, local-pref, origin, MED. eBGP neighbor paths: local-pref, AS_PATH, origin, MED. iBGP neighbor paths: local-pref, AS_PATH, origin (MED via eBGP). Weight never survives a router hop; local-pref survives iBGP only.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you tune inbound versus outbound path selection?",
+      "a": "For inbound (choosing a path as the receiver) use local-pref (step 2) or AS_PATH prepend (step 4). For outbound (telling an upstream) use MED (step 6), subject to the same-AS comparison rule. Communities automate these attribute sets across many routers.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Command to see every path and attribute for one prefix?",
+      "a": "show ip bgp <prefix> lists all paths with their attributes; show ip bgp neighbors <ip> paths shows the paths known per neighbor.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why can an earlier tie-breaker make later steps irrelevant?",
+      "a": "The very first criterion that differs decides the best path. If a decision is made at step 2 (local preference), steps 3-9 never run at all; order matters.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the exam mantra for path-selection order?",
+      "a": "Weight > Local Pref > AS_PATH > MED. Everything before the first differing criterion ties.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "When does eBGP win over iBGP in path selection?",
+      "a": "Only at step 7, after weight, local-pref, local origin, AS_PATH, origin, and MED comparisons. eBGP beating iBGP does not trump those earlier criteria.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is BGP best-path selection per neighbor or per prefix?",
+      "a": "Per prefix, not per neighbor. The router evaluates all available paths for each prefix and keeps one winner.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

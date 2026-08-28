@@ -1,0 +1,154 @@
+{
+  "title": "STP Port States",
+  "level": 8,
+  "levelTitle": "Level 08 - STP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "08. Port States.md",
+  "cards": [
+    {
+      "q": "What do STP port states describe and what are the classic 802.1D and RSTP state sets?",
+      "a": "Port states describe operational behavior regarding forwarding user data, learning source MACs, and processing BPDUs. Classic 802.1D has Blocking, Listening, Learning, Forwarding, Disabled; RSTP has Discarding, Learning, Forwarding.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the critical distinction between a port role and a port state?",
+      "a": "Role = what the port is for (Root, Designated, Alternate, Backup); State = what the port is currently doing (Blocking/Listening/Learning/Forwarding or Discarding/Learning/Forwarding).",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "In classic STP, what does a Blocking port do and what does it not do?",
+      "a": "A Blocking port does not forward user data and does not learn MAC addresses, but it continues to process STP BPDUs. It prevents loops while retaining STP information.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why does a Blocking port not mean the port is completely inactive?",
+      "a": "A Blocking port can receive/process BPDUs and monitor the topology, so it can react and move to another state if required.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What does a Listening port do?",
+      "a": "A Listening port participates in STP topology calculation but does not forward user data or learn MAC addresses, using the period to determine whether it should become a forwarding port without creating a loop.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does a Learning port do and why does it exist?",
+      "a": "A Learning port learns source MAC addresses but does not forward user data. It populates the MAC address table before forwarding begins, reducing unnecessary flooding when the port reaches Forwarding.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Which STP state forwards data, learns MACs, and processes BPDUs, and which roles use it?",
+      "a": "The Forwarding state performs normal Layer-2 switching. Root Port and Designated Port are typically in Forwarding.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a Disabled port and how does it differ from Blocking?",
+      "a": "A Disabled port does not participate in STP (from administrative shutdown, interface down, or not operational), processing no user data, MAC learning, or BPDUs. A Blocking port is still participating in STP and processes BPDUs.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the traditional classic 802.1D transition sequence toward Forwarding?",
+      "a": "Blocking → Listening → Learning → Forwarding, with Disabled possible depending on administrative/operational conditions.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the default classic STP timer values and their purposes?",
+      "a": "Hello Time 2 s (interval between root BPDUs), Max Age 20 s (when received BPDU info expires), Forward Delay 15 s (duration of Listening/Learning).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is 20 + 15 + 15 = 50 seconds not a universal STP convergence time?",
+      "a": "Max Age is primarily for aging out stale BPDU information, not a fixed blocking duration; Forward Delay governs Listening and Learning. Actual convergence depends on the topology and failure type.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does RSTP reduce the five classic states to three?",
+      "a": "RSTP maps Blocking and Listening into Discarding, keeps Learning and Forwarding, and treats Disabled as not participating, eliminating the separate Listening state.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the RSTP Discarding state do?",
+      "a": "It combines the functional behavior of classic Blocking and Listening: no user-data forwarding, no MAC learning, but STP control information is processed. RSTP Alternate and Backup ports are normally in Discarding.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the typical steady-state role/state combinations?",
+      "a": "Root Port → Forwarding, Designated Port → Forwarding, Alternate Port → Discarding, Backup Port → Discarding. These are typical steady-state combinations, not a statement that role and state are the same.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the exam wording for why the Learning state exists?",
+      "a": "Learning allows the switch to build its MAC table before normal data forwarding begins, reducing unnecessary flooding when the port enters Forwarding.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does RSTP converge faster than the traditional timer sequence, and is RSTP completely timerless?",
+      "a": "RSTP uses Proposal/Agreement, explicit synchronization, Alternate/Backup roles, rapid transition on point-to-point links, and edge-port behavior. It is not completely timerless because it still uses timers for BPDU aging and failure detection.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is PortFast/edge port behavior and when should it be used?",
+      "a": "PortFast lets an access/edge port connected to an end device (PC, printer, server, IP phone) transition directly to Forwarding. It should normally be used only on end-device ports, not ordinary switch-to-switch links.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands verify STP states and configure classic timers?",
+      "a": "show spanning-tree shows role/state/root/timers; show spanning-tree vlan 10 shows a VLAN; show spanning-tree interface Gi0/1 shows an interface. Timers can be configured with spanning-tree vlan 10 forward-time 15 / max-age 20 / hello-time 2, but arbitrary timer lowering is not the preferred fix for slow convergence.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why should you troubleshoot not only from a port's state?",
+      "a": "A Forwarding state does not tell you whether the port is Root or Designated, and Discarding does not automatically mean Alternate (it could be Backup or another condition). Always inspect Role + State + Cost + Root information.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "A port in classic STP Learning state forwards user data. True or false?",
+      "a": "False. Learning builds the MAC table but does not forward user data.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does RSTP use Blocking, Listening, Learning and Forwarding as its states?",
+      "a": "No. RSTP uses Discarding, Learning and Forwarding as its operational port states.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is every Discarding port an Alternate Port?",
+      "a": "No. Alternate and Backup ports are normally Discarding, but role and state are separate concepts.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the key differences between classic 802.1D and RSTP port state models?",
+      "a": "802.1D has Blocking/Listening/Learning/Forwarding/Disabled with a separate Listening state and slower timer convergence. RSTP has Discarding/Learning/Forwarding, no separate Listening state, and uses rapid proposal/agreement and explicit roles for faster convergence.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the core exam idea about ROLE vs STATE?",
+      "a": "Role = what the port is responsible for (Root/Designated/Alternate/Backup); State = what the port is currently allowed to do (Discarding/Learning/Forwarding). Classic STP: Blocking→Listening→Learning→Forwarding; RSTP: Discarding→Learning→Forwarding.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

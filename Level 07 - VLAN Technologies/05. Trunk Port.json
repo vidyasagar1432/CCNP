@@ -1,0 +1,190 @@
+{
+  "title": "Trunk Port",
+  "level": 7,
+  "levelTitle": "Level 07 - VLAN Technologies",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "05. Trunk Port.md",
+  "cards": [
+    {
+      "q": "What is a trunk port?",
+      "a": "A trunk port is a Layer 2 switch port that carries traffic for multiple VLANs over a single physical link. On a Cisco 802.1Q trunk, VLAN information is normally carried in an 802.1Q tag, except the native VLAN, whose frames are normally transmitted untagged.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are common trunk connections?",
+      "a": "Switch to Switch, Switch to Router, Switch to Firewall, Switch to Hypervisor, Switch to Wireless AP carrying multiple VLANs, and Switch to EtherChannel/Port-Channel.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does a trunk allow multiple VLANs to share the same physical link?",
+      "a": "Instead of requiring one physical link per VLAN, a trunk uses 802.1Q VLAN tagging to identify the VLAN associated with each frame.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Where is the 802.1Q tag inserted in an Ethernet frame and what does it contain?",
+      "a": "The 4-byte 802.1Q tag is inserted between the source MAC address and the EtherType/Length field. It contains a TPID (0x8100) and a TCI, which includes PCP, DEI, and a 12-bit VID.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the normal assignable VLAN IDs and which are reserved?",
+      "a": "Normal VLAN IDs are 1-4094. VLAN 0 and VLAN 4095 are reserved and are not normal assignable VLAN IDs.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the native VLAN on a trunk?",
+      "a": "The native VLAN is the VLAN associated with untagged traffic on an 802.1Q trunk. It is not inherently VLAN 1; VLAN 1 is the common default native VLAN on Cisco switches, but it can be changed.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the best practice for native VLAN configuration on trunks?",
+      "a": "Configure an unused VLAN as the native VLAN and make sure both ends of the trunk agree.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does 'switchport trunk allowed vlan 10,20,30' do?",
+      "a": "It defines the VLANs that are allowed to be carried across the trunk, providing VLAN scope control, reduced unnecessary Layer 2 propagation, better operational hygiene, and reduced broadcast-domain exposure.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the difference between the allowed VLAN list and the VLANs with active traffic?",
+      "a": "The allowed VLAN list defines which VLANs are permitted on the trunk; it is not the same as the VLANs that currently have active traffic.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does 'switchport nonegotiate' mean?",
+      "a": "It means do not send DTP negotiation frames. It does not mean 'do not trunk'; the port remains a statically configured trunk.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What trunk encapsulations exist and which is used in modern Cisco networks?",
+      "a": "802.1Q and ISL (a legacy Cisco proprietary technology). Modern Cisco Catalyst platforms generally use 802.1Q, and on many modern switches the 'switchport trunk encapsulation dot1q' command is unavailable because 802.1Q is the only supported encapsulation.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is DTP?",
+      "a": "DTP (Dynamic Trunking Protocol) is a Cisco proprietary protocol used to negotiate trunking between compatible Cisco switchports. Its modes include access, trunk, dynamic desirable, dynamic auto, and nonegotiate.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What trunk forms with the dynamic desirable and dynamic auto combinations?",
+      "a": "Dynamic Desirable + Dynamic Auto can form a trunk, but Dynamic Auto + Dynamic Auto does not form a trunk (both sides are passive).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What security risk does leaving an endpoint-facing port in a dynamic DTP mode create?",
+      "a": "A device capable of participating in DTP may potentially negotiate a trunk, exposing multiple VLANs to an unauthorized device. Best practice for endpoint ports is 'switchport mode access' and, where appropriate, 'switchport nonegotiate'.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the two classic VLAN-hopping concepts?",
+      "a": "Switch spoofing (attempts to make an endpoint-facing port become a trunk) and double-tagging (takes advantage of 802.1Q native-VLAN behavior and nested VLAN tags).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a native VLAN mismatch and what are its consequences?",
+      "a": "A native VLAN mismatch occurs when the two ends of a trunk use different native VLAN IDs, so they disagree about which VLAN an untagged frame belongs to. Consequences include misclassified untagged traffic, unexpected connectivity, CDP/native-VLAN mismatch warnings, Layer 2 traffic leakage or incorrect forwarding, and security concerns.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is router-on-a-stick configured with a trunk and 802.1Q subinterfaces?",
+      "a": "The switch-facing interface is a trunk, and the router uses subinterfaces with 'encapsulation dot1Q 10' and 'ip address 192.168.10.1 255.255.255.0' per VLAN to provide inter-VLAN routing.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the relationship between EtherChannel and a trunk?",
+      "a": "EtherChannel and trunking are separate concepts. EtherChannel is link aggregation that combines physical links into a logical Port-Channel interface, and that logical interface can then be configured as an access port or trunk.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is one of the most important trunk troubleshooting commands and what does it show?",
+      "a": "'show interfaces trunk'. It can show trunking ports, encapsulation, native VLAN, allowed VLANs, VLANs allowed and active, and VLANs forwarding and not pruned.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the trunk troubleshooting workflow?",
+      "a": "Check physical link up, port trunking, 802.1Q operating, native VLAN correct, required VLAN allowed, VLAN exists, STP forwarding for the VLAN, and Layer 3 gateway/routing correct.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Is all trunk traffic tagged?",
+      "a": "No. The native VLAN is normally transmitted untagged on an 802.1Q trunk.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is the native VLAN always VLAN 1?",
+      "a": "No. VLAN 1 is the common default native VLAN, but the native VLAN can be changed, for example with 'switchport trunk native vlan 999'.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does 'switchport nonegotiate' disable the trunk?",
+      "a": "No. It disables DTP negotiation, not trunk operation. A port with 'switchport mode trunk' and 'switchport nonegotiate' is still a trunk.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does 'dynamic desirable' always create a trunk?",
+      "a": "No. Trunk formation depends on the combination of the two endpoints' modes and platform behavior.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does 'dynamic auto' plus 'dynamic auto' create a trunk?",
+      "a": "No. Both sides are passive, so Auto + Auto = No trunk.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does removing a VLAN from the allowed list remove it from the switch?",
+      "a": "No. The VLAN still exists locally; the allowed list only controls whether the VLAN can be carried across that trunk.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does a native VLAN mismatch only affect management traffic?",
+      "a": "No. It affects the interpretation of untagged traffic and can cause unexpected Layer 2 behavior.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is EtherChannel itself a trunk?",
+      "a": "Not exactly. EtherChannel aggregates physical links into a logical interface, and that logical interface can then be configured as an access port or trunk depending on the design.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Do wireless APs always use access ports?",
+      "a": "No. An AP carrying multiple SSIDs mapped to different VLANs commonly requires a trunk.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Summarize the trunk port quick review key points.",
+      "a": "Trunk primary purpose is to carry multiple VLANs over one link; VLAN identification by 802.1Q; native VLAN normally untagged; typical peers are switch, router, firewall, AP; configuration switchport mode trunk; allowed VLANs command; native VLAN command; DTP may negotiate; switchport nonegotiate disables DTP; legacy encapsulation ISL; EtherChannel can carry a trunk; main trap is native VLAN is untagged.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

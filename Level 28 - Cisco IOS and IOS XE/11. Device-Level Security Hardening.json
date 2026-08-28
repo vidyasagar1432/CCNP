@@ -1,0 +1,82 @@
+{
+  "title": "Device-Level Security Hardening (IOS XE)",
+  "level": 28,
+  "levelTitle": "Level 28 - Cisco IOS and IOS XE",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "11. Device-Level Security Hardening.md",
+  "cards": [
+    {
+      "q": "What is device-level security hardening on IOS XE?",
+      "a": "It protects the management and control plane of the device itself, covering login/AAA security, role-based access, control-plane policing (CoPP), SNMP management, and management-plane protection using least privilege.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the three functions of AAA?",
+      "a": "Authentication verifies who the user is, authorization determines what they may do, and accounting logs what they did.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between TACACS+ and RADIUS?",
+      "a": "TACACS+ runs on TCP 49, separates authentication, authorization, and accounting, and encrypts all three, while RADIUS runs on UDP 1812/1813, combines authentication and accounting, and encrypts only the password.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between CoPP and management-plane protection?",
+      "a": "CoPP (control-plane policing) rate-limits control-plane traffic to stop DoS, while management-plane protection (MPP) restricts which management protocols and interfaces can be used for management.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why should management use SSH instead of Telnet?",
+      "a": "SSH encrypts the management session and credentials, while Telnet is cleartext and vulnerable to interception; restrict vty lines with transport input ssh.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Why is enable secret preferred over enable password?",
+      "a": "enable secret stores the privileged password using a strong hash, while enable password is weak and can be stored in cleartext.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is least privilege implemented for local users?",
+      "a": "By assigning privilege levels (0-15) or roles/parser views so users only get the command access they need, rather than full privileged-mode access.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How is CoPP configured on IOS XE?",
+      "a": "Create a class-map for the control-plane traffic, a policy-map with police cir actions, then apply it under the control-plane mode with service-policy input.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands verify AAA, SSH, and CoPP state?",
+      "a": "show aaa, show run aaa, show ip ssh, show control-plane, and show snmp.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "An administrator can no longer log in after tightening the vty lines; what is likely wrong?",
+      "a": "An ACL on the vty lines or transport input setting may be blocking the administrator's source address or protocol; check the line vty configuration and the applied access-class.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What is a common hardening misconception about RADIUS?",
+      "a": "That RADIUS encrypts all traffic; RADIUS encrypts only the password, whereas TACACS+ encrypts the entire exchange and separates AAA functions.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the hardening quick-review summary?",
+      "a": "Harden via AAA (TACACS+ vs RADIUS), least-privilege local users with enable secret, SSH instead of Telnet, CoPP for the control plane, MPP for the management plane, SNMPv3, and disabling unencrypted HTTP.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

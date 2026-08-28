@@ -1,0 +1,130 @@
+{
+  "title": "Native VLAN",
+  "level": 7,
+  "levelTitle": "Level 07 - VLAN Technologies",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "06. Native VLAN.md",
+  "cards": [
+    {
+      "q": "What is the native VLAN?",
+      "a": "The native VLAN is the VLAN associated with untagged traffic on an 802.1Q trunk. On a Cisco 802.1Q trunk, normal VLAN traffic is tagged with an 802.1Q VLAN ID while traffic belonging to the native VLAN is normally transmitted without an 802.1Q tag.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Is the native VLAN inherently VLAN 1?",
+      "a": "No. The native VLAN is not inherently VLAN 1. VLAN 1 is simply the common default native VLAN on many Cisco switches, and it can be changed.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What command changes the native VLAN?",
+      "a": "Under the trunk interface: 'switchport mode trunk' then 'switchport trunk native vlan 999'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why does the native VLAN exist?",
+      "a": "The native VLAN provides a defined VLAN association for untagged traffic on an 802.1Q trunk, because not every Ethernet frame traversing a trunk necessarily carries an 802.1Q tag.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Do untagged frames used by Layer 2 control protocols (CDP, DTP, PAgP) automatically belong to the native VLAN?",
+      "a": "Not necessarily. Cisco Layer 2 control protocols can use untagged Ethernet frames, but these control-plane frames should not be thought of simply as ordinary data frames belonging to the native VLAN; their handling is protocol/platform dependent.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What happens when the two ends of a trunk have a native VLAN mismatch (e.g., 999 vs 100)?",
+      "a": "Each switch interprets the same untagged frame as belonging to its own native VLAN (Switch A as VLAN 999, Switch B as VLAN 100). This can cause unexpected Layer 2 connectivity, misclassification of untagged traffic, one-VLAN connectivity problems, CDP mismatch warnings, and security concerns.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does a native VLAN mismatch break correctly tagged traffic for other VLANs?",
+      "a": "No. A native VLAN mismatch normally does not break correctly tagged traffic for other VLANs. Tagged VLAN traffic (e.g., VLAN 10, VLAN 20) is normally unaffected; only untagged/native-VLAN traffic is affected.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "A native VLAN mismatch automatically causes VLAN hopping. True or false?",
+      "a": "False. A native VLAN mismatch is a configuration error and does not itself automatically cause VLAN hopping. Double-tagging is the VLAN-hopping technique in which native VLAN behavior can be exploited.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How is the native VLAN involved in the double-tagging VLAN-hopping attack?",
+      "a": "An attacker constructs a double-tagged frame; the first/outer tag is associated with the native VLAN and removed at the first switch, leaving a second 802.1Q tag that can then be forwarded toward another VLAN.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the native VLAN security best practices?",
+      "a": "Use a dedicated/unused native VLAN reserved for native-trunk purposes, keep the native VLAN consistent on both ends, restrict allowed VLANs, and consider tagging native VLAN traffic where supported.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What command tags native VLAN traffic on platforms that support it?",
+      "a": "'vlan dot1q tag native'. This changes the normal behavior so native VLAN traffic is tagged as well, providing additional protection against certain native-VLAN/double-tagging scenarios.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is a native VLAN mapped in router-on-a-stick?",
+      "a": "A router subinterface is configured with 'encapsulation dot1Q 999 native' and an IP address, using the 'native' keyword so the subinterface handles untagged frames associated with VLAN 999.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the native VLAN on a standard 802.1Q trunk - tagged or untagged?",
+      "a": "Native VLAN traffic is normally untagged on a standard 802.1Q trunk. However, Cisco can be configured to tag it with 'vlan dot1q tag native'.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands verify the native VLAN configuration?",
+      "a": "'show interfaces trunk' (shows Port and Native vlan), 'show interfaces Gi0/24 switchport' (look for Native VLAN), 'show cdp neighbors detail' (a mismatch can generate a CDP warning), and 'show vlan brief'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the native VLAN troubleshooting workflow?",
+      "a": "Confirm the link is actually trunking, check the native VLAN, verify both ends use the same ID. If not, fix the mismatch; if yes, check allowed VLANs, STP, and Layer 3.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Is changing only one side of a trunk's native VLAN enough?",
+      "a": "No. If Switch A is configured with native VLAN 999 and Switch B with native VLAN 1, the trunk has a native VLAN mismatch. Both ends should agree.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is every untagged frame user traffic belonging to the native VLAN?",
+      "a": "Not necessarily. Layer 2 control protocols can use untagged Ethernet frames and have their own protocol-specific handling.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does the physical router interface automatically handle the native VLAN in router-on-a-stick?",
+      "a": "Not necessarily. In router-on-a-stick, the native VLAN is normally explicitly mapped with 'encapsulation dot1Q <vlan-id> native' on a subinterface.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Summarize the native VLAN quick review key points.",
+      "a": "It is used on an 802.1Q trunk; its purpose is to define the VLAN associated with untagged trunk traffic; normal tag is none; Cisco default is VLAN 1; it can be changed; both ends should match; mismatch causes misclassification of untagged traffic; tagged VLAN traffic is normally unaffected; it is relevant to double-tagging/VLAN-hopping; recommended design is a dedicated/unused native VLAN.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the one-minute native VLAN revision chain?",
+      "a": "Native VLAN exists on an 802.1Q trunk; normally untagged; default commonly VLAN 1; both ends must match; mismatch affects untagged traffic; security relevance is double-tagging; best practice is a dedicated/unused native VLAN.",
+      "tag": "Core Concept",
+      "context": "Both"
+    }
+  ]
+}

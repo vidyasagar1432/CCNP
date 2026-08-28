@@ -1,0 +1,124 @@
+{
+  "title": "Network Design Principles",
+  "level": 0,
+  "levelTitle": "Level 00 - Networking Basics",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "07. Network Design Principles.md",
+  "cards": [
+    {
+      "q": "What are the five canonical design attributes a network should satisfy?",
+      "a": "Fault tolerance, scalability, QoS, and security (the Cisco four characteristics of network design), plus manageability and automation as the modern fifth pillar.",
+      "tag": "Overview",
+      "context": "Exam"
+    },
+    {
+      "q": "How does ENCOR typically test network design principles?",
+      "a": "By presenting a design scenario and asking which principle it satisfies or violates.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What does fault tolerance require beyond simply having two devices?",
+      "a": "It requires eliminating single points of failure with redundant links and devices plus rapid convergence (RSTP/EtherChannel, HSRP/VRRP, NSF/SSO). Designed tolerance means some failures are detected and recovered faster than others, not just 'two of everything'.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does scalability mean in network design?",
+      "a": "A hierarchical design so adding more sites or users does not require redesigning the core; modular blocks grow vertically (DC) or horizontally (campus), and the address plan has room to grow using VLSM and summarization.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is the purpose of QoS in network design?",
+      "a": "To differentiate traffic by classifying, marking, and queuing so that traffic such as voice and video is handled first, achieving predictable delay, jitter, and loss under congestion.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does defense-in-depth security include?",
+      "a": "Layered controls including ACLs, segmentation (VLAN/VRF/SGT), 802.1X, device hardening, encrypted management, and firewalls, applied as secure-by-design rather than a bolt-on.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the manageability and automation pillar include?",
+      "a": "Centralized control (DNA Center/ISE), model-driven APIs (NETCONF/RESTCONF), telemetry, and consistent baselines, which reduce human error and speed change.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the supporting design rules of hierarchy, modularity, and redundancy?",
+      "a": "Hierarchy gives consistent behavior and isolation via three-tier or layered modules; modularity keeps functions in blocks so one block can change without touching the rest; redundancy with simplicity means dual everything while avoiding over-engineering such as STP complexities.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What do the 80/20 and 20/80 rules describe?",
+      "a": "The 80/20 rule says local traffic dominates where applications are local, whereas the 20/80 rule applies when most traffic crosses to the core or data center with centralized apps and data. This determines where switches and VLANs are placed.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why does speed of convergence matter more than speed of reconfiguration?",
+      "a": "For most outages, how quickly the network recovers (speed of convergence) matters more than how fast a configuration change can be made.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Which design anti-pattern causes loops or broadcast storms?",
+      "a": "Redundant links without EtherChannel or STP tuning, which leads to loops and broadcast storms.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens if a redundant switch pair has a single default gateway?",
+      "a": "There is no first-hop redundancy, so HSRP or VRRP is missing and a single gateway becomes a failure point.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is having 'two identical switches' enough for redundancy?",
+      "a": "No. The control plane must also converge, using HSRP/VRRP for gateways, RSTP for loops, and NSF/SSO for supervisor failover.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is QoS about making the internet faster?",
+      "a": "No. QoS does not increase bandwidth; it reorders and prioritizes existing capacity so important traffic is handled first under congestion.",
+      "tag": "Exam Trap",
+      "context": "Interview"
+    },
+    {
+      "q": "Is one ACL on the edge sufficient for secure design?",
+      "a": "No. Security is defense-in-depth; a single edge ACL is not 'secure design'. Layered controls, segmented zones, hardened devices, and encrypted management are all required.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How should the management plane be protected?",
+      "a": "The management plane should be placed on a dedicated, separate management segment, ideally a management VRF, so it is not exposed to users.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Match the design principle to its exam signal: which uses hybrid convergence, hierarchy, queuing, and segmentation?",
+      "a": "Fault tolerance signals dual devices plus HA protocols; scalability signals hierarchy with modular design and summarization; QoS signals classification and queuing with voice first; security signals segmentation, 802.1X, hardening, and encrypted management.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "How does an administrator apply QoS priority to VoIP at the policy level?",
+      "a": "Create a class-map matching DSCP EF for voice, then in a policy-map assign that class a strict priority queue, for example priority percent 10.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What command combines two links into an active EtherChannel?",
+      "a": "On the port-channel interface, channel-group 1 mode active, which uses LACP and doubles bandwidth while adding high availability.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    }
+  ]
+}

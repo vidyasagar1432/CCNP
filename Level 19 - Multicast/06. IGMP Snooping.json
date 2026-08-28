@@ -1,0 +1,76 @@
+{
+  "title": "IGMP Snooping",
+  "level": 19,
+  "levelTitle": "Level 19 - Multicast",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "06. IGMP Snooping.md",
+  "cards": [
+    {
+      "q": "What is IGMP snooping?",
+      "a": "IGMP snooping is a Layer 2 switch feature that inspects IGMP membership messages and builds per-group forwarding tables so multicast is sent only out ports that have members instead of flooding the whole VLAN.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Why does a switch need IGMP snooping?",
+      "a": "Without snooping the switch floods multicast like broadcast to every port, wasting bandwidth and CPU; snooping limits forwarding to only the ports that reported membership.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is an mrouter port?",
+      "a": "An mrouter port is the switch port facing the multicast router or querier; group traffic is forwarded out member ports plus the mrouter port so the router continues to see the group.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does a switch learn which ports are group members?",
+      "a": "It snoops or listens to IGMP reports sent by hosts on the VLAN and records each reporting port as a member of that group in its forwarding table.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between IGMP snooping and IGMP proxying?",
+      "a": "IGMP snooping inspects reports and builds L2 per-port forwarding tables while passing queries through, whereas IGMP proxying terminates and regenerates queries at Layer 3, summarizing membership like a router.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the switch querier feature?",
+      "a": "The switch querier lets a switch act as the IGMP querier for a VLAN when no multicast router is present, so membership processing continues without a router.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Is IGMP snooping enabled by default on Cisco switches?",
+      "a": "Yes, IGMP snooping is enabled by default on most Cisco switches, and it can be controlled per VLAN with commands such as ip igmp snooping vlan 10.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands verify IGMP snooping state?",
+      "a": "show ip igmp snooping, show ip igmp snooping groups, show ip igmp snooping mrouter, and show mac address-table multicast.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Multicast is being flooded to all ports despite snooping; what is likely wrong?",
+      "a": "IGMP snooping is probably disabled on the VLAN, or the mrouter port is not correctly learned, so the switch has no group-to-port table; check show ip igmp snooping.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the key exam distinction between IGMP and IGMP snooping?",
+      "a": "IGMP is the host-to-router (Layer 3) membership protocol, while IGMP snooping is a switch Layer 2 feature that peeks at IGMP messages to restrict flooding.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the IGMP snooping quick-review summary?",
+      "a": "IGMP snooping is a Layer 2 switch feature, on by default, that snoops IGMP reports to build per-group member-port tables and forwards multicast only to member ports plus the mrouter port, passing queries through and optionally using a switch querier.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

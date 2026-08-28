@@ -1,0 +1,124 @@
+{
+  "title": "Network Components",
+  "level": 0,
+  "levelTitle": "Level 00 - Networking Basics",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "05. Network Components.md",
+  "cards": [
+    {
+      "q": "What is the key mental model for categorizing network devices across the course?",
+      "a": "Categorizing devices by their function as an end device or intermediary device, and by their plane (data, control, or management).",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are end devices (hosts) and what identity do they have?",
+      "a": "End devices are PCs, laptops, phones, tablets, cameras, IoT, printers, and servers. They originate and consume traffic and have at least a MAC (L2) and typically an IP (L3) identity.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "At what layer does a hub operate and why is it avoided?",
+      "a": "A hub is a Layer 1 device that regenerates the signal to all ports, creating one collision domain, so it is legacy and avoided.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does a switch do and what data structures does it use?",
+      "a": "A switch at Layer 2/Layer 3 forwards frames by MAC using the CAM table, creates VLANs, provides microsegmentation, and an L3 switch routes between VLANs using the FIB.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does a router do?",
+      "a": "A Layer 3 device performs path selection by IP using the routing table, interconnects networks, and can perform NAT and filtering.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does a wireless access point do?",
+      "a": "A Layer 2 device that bridges 802.11 RF frames onto the wired LAN, using BSSID association.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does a firewall do at L3-L7?",
+      "a": "A stateful firewall enforces policy, tracks sessions, and performs NAT with VPN/IPS capability.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does a load balancer do at L4-L7?",
+      "a": "It distributes flows across a server farm using a virtual IP (VIP) and heart checks.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the role of a Wireless LAN Controller (WLC)?",
+      "a": "A WLC centralizes AP configuration, RF management, and roaming, operating in the management/control plane.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the data plane?",
+      "a": "The actual forwarding path for user packets (frames/packets), running on ASICs/TCAM, with performance measured in pps/fib and using the switching fabric, TCAM/MAC table, and FIB.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the control plane?",
+      "a": "The part that decides how to forward by building routing and forwarding tables, running routing protocols such as OSPF/EIGRP/BGP, and handling ARP/ND and STP.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the management plane and what protocols does it include?",
+      "a": "The management plane is how the device is administered, using SSH/Telnet, SNMP, syslog, NTP, NetFlow export, and SDN controller connectivity via RESTCONF/NETCONF.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Compare copper, fiber, and wireless physical media.",
+      "a": "Copper (UTP/STP) is cheap, short (up to 100 m), and susceptible to EMI and PoE capable; fiber is immune to EMI, with single-mode for long haul (laser) and multimode for short distances (LED/VCSEL); wireless (RF) offers mobility but a shared medium and interference.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "To which plane do STP and OSPF belong, and to which do forwarding ASIC decisions and SSH/SNMP belong?",
+      "a": "STP and OSPF belong to the control plane; forwarding decisions made in an ASIC belong to the data plane; and SSH/SNMP belong to the management plane.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What layering distinguishes hubs, switches, routers, and firewalls?",
+      "a": "Hubs are Layer 1, switches are Layer 2 (plus Layer 3), routers are Layer 3, and firewalls are stateful Layer 4-7 devices.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How is an L3 switch different from a WAN router?",
+      "a": "An L3 switch is a router for VLANs but not a WAN router, since it lacks the NAT/security focus; an SD-WAN edge is WAN CPE, not just a LAN switch.",
+      "tag": "Exam Trap",
+      "context": "Interview"
+    },
+    {
+      "q": "What is the difference between a router and a firewall?",
+      "a": "A router forwards traffic to connect networks, while a firewall is a security policy enforcement point performing stateful filtering. Both can perform NAT, but each is typical in its own location.",
+      "tag": "Exam Trap",
+      "context": "Interview"
+    },
+    {
+      "q": "Which command shows control-plane output (RIB) and which shows data-plane input (FIB/CEF)?",
+      "a": "show ip route shows control-plane output (the RIB), while show ip cef shows data-plane input (the FIB/CEF).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What command identifies a device's version, model, and uptime?",
+      "a": "show version identifies the IOS version, model, and uptime; show ip interface brief shows L3 interfaces and their state; and show interfaces shows per-interface stats, errors, and duplex.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    }
+  ]
+}

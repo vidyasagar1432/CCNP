@@ -1,0 +1,166 @@
+{
+  "title": "PVST+ (Per-VLAN Spanning Tree Plus)",
+  "level": 8,
+  "levelTitle": "Level 08 - STP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "03. PVST+.md",
+  "cards": [
+    {
+      "q": "What is PVST+ and what is its core architecture?",
+      "a": "PVST+ (Per-VLAN Spanning Tree Plus) is Cisco's per-VLAN STP implementation that runs a separate 802.1D-style STP instance for each VLAN, each independently electing a Root Bridge, Root Ports, Designated Ports, and Blocking Ports.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How does PVST+ enable per-VLAN Layer-2 load balancing?",
+      "a": "Because every VLAN has its own spanning-tree instance, the same physical interface can forward one VLAN while blocking another, so different VLANs can use different forwarding paths across redundant links.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What STP mode do modern Cisco switches commonly default to?",
+      "a": "Modern Cisco switches commonly default to Rapid PVST+, not classic PVST+.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How are PVST+ BPDUs carried on an 802.1Q trunk regarding tagging?",
+      "a": "Native-VLAN BPDUs are untagged, and PVST+ BPDUs for other (non-native) VLANs are 802.1Q tagged. There is additional special VLAN 1/CST interoperability handling.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is it an oversimplification to say only the native VLAN BPDU is untagged on a PVST+ trunk?",
+      "a": "PVST+ interoperates with IEEE CST through VLAN 1 by default: Cisco sends the IEEE-formatted VLAN 1/CST BPDU untagged for interoperability, while PVST+ BPDUs for other VLANs are tagged; if the native VLAN differs from VLAN 1, the native-VLAN BPDU is also untagged.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What can a native VLAN mismatch cause on a PVST+ trunk?",
+      "a": "PVST+ inconsistency, because the switches associate untagged BPDUs with different VLANs. Cisco uses PVST+ consistency checking to detect this condition.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does the Extended System ID make each VLAN's Bridge ID unique in PVST+?",
+      "a": "The 12-bit VLAN ID is incorporated into the priority field so each VLAN has a unique Bridge ID. Effective priority = configured priority + VLAN ID (e.g., 4096 + VLAN 10 = 4106), and configured priority uses increments of 4096.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the default configurable PVST+ bridge priority?",
+      "a": "32768.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does PVST+ elect a Root Bridge for a VLAN, and can different VLANs have different roots?",
+      "a": "PVST+ elects a Root Bridge independently for every VLAN using the lowest Bridge ID (lowest effective priority, then lowest MAC). This allows different VLANs to have different Root Bridges and forwarding paths.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which port role does the Root Bridge have, and what are the roles on a non-root switch?",
+      "a": "The Root Bridge has no Root Port; its active ports are normally Designated Ports. A non-root switch selects one Root Port per VLAN and each segment has one Designated Port; redundant paths become non-forwarding/blocking.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "In classic PVST+, what is the role of a redundant, non-forwarding path called, and is Alternate one of its roles?",
+      "a": "In classic PVST+/802.1D it is called a Blocking port. Alternate is an RSTP/Rapid PVST+ role; classic PVST+ does not use Alternate as a formal role.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the classic PVST+ port states and their behavior?",
+      "a": "Blocking (no forwarding, no MAC learning), Listening (no forwarding, no MAC learning, STP calculation), Learning (no forwarding, learns MACs), and Forwarding (forwards and learns MACs).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the default classic PVST+ timers?",
+      "a": "Hello Time = 2 seconds, Forward Delay = 15 seconds, Max Age = 20 seconds. The worst-case timer calculation is 20 + 15 + 15 ≈ 50 seconds, but actual convergence depends on topology.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the purpose of Max Age and Forward Delay in classic STP?",
+      "a": "Max Age controls how long received BPDU information is valid before it can be aged out (not simply a blocking timer). Forward Delay controls time spent in Listening and Learning (15 s each).",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How does classic STP signal a topology change in PVST+?",
+      "a": "A switch detecting a change sends a TCN BPDU toward the Root; the Root acknowledges and propagates TC information, causing switches to temporarily reduce MAC aging so stale Layer-2 entries are removed faster.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a key protected-path design pattern using PVST+ load balancing?",
+      "a": "Different VLANs get different Root Bridges (e.g., Switch A root for VLANs 10,20 and Switch B root for VLANs 30,40) so each dual uplink forwards one set of VLANs and blocks another, using both physical links.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Match each STP protection feature to its purpose: PortFast, BPDU Guard, Root Guard, Loop Guard, BPDU Filter.",
+      "a": "PortFast allows edge ports to transition rapidly; BPDU Guard err-disables a PortFast/edge port if a BPDU is received; Root Guard prevents a port from accepting a superior BPDU and changing root placement; Loop Guard puts a port in loop-inconsistent state when expected BPDUs stop; BPDU Filter suppresses BPDUs and is potentially dangerous if misused.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between Root Guard and Loop Guard?",
+      "a": "Root Guard protects root placement by reacting to an unexpected superior BPDU (root-inconsistent). Loop Guard protects against a loop by reacting when expected BPDUs disappear and a non-forwarding port might incorrectly transition to forwarding (loop-inconsistent).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do PVST+, Rapid PVST+, and MST compare in STP logic and number of instances?",
+      "a": "PVST+ uses 802.1D with one instance per VLAN and slow convergence; Rapid PVST+ uses RSTP with one instance per VLAN and fast convergence; MST uses RSTP with multiple VLANs mapped to fewer instances.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why does MST scale better than PVST+/Rapid PVST+ when there are many VLANs?",
+      "a": "With e.g. 500 VLANs, PVST+/Rapid PVST+ maintain up to 500 STP instances, while MST maps VLAN groups into a much smaller number of instances, reducing STP control-plane overhead. PVST+/Rapid PVST+ is VLAN-centric; MST is instance-centric.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the CIST and what does an MST region present to an external PVST+/Rapid PVST+ domain?",
+      "a": "At an MST boundary the region presents its Common and Internal Spanning Tree (CIST) toward the external STP domain. MST region parameters include Region Name, Revision Number, and VLAN-to-Instance Mapping.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What command enables classic PVST+ and what command enables Rapid PVST+?",
+      "a": "spanning-tree mode pvst enables classic PVST+; spanning-tree mode rapid-pvst enables Rapid PVST+.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which verification commands show STP instances, a specific VLAN, and inconsistent ports?",
+      "a": "show spanning-tree active shows active STP instances; show spanning-tree vlan 10 shows a VLAN; show spanning-tree inconsistentports shows root-/loop-inconsistent ports; show interfaces trunk verifies native/allowed VLANs.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A change to the MST region name, revision, or VLAN mapping will do what to the switches?",
+      "a": "It can cause the switches to become separate MST regions.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is Alternate an RSTP role and not a classic PVST+ role?",
+      "a": "Classic PVST+ uses 802.1D terminology (Root/Designated/Blocking) and does not use Alternate as a formal role; Alternate is an RSTP/Rapid PVST+ port role.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why does classic PVST+ converge more slowly than Rapid PVST+?",
+      "a": "Classic PVST+ relies on 802.1D timers (Hello 2 s, Max Age 20 s, Forward Delay 15 s), whereas Rapid PVST+ uses RSTP mechanisms such as Proposal/Agreement and alternate roles to converge much faster.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    }
+  ]
+}

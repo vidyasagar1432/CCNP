@@ -1,0 +1,148 @@
+{
+  "title": "CAM Table",
+  "level": 4,
+  "levelTitle": "Level 04 - Ethernet & Switching",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "03. CAM Table.md",
+  "cards": [
+    {
+      "q": "What is the CAM table?",
+      "a": "The CAM (Content-Addressable Memory) table is the hardware-based Layer 2 forwarding database a switch uses to associate a MAC address and VLAN context with a switch port. Cisco commonly exposes it through the MAC address table, so CAM table and MAC address table are interchangeable in normal switching discussions.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How does CAM differ from traditional memory?",
+      "a": "Traditional memory is searched by address to retrieve data (address -> data). CAM works in the opposite direction: content/key -> matching entry, so a switch can use the destination MAC and VLAN context as the lookup key and forward in hardware without examining every table entry sequentially.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What does a typical CAM/MAC table entry contain?",
+      "a": "A typical entry contains the VLAN, the MAC address, the entry type (for example DYNAMIC or STATIC), and the associated switch port.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between a dynamic and a static MAC table entry?",
+      "a": "A dynamic entry is learned automatically from the Source MAC address of an incoming Ethernet frame. A static entry is manually configured, for example with mac address-table static AAAA.AAAA.AAAA vlan 10 interface GigabitEthernet0/1.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does a switch use the CAM table to forward a frame from Host A to Host B?",
+      "a": "The switch learns the Source MAC on the incoming port, searches the CAM/MAC table for the Destination MAC + VLAN, finds the destination on its learned port (for example Gi0/2), and forwards the frame toward that port.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What happens when a switch receives a frame with an unknown destination MAC?",
+      "a": "This is an unknown unicast. The switch floods the frame out other eligible ports in the same VLAN, except the ingress port, because it cannot determine the correct outgoing port.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the rule for known vs unknown unicast forwarding?",
+      "a": "Known unicast is forwarded to the learned port; unknown unicast is flooded within the VLAN. Broadcast and certain multicast traffic can also be flooded according to switching and multicast behavior.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the typical aging timer for dynamic CAM entries?",
+      "a": "A commonly encountered Cisco IOS default is 300 seconds (5 minutes), though the exact default can vary by platform/software. When the timer expires, the entry is removed and can be relearned when traffic arrives from that source MAC again.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the effects of MAC aging being too short or too long?",
+      "a": "Too short: entries expire frequently, unknown-unicast flooding increases, and hosts are relearned repeatedly. Too long: stale entries remain after topology/host movement and troubleshooting becomes more difficult.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is a MAC move / MAC flapping?",
+      "a": "A MAC move occurs when the same MAC address is learned on different ports, causing the switch to update the MAC entry and possibly generate a MAC-move/flapping message. Causes include Layer 2 loops, STP topology changes, VM mobility, duplicate MACs, redundant paths, and virtual MAC behavior (HSRP/VRRP).",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Does a MAC move automatically indicate a rogue switch?",
+      "a": "No. A MAC move does not automatically mean a rogue switch; you must investigate the topology and traffic path for causes such as loops, cabling, or VM mobility.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between CAM and TCAM?",
+      "a": "CAM performs exact-match lookups and is well suited to Layer 2 MAC forwarding. TCAM (Ternary Content-Addressable Memory) supports three states (0, 1, X don't-care) and is used for pattern/prefix matching such as IP routing, ACLs, QoS classification, and policy matching.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which features commonly use TCAM rather than CAM?",
+      "a": "TCAM handles ternary/pattern-based matching for IP routing/prefix lookups, ACLs, QoS classification, policy matching, and other hardware forwarding features.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do the MAC address table and ARP table differ?",
+      "a": "The MAC address table answers which switch port leads to a MAC address (MAC -> VLAN -> Port). The ARP table answers which MAC corresponds to an IPv4 address (IPv4 -> MAC). Together they let you trace an IPv4 address to a switch port.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Can the same MAC address appear in different VLANs?",
+      "a": "Yes. The same MAC can legitimately exist in different VLANs assigned to different ports, and this does not necessarily represent a duplicate host because the entries belong to different Layer 2 broadcast domains.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is Port Security and how does it relate to the CAM table?",
+      "a": "Port Security is a security feature built around controlling which MAC addresses are allowed on a switch port. It can use static secure, dynamically learned secure, or sticky secure MACs, maximum MAC limits, and violation modes (shutdown, restrict, protect).",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the port security violation modes?",
+      "a": "shutdown, restrict, and protect. Behavior after a violation and secure MAC persistence depend on the configuration and violation mode.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands display MAC table information?",
+      "a": "show mac address-table, show mac address-table vlan 10, show mac address-table address 001B.21AA.BBCC, show mac address-table dynamic, show mac address-table static, show mac address-table aging-time, and show mac address-table count.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you configure MAC aging time or a static MAC entry?",
+      "a": "Use mac address-table aging-time 300 to set the aging timer, and mac address-table static AAAA.AAAA.AAAA vlan 10 interface GigabitEthernet0/1 to configure a static entry.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the troubleshooting workflow when you know only a host's IPv4 address?",
+      "a": "Check the ARP table to map IPv4 to MAC, then check the MAC address table with show mac address-table address <MAC> to find the VLAN and switch port, then check the interface and neighboring device.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What steps do you take to troubleshoot suspected MAC movement?",
+      "a": "Identify the MAC, check its current port, look for MAC-move/flapping logs, check the connected device, trace neighboring switches, check STP topology, and check for loops, redundant links, or duplicate MACs.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which facts belong in the CAM table quick review?",
+      "a": "CAM = Content-Addressable Memory for Layer 2 exact-match forwarding; lookup context is MAC + VLAN; result is a switch port; dynamic entries learned from Source MAC; known unicast forwarded, unknown unicast flooded; common aging default 300 seconds; ARP maps IPv4 to MAC; TCAM is ternary/pattern-based for routing, ACLs, and QoS.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the one-minute mental model for CAM forwarding?",
+      "a": "Learning: on each frame, the switch learns Source MAC + VLAN + incoming port into the CAM. Forwarding: lookup Destination MAC + VLAN in CAM; if known, forward to the port; if unknown, flood within the VLAN. Troubleshooting chain: IPv4 -> ARP -> MAC -> CAM/MAC table -> switch port.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

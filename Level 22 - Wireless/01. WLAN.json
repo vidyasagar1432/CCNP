@@ -1,0 +1,112 @@
+{
+  "title": "WLAN (Wireless LAN)",
+  "level": 22,
+  "levelTitle": "Level 22 - Wireless",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "01. WLAN.md",
+  "cards": [
+    {
+      "q": "What is a WLAN (Wireless LAN)?",
+      "a": "A WLAN is a wireless network built on 802.11 (Wi-Fi). Clients associate to an access point that broadcasts a BSSID/SSID, frames travel over RF in the 2.4/5/6 GHz bands, and enterprise WLANs centralize control on a WLC using CAPWAP tunnels.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How does a WLAN differ from a wired LAN?",
+      "a": "A wired LAN uses cabling and access by plugging in, with low error rates and static endpoints. A WLAN uses RF as a shared, error-prone medium, clients associate to an AP instead of plugging in, errors come from interference, and users roam between APs.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the components of an enterprise WLAN?",
+      "a": "The client (station/STA), the access point (AP), the wireless LAN controller (WLC), and the wired backend network plus services. An enterprise deployment is APs plus WLC plus the wired network.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the characteristics of the 2.4, 5, and 6 GHz bands?",
+      "a": "2.4 GHz offers long range but is crowded; 5 GHz has more channels and is faster; 6 GHz is used by Wi-Fi 6E and is new. More spectrum in the 5/6 GHz bands gives better performance.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What do BSS, ESS, SSID, and BSSID each mean?",
+      "a": "BSS is one AP plus its clients; ESS is many BSSes sharing one SSID; SSID is the network name; BSSID is the MAC address of an AP radio.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does a WLAN support roaming?",
+      "a": "A WLAN (ESS) groups multiple BSSes under one SSID, so a client can move between APs while the network appears as one, enabling roaming.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between SSID and BSSID?",
+      "a": "The SSID is the network name that users see; the BSSID is the MAC address of the AP's radio. Treating the BSSID as the network name is a common exam mistake.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which plane of a WLAN is handled where?",
+      "a": "The control plane and management plane are handled by the WLC; the data plane runs between AP and WLC over CAPWAP. Centralized WLC handling gives simpler operations and a single administration point.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which plane travels over CAPWAP in a centralized WLAN?",
+      "a": "The data plane (client data) travels between the AP and WLC over CAPWAP, while control and management are handled by the WLC.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the WLAN deployment models?",
+      "a": "Autonomous (AP-only, standalone), centralized (WLC plus CAPWAP), cloud (Meraki-style), and mesh (wireless backhaul). Centralized is the classic enterprise model.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which WLAN deployment model does a classic enterprise use?",
+      "a": "Centralized: APs controlled by a WLC with CAPWAP tunnels, not autonomous standalone APs.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands show WLAN and AP status?",
+      "a": "show wlan summary lists configured WLANs; show ap summary and show ap config general show AP status and settings; show wireless profile policy shows policy profiles; show ap join stats summary shows AP join/registration statistics.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A client cannot see the SSID. What is the likely cause and the check?",
+      "a": "The WLAN is likely disabled or not broadcast. Check with show wlan summary and verify the WLAN is enabled.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "An AP is failing to join the controller. What are the likely causes and the check?",
+      "a": "Likely CAPWAP reachability or DNS resolution problems. Check with show ap join stats (or show ap join stats summary) and verify CAPWAP and DNS.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Clients drop or get weak signals in a WLAN. How do you troubleshoot?",
+      "a": "Weak signal points to coverage/RF issues, and client drops point to interference. Check RF health and AP radio statistics (show ap radio) to assess coverage and interference.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Users report clients cannot roam between APs. What is the likely cause?",
+      "a": "The APs are likely not part of the same ESSID, so clients are not on the same SSID group. Check the mobility/WLAN configuration so all BSSes share one SSID.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "In the WLAN quick review, what standard and bands does a WLAN use?",
+      "a": "A WLAN uses the 802.11 standard in the 2.4, 5 and 6 GHz bands, with APs providing access points, a WLC as the controller, SSID as the network name, BSSID as the MAC, BSS as one AP, and ESS as many APs under one SSID.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

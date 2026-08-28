@@ -1,0 +1,142 @@
+{
+  "title": "EIGRP for IPv6",
+  "level": 11,
+  "levelTitle": "Level 11 - EIGRP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "06. IPv6.md",
+  "cards": [
+    {
+      "q": "What is EIGRP for IPv6?",
+      "a": "EIGRP for IPv6 provides dynamic IPv6 routing using the same fundamental EIGRP mechanisms as IPv4: DUAL, RTP, successors and feasible successors, composite metrics, query/reply operation, variance, summarization, and stub functionality. The major operational differences are that it runs directly over IPv6, uses IPv6 multicast, and does not use IPv4-style network statements. Modern IOS/IOS XE configures it using named mode with an IPv6 address family.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How does EIGRP for IPv6 compare with EIGRP for IPv4?",
+      "a": "Both use IP protocol 88 (IPv6 next header 88), DUAL, RTP, successors/FS, and the composite metric, and both use a 32-bit router ID. Differences: multicast is FF02::A for IPv6 versus 224.0.0.10 for IPv4; IPv6 activation is interface-based with no network statement; and IPv6 neighbors commonly use link-local addresses.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does EIGRP for IPv6 carry its packets?",
+      "a": "EIGRP for IPv6 uses the same five packet types (Hello, Update, Query, Reply, ACK) and RTP for reliable delivery of Updates, Queries, and Replies. Packets are carried directly in IPv6 identified by IP protocol (next header) 88, not over TCP or UDP.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What multicast address does EIGRP for IPv6 use?",
+      "a": "FF02::A, the IPv6 link-local multicast address for all EIGRP routers. IPv4 EIGRP uses 224.0.0.10; both represent the EIGRP multicast group for neighboring EIGRP routers.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Is it normal to see an IPv6 link-local address like FE80::2 as the EIGRP next hop?",
+      "a": "Yes. EIGRP for IPv6 commonly uses the neighbor's link-local IPv6 address as the next hop. A global unicast address is not required solely for EIGRP neighbor discovery, and the link-local address is valid only on the local link where the neighbor relationship exists.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What global command must be enabled for IPv6 routing, and does it enable EIGRP by itself?",
+      "a": "ipv6 unicast-routing enables IPv6 routing globally; without it the router cannot perform normal IPv6 routing. It does not, by itself, enable EIGRP on interfaces.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What addressing is required on interfaces participating in EIGRP for IPv6?",
+      "a": "Participating interfaces need IPv6 connectivity and normally have automatically generated link-local addresses, for example an interface configured with ipv6 address 2001:db8:1::1/64 also has a link-local address.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What kind of router ID does EIGRP for IPv6 require?",
+      "a": "A 32-bit EIGRP router ID written in IPv4 dotted-decimal format even though the address family is IPv6, for example eigrp router-id 1.1.1.1. It is an EIGRP router ID, not an IPv4 address that must exist on an interface.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the named-mode configuration hierarchy for EIGRP for IPv6?",
+      "a": "router eigrp <name> → address-family ipv6 unicast autonomous-system <AS> → under the AF: eigrp router-id, af-interface, and topology base.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How is EIGRP enabled on interfaces in named IPv6 mode?",
+      "a": "Unlike classic IPv4 EIGRP, IPv6 EIGRP does not use an IPv6 network command. Interface-specific configuration goes through af-interface, and the architectural rule is that IPv6 EIGRP participation is interface-based, not controlled by a network statement. Exact activation syntax can vary by IOS/IOS XE release.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the classic-mode commands for EIGRP for IPv6?",
+      "a": "ipv6 unicast-routing, then ipv6 router eigrp 100 with eigrp router-id and no shutdown, and ipv6 eigrp 100 under each participating interface. Classic uses a separate IPv6 EIGRP process, whereas modern named mode puts an IPv6 AF inside the named process.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Does EIGRP for IPv6 use a different metric algorithm from IPv4?",
+      "a": "No. EIGRP for IPv6 uses the same fundamental composite metric model with the same default K-values, so the active components are bandwidth and delay. The IP version changes; the metric algorithm does not.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Do DUAL, successor, and feasible successor behave differently in EIGRP for IPv6?",
+      "a": "No. EIGRP for IPv6 uses DUAL with the same feasibility condition RD < FD. If a feasible successor exists when the successor fails, EIGRP installs the backup without going Active and without sending queries. The IP version changes; the fundamental EIGRP algorithm does not.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is unequal-cost load balancing configured in EIGRP for IPv6?",
+      "a": "With the variance command under the IPv6 address family topology base (topology base in named mode). The candidate route must still satisfy EIGRP's loop-free feasibility requirements.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is route summarization configured in EIGRP for IPv6 and what does it do?",
+      "a": "In named mode, summarization is configured on the address-family interface using summary-address, for example summary-address 2001:db8:100::/48 under af-interface. Summarization reduces routing-table size and limits the propagation of more-specific routes.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the purpose of EIGRP stub for IPv6?",
+      "a": "The purpose is the same as IPv4 stub: reduce unnecessary query propagation, improve stability, reduce query scope, and make the router appropriate for stub or branch roles. The DUAL query-boundary concept is the same.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the default EIGRP administrative distances for IPv6?",
+      "a": "Internal EIGRP 90, external EIGRP 170. These are administrative distances, not EIGRP metric values: metric chooses the best EIGRP path, while AD chooses between routes from different sources.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What causes 'no IPv6 neighbors' and 'process does not operate' in EIGRP for IPv6?",
+      "a": "No IPv6 neighbors: IPv6 routing not enabled (check ipv6 unicast-routing), EIGRP not enabled on the interface, or the EIGRP AF shut down (check no shutdown). Process does not operate: missing router ID, fixed by configuring eigrp router-id.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the IPv6 EIGRP troubleshooting order?",
+      "a": "1. ipv6 unicast-routing → 2. IPv6 addressing/link-local connectivity → 3. correct IPv6 address family → 4. correct AS number → 5. EIGRP router ID → 6. EIGRP enabled on the interface → 7. AF/process not shut down → 8. K-values match → 9. neighbor relationship → 10. topology table → 11. IPv6 routing table. This separates neighbor formation problems from route installation problems.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which show commands verify EIGRP for IPv6?",
+      "a": "Classic: show ipv6 eigrp neighbors, show ipv6 eigrp topology, show ipv6 eigrp interfaces, show ipv6 route eigrp. Named: show eigrp address-family ipv6 neighbors, show eigrp address-family ipv6 topology, show eigrp address-family ipv6 interfaces. Also useful: show ipv6 route, show ipv6 interface brief, and show running-config | section router eigrp.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the difference between RD and AD in EIGRP?",
+      "a": "RD is Reported Distance, the neighbor's advertised distance to the destination, used in the feasibility condition RD < FD. AD is Administrative Distance, which selects between routes from different sources; internal EIGRP defaults to 90 and external to 170. Do not confuse the two acronyms.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the core formula for EIGRP for IPv6?",
+      "a": "EIGRP for IPv6 = IPv6 + Protocol 88 + FF02::A + interface-based activation + link-local next hops + 32-bit router ID + the same DUAL/RTP/metric concepts as IPv4.",
+      "tag": "Core Concept",
+      "context": "Both"
+    }
+  ]
+}

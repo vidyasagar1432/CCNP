@@ -1,0 +1,106 @@
+{
+  "title": "Encapsulation",
+  "level": 3,
+  "levelTitle": "Level 03 - OSI & TCP IP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "03. Encapsulation.md",
+  "cards": [
+    {
+      "q": "What is encapsulation?",
+      "a": "Encapsulation is the process of adding headers (and trailers) as data is passed down the protocol stack from application to transport to network to link. Each layer wraps the previous layer's data in its own envelope, so payload plus header equals the next layer's PDU.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Describe the encapsulation chain for an HTTP request.",
+      "a": "Application data (L7) gets a TCP header to form a Segment, then an IP header to form a Packet, then an Ethernet header with FCS to form a Frame, then it is sent as bits. The data itself stays the same; only the headers grow.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why does each layer add its own header during encapsulation?",
+      "a": "Each layer provides its own service (ports at L4, addressing/routing at L3, framing and error check at L2), so each needs private context in its header. This supports peer communication and multiplexing via EtherType (L2), Protocol field (L3), and ports (L4).",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What are the (IPv4) TCP header size and key fields?",
+      "a": "The TCP header is 20-60 bytes and contains ports, sequence/acknowledgement, flags, window, and checksum. UDP's header is only 8 bytes with ports, length, and checksum.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the IPv4 and IPv6 L3 header sizes and key fields?",
+      "a": "IPv4 has a 20+ byte header with version, IHL, TTL, protocol, source/destination IP, and checksum. IPv6 has a fixed 40-byte header with flow label, hop limit, and 128-bit source/destination addresses.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the Ethernet (L2) header and trailer sizes and fields?",
+      "a": "Ethernet has a 14-byte header plus a 4-byte FCS trailer, containing destination/source MAC, EtherType/Length, and FCS. An 802.1Q VLAN tag adds 4 bytes inside the header with TPID, PCP, and VID.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens to encapsulation across a VLAN trunk?",
+      "a": "An extra 802.1Q VLAN tag is inserted into the Ethernet frame, making it a 'harder' frame (trunk encapsulation).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What happens to encapsulation in tunnels like GRE, IPsec, or VXLAN?",
+      "a": "The outer protocol encapsulates the entire original IP packet as payload, creating double addressing, so MTU must be reduced to accommodate the extra headers.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Where do MPLS labels sit in the encapsulation chain?",
+      "a": "MPLS labels are shoved between the L2 and L3 headers as a shim, with the L3 header still intact underneath it.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens when encapsulation pushes a frame beyond the maximum frame size?",
+      "a": "If the frame exceeds the egress MTU it causes fragmentation (IPv4) or a drop for oversized frames, governed by MTU rules.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "In which direction does encapsulation occur at each end of a path?",
+      "a": "Encapsulation is DOWN the source stack (adding headers); decapsulation is UP at the destination (removing headers). Get the direction right.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which header exists in a segment versus a frame?",
+      "a": "A segment contains only L4 fields; a frame contains L2 plus all headers above it.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Do L3 and L4 headers change at every hop?",
+      "a": "No. Every hop re-encapsulates a new L2 (Ethernet) header per link, but the L3/L4 headers only change at the tunnel endpoints or source/destination endpoints.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which protocols have header checksums and which do not?",
+      "a": "IPv4 has a header checksum (recomputed each hop as TTL changes); IPv6 has no header checksum; TCP and UDP checksums are end-to-end.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What command would you use to adjust MTU for a tunnel that changes encapsulation?",
+      "a": "On the tunnel interface, use the ip mtu command, for example ip mtu 1476, or view current MTU with show interfaces.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "In a tunnel, how is the inner packet treated relative to the outer header?",
+      "a": "The inner packet becomes the payload of the outer header. Only the tunnel endpoints read the inner packet; intermediate devices route based on the outer header only.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

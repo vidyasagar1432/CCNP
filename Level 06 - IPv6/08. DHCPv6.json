@@ -1,0 +1,94 @@
+{
+  "title": "DHCPv6",
+  "level": 6,
+  "levelTitle": "Level 06 - IPv6",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "08. DHCPv6.md",
+  "cards": [
+    {
+      "q": "What is DHCPv6?",
+      "a": "DHCPv6 (RFC 3315) is IPv6's stateful addressing and configuration protocol. The server tracks leases like DHCPv4 and delivers options such as DNS, domain, and NTP; it complements or fully replaces SLAAC depending on the M and O RA flags.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the DHCPv6 message flow?",
+      "a": "The client sends SOLICIT (multicast to ff02::1:2), the server answers ADVERTISE (unicast), the client sends REQUEST, and the server replies with REPLY carrying the assignment and options. Confirm, Renew, and Rebind handle lease maintenance like DHCPv4.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do the M and O RA flags determine DHCPv6 mode?",
+      "a": "M=1 is stateful (managed) and DHCPv6 assigns addresses; O=1 is stateless (other-config) and DHCPv6 provides only options with no address; M=0 O=0 means DHCPv6 is not used. Common enterprise practice is SLAAC plus stateless DHCPv6 for DNS (A=1, O=1).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the DHCPv6 identity association (IA) types?",
+      "a": "IA_NA for non-temporary addresses, IA_TA for temporary addresses, and IA_PD for prefix delegation, which lets a CPE delegate a prefix such as /56 to downstream routers. The server also sends preferred and valid lifetimes.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What ports does DHCPv6 use and how does it handle remote servers?",
+      "a": "DHCPv6 clients listen on UDP 546 and servers on UDP 547. If no DHCPv6 server is on the segment, a relay agent forwards the Solicit to a remote server and inserts Relay-Info, similar to a DHCPv4 relay.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "When should you choose SLAAC versus DHCPv6?",
+      "a": "Choose SLAAC for zero-config with no server; DHCPv6 for tracking, options, and control; the industry norm is SLAAC plus stateless DHCPv6 for DNS; and DHCPv6-PD for prefix delegation to a CPE.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do you configure a DHCPv6 server on Cisco IOS?",
+      "a": "Create ipv6 dhcp pool CORP with address prefix 2001:db8:1:10::/64 lifetime 2592000 604800, dns-server 2001:db8:53::1, and domain-name corp.example; then bind it on the interface with ipv6 dhcp server CORP and set ipv6 nd managed-config-flag for M=1 or ipv6 nd other-config-flag for O=1.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does a CPE request a delegated prefix from DHCPv6?",
+      "a": "On its upstream interface the CPE uses ipv6 dhcp client pd PD-CLIENT to obtain an IA_PD prefix such as a /56.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands verify DHCPv6 operation on Cisco IOS?",
+      "a": "show ipv6 dhcp binding and show ipv6 dhcp interface.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does a DHCPv6 client discover servers?",
+      "a": "The SOLICIT message is multicast to ff02::1:2 (all DHCP server nodes); IPv6 has no broadcast.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What UDP ports does DHCPv6 use?",
+      "a": "Client listens on UDP 546 and the server on UDP 547.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Who decides whether DHCPv6 is stateful or stateless?",
+      "a": "DHCPv6 does not decide; the stateful versus stateless mode is determined by the M and O flags carried in the Router Advertisement.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How do hosts get DNS in a stateless IPv6 world?",
+      "a": "Either via RDNSS options in the RA when using SLAAC or via DHCPv6 option delivery when running stateless DHCPv6; both are exam-relevant facts.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Even with DHCPv6, how does a host learn its default gateway?",
+      "a": "The Router Advertisement still configures the default route, unlike DHCPv4 where DHCP hands out the gateway; ND/RAs are always responsible for the default gateway in IPv6.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "title": "BGP",
+  "level": 29,
+  "levelTitle": "Level 29 - Troubleshooting",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "09. BGP.md",
+  "cards": [
+    {
+      "q": "What does BGP troubleshooting cover?",
+      "a": "Session state, eBGP/iBGP rules, NLRI exchange, and path selection. Verify show ip bgp summary, then neighbors, table, and best path in order.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the verification chain for BGP?",
+      "a": "show ip bgp summary, then show ip bgp neighbors, then the BGP table (show ip bgp), then installed routes (show ip route bgp).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does the BGP Established state mean?",
+      "a": "The BGP session is up and healthy. Any state less than Established (Idle, Connect, Active) needs a TCP or config check.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the BGP Active state indicate?",
+      "a": "The session is retrying to establish TCP. Idle means starting, Connect means a TCP attempt is in progress.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What dominates most BGP advertising failures?",
+      "a": "Next-hop reachability and the network statement. A route not in the local table cannot be advertised via the network command.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is required for the network command to advertise a route?",
+      "a": "The network must match a route already existing in the local routing table (with the correct mask).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a RIB-failure in BGP?",
+      "a": "The route is in the BGP table but not installed in the RIB, most commonly because the next hop is unreachable. Check with show ip bgp rib-failure.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is required for iBGP?",
+      "a": "A full mesh of sessions (or route reflectors), because iBGP does not advertise routes learned from one iBGP peer to another. The eBGP next hop must be set to self.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the primary BGP best-path decision attributes in order?",
+      "a": "Weight (highest), local preference (highest), originate local, AS path (shortest), origin (IGP), MED (lowest), then eBGP over iBGP.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the administrative distance of iBGP?",
+      "a": "200.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What TCP port does BGP use?",
+      "a": "TCP port 179.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "A BGP flap with hold timer issues is most likely caused by what?",
+      "a": "The remote peer not responding within the hold timer, checked with show ip bgp neighbors.",
+      "tag": "Quick Review",
+      "context": "Practical"
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "title": "OSPF DR / BDR",
+  "level": 10,
+  "levelTitle": "Level 10 - OSPF",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "05. DR BDR.md",
+  "cards": [
+    {
+      "q": "What is the purpose of the DR and BDR in OSPF?",
+      "a": "On multi-access (broadcast/NBMA) networks, electing a Designated Router (DR) and Backup Designated Router (BDR) cuts the number of adjacencies from N x (N-1)/2 down to N. The DR becomes the hub for LSA flooding on the segment. Point-to-point links elect no DR/BDR.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How does the DR reduce adjacency count on a shared segment?",
+      "a": "Without a DR, n routers form n(n-1)/2 full adjacencies. With a DR/BDR, each router has only n adjacencies (each to the DR and BDR). For 5 routers that's 10 adjacencies reduced to 5; for 10 routers, 45 reduced to 10.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the exact OSPF DR/BDR election order?",
+      "a": "1. Highest interface priority (0-255, default 1, 0 = never eligible). 2. Tie is broken by the highest Router ID. Election is non-preemptive: existing DR/BDR keep their role even if a higher priority router appears later.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Describe the adjacency behavior of the DR, BDR, and DROther roles.",
+      "a": "DR is Full with the BDR and all DROthers. BDR is Full with the DR and all DROthers but silent until the DR fails. DROthers are 2-Way with other DROthers and Full with only the DR and BDR; they never send LSAs directly to each other.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What multicast address do OSPF routers use when sending to the DR/BDR?",
+      "a": "224.0.0.6 is used toward the DR/BDR, while 224.0.0.5 is used for all OSPF routers on the segment.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens when the DR fails?",
+      "a": "The BDR becomes the DR, then a new BDR is elected among the DROthers. Failure is noticed via the dead timer (40 seconds), after which the segment re-converges.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How do you force a router to become the DR and how do you avoid DR election on P2P links?",
+      "a": "Set a high interface priority, e.g. ip ospf priority 200, to force it to be DR/BDR. On real point-to-point links, set ip ospf network point-to-point so no DR election occurs, giving a smaller LSDB and no DBD with DR.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands verify DR/BDR roles and state?",
+      "a": "show ip ospf neighbor shows the state column (FULL/2WAY) and DR/BDR flags; show ip ospf interface Gi0/1 shows the DR and BDR addresses and the network type.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does a priority of 0 mean in OSPF DR/BDR election?",
+      "a": "A priority of 0 means the router is never eligible to become DR or BDR. This is a common way to prevent a router from taking the DR role.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is OSPF DR/BDR election preemptive?",
+      "a": "No. It is non-preemptive: the existing DR/BDR keep their role even if a higher-priority router joins later. The role only changes on a full election reset, such as a link-down or OSPF restart.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Do point-to-point links use a DR/BDR?",
+      "a": "No. Point-to-point links elect no DR/BDR at all, and neighbors go straight to Full, forming full mesh adjacencies.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which multicast group is used for DR/BDR communication versus all OSPF routers?",
+      "a": "224.0.0.6 is the DR/BDR multicast group; 224.0.0.5 is the all-OSPF-routers group.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the key DR/BDR quick-review facts?",
+      "a": "DR/BDR only on broadcast/NBMA; P2P has none; election is highest priority then highest RID; non-preemptive; DROther to DROther is 2-Way; failure promotes BDR to DR; multicast .6 toward DR/BDR; priority 0 is never eligible.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

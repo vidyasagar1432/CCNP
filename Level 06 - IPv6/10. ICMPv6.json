@@ -1,0 +1,76 @@
+{
+  "title": "ICMPv6",
+  "level": 6,
+  "levelTitle": "Level 06 - IPv6",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "10. ICMPv6.md",
+  "cards": [
+    {
+      "q": "What is ICMPv6?",
+      "a": "ICMPv6 (RFC 4443) is IPv6's control protocol providing error reporting, echo, and messaging, and it carries Neighbor Discovery and MLD as submodules. It is essential rather than optional: without Packet Too Big messages PMTUD cannot work and IPv6 breaks across MTU limits.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the ICMPv6 message classes?",
+      "a": "Error messages are types 1 (Destination Unreachable), 2 (Packet Too Big), 3 (Time Exceeded), and 4 (Parameter Problem); informational messages are 128 Echo Request and 129 Echo Reply. ND rides in types 133-137 and MLD in types 130-132.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What do the ICMPv6 error codes mean?",
+      "a": "Type 1 codes: 0 no route to destination, 1 administratively prohibited (firewall), 3 address unreachable, 4 port unreachable. Type 2 is Packet Too Big, type 3 code 0 is hop limit exceeded which powers traceroute, and type 4 is a malformed header or option.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does IPv6 handle a packet larger than the next link's MTU?",
+      "a": "IPv6 routers never fragment. The router sends ICMPv6 Type 2 Packet Too Big carrying the link MTU, and the sender re-sends the packet at that size. If PTB is filtered, large packets silently black-hole, producing an MTU black hole.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Compare ICMPv4 with ICMPv6.",
+      "a": "In IPv4 routers may fragment while in IPv6 only the sender may (via PTB); ND is part of ICMPv6 while ARP is separate in IPv4; multicast listener discovery uses MLD instead of IGMP; the IPv6 checksum is always required and is two-layer; and where ICMPv4 is often filtered, ICMPv6 PTB/ND/MLD should be permitted.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What commands test IPv6 connectivity and helper utilities exist?",
+      "a": "ping6 2001:db8::1 and traceroute6 2001:db8:53::1 for paths, plus show ipv6 mtu and debug ipv6 icmp on the router; an ACL such as permit icmp any any packet-too-big keeps PTB (type 2) allowed.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does IPv6 discover a path MTU?",
+      "a": "Through ICMPv6 Type 2 Packet Too Big messages, since routers never fragment; the answer is never 'the router fragments'.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens if ICMPv6 is blocked on a firewall?",
+      "a": "IPv6 breaks even if forwarding is enabled, so firewalls must allow ND (types 133-136), Packet Too Big (type 2), and MLD (130-132) through their ACLs.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which protocol does Neighbor Discovery run over?",
+      "a": "ND and MLD both live inside ICMPv6, so ND uses ICMPv6, never ARP.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What ICMPv6 types are used for ping?",
+      "a": "Echo Request is type 128 and Echo Reply is type 129, not ICMPv4's 8 and 0.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does ICMPv6 type 1 code 1 indicate?",
+      "a": "Administratively prohibited, which is the signature of a firewall dropping the packet.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

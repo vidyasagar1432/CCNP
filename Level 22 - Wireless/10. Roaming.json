@@ -1,0 +1,88 @@
+{
+  "title": "Roaming",
+  "level": 22,
+  "levelTitle": "Level 22 - Wireless",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "10. Roaming.md",
+  "cards": [
+    {
+      "q": "What is roaming in wireless?",
+      "a": "Roaming is a client moving from one AP/BSS to another while keeping its session. Types differ by scope: Layer 2 vs Layer 3, intra- versus inter-WLC, plus 802.11r fast roaming for handoff speed. Roaming works because mobility (a mobility group) shares the client state.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the roaming types and their scopes?",
+      "a": "Layer 2 roaming stays on the same subnet (switch path); Layer 3 roaming crosses to a different subnet and needs anchor forwarding; intra-WLC roaming is within one controller; inter-WLC roaming crosses controllers via mobility.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens during a roaming handoff?",
+      "a": "The client reassociates with the new AP at its new BSSID, the WLC/mobility state updates, frames follow the client, and the old AP releases it.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does 802.11r provide for roaming?",
+      "a": "802.11r (fast transition, FT) pre-distributes a PMK so reassociation is fast, giving millisecond-level handoffs ideal for voice/real-time traffic.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What do 802.11k and 802.11v do?",
+      "a": "802.11k provides neighbor reports and 802.11v assists client roaming, together helping clients pick the right AP in a network-driven way.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are sticky clients and how do you fix them?",
+      "a": "A sticky client hangs on a weak AP because of the RSSI threshold or missing steering. Fixes are 802.11v/disabling, band steering for RF utilization, and 802.11r for slow handoffs. Band steering plus 802.11k/v/r fixes stickiness and slow handoffs.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is required for seamless roaming?",
+      "a": "The same SSID (an ESS), the same security (PMK/802.1X), shared state (mobility group), and fast keys (802.11r). All must line up for a zero-drama roam.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands verify clients and roaming?",
+      "a": "show wireless client summary, show wireless client mac <MAC>, show ap summary, show wireless mobility client, and debug dot11 for dot11 details.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Roam sessions drop or roam slowly. What are the likely causes and checks?",
+      "a": "Session drops usually mean the reassociation failed (check show wireless client summary); slow roam usually means 802.11r is not enabled, so check the FT config.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Clients stick to weak APs, cross-L3 roams fail, and there is a reauth loop. What should you check?",
+      "a": "Sticky clients come from RSSI issues, fixed with band steering; cross-L3 failures point to the anchor/mobility path; a reauth loop indicates a key mismatch in security.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do Layer 2 and Layer 3 roaming differ?",
+      "a": "A Layer 2 roam stays on the same subnet; a Layer 3 roam moves to a different subnet and requires the anchor WLC to forward traffic.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between 802.11r and 802.11k/v?",
+      "a": "802.11r provides fast keys (fast transition/FT) for quick handoffs, while 802.11k provides neighbor reports and 802.11v assists roaming — together they help clients choose the right AP.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which Roaming quick review facts should you remember?",
+      "a": "L2 roam is same subnet, L3 needs the anchor path; intra-WLC is one controller, inter-WLC uses mobility; 802.11r gives fast keys, 802.11k/v assist and neighbor reports; sticky clients are fixed with band steering; seamless roaming needs the same SSID.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

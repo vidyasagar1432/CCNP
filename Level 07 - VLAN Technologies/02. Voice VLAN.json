@@ -1,0 +1,178 @@
+{
+  "title": "Voice VLAN",
+  "level": 7,
+  "levelTitle": "Level 07 - VLAN Technologies",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "02. Voice VLAN.md",
+  "cards": [
+    {
+      "q": "What is a Voice VLAN?",
+      "a": "A Voice VLAN is a dedicated VLAN used to carry IP phone/VoIP traffic separately from normal data traffic. A common Cisco campus design allows an IP phone and a PC to share the same physical switch port, with the PC on the data VLAN and the phone on the voice VLAN.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How are PC traffic and phone voice traffic tagged on a Cisco access port with a voice VLAN?",
+      "a": "PC traffic is normally untagged and belongs to the data/access VLAN, while the IP phone normally sends voice traffic 802.1Q-tagged with the voice VLAN ID.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What port type remains in effect when a voice VLAN is configured, and what command associates it?",
+      "a": "The switch port remains configured as an access port (switchport mode access, not trunk). The voice VLAN is associated using 'switchport voice vlan 20'.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What benefits does a separate voice VLAN provide?",
+      "a": "It provides segmentation of voice and data Layer 2 traffic, allows voice traffic to receive appropriate QoS priority, uses a dedicated IP subnet and voice-specific DHCP configuration, enables separate security control, administration, and independent troubleshooting of voice versus data traffic.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is the typical configuration for an access port supporting a phone and PC?",
+      "a": "interface GigabitEthernet0/1: switchport mode access, switchport access vlan 10, switchport voice vlan 20, and spanning-tree portfast.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does an IP phone learn which voice VLAN to use for voice traffic in Cisco environments?",
+      "a": "Phones commonly learn the voice VLAN using CDP (Cisco Discovery Protocol) or LLDP-MED (Link Layer Discovery Protocol - Media Endpoint Discovery), though phones may also be manually configured or use vendor-specific provisioning mechanisms.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Is CDP/LLDP mandatory for voice VLAN discovery?",
+      "a": "No. CDP/LLDP-MED is a common method of automatic voice-VLAN discovery, but a phone can also be manually configured or use vendor-specific provisioning mechanisms.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is DHCP Option 150 used for in Cisco IP telephony?",
+      "a": "DHCP Option 150 is commonly used in Cisco IP telephony environments to provide the address of a TFTP server used for phone configuration/provisioning. It is strongly associated with Cisco IP phone/TFTP provisioning.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are DHCP Options 66 and 242?",
+      "a": "DHCP Option 66 provides a TFTP/server hostname or address used by various network devices and VoIP implementations. DHCP Option 242 is associated particularly with Avaya environments and should not be described as a generic Cisco VoIP option.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Is DHCP Option 242 the Cisco Skinny option?",
+      "a": "No. Option 242 is particularly associated with Avaya environments. Cisco's Skinny protocol is SCCP (Skinny Client Control Protocol).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What QoS marking is commonly used for voice media (RTP) traffic?",
+      "a": "DSCP EF = 46 is commonly used for voice bearer/media (RTP) traffic, providing low-latency treatment. RTP is the Real-time Transport Protocol used for voice media.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Is DSCP EF the marking for voice signaling?",
+      "a": "Usually no. DSCP EF (46) is commonly used for voice bearer/RTP media. Signaling is a separate traffic class and commonly uses a different marking such as CS3, depending on the QoS design.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the distinction between voice media and voice signaling?",
+      "a": "Voice media (RTP) carries the actual real-time audio stream, while voice signaling (SIP, SCCP, H.323) sets up and manages calls. They are separate traffic classes and may receive different QoS markings.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is the QoS trust boundary concept in a phone/PC voice VLAN design?",
+      "a": "The phone can generate voice traffic with appropriate QoS markings and act as a trust boundary. A common design trusts markings from a trusted Cisco phone while treating the attached PC as untrusted, so PC-created markings are not automatically trusted.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Is PoE required for a voice VLAN to operate?",
+      "a": "No. Voice VLAN operation does not require PoE; PoE is simply a common method of powering IP phones. A phone can receive power from another source and still use a voice VLAN.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the common PoE standards for powering IP phones?",
+      "a": "IEEE 802.3af (PoE), IEEE 802.3at (PoE+), and IEEE 802.3bt (higher-power PoE variants). PoE provides Ethernet connectivity and electrical power through the same cable.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens if a phone requires PoE but the switch cannot provide sufficient power?",
+      "a": "The phone may fail to power up even though the Ethernet connection itself is functional.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What command output verifies access and voice VLAN configuration on a port?",
+      "a": "'show interfaces GigabitEthernet0/1 switchport'. Look for Administrative Mode: static access, Operational Mode: static access, Access Mode VLAN: 10, and Voice VLAN: 20.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands verify CDP/LLDP neighbors for phone discovery?",
+      "a": "'show cdp neighbors', 'show cdp neighbors detail', 'show lldp neighbors', and 'show lldp neighbors detail'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What command checks PoE on a supported Cisco switch?",
+      "a": "'show power inline' or 'show power inline GigabitEthernet0/1'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the structured troubleshooting sequence for a voice VLAN problem?",
+      "a": "Check physical connectivity/PoE (show interfaces status, show power inline), verify access and voice VLAN (show interfaces switchport), verify VLAN existence (show vlan brief), verify VLAN propagation on trunks (show interfaces trunk), verify phone VLAN discovery (show cdp/lldp neighbors detail), verify DHCP, then verify QoS.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What causes a phone to receive a data VLAN address?",
+      "a": "A voice VLAN configuration or discovery problem, such as the phone not learning the voice VLAN via CDP/LLDP-MED and falling back to the access VLAN.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the likely cause when a phone VLAN works locally but not across switches?",
+      "a": "The voice VLAN is not allowed on the trunk connecting the switches.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Does configuring a voice VLAN make the port a trunk?",
+      "a": "No. The interface remains an access port with 'switchport mode access' plus 'switchport voice vlan 20'. It is not equivalent to configuring 'switchport mode trunk'.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Should you trust QoS markings from the PC because it is connected through the trusted phone?",
+      "a": "No. The phone can be a QoS trust boundary, but a common design trusts appropriate markings from the phone while not automatically trusting markings generated by the attached PC.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does a voice VLAN provide complete security?",
+      "a": "No. A voice VLAN provides Layer 2 segmentation. Security still depends on ACLs, firewall policies, QoS/security configuration, endpoint security, and network design.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Summarize the key voice VLAN facts from the quick review table.",
+      "a": "Purpose is to separate IP phone traffic from data; data VLAN carries untagged PC traffic; voice VLAN carries tagged phone traffic; port stays an access port with switchport voice vlan; discovery via CDP/LLDP-MED; DHCP Option 150 is Cisco TFTP provisioning; RTP is voice media marked DSCP EF (46); PoE is a common power method but not required.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the troubleshooting order for a voice deployment?",
+      "a": "Verify PoE to voice VLAN to DHCP to VLAN propagation to routing to QoS.",
+      "tag": "Quick Review",
+      "context": "Practical"
+    }
+  ]
+}

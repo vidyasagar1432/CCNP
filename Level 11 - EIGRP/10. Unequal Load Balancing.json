@@ -1,0 +1,88 @@
+{
+  "title": "EIGRP Unequal-Cost Load Balancing",
+  "level": 11,
+  "levelTitle": "Level 11 - EIGRP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "10. Unequal Load Balancing.md",
+  "cards": [
+    {
+      "q": "What is EIGRP unequal-cost load balancing?",
+      "a": "It allows EIGRP to install multiple loop-free paths to the same destination even when their metrics differ. It is enabled with variance, whose default is 1 for normal equal-cost multipath; values above 1 expand the acceptable metric range. Variance does not bypass loop prevention, so an alternate path must still satisfy the feasibility condition. EIGRP installs the routes and CEF/data-plane forwarding performs the actual load sharing.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are successor, FD, RD, and feasible successor, and what is the feasibility condition?",
+      "a": "Successor is the best path to the destination. FD is the total EIGRP metric from the local router to the destination. RD is the neighbor's advertised distance. A feasible successor is a backup path satisfying the feasibility condition RD < FD(successor), which makes the alternate path loop-free.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the full eligibility test for an alternate EIGRP path to be used for unequal-cost load balancing?",
+      "a": "Both conditions must hold: 1) Metric bound: FD(path) <= variance × FD(successor). 2) Loop-free condition: RD(path) < FD(successor). Variance alone is not enough; a path can fall within the variance range but still be excluded if it fails the feasibility condition.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "With successor FD 100 and variance 2, which alternate paths can and cannot be installed?",
+      "a": "The maximum acceptable FD is 200. An alternate path with FD 180 can potentially be installed if its RD < 100. An alternate path with FD 220 is outside the variance bound and cannot be installed, regardless of anything else.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does EIGRP distribute traffic across unequal-cost paths?",
+      "a": "EIGRP's balanced traffic-sharing calculation gives lower-metric paths a greater share, roughly highest installed-path metric divided by the path metric. For metrics 100 and 200 the relative shares are 2:1, so path A gets about 2/3 and B about 1/3. It is not equal traffic; and the actual packet forwarding is done by CEF or the router's forwarding mechanism.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do equal-cost and unequal-cost load balancing compare in EIGRP?",
+      "a": "Equal-cost (ECMP): path metrics equal, variance is 1, traffic distributed across equal paths, loop-free requirement applies, enabler is default behavior. Unequal-cost: path metrics different, variance greater than 1, traffic weighted toward the lower-metric path, loop-free requirement still applies, enabler is variance n. Both are limited by maximum-paths.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the relationship between variance, feasibility, and maximum-paths?",
+      "a": "Variance controls metric eligibility (the window), the feasibility condition controls loop-free eligibility (RD < successor FD), and maximum-paths limits how many paths can actually be installed. With variance 3 and maximum-paths 2, even if four paths qualify, only the configured maximum can be installed.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Where is unequal-cost load balancing configured in classic and named EIGRP?",
+      "a": "Classic: router eigrp 100 followed by variance 2 and maximum-paths 4. Named mode: router eigrp CAMPUS → address-family ipv4 unicast autonomous-system 100 → topology base → variance 2 and maximum-paths 4.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands verify unequal-cost load balancing?",
+      "a": "show ip route <prefix> looks for multiple next hops for the same destination. show ip eigrp topology (classic) or show eigrp address-family ipv4 topology base (named) identifies the successor, feasible successors, and their metrics. show running-config | section router eigrp verifies the variance and maximum-paths settings.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why might only one EIGRP path be installed or traffic not be packet-by-packet proportional?",
+      "a": "Only one path installed: the alternate path fails the FS or variance test (check RD, FD, and variance), its FD is too high, or it is not loop-free. Too few paths: maximum-paths limit. Traffic not perfectly proportional: the forwarding plane uses hashing/flow-based load-sharing behavior, so check CEF/load-sharing behavior.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "When designing unequal-cost load balancing, what must be considered?",
+      "a": "It is useful when paths have different characteristics such as different bandwidths, but different bandwidths do not automatically make paths eligible. The alternate route must satisfy RD < successor FD, then FD <= variance × successor FD. Also consider composite metric, variance, maximum-paths, link stability, and actual CEF forwarding behavior.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Does EIGRP itself forward packets to perform load balancing?",
+      "a": "No. EIGRP is responsible for route calculation and route installation. The forwarding plane, typically CEF, performs the actual packet forwarding and load sharing.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the one-minute memory rule for EIGRP unequal-cost load balancing?",
+      "a": "VARIANCE = metric window; RD < successor FD = loop-free; FD <= variance × successor FD = metric eligibility; maximum-paths = number of installed paths; CEF = actual forwarding/load sharing.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

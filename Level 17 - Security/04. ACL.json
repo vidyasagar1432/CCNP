@@ -1,0 +1,208 @@
+{
+  "title": "ACLs (Access Control Lists)",
+  "level": 17,
+  "levelTitle": "Level 17 - Security",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "04. ACL.md",
+  "cards": [
+    {
+      "q": "What are Access Control Lists (ACLs)?",
+      "a": "ACLs are ordered sets of rules used to match and permit or deny traffic, filtering based on addresses, protocols, ports, and other criteria. Processing follows: top-to-bottom, first match wins, implicit deny.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the primary uses of ACLs?",
+      "a": "Traffic filtering, management access control, NAT traffic selection, route-map matching, QoS classification, control-plane protection, and time-based access control.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What can a standard IPv4 ACL match?",
+      "a": "Only the source IPv4 address; it cannot directly match destination IP, TCP/UDP ports, or specific IP protocols.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the numbered standard and extended IPv4 ACL ranges?",
+      "a": "Standard: 1-99 and 1300-1999. Extended: 100-199 and 2000-2699.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What can an extended IPv4 ACL match?",
+      "a": "Source IPv4, destination IPv4, IP protocol, TCP source/destination ports, UDP ports, ICMP types, TCP flags, and other protocol-specific criteria.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does 'access-list 101 permit tcp 192.168.10.0 0.0.0.255 host 10.0.0.5 eq 443' match?",
+      "a": "Source 192.168.10.0/24, protocol TCP, destination host 10.0.0.5, destination port 443, action permit.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why are named ACLs generally preferred over numbered ACLs?",
+      "a": "They provide meaningful names, easier administration and editing, sequence numbers, and better documentation.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the rule for wildcard masks in IPv4 ACLs?",
+      "a": "0 = must match, 1 = ignore.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What wildcard mask matches an exact host and what matches any address?",
+      "a": "Exact host: 0.0.0.0 (or 'host'). Any address: 255.255.255.255 (or 'any').",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you calculate a wildcard mask from a subnet mask?",
+      "a": "Wildcard mask is the inverse of the subnet mask; per octet use 255 minus the subnet-mask octet (e.g., 255.255.255.192 gives 0.0.0.63).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How are ACL entries processed?",
+      "a": "ACEs are processed top-to-bottom; the first ACE that matches the packet determines the action and processing stops (the router does not continue searching for a more specific match).",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What happens when a packet does not match any ACE in an ACL?",
+      "a": "It is denied by the implicit deny at the end of the ACL (effectively 'deny ip any any').",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Given 'access-list 101 permit ip any any' followed by 'access-list 101 deny tcp any host 10.0.0.5 eq 22', what happens to SSH traffic?",
+      "a": "The SSH deny is never reached because the broad permit matches first (first match wins); put specific denies before broad permits.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Where should extended ACLs and standard ACLs be placed?",
+      "a": "Extended ACLs are placed close to the source (to stop unwanted traffic early); standard ACLs are placed close to the destination (since they only know the source, to avoid unintentionally blocking a source from multiple destinations). These are design guidelines.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands apply an IPv4 ACL to an interface, and in what direction?",
+      "a": "'ip access-group <ACL> in' or 'ip access-group <ACL> out', where direction is from the router's perspective.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the TCP/UDP port operators in ACLs?",
+      "a": "eq (equal to), neq (not equal to), gt (greater than), lt (less than), and range (inclusive range).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "In 'access-list 101 permit tcp any host 10.0.0.5 eq 443', what does 'eq 443' match?",
+      "a": "The destination TCP port 443.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why should you not blindly block all ICMP?",
+      "a": "Network troubleshooting, Path MTU Discovery, routing behavior, and IPv6 operation can depend on ICMP/ICMPv6.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What does the TCP 'established' keyword match, and what limitation does it have?",
+      "a": "It matches TCP packets with ACK or RST set, used to allow return traffic, but it is not a stateful firewall and does not guarantee the traffic belongs to a legitimate session.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the purpose of ACL sequence numbers?",
+      "a": "They allow entries to be inserted and modified more easily in named ACLs; numbered ACLs can be resequenced with 'access-list resequence <ACL> <start> <incr>'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the difference between 'ip access-group' and 'access-class'?",
+      "a": "'ip access-group' filters interface traffic; 'access-class' restricts VTY/management access.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a time-based ACL?",
+      "a": "An ACE made active only during a configured time period using a time-range (e.g., 'time-range BUSINESS-HOURS  periodic weekdays 08:00 to 18:00').",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are dynamic ACLs and reflexive ACLs?",
+      "a": "Dynamic (lock-and-key) ACLs create temporary access after successful authentication; reflexive ACLs dynamically create temporary entries for return traffic. Neither is equivalent to a stateful firewall.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How can ACL logging help troubleshooting, and what is its caution?",
+      "a": "Logging reports matches to identify blocked sources, unexpected traffic, or policy violations; excessive logging can generate heavy logging traffic and CPU work, so use it selectively.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How is an ACL used in NAT?",
+      "a": "The ACL identifies which inside addresses should be translated (e.g., 'ip nat inside source list 10 ...'), acting as a traffic-selection mechanism rather than necessarily an interface packet filter.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How is an ACL used with route-maps?",
+      "a": "The ACL identifies the traffic the route-map should match (e.g., with 'match ip address 10'), used in Policy-Based Routing, NAT, redistribution, and other policy features.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What command applies an IPv6 ACL, and how do IPv6 ACLs differ from IPv4?",
+      "a": "'ipv6 traffic-filter <ACL> in/out'; IPv6 ACLs do not use IPv4 wildcard masks, use ICMPv6, have their own named ACL syntax, and still have an implicit deny.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is ICMPv6 especially important in IPv6?",
+      "a": "IPv6 depends on ICMPv6 for Neighbor Discovery, Router Discovery, Neighbor Solicitation/Advertisement, and Path MTU Discovery; blocking required ICMPv6 can break IPv6 operation.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does an ACL differ from routing?",
+      "a": "Routing answers 'where should the packet go'; an ACL answers 'is this packet allowed'. A permit in an ACL does not create a route, and routing does not bypass an ACL.",
+      "tag": "Exam Trap",
+      "context": "Interview"
+    },
+    {
+      "q": "What verification commands are used for IPv4 and IPv6 ACLs?",
+      "a": "show access-lists, show ip access-lists, show ipv6 access-list, show ip interface, show running-config | section access-list, and show running-config | include access-group.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What do ACL counters tell you, and how are they cleared?",
+      "a": "Counters indicate which ACE matched traffic; they can be cleared with 'clear access-list counters' before a new test.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the relationship between ACLs and CoPP?",
+      "a": "ACLs classify traffic for CoPP, which protects the router's control plane; data-plane/interface ACLs handle transit traffic while CoPP handles traffic destined for the device's control plane.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Are ACLs equivalent to a stateful firewall?",
+      "a": "No. An ACL is primarily a stateless packet-filtering/matching mechanism and is not equivalent to a full stateful firewall.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    }
+  ]
+}

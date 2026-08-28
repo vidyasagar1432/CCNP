@@ -1,0 +1,94 @@
+{
+  "title": "Mesh Topology",
+  "level": 2,
+  "levelTitle": "Level 02 - Network Topologies",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "04. Mesh.md",
+  "cards": [
+    {
+      "q": "What is a mesh topology?",
+      "a": "Nodes are interconnected with direct links — either full mesh (every node connected to every other) or partial mesh (only some pairs). Mesh gives the most redundancy and best path diversity, at the cost of many links.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How many links does a full mesh of N nodes need, and when is each form used?",
+      "a": "Full mesh needs N(N-1)/2 links and is used for small cores or key hub HA, since cost dominates beyond about 5-6 nodes. Partial mesh uses a subset (hub-and-spoke with extras) for WAN cores, ISP backbones, and data centers.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why does mesh topology exist? What benefits does it provide?",
+      "a": "It provides path redundancy (a link failure is handled by another path), no single point of failure for a meshed node, lower hop count/lower latency from near-complete connectivity, and load-balancing possibilities via equal-cost multipath.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What mechanisms make L2 mesh safe, and why?",
+      "a": "At L2, redundancy creates loops, so Spanning Tree (STP) puts redundant links in Blocking to prevent broadcast storms, and EtherChannel bundles two links into one logical link.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do L3 routing protocols realize the benefit of mesh?",
+      "a": "Routing protocols such as OSPF/BGP learn multiple equal paths and use ECMP (equal-cost multipath) to balance across parallel links, enabling fast convergence when a path disappears.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Name the real-world examples where mesh is deployed.",
+      "a": "WAN partial mesh (backup circuits between major sites), ISP backbone (national meshes enabling sub-50 ms convergence on a fiber cut), data-center spine-leaf (full-mesh underlay between spines/leaves), and wireless mesh (APs relaying to each other to extend coverage).",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What commands implement ECMP for two equal-cost default routes?",
+      "a": "Configure both routes with the same AD/metric: 'ip route 0.0.0.0 0.0.0.0 10.0.0.1' and 'ip route 0.0.0.0 0.0.0.0 10.0.0.2'. 'show ip route' lists both, and CEF load-balances across them.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you bundle two links between the same pair of switches instead of leaving STP to block one?",
+      "a": "Use EtherChannel: create a Port-channel interface and add both physical ports with 'channel-group 1 mode active' (LACP) on each member.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Calculate the full-mesh link count for 4 nodes. What is the formula?",
+      "a": "The formula is N(N-1)/2, so 4 nodes gives 4(3)/2 = 6 links.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens if you create L2 mesh redundancy without STP or EtherChannel?",
+      "a": "The redundancy creates loops that can cause broadcast storms. The design must control redundancy with STP or EtherChannel.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is full mesh the default for small networks?",
+      "a": "No. Full mesh for 20 routers is absurd; partial mesh or hub-spoke is typical for small networks. Full mesh is reserved for small cores/key hubs.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "What condition must hold for ECMP to balance across two routes?",
+      "a": "The routes must have equal AD (administrative distance) and equal metric, so both are considered equal-cost paths.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a known trade-off of wireless mesh relaying?",
+      "a": "Wireless mesh relays degrade with hops — some technologies halve throughput per hop — so multihop relay is a trap in RF questions.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "In the mesh Quick Review, how do full mesh and partial mesh compare?",
+      "a": "Full mesh uses N(N-1)/2 links with redundancy for every pair but cost grows fast; it suits small cores/spines and makes ECMP easy. Partial mesh uses a selected subset with moderate cost and is typical for WAN/ISP backbones. Both need STP/EtherChannel at L2 to control loops.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

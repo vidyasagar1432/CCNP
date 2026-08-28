@@ -1,0 +1,112 @@
+{
+  "title": "BPDU Guard",
+  "level": 8,
+  "levelTitle": "Level 08 - STP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "11. BPDU Guard.md",
+  "cards": [
+    {
+      "q": "What does BPDU Guard do and what happens when it triggers?",
+      "a": "BPDU Guard protects a PortFast/edge port: when a BPDU is received on that port, it error-disables (err-disables) the port and logs a message. The port is moved out of service until manual intervention or a configured recover mechanism.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the key difference between BPDU Guard and PortFast?",
+      "a": "PortFast is the edge-port behavior that skips listening/learning. BPDU Guard is the protection that err-disables the port if an unexpected BPDU is received.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What problem does an edge port with PortFast but without BPDU Guard leave?",
+      "a": "An edge port immediately forwards; if accidentally connected to another switch announcing BPDUs, it can create a loop that BPDU Guard could have detected/blocked.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What command enables BPDU Guard on an interface and globally?",
+      "a": "spanning-tree bpduguard enable per interface; spanning-tree portfast bpduguard default globally (applies to ports where PortFast is configured).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you verify a port is in err-disabled BPDU Guard state, and how do you recover it?",
+      "a": "show interfaces status and show spanning-tree show errdisabled/state; recovery by manually shutting/no-shut or with errdisable recovery cause bpduguard interval <seconds>.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is errdisable recovery and why configure it?",
+      "a": "errdisable recovery cause bpduguard automatically restores the port after a timer, avoiding manual intervention. It is a recovery mechanism, not a replacement for fixing the underlying cause.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does BPDU Guard differ from BPDU Filter?",
+      "a": "BPDU Guard err-disables the port when a BPDU is received. BPDU Filter suppresses/filters BPDUs and can make STP not participate, hiding loops; it is riskier and not a 'safer' version of Guard.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "When BPDU Guard and Loop Guard are both configured, which takes precedence?",
+      "a": "BPDU Guard takes priority. It err-disables an edge port where a BPDU is received, regardless of Loop Guard being enabled.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does BPDU Guard relate to Root Guard, and can they be configured on the same port?",
+      "a": "BPDU Guard protects edge ports. Root Guard protects root placement on segments facing other switches. They address different problems and generally apply to different types of ports; both can use the spanning-tree guard <keyword> form but the configuration context differs.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What happens to BPDU Guard on a non-PortFast port?",
+      "a": "BPDU Guard is primarily for PortFast/edge ports. On a normal (non-edge) port, STP does not expect a BPDU to be unexpected in the same way; the feature is intended for edge ports.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is BPDU Guard the first defense for edge ports in practice?",
+      "a": "Because end-user ports are the most likely to be misconnected or to have rogue devices, and BPDU Guard ensures an accidental BPDU does not create a loop.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What exactly gets enabled with 'spanning-tree portfast bpduguard default'?",
+      "a": "It enables BPDU Guard default on all ports where PortFast is enabled, providing edge-port protection network-wide.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the mental model for BPDU Guard?",
+      "a": "If this edge port receives a BPDU, shut it down (err-disable) — protect the rest of the network from a rogue BPDU.",
+      "tag": "Quick Review",
+      "context": "Both"
+    },
+    {
+      "q": "How do you find which ports are in bpduguard errdisable and reset them?",
+      "a": "show errdisable detect and show interfaces status / show interfaces Gi0/1, then shutdown/no shutdown; consider errdisable recovery cause bpduguard.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why should errdisable recovery be used carefully?",
+      "a": "It can mask a persistent problem by bringing the port back repeatedly; the underlying cause (e.g., a device sending BPDUs) should be fixed first.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does BPDU Guard prevent packets from being forwarded after triggering?",
+      "a": "The port becomes err-disabled (administratively down from an STP perspective), so it does not forward user data until recovered.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the key BPDU Guard facts in quick review?",
+      "a": "Protects PortFast/edge ports; err-disables port on unexpected BPDU; enable: spanning-tree bpduguard enable / global spanning-tree portfast bpduguard default; recovery: manual or errdisable recovery cause bpduguard; priority over Loop Guard; distinct from BPDU Filter and Root Guard.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

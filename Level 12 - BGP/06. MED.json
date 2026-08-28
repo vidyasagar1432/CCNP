@@ -1,0 +1,22 @@
+{
+  "title": "MED (Multi-Exit Discriminator)",
+  "level": 12,
+  "levelTitle": "Level 12 - BGP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "06. MED.md",
+  "cards": [
+    { "q": "What is MED?", "a": "The optional non-transitive attribute that tells a neighbor AS which of your exit points to use for inbound traffic; it is advertised outbound and compared inbound, and lower is better (best-path step 6). The critical exam rule is that MED is compared only between paths from the same neighbor AS unless bgp always-compare-med is set.", "tag": "Overview", "context": "Both" },
+    { "q": "What is MED's one job in traffic engineering?", "a": "Inbound traffic selection: with two links to an upstream, setting a lower MED on link A tells the upstream to prefer A for traffic entering you. MED is set outbound toward the neighbor and judged inbound by the neighbor.", "tag": "Core Concept", "context": "Interview" },
+    { "q": "What are the key MED attribute properties?", "a": "Type optional non-transitive, default 0 (missing equals 0), best-path step 6 with lower wins, compared only among the same neighbor AS unless bgp always-compare-med is set, and on eBGP the metric is the router's own IGP metric.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How do MED and Local-Pref differ in direction?", "a": "Local Pref is set inbound and means my AS picks the exit; MED is set outbound and means the upstream picks the entry. In short, local-pref influences your outbound traffic, while MED influences your inbound traffic.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How do you configure MED?", "a": "route-map SETMED permit 10 with match ip address prefix-list PRIMARY-LINK and set metric 50, applied with neighbor 192.0.2.2 route-map SETMED out. A lower set metric is more preferred by the upstream (step 6 lower wins); for a second link use a higher metric such as 200.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What does bgp always-compare-med change?", "a": "By default MED from one AS is not comparable to MED from another (both are treated as 0). bgp always-compare-med forces comparison across all paths regardless of neighbor AS; use with caution on multihomed connections.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How does MED behave across iBGP and a third AS?", "a": "MED transits iBGP so internal routers know the neighbor's preference, but when re-advertising to a third AS the MED is stripped because it is optional non-transitive, unless it is reset.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "Command to see the MED per path?", "a": "show ip bgp <prefix> shows the MED column per path; show ip bgp neighbors <ip> routes and show ip bgp paths also expose MED values.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "Why might a path with missing MED unexpectedly win?", "a": "Because a missing MED is treated as 0, and lower MED wins at step 6. A set MED such as 100 is higher than the missing 0.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "Can MED cross to a third AS by default?", "a": "No. MED is optional non-transitive, so it does not cross to a third AS unless explicitly reset.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "Which always beats MED regardless of values?", "a": "Local-pref (step 2) always beats MED (step 6), and earlier steps like AS_PATH also decide before MED is ever compared.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "MED quick summary?", "a": "Type optional non-transitive, default 0, lower wins, best-path step 6, set outbound and judged inbound, compared only within the same neighbor AS, forced with always-compare-med, and its job is inbound traffic selection.", "tag": "Quick Review", "context": "Exam" }
+  ]
+}

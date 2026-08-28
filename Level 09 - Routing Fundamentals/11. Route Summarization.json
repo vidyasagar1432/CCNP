@@ -1,0 +1,124 @@
+{
+  "title": "Route Summarization (Aggregation)",
+  "level": 9,
+  "levelTitle": "Level 09 - Routing Fundamentals",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "11. Route Summarization.md",
+  "cards": [
+    {
+      "q": "What is route summarization and what is the trade-off?",
+      "a": "Route summarization represents multiple more-specific routes with one less-specific aggregate prefix, for example 10.1.0.0/24 through 10.1.7.0/24 summarized as 10.1.0.0/21. It reduces prefixes advertised and maintained, lowering control-plane processing, routing-table size, update traffic, and instability propagation, but the trade-off is loss of routing granularity.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the benefits of route summarization?",
+      "a": "Smaller routing tables, less control-plane work, faster convergence, stability (internal changes hidden beyond the boundary), reduced update propagation, and better scalability. Summarization does not automatically guarantee a single physical forwarding path or next hop; forwarding depends on the routing protocol and resulting RIB/FIB.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do routing protocols implement summarization?",
+      "a": "RIP v1: classful behavior (no VLSM/CIDR). RIP v2: auto-summary or manual summary. EIGRP: auto-summary or interface summary (ip summary-address eigrp). OSPF: ABR 'area range' for inter-area routes and ASBR 'summary-address' for external routes. BGP: 'aggregate-address'.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are OSPF's two different summarization mechanisms and where is each performed?",
+      "a": "ABR summarization uses 'area range' to summarize routes between OSPF areas and is performed by an ABR (OSPF does not summarize routes within the same area). External-route summarization uses 'summary-address' to summarize external routes being introduced into OSPF and is performed by an ASBR.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you calculate a summary route and what is block alignment?",
+      "a": "Convert the addresses to binary, compare left to right, find the longest run of identical bits to become the summary prefix, set remaining host bits to 0, and verify the aggregate covers every required subnet. A valid summary must be properly aligned: 10.1.4.0/24 through 10.1.7.0/24 summarize to 10.1.4.0/22, not 10.1.5.0/22. Find the smallest correctly aligned prefix that covers all networks without including unwanted space.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why do 10.1.0.0/24, 10.1.1.0/24, 10.1.2.0/24, and 10.1.3.0/24 summarize to 10.1.0.0/22?",
+      "a": "They summarize to 10.1.0.0/22 because a /22 covers 4 × /24 networks (10.1.0.0/24, 10.1.1.0/24, 10.1.2.0/24, 10.1.3.0/24) and the block is properly aligned at 10.1.0.0.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is EIGRP summarization configured and what Null0 behavior results?",
+      "a": "EIGRP manual summary is configured on an interface, e.g. interface GigabitEthernet0/1 / ip summary-address eigrp 100 10.1.0.0 255.255.0.0, advertising the summary instead of individual routes. When an EIGRP interface summary is configured, Cisco IOS installs a summary route to Null0 on the summarizing router to prevent traffic inside the summary but without a specific route from being forwarded toward another router.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "In EIGRP summarization, how does the Null0 summary route interact with more-specific routes?",
+      "a": "The Null0 route is normally less preferred than more-specific routes, so valid specific destinations continue to use their specific routes by longest-prefix match. The Null0 route only discards traffic inside the summary that has no actual more-specific route.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How is OSPF ABR summarization and external summarization configured?",
+      "a": "ABR summarization: router ospf 1 / area 1 range 10.1.0.0 255.255.0.0 summarizes inter-area routes at the area boundary. External summarization: router ospf 1 / summary-address 10.2.0.0 255.255.0.0 summarizes external routes being redistributed into OSPF. OSPF does not summarize routes inside an area.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How is BGP aggregation configured and what does 'summary-only' do?",
+      "a": "BGP aggregation uses router bgp 65000 / aggregate-address 10.1.0.0 255.255.0.0, generated from contributing routes in the BGP table. Adding summary-only suppresses advertisement of the more-specific contributing routes to BGP peers while advertising the aggregate.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Does aggregate-address require a network statement for the exact aggregate?",
+      "a": "No. aggregate-address does not require a network statement for the exact aggregate; network and aggregate-address are separate BGP mechanisms.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does BGP aggregation automatically create a Null0 route?",
+      "a": "No. BGP aggregation should not be described as automatically creating a Null0 route the way an EIGRP interface summary does. For a manually originated aggregate, a common design is ip route 10.1.0.0 255.255.0.0 Null0 plus router bgp 65000 / network 10.1.0.0 mask 255.255.0.0, providing a local discard path for destinations without a more-specific route.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is a Null0 route important for loop prevention with summaries?",
+      "a": "If a router advertises 10.1.0.0/16 but owns only 10.1.1.0/24 and 10.1.2.0/24, traffic to 10.1.200.0/24 matches the /16 summary even though the destination does not exist. A local Null0 route safely discards that traffic, while valid more-specific routes win by longest-prefix match. Without a discard route, traffic matching only the summary could be forwarded toward another less-specific route, contributing to routing loops.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "For an EIGRP/OSPF/BGP-specified summarization config, which commands would you use?",
+      "a": "EIGRP: interface GigabitEthernet0/1 / ip summary-address eigrp 100 10.1.0.0 255.255.0.0. OSPF ABR: router ospf 1 / area 1 range 10.1.0.0 255.255.0.0. OSPF external: router ospf 1 / summary-address 10.2.0.0 255.255.0.0. BGP: router bgp 65000 / aggregate-address 10.1.0.0 255.255.0.0 (with optional summary-only).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What do you check if an expected summary is missing or a specific route is unexpectedly hidden from BGP peers?",
+      "a": "For a missing summary, check show ip route, show ip protocols, and show ip bgp for incorrect summary configuration or missing contributing routes (e.g. OSPF area range on the wrong router/area, summary-address on the wrong ASBR). If a specific route is unexpectedly hidden from BGP peers, check aggregate-address ... summary-only, which suppresses the specifics.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Is summarization simply 'combine any networks'?",
+      "a": "No. The networks must form a valid, aligned CIDR block. For example, 10.1.0.0/24, 10.1.1.0/24, 10.1.2.0/24, and 10.1.3.0/24 combine to 10.1.0.0/22 only because they form a correctly aligned block.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Can OSPF summarize routes inside an area?",
+      "a": "No. OSPF does not summarize routes inside an area; summarization occurs at the area boundary. ABR uses 'area range' for inter-area routes, and an ASBR uses 'summary-address' for external routes.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does longest-prefix match still apply when a summary route exists?",
+      "a": "Yes. If both 10.1.0.0/16 → Null0 and 10.1.1.0/24 → Gi0/1 exist, traffic for 10.1.1.10 uses 10.1.1.0/24 because /24 is more specific than /16. Longest-prefix match always prefers a valid more-specific route.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Summarize the route summarization quick review.",
+      "a": "Summarization represents multiple specific routes with a less-specific prefix; main benefit is smaller routing tables and less control-plane/update overhead; main trade-off is loss of granularity; prefix calculation finds the longest common prefix with correct block alignment; RIP v1 is classful; EIGRP uses ip summary-address eigrp and normally installs a Null0 summary route; OSPF internal uses area range on an ABR; OSPF external uses summary-address on an ASBR; OSPF does not summarize within an area; BGP uses aggregate-address where summary-only suppresses specifics; BGP Null0 is not automatically implied; Null0 safely discards traffic matching only the aggregate; LPM makes more-specific routes beat the aggregate.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

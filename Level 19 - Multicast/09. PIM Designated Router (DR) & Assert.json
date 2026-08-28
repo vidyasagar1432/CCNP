@@ -1,0 +1,70 @@
+{
+  "title": "PIM Designated Router (DR) & Assert",
+  "level": 19,
+  "levelTitle": "Level 19 - Multicast",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "09. PIM Designated Router (DR) & Assert.md",
+  "cards": [
+    {
+      "q": "What are the PIM DR and Assert mechanisms for?",
+      "a": "The DR is a designated router elected on a multi-access LAN that acts for hosts (IGMP/joins and sparse-mode registering), while the Assert mechanism resolves duplicate forwarding when two routers forward the same (S,G) onto the LAN.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How is the PIM Designated Router elected?",
+      "a": "The router with the highest PIM neighbor priority (default 1) wins, and on a tie the router with the highest IP address wins; priority is set with ip pim dr-priority.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the role of the DR in PIM-SM?",
+      "a": "The DR is the single representative for the LAN: it sends IGMP/PIM joins, acts as the First-Hop Router registering the source if the source is on that LAN, and is the Last-Hop Router for the SPT join.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What triggers a PIM Assert?",
+      "a": "A PIM Assert is triggered when two routers are both forwarding the same (S,G) onto the same LAN, causing duplicated frames; the assert selects a single forwarder and the loser prunes.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How is the PIM Assert winner decided?",
+      "a": "The winner is the router with the better, lower route metric to the source (lower administrative preference and lower metric); on a tie the router with the highest IP address wins.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which command configures DR priority?",
+      "a": "The interface command ip pim dr-priority sets the DR priority that influences the DR election on the segment.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands verify DR and Assert state?",
+      "a": "show ip pim interface, show ip pim neighbor, show ip pim assert, show ip mroute, and debug ip pim.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "There is duplicate multicast traffic on a shared LAN segment; what is likely wrong?",
+      "a": "Two PIM routers are both forwarding the same (S,G) and the Assert mechanism has not resolved a winner, likely because their metrics to the source are equal or the assert is still pending; check show ip pim assert.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the key exam distinction between DR election and PIM Assert?",
+      "a": "DR election determines who speaks for hosts on a LAN (priority then highest IP), while Assert determines which router forwards a duplicated (S,G) onto the LAN (lower metric then higher IP).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the DR and Assert quick-review summary?",
+      "a": "The DR is chosen by highest priority then highest IP and handles IGMP/joins and sparse-mode registering for the LAN, while Assert keeps only the router with the lower metric to the source (higher IP on a tie) as the single forwarder to stop duplicate multicast.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

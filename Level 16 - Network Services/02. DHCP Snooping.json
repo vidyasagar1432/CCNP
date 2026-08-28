@@ -1,0 +1,190 @@
+{
+  "title": "DHCP Snooping",
+  "level": 16,
+  "levelTitle": "Level 16 - Network Services",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "02. DHCP Snooping.md",
+  "cards": [
+    {
+      "q": "What is DHCP Snooping?",
+      "a": "A Layer 2 security feature that protects switched networks from unauthorized DHCP servers and DHCP-based attacks using a trusted/untrusted interface model and a DHCP binding database.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How does DHCP snooping protect against common threats?",
+      "a": "Rogue DHCP servers are blocked on untrusted ports, DHCP starvation is mitigated by rate limiting, invalid IP/MAC relationships get bindings for DAI/IP Source Guard, and the trusted/untrusted boundary enforces where DHCP server messages may originate.",
+      "tag": "Overview",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is DHCP snooping needed on an access network?",
+      "a": "Without it, an attacker on a normal access port can run as a rogue DHCP server and hand out malicious IP, gateway, or DNS settings that redirect traffic or disrupt connectivity.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is a trusted port for DHCP snooping?",
+      "a": "A port connected toward the legitimate DHCP server, DHCP relay, or network infrastructure/uplink carrying valid server responses; DHCPOFFER, DHCPACK, and DHCPNAK are allowed there, configured with ip dhcp snooping trust.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is an untrusted port for DHCP snooping?",
+      "a": "A client-facing port, untrusted by default, where DHCP server messages such as OFFER, ACK, and NAK are dropped.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which DHCP messages are server-originated versus client-originated?",
+      "a": "Server-originated: DHCPOFFER, DHCPACK, DHCPNAK. Client-originated: DHCPDISCOVER, DHCPREQUEST, DHCPDECLINE, DHCPRELEASE, and DHCPINFORM.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands configure DHCP snooping on Cisco IOS?",
+      "a": "ip dhcp snooping enables it globally, ip dhcp snooping vlan 10 enables it for a VLAN, ip dhcp snooping trust marks the server/relay-facing port, and ip dhcp snooping limit rate rate-limits client ports.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Does ip dhcp snooping alone protect every VLAN?",
+      "a": "No. DHCP snooping must be enabled globally and then explicitly enabled on the relevant VLANs with commands such as ip dhcp snooping vlan 10,20 or a range.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does ip dhcp snooping limit rate 10 mean?",
+      "a": "It limits DHCP packet reception to approximately 10 packets per second on that interface, helping mitigate excessive DHCP traffic and starvation attacks.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is a DHCP starvation attack and its impact?",
+      "a": "An attacker generates many DHCP requests using different client identities to exhaust the address pool; legitimate clients are then unable to obtain an IP. Mitigations include DHCP snooping, rate limiting, port security, and other Layer 2 controls.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Is DHCP snooping rate limiting the same as starvation detection?",
+      "a": "No. Rate limiting mitigates excessive or starvation-style DHCP traffic; it does not independently identify an attack as a starvation attack.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the DHCP snooping binding database contain?",
+      "a": "Client MAC address, DHCP-assigned IPv4 address, VLAN, client-facing switch interface, and lease information.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does the switch learn DHCP snooping bindings?",
+      "a": "It observes the DHCP transaction (DISCOVER/REQUEST/ACK) and records the resulting client binding; a host with a manually configured static IP does not automatically produce a normal binding.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How are static-IP devices supported when DAI or IP Source Guard depends on snooping bindings?",
+      "a": "Some platforms support static snooping bindings using ip dhcp snooping binding <MAC> vlan <VLAN> <IP> interface <INTERFACE>; syntax and support vary by IOS/IOS XE release.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why and how are DHCP snooping bindings persisted?",
+      "a": "Bindings can be stored externally, e.g. ip dhcp snooping database flash:dhcp-snooping.db, so they survive a switch reload; this matters when DAI or IP Source Guard depends on the bindings.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do DAI and IP Source Guard use the snooping binding database?",
+      "a": "DAI validates ARP information against the bindings to prevent forged ARP, while IP Source Guard restricts IP traffic to the expected IP/MAC/interface relationships; DHCP snooping is the foundation for both.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What typically makes DAI start dropping valid ARP?",
+      "a": "A missing or incorrect binding, a static-IP client, an expired DHCP lease, snooping recently enabled, or binding loss after reload; static bindings may be required for static clients.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is DHCP Option 82 and how is it configured on switches?",
+      "a": "Option 82 is Relay Agent Information carrying Circuit ID and Remote ID; supported switches enable handling with ip dhcp snooping information option and may allow untrusted sources via ip dhcp snooping information option allow-untrusted.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Is Option 82 a general spoofing detector?",
+      "a": "No. Option 82 is Relay Agent Information and is not itself a mechanism for detecting every spoofing attack; its behavior varies by platform and IOS/IOS XE release.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Are DHCP snooping and DHCP relay the same feature?",
+      "a": "No. DHCP snooping is a Layer 2 DHCP security feature, while DHCP relay (ip helper-address) forwards DHCP across subnets at Layer 3; they are related but different functions.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Where does giaddr fit in with DHCP snooping?",
+      "a": "giaddr is the Gateway IP Address field populated by a Layer 3 DHCP relay so the server can pick the correct scope; it is associated with DHCP relay operation, not DHCP snooping itself.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How should DHCP snooping trust be handled on trunk ports?",
+      "a": "Trusting a trunk is a security decision: only trust it when legitimate DHCP server/relay traffic is expected through that path, and enable snooping on the VLANs it carries.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does DHCP snooping interact with EtherChannel?",
+      "a": "Trust must be configured appropriately, e.g. ip dhcp snooping trust on Port-channel1; whether config applies to the logical channel or member interfaces varies by platform, so follow the platform-specific implementation.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do the Layer 2 security features differ in purpose?",
+      "a": "DHCP snooping protects DHCP infrastructure, port security restricts source MAC addresses, DAI protects ARP, and IP Source Guard restricts IP source information; they solve different problems and can be combined.",
+      "tag": "Quick Review",
+      "context": "Both"
+    },
+    {
+      "q": "What commands verify DHCP snooping?",
+      "a": "show ip dhcp snooping for state/VLANs/trusted interfaces, show ip dhcp snooping binding for the binding database, and show ip dhcp snooping statistics for packet counters.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What can DHCP snooping statistics reveal?",
+      "a": "DHCP packets received, forwarded, and dropped, plus rate-limit-related activity, which helps determine whether the switch is dropping DHCP traffic.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What causes hosts to get no IP address with snooping enabled?",
+      "a": "Snooping not enabled on the client VLAN, the server/relay-facing port left untrusted, a rate limit set too low, a relay problem, a server/pool problem, or incorrect VLAN assignment.",
+      "tag": "Quick Review",
+      "context": "Practical"
+    },
+    {
+      "q": "A legitimate DHCP server is blocked — what is the likely cause and fix?",
+      "a": "The server/relay-facing interface is untrusted; fix it by configuring ip dhcp snooping trust on that interface.",
+      "tag": "Quick Review",
+      "context": "Practical"
+    },
+    {
+      "q": "The snooping binding table is empty — what should you verify?",
+      "a": "That snooping is globally enabled, the client VLAN is enabled, clients actually use DHCP, the DHCP transaction completes, the database was not cleared, and the correct interfaces are configured.",
+      "tag": "Quick Review",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the One-Minute Mental Model of DHCP snooping?",
+      "a": "DHCP snooping establishes a trust boundary for DHCP traffic: trusted ports (server/relay) allow server messages, untrusted ports (clients) drop them, legitimate activity builds a binding database that supports DAI and IP Source Guard; rate limiting mitigates starvation.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

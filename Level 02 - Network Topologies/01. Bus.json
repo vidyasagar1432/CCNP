@@ -1,0 +1,76 @@
+{
+  "title": "Bus Topology",
+  "level": 2,
+  "levelTitle": "Level 02 - Network Topologies",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "01. Bus.md",
+  "cards": [
+    {
+      "q": "What is a bus topology?",
+      "a": "All devices share a single transmission medium, originally a coaxial cable (10BASE2/10BASE5 'thicknet'/'thinnet'). Every frame travels the whole cable and every node sees it, giving one shared collision domain and one broadcast domain.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How were nodes physically attached on a 10BASE2 bus versus a 10BASE5 bus?",
+      "a": "10BASE2 used BNC T-connectors daisy-chained on the cable; 10BASE5 used 'vampire taps' that clamped onto the thick coax.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What protocol arbitrated media access on a bus topology, and what did it mean for the collision domain?",
+      "a": "CSMA/CD (Carrier Sense Multiple Access with Collision Detection) arbitrated access. All nodes were in a single shared collision domain, so only one could transmit at a time.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the purpose of terminators on a bus segment, and what happens if one is missing?",
+      "a": "Terminators at both ends of the cable absorb signals. If a terminator is missing, signals reflect back and the network appears 'gone'/down.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the characteristics of a bus topology regarding collision domain, broadcast domain, and bandwidth?",
+      "a": "One collision domain (all nodes share it) and one broadcast domain; bandwidth is shared so all nodes divide the 10 Mbps. Security is weak because every node can see all traffic (promiscuous capture).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why did the bus topology fall out of use?",
+      "a": "It had a single point of failure (any cable break kills the whole segment), poor fault isolation, security exposure, scalability limits, and half-duplex on a shared medium. It was replaced by twisted-pair star wiring to switches.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How does the bus concept relate to modern switching regarding hubs and switches?",
+      "a": "A hub recreates a bus because all its nodes share one collision domain. A switch microsegments so each port is its own collision domain. The exam treats 'bus equals one shared collision domain' as the definition of the model.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "A bus topology is one collision domain. What else is it in terms of domains?",
+      "a": "It is also one broadcast domain (unless separated by many VLANs).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens to a bus when the cable breaks?",
+      "a": "A cable break splits the bus and can bring the whole segment down; a short can take the entire segment down. This is the classic argument for getting rid of bus topologies.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "Does CSMA/CD exist on switched full-duplex links?",
+      "a": "No. CSMA/CD is the media-arbitration protocol of bus/half-duplex shared media and does not exist on switched full-duplex links.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "In the bus Quick Review, what are the classic media and fault-isolation details?",
+      "a": "Media is a single shared coax cable (10BASE2/5). A cable break equals segment down — the worst fault isolation. Bandwidth is shared 10 Mbps that everyone divides, and it is legacy, appearing only in historical questions.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

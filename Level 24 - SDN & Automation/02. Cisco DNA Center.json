@@ -1,0 +1,23 @@
+{
+  "title": "Cisco DNA Center",
+  "level": 24,
+  "levelTitle": "Level 24 - SDN & Automation",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "02. Cisco DNA Center.md",
+  "cards": [
+    { "q": "What is Cisco DNA Center?", "a": "DNA Center is Cisco's SDN controller and management platform for campus networks. It provides intent-based networking, automation (design, provisioning, assurance), and the control logic for SD-Access, exposing a REST API and using netconf/CLI southbound to program Catalyst switches.", "tag": "Overview", "context": "Both" },
+    { "q": "What are the five main functions of DNA Center?", "a": "Design (sites, templates), provisioning (device config), assurance (telemetry/health), automation (intent-based), and SD-Access fabric control.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What is intent-based networking?", "a": "It starts with an intent (what you want), translates it into policies/config, activates it by pushing to devices, and uses assurance to verify the intent was met. DNA Center makes the desired state real and verifies it.", "tag": "Core Concept", "context": "Interview" },
+    { "q": "What is the intent-based networking workflow in order?", "a": "Intent, then translation (policies to config), then activation (push to devices), then assurance (verify intent).", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What role does each plane play in DNA Center?", "a": "Management = UI/API, automation = provisioning, assurance = analytics, and control = SD-Access fabric.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How does DNA Center assurance help troubleshooting?", "a": "Assurance gives telemetry-driven troubleshooting by collecting analytics and health data from the network.", "tag": "Core Concept", "context": "Interview" },
+    { "q": "How does DNA Center expose automation to third parties?", "a": "Through its REST API and intent API, which third-party apps, Ansible, and scripts use, with token-based authentication.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "Which components make up the DNA Center SD-Access tie-in?", "a": "Fabric controller = DNA Center, control plane = LISP, data plane = VXLAN, and policy = ISE. DNA Center drives SD-Access using LISP + VXLAN + ISE.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How is DNA Center made highly available?", "a": "It runs as a cluster of multiple nodes with primary/secondary roles, database replication between nodes, and automatic failover.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How do you administer DNA Center configuration?", "a": "DNA Center is managed through the GUI and REST API, not the CLI, so configuration work is done via the UI/API interface.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "How do you troubleshoot API authentication, empty assurance, or fabric issues in DNA Center?", "a": "API auth failures point to the token (check the REST request), empty assurance to telemetry, SD-Access down to the LISP/VXLAN fabric, provisioning failure to device reachability (check UI/API), and cluster degradation to node health (HA).", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What is the automation entry point for DNA Center?", "a": "The DNA Center REST API is the entry point for automation; scripts, Ansible, and third-party apps use it with token auth.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "What summarizes DNA Center's role in the campus?", "a": "DNA Center is the brain plus dashboard of the campus, combining intent-based networking, assurance telemetry, template automation, and SD-Access fabric control under one platform.", "tag": "Exam Trap", "context": "Both" }
+  ]
+}

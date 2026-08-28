@@ -1,0 +1,76 @@
+{
+  "title": "Multicast Boundaries & RPF",
+  "level": 19,
+  "levelTitle": "Level 19 - Multicast",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "08. Multicast Boundaries & RPF.md",
+  "cards": [
+    {
+      "q": "What are the two multicast control mechanisms covered here?",
+      "a": "Multicast boundaries restrict how far multicast can propagate (scoping with TTL thresholds and group ACLs), and the RPF check ensures a loop-free source-rooted tree by only forwarding packets that arrive on the unicast interface toward the source.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the RPF check in multicast?",
+      "a": "RPF (Reverse Path Forwarding) forwards a multicast packet only if it arrived on the interface the unicast routing table would use to reach the source; otherwise the packet is dropped as an RPF failure.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does the RPF check use as its basis?",
+      "a": "RPF uses the existing unicast routing table (RIB); multicast itself does not maintain a separate topology, so the source-facing interface is derived from unicast routing.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens to a multicast packet that fails the RPF check?",
+      "a": "It is silently dropped, since it arrived on an interface the unicast RIB does not point toward the source; this silent drop is a common multicast troubleshooting symptom.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does asymmetric unicast routing affect RPF?",
+      "a": "Asymmetric routing sends the multicast packet back on a non-RPF interface, causing an RPF failure; it is fixed with MBGP alternate paths, static RPF routes, or tunnels that align the RPF path.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the types of multicast boundaries?",
+      "a": "A TTL boundary using ip multicast ttl-threshold, a group boundary using ip multicast boundary with an ACL, administratively scoped 239/8 groups, and Auto-RP scope limiting the 224.0.1.39/40 group propagation.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is 239.0.0.0/8 used for?",
+      "a": "It is reserved for administratively scoped multicast, meaning group traffic in this range is never forwarded beyond the local domain.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands verify RPF and boundaries?",
+      "a": "show ip rpf, show ip mroute, show ip pim interface, debug ip mpacket, and show ip igmp interface.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Multicast packets are being dropped despite receivers being present; what is likely wrong?",
+      "a": "An RPF failure is likely: the packet is arriving on a different interface than the unicast RIB points toward the source, so it is silently dropped; check show ip rpf for the source.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the difference between an RPF check and a multicast boundary?",
+      "a": "RPF decides whether to forward based on the source-facing interface (loop prevention), while a boundary decides how far multicast may travel using TTL thresholds and group ACLs (scoping).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the boundaries and RPF quick-review summary?",
+      "a": "RPF forwards only packets arriving on the unicast-RIB source-facing interface and silently drops others to prevent loops, while TTL and group boundaries plus the 239/8 admin scope confine multicast propagation, with MBGP or static routes fixing asymmetric RPF.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

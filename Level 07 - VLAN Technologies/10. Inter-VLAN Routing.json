@@ -1,0 +1,142 @@
+{
+  "title": "Inter-VLAN Routing",
+  "level": 7,
+  "levelTitle": "Level 07 - VLAN Technologies",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "10. Inter-VLAN Routing.md",
+  "cards": [
+    {
+      "q": "What is inter-VLAN routing?",
+      "a": "Inter-VLAN routing allows devices in different VLANs to communicate by forwarding traffic between their Layer 3 IP subnets. Since a VLAN creates a separate Layer 2 broadcast domain and different VLANs use different IP subnets, communication requires a Layer 3 gateway/router interface.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the three major inter-VLAN routing implementation models?",
+      "a": "Router-on-a-Stick (ROAS) using router subinterfaces over an 802.1Q trunk; SVI-based routing where a multilayer switch routes using Switch Virtual Interfaces; and Routed access using Layer 3 routed links instead of Layer 2 trunks.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is a default gateway needed for inter-VLAN communication?",
+      "a": "When a host wants to reach a device on a different IP subnet, it must send the packet to its default gateway, which is a Layer 3 device that routes the packet toward the destination VLAN.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How does router-on-a-stick (ROAS) perform inter-VLAN routing?",
+      "a": "ROAS uses one physical router interface connected to a switch through an 802.1Q trunk, creating one subinterface per VLAN. Each subinterface has 'encapsulation dot1Q <vlan>' and an IP address acting as the VLAN gateway.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the advantages and disadvantages of router-on-a-stick?",
+      "a": "Advantages: simple, low cost, requires only one physical router interface, useful for small networks and labs. Disadvantages: one physical link carries traffic for multiple VLANs, bandwidth can become a bottleneck, the router must process inter-VLAN traffic, and it is less scalable than hardware-based L3 switching.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is an SVI (Switch Virtual Interface) and how is it used?",
+      "a": "An SVI is a logical Layer 3 interface associated with a VLAN, configured with 'interface VlanX' and an IP address. On a multilayer switch, SVIs act as the default gateways for hosts and provide inter-VLAN routing.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What command enables Layer 3 routing on a Cisco multilayer switch?",
+      "a": "'ip routing'. An SVI can exist without the switch acting as an inter-VLAN router; 'ip routing' is what enables the multilayer switch to perform IP routing between interfaces/SVIs.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What must be true for an SVI to become operational?",
+      "a": "The associated VLAN must exist and have valid Layer 2 conditions, such as an active Layer 2 port where appropriate, and the SVI typically needs 'no shutdown'. Verify with 'show vlan brief', 'show interfaces vlan 10', and 'show ip interface brief'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do modern multilayer switches perform Layer 3 forwarding?",
+      "a": "They use hardware-based switching/forwarding ASICs and platform-specific forwarding tables (such as CEF concepts and TCAM), providing high-speed forwarding compared with sending every packet to a software-only router process.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is routed access design?",
+      "a": "A routed access design uses Layer 3 links between network devices rather than extending Layer 2 VLANs across those links. Physical switch interfaces are converted to routed interfaces with 'no switchport' and IP addresses, creating Layer 3 point-to-point links instead of Layer 2 trunks.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What benefit does routed access provide in campus design?",
+      "a": "Routed access can reduce Layer 2 domain size and simplify spanning-tree boundaries, though traditional three-tier designs and modern routed designs are both valid depending on requirements.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What routing protocols can a multilayer switch use beyond connected SVIs?",
+      "a": "Static routes, OSPF, EIGRP, BGP, or other supported routing protocols. The SVI provides the local VLAN gateway, and the routing table determines how traffic reaches remote networks.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "At what point can policy such as ACLs be applied for segmentation?",
+      "a": "The Layer 3 gateway (SVI/L3 gateway) is an important enforcement point where routing, ACLs, and QoS/L3 policy can be applied to control traffic between VLANs.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How is the native VLAN configured in router-on-a-stick?",
+      "a": "The native VLAN is transmitted untagged on an 802.1Q trunk, so ROAS explicitly identifies it using 'encapsulation dot1Q 99 native' on a subinterface. A normal 'encapsulation dot1Q 10' subinterface expects VLAN 10 tagging.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands verify inter-VLAN routing configuration?",
+      "a": "'show ip interface brief', 'show ip route' (check for connected routes), 'show vlan brief', 'show interfaces trunk', 'ping 10.1.20.20 source 10.1.10.1', and 'traceroute 10.1.20.20'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the inter-VLAN routing troubleshooting flow?",
+      "a": "Check VLAN created, host in correct VLAN, trunk carries the VLAN, SVI/subinterface operational, host uses correct default gateway, L3 device has the connected route, ACLs not blocking, and the return route correct.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Can a Layer 2 switch route traffic between separate IP subnets?",
+      "a": "No. A Layer 2 switch cannot route traffic between separate IP subnets; Layer 3 routing is required for different VLANs/subnets to communicate.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Without the correct 802.1Q encapsulation on a ROAS subinterface, what happens?",
+      "a": "The router does not know which VLAN the subinterface represents, so traffic to/from that VLAN fails. Each tagged ROAS subinterface needs the appropriate 'encapsulation dot1Q <vlan-id>'.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Creating an SVI automatically enables routing on a multilayer switch. True or false?",
+      "a": "False. 'interface Vlan10' creates/configures an SVI, but 'ip routing' is what enables Layer 3 routing on the multilayer switch. Keep those concepts separate.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between a routed interface and a Layer 2 switchport?",
+      "a": "A routed interface uses 'no switchport' and can be assigned an IP address, making it a Layer 3 interface; a Layer 2 switchport forwards at Layer 2. For example, 'interface GigabitEthernet1/0/1' with 'no switchport' and 'ip address 10.255.1.1 255.255.255.252'.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does ROAS compare to SVI routing?",
+      "a": "ROAS uses router subinterfaces over an 802.1Q trunk with lower scalability and a shared-link bottleneck, suitable for small/simple sites. SVI routing uses a multilayer switch's SVIs with hardware-based L3 forwarding and higher scalability, suitable for campus networks.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the inter-VLAN routing mental model?",
+      "a": "VLAN = Layer 2 broadcast boundary; IP subnet = Layer 3 boundary; L3 gateway forwards traffic between subnets. Within the same subnet traffic is switched at Layer 2, but between different subnets it goes through the default gateway and Layer 3 routing.",
+      "tag": "Core Concept",
+      "context": "Both"
+    }
+  ]
+}

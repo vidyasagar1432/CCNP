@@ -1,0 +1,76 @@
+{
+  "title": "SSID (Service Set Identifier)",
+  "level": 22,
+  "levelTitle": "Level 22 - Wireless",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "03. SSID.md",
+  "cards": [
+    {
+      "q": "What is an SSID?",
+      "a": "The SSID (Service Set Identifier) is the human-readable name of a wireless network, an ASCII label up to 32 characters, broadcast in beacons so clients can find and join it. It is case-sensitive and is just a label — the real identity of the radio is the BSSID (MAC).",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How do multiple SSIDs connect to policies on a WLC?",
+      "a": "A WLC runs multiple SSIDs, each mapped to a different WLAN profile with its own security, VLAN, and QoS policy. The chain is SSID to WLAN profile to VLAN, with QoS/ACL rules per WLAN.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between an SSID and a BSSID?",
+      "a": "The SSID is the network name (network identity); the BSSID is the MAC address of a specific AP radio. One SSID can span many BSSIDs (many APs).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does an SSID relate to a WLAN profile and VLAN on a WLC?",
+      "a": "The SSID is the wireless side that clients see; the WLAN profile applies security and policy; the VLAN determines where traffic lands; and QoS/ACL rules apply per WLAN.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is an example of running multiple SSIDs with different policies?",
+      "a": "Corp-Guest uses client isolation, Corp-Corp uses 802.1X enterprise authentication, and Corp-IoT uses PSK plus a mapped VLAN. Each SSID gets its own VLAN, security, and QoS, with client isolation where needed.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Is hiding the SSID a security measure?",
+      "a": "No. A hidden SSID is merely withheld from beacons and is not secure, because clients still probe for it by name.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands create and enable a WLAN on a WLC?",
+      "a": "wlan Corp-Guest 2 Guest-Data creates a WLAN; security wpa psk ascii sets the pre-shared key; no security wpa akm dot1x disables 802.1X; vlan Guest maps a VLAN; no shutdown enables it.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands verify WLAN and AP WLAN configuration?",
+      "a": "show wlan summary lists WLANs, show wlan id 2 shows a specific WLAN profile, show ap wlan summary shows WLANs per AP, show wireless profile policy shows policy profiles, and show ap config general shows AP settings.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "The SSID is missing from client scans. What is the likely cause and check?",
+      "a": "The WLAN is likely in shutdown (disabled) or broadcast is off. Check with show wlan summary and verify the WLAN is enabled and broadcasting.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Clients cannot join the SSID or land in the wrong VLAN. What should you check?",
+      "a": "A join failure usually means a security mismatch, so check show wlan id; a wrong VLAN means the profile-to-VLAN mapping is off. Slow performance may point to band steering in the policy profile.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which SSID quick review facts should you remember?",
+      "a": "SSID is a name up to 32 characters; the BSSID is the MAC; the SSID is broadcast in beacons; each SSID maps to a WLAN profile with a VLAN; hidden SSIDs are not secure; multiple SSIDs run per policy.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

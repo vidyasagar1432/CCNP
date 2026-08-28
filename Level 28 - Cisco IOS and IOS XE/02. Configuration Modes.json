@@ -1,0 +1,70 @@
+{
+  "title": "Configuration Modes",
+  "level": 28,
+  "levelTitle": "Level 28 - Cisco IOS and IOS XE",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "02. Configuration Modes.md",
+  "cards": [
+    {
+      "q": "How is IOS configuration organized into modes?",
+      "a": "IOS uses a hierarchy: global config, then interface, line, or router modes, then nested submodes. Each prompt reflects the current context, and commands apply only to that mode's scope.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How do you tell which configuration mode you are in?",
+      "a": "Read the prompt: # is privileged EXEC, (config)# is global config, (config-if)# is interface, (config-line)# is line, and (config-router)# is router configuration.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands take you from privileged EXEC to global, interface, line, and router modes?",
+      "a": "configure terminal enters global config; from global, interface Gi0/1 enters interface mode, line console 0 enters line mode, and router ospf 1 enters router mode. Submodes always nest under global config.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between exit, end, and Ctrl+Z?",
+      "a": "exit goes up one mode level, while end and Ctrl+Z go all the way back to privileged EXEC mode.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "You are in interface config and type interface Gi0/2. What happens?",
+      "a": "The prompt switches context directly to the new interface without requiring you to exit to global config first.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands apply device-wide in global config?",
+      "a": "hostname, ip route, access-list, snmp-server, and logging are global commands that affect the whole device.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands are scoped to a single interface under (config-if)?",
+      "a": "ip address, no shutdown, description, speed and duplex, and channel-group apply only to that interface.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Give the command session to assign an IP and bring up an interface, then return to EXEC.",
+      "a": "configure terminal; interface GigabitEthernet0/1; ip address 10.0.0.1 255.255.255.0; no shutdown; then end or Ctrl+Z.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does the do command allow inside config mode?",
+      "a": "The do command runs EXEC commands such as show or ping from inside configuration mode so you can verify settings without exiting.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A configuration command is rejected. What do you check first?",
+      "a": "Your mode and prompt. A config command entered in privileged EXEC, or an EXEC command entered in config mode without do, is rejected; read the prompt and exit or use do as needed.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

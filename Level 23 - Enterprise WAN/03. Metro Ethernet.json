@@ -1,0 +1,82 @@
+{
+  "title": "Metro Ethernet",
+  "level": 23,
+  "levelTitle": "Level 23 - Enterprise WAN",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "03. Metro Ethernet.md",
+  "cards": [
+    {
+      "q": "What is Metro Ethernet?",
+      "a": "An Ethernet WAN service carried across a metro/service provider network, offering cost, speed, and simple L2/L3 models with service types such as E-LINE, E-LAN, and E-TREE, delivered via EoMPLS/pseudowire or VPLS/EVPN.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Why choose Metro Ethernet as a WAN?",
+      "a": "Because Ethernet is ubiquitous (familiar skills), fast (1/10/100 G), cheaper than TDM, and scales via EVPN.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the three EVC service types and their connectivity models?",
+      "a": "E-LINE is point-to-point (site links), E-LAN is multipoint any-to-any, and E-TREE is hub-spoke (root/leaf).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which delivery technologies are used for point-to-point versus multipoint Metro Ethernet?",
+      "a": "EoMPLS (L2VPN pseudowire) is used for point-to-point, while VPLS/EVPN provide multipoint L2VPN delivery.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the role of QinQ (802.1ad) in Metro Ethernet?",
+      "a": "QinQ stacks VLANs: customer tags (C-tags) ride inside service tags (S-tags) at the provider edge to deliver carrier Ethernet.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the key difference between Metro Ethernet and MPLS L3VPN for routing?",
+      "a": "L2 Metro Ethernet keeps routing with the customer, while L3 MPLS L3VPN hands routing to the provider; control is EVPN/VPLS versus MP-BGP respectively.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is EVPN in connection with Metro Ethernet?",
+      "a": "EVPN is a modern BGP + VXLAN-based L2/L3 service that scales beyond VPLS.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which commands verify Metro Ethernet pseudowires and EVPN services?",
+      "a": "show l2vpn forwarding and show l2vpn service for pseudowires; show ethernet service, show evpn evi, and show bridge-domain for EVPN/bridge checks.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A point-to-point Metro Ethernet link is down. What is the likely cause and check?",
+      "a": "A failed pseudowire is likely; check show l2vpn forwarding.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Multipoint Metro Ethernet connectivity is broken. What is the likely cause and check?",
+      "a": "A VPLS/EVPN problem is likely; check show evpn evi and MP-BGP state.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Metro Ethernet traffic is tagged incorrectly. What is the likely cause and check?",
+      "a": "A QinQ tag mismatch is likely; check the ethernet service tag configuration.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How are E-LINE, E-LAN, and E-TREE defined in one line?",
+      "a": "E-LINE is point-to-point, E-LAN is any-to-any, and E-TREE is hub-spoke.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,130 @@
+{
+  "title": "Syslog",
+  "level": 16,
+  "levelTitle": "Level 16 - Network Services",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "07. Syslog.md",
+  "cards": [
+    {
+      "q": "What is Syslog and which port does Cisco traditionally use?",
+      "a": "Syslog is a standardized mechanism for generating and transporting event/log messages; Cisco's traditional/default transport is UDP 514, though TCP and TLS are used by some implementations.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Why centralize logging to a Syslog server?",
+      "a": "It gives one location for event analysis, long-term storage, correlation across devices, easier troubleshooting, security monitoring, and incident investigation; without it, local logs can be lost after a reload or buffer overflow.",
+      "tag": "Overview",
+      "context": "Interview"
+    },
+    {
+      "q": "What are the Syslog severity levels?",
+      "a": "0 Emergency (system unusable), 1 Alert (immediate action), 2 Critical, 3 Error, 4 Warning, 5 Notice, 6 Informational, and 7 Debugging; 0 is most severe and 7 is most verbose.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does a logging severity threshold behave?",
+      "a": "A threshold includes that level and all numerically lower (more severe) levels; for example, logging trap 4 sends levels 0-4 and does not send 5, 6, or 7.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the Cisco Syslog message format?",
+      "a": "%FACILITY-SEVERITY-MNEMONIC: description, for example %LINEPROTO-5-UPDOWN: line protocol on interface changed state to up.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What do the facility, severity, mnemonic, and description fields mean in a Syslog message?",
+      "a": "Facility identifies the subsystem (LINK, LINEPROTO, OSPF, SYS, BGP), severity is the numeric 0-7 level, mnemonic is a short event identifier such as UPDOWN, and description supplies event details.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does logging buffered 4096 do and its limitation?",
+      "a": "It stores log messages in RAM locally; the buffer is volatile, so messages are normally lost on reload, and persistent centralized logging requires an external Syslog server.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands configure remote Syslog logging?",
+      "a": "logging host 10.0.0.5 sets the destination (multiple hosts allowed), and logging trap 4 sets the severity threshold sent to remote destinations, sending 0-4.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the Syslog logging destinations?",
+      "a": "Console (display on console), VTY/monitor (terminal sessions), buffer (local RAM), and Syslog server (remote collector).",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between logging monitor and terminal monitor?",
+      "a": "logging monitor configures monitor logging behavior, while terminal monitor enables logging display in the current VTY/SSH session.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does logging source-interface Loopback0 help?",
+      "a": "It makes the router source Syslog messages from the Loopback0 address, giving a stable source IP that simplifies ACLs, device identification, and management-plane consistency; it does not bypass ACLs or routing.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What command adds timestamps to Syslog messages?",
+      "a": "service timestamps log datetime msec, and service timestamps debug datetime msec for debug messages; accurate timestamps are essential for determining event order and correlating events across devices.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do NTP and Syslog work together?",
+      "a": "NTP provides an accurate device clock, which produces accurate Syslog timestamps and reliable event correlation; NTP provides the time and Syslog records events using that time.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Are Syslog and SNMP the same mechanism?",
+      "a": "No. Syslog is event/log collection typically over UDP 514 with no polling and no MIB/OID, while SNMP is monitoring/management over UDP 161/162 with polling and structured data; Syslog does not inherently feed SNMP traps.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the primary Syslog verification command?",
+      "a": "show logging shows logging status, destinations, levels, buffer contents, console/monitor settings, timestamps, and messages; clear logging clears the local buffer but not logs already stored on a remote Syslog server.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "No logs reach the Syslog server — what should you check?",
+      "a": "The Syslog server IP, remote logging config, logging threshold, source interface, routing, ACL/firewall, and UDP 514; verify with show logging.",
+      "tag": "Quick Review",
+      "context": "Practical"
+    },
+    {
+      "q": "What does logging trap 7 permit, and why might it cause too many messages?",
+      "a": "Level 7 permits all levels 0-7, including debugging, so it is the most verbose threshold; to reduce noise use a higher-number-limited threshold such as logging trap 4, which sends only 0-4.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "With logging trap 4, which of messages SYS-0, SYS-2, SYS-4, SYS-5, SYS-6 reach the remote server?",
+      "a": "Only 0, 2, and 4; levels 5 and 6 are not sent because they are less severe than the threshold of 4.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the security considerations for Syslog?",
+      "a": "Traditional Syslog over UDP provides no strong confidentiality or integrity, so protect the management network, restrict which devices can send logs, use secure transports like TLS where supported, and synchronize clocks with NTP.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is the One-Minute Syslog mental model?",
+      "a": "A Cisco device sends logs to console, buffer, monitor, and remote Syslog server (UDP 514); severity runs 0 (Emergency, most severe) to 7 (Debugging, most verbose); thresholds send that level and everything numerically lower; NTP keeps timestamps trustworthy.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

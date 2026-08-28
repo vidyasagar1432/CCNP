@@ -1,0 +1,88 @@
+{
+  "title": "SD-WAN",
+  "level": 29,
+  "levelTitle": "Level 29 - Troubleshooting",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "17. SD-WAN.md",
+  "cards": [
+    {
+      "q": "What does SD-WAN troubleshooting check?",
+      "a": "The control plane (vManage/vSmart), the data plane (transport tunnels), and policy. Failures are control connections down, TLOC issues, or policy dropping traffic.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the SD-WAN architecture components and their roles?",
+      "a": "vManage (admin UI), vSmart (control policy), vBond (orchestration), vEdge/cEdge (data plane), and vAnalytics (reporting).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the first SD-WAN check?",
+      "a": "show sdwan control connections, which shows connectivity to vSmart and vBond. Control connections must be up before data works.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands show the SD-WAN data plane?",
+      "a": "show sdwan tunnel (data tunnels) and show sdwan interface (transport).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the SD-WAN troubleshooting order?",
+      "a": "Control plane first, then tunnels, then policy. Control plane must be up before data tunnels work.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does a tunnel down in SD-WAN indicate?",
+      "a": "A TLOC (transport locator) issue with the transport interface.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What drives SD-WAN path selection and failover?",
+      "a": "BFD/SLA measurements, which determine the health of transport paths and drive path selection.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What port does SD-WAN use for DTLS control connections?",
+      "a": "DTLS port 12346 for control plane connectivity.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "When policy drops traffic silently in SD-WAN, what should you check?",
+      "a": "The policy match (data-prefix or application) and action, since a wrong match or action causes traffic to be dropped.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between centralized and localized SD-WAN policy?",
+      "a": "Centralized policy is applied by vSmart for control and data plane; localized policy applies to interfaces.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "A vSmart with no connection to the vEdge is most likely caused by what?",
+      "a": "A certificate or reachability problem preventing the control connection from forming.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What command shows BFD sessions for SLA health?",
+      "a": "show sdwan bfd sessions.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A vBond that is unreachable is most likely caused by what?",
+      "a": "A DNS/IP problem resolving and reaching the vBond orchestration node.",
+      "tag": "Quick Review",
+      "context": "Practical"
+    }
+  ]
+}

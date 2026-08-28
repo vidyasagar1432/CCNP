@@ -1,0 +1,70 @@
+{
+  "title": "IMAP",
+  "level": 16,
+  "levelTitle": "Level 16 - Network Services",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "16. IMAP.md",
+  "cards": [
+    {
+      "q": "What is IMAP and how does it handle mail?",
+      "a": "IMAP (TCP 143) keeps mail on the server and synchronizes it across clients, keeping folders, read-state, and messages consistent; it also supports server-side search and partial fetch, and its secure variant is IMAPS on TCP 993.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the IMAP model?",
+      "a": "Mail lives on the server (port 143, secure 993), synchronizes across clients, is an online protocol, and uses server-side folders; clients keep talking to the server so nothing lives only on one device.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do IMAP and POP3 compare?",
+      "a": "IMAP keeps mail on the server and syncs across multiple clients with server folders and search, using ports 143/993; POP3 downloads and usually deletes mail, lacks multi-device sync, uses a single INBOX, and uses ports 110/995.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the basic IMAP operations?",
+      "a": "LOGIN authenticates, SELECT INBOX opens a folder, FETCH n BODY[] retrieves a message, SEARCH UNSEEN runs a server-side query, STORE +FLAGS (Seen) marks mail read, and CLOSE/LOGOUT finishes; commands are prefix-tagged, e.g. a01 SELECT INBOX.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the IMAP security ports?",
+      "a": "143 is plaintext and 993 is IMAPS over TLS; use 993 or STARTTLS because mail on 143 is sniffable.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "When should you choose IMAP versus POP3?",
+      "a": "Choose IMAP when using phone plus laptop plus webmail, for server backup because mail is retained, and where multi-device sync matters; choose POP3 for offline single-device use and minimal server load.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Why is IMAP better than POP3 for DLP and backup?",
+      "a": "IMAP keeps mail on the mail servers, so central backup and DLP work better than with POP3 where data lands only on endpoints.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What should network operations watch for with IMAP?",
+      "a": "Allow TCP 143/993 and monitor for bulk login attempts, and check credentials on bad-login reports, folder config on missing folders, and client settings when sync drift appears.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "The exam's memorizable IMAP versus POP3 contrast is what?",
+      "a": "IMAP = synchronized online; POP3 = download offline.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How would you troubleshoot an IMAP connection reset?",
+      "a": "It is often a TLS-versus-plaintext mismatch: connect with 993 when encryption is required rather than 143, and verify the ACL and credentials.",
+      "tag": "Quick Review",
+      "context": "Practical"
+    }
+  ]
+}

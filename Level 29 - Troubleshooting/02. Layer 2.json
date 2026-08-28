@@ -1,0 +1,23 @@
+{
+  "title": "Layer 2",
+  "level": 29,
+  "levelTitle": "Level 29 - Troubleshooting",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "02. Layer 2.md",
+  "cards": [
+    { "q": "What is Layer 2 troubleshooting concerned with?", "a": "Switching: VLANs, trunks, MAC learning, STP, and ports. Problems appear as no MAC learned, VLAN missing, or STP blocking.", "tag": "Overview", "context": "Both" },
+    { "q": "What is the Layer 2 verification order?", "a": "Link up, VLAN exists, port in VLAN, MAC learned, trunk carries VLAN, then STP state. Work up the switch database.", "tag": "Core Concept", "context": "Both" },
+    { "q": "What command proves the switch sees hosts on a port?", "a": "show mac address-table, which shows learned MACs.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What command shows the VLAN list on a switch?", "a": "show vlan (or show vlan brief).", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What command shows trunk information?", "a": "show interfaces trunk.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What are the two top causes of Layer 2 issues?", "a": "VLAN mismatch and trunk filtering (allowed VLAN list).", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What silent failure does a native VLAN mismatch cause on a trunk?", "a": "Native VLAN mismatch causes silent loss of traffic between the two ends.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What is the relationship between STP blocking and loops?", "a": "STP blocking is normal and expected; loops are the actual failure. Look for loops rather than treating a blocked port as an error.", "tag": "Exam Trap", "context": "Both" },
+    { "q": "What should the trunk configuration be for encapsulation and mode?", "a": "Encapsulation 802.1Q and switchport mode trunk. Avold relying on VTP.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What three tools resolve most Layer 2 issues?", "a": "The MAC table, show vlan, and show interfaces trunk.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "A broadcast storm on the network is most likely caused by what?", "a": "A loop in the network (unblocked STP or a switching loop).", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How do you confirm the VLAN a port belongs to?", "a": "Use show interfaces switchport or show interfaces status to verify the VLAN assignment.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "Why is an unknown MAC in the table a Layer 2 concern?", "a": "An unknown or wrong MAC can indicate a VLAN mismatch or a port assignment problem.", "tag": "Quick Review", "context": "Exam" }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "title": "YAML",
+  "level": 24,
+  "levelTitle": "Level 24 - SDN & Automation",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "12. YAML.md",
+  "cards": [
+    {
+      "q": "What is YAML and why is it used in automation?",
+      "a": "YAML (\"YAML Ain't Markup Language\") is a human-friendly data format based on indentation, used heavily by Ansible for playbooks and inventory and for config files. It maps cleanly to JSON and Python structures.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the basic YAML syntax elements?",
+      "a": "Mapping (key: value), list (- item), nesting via indentation, comments with #, and strings where quotes are optional. Indentation defines structure and must use spaces, not tabs.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does a YAML list of mappings look like?",
+      "a": "A dash-prefixed item per element, for example interfaces: with \"- name: Gi1\" and its indented attributes enabled under it. It is the classic Ansible/device structure.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What YAML rules must be followed to avoid parse errors?",
+      "a": "Use spaces, never tabs; keep consistent indentation at the same level; quote special characters like : and #; use true/false for booleans; and use null or ~ for null. Tabs and mixed indentation cause parse errors.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Where is YAML used across network automation?",
+      "a": "Ansible playbooks and inventory, config files/values, DNA Center exports, and a similar style in Terraform HCL. YAML is the config/playbook language of automation.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does YAML compare to JSON?",
+      "a": "YAML is human-friendly, uses indentation instead of braces, and supports comments; JSON is compact, standard, and uses braces with no comments. YAML converts cleanly to JSON.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you load and write YAML in Python?",
+      "a": "import yaml, then data = yaml.safe_load(text) converts YAML to dict/list and yaml.safe_dump(data) serializes back to YAML text. Use safe_load, never unsafe load.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What causes most YAML parse errors and odd values?",
+      "a": "Tabs or bad indentation cause parse errors; wrong values come from quoting issues; missing keys come from wrong nesting/indent level; boolean problems come from \"yes\"/\"no\" strings instead of true/false; and anchors/aliases need expansion.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why are tabs forbidden in YAML?",
+      "a": "YAML defines structure purely by indentation using spaces; tabs and mixed indentation produce parse errors.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which automation tools rely on YAML for their configuration files?",
+      "a": "Ansible playbooks and inventory are YAML, Terraform uses the similar HCL, and SDN platforms such as DNA Center export YAML, making YAML the automation config language.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

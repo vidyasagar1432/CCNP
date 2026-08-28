@@ -1,0 +1,70 @@
+{
+  "title": "Prefix Lists",
+  "level": 12,
+  "levelTitle": "Level 12 - BGP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "12. Prefix Lists.md",
+  "cards": [
+    {
+      "q": "What are prefix lists?",
+      "a": "Filters that match routes by prefix and prefix-length, the preferred way to match routes in BGP policy (route-maps, distribute-lists, filters) because they are faster and cleaner than access-lists for routing. The exam focuses on the ge and le modifiers and first-match-wins evaluation order.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the prefix list syntax?",
+      "a": "ip prefix-list NAME {seq} deny|permit PREFIX/LEN [ge GE] [le LE]. Without ge or le, only an exact prefix of that length matches.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the implicit prefix list rules?",
+      "a": "Default len is only the stated length; default ge equals the stated length; default le is 32; matching requires the prefix bits be identical AND the length be within [ge, le]; and an implicit deny applies at the end so nothing matches beyond the configured entries.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does ip prefix-list FOO permit 10.0.0.0/8 ge 16 le 24 match?",
+      "a": "It matches 10.0.0.0/8 prefixes with lengths from 16 through 24 only; a /25 or longer is not matched. ge and le modify length, not the prefix bits, and the /8 prefix part stays fixed.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What matches permit 0.0.0.0/0 le 32 and permit 0.0.0.0/0?",
+      "a": "0.0.0.0/0 le 32 matches everything, the universal permit commonly placed at the end of lists; 0.0.0.0/0 alone matches only the default route.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How are prefix list entries evaluated?",
+      "a": "Sequences are evaluated lowest seq first and the first match wins; an implicit deny is applied at the end no matter what. Prefix lists support sequence numbers that can be reordered or deleted.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you use a prefix list inside a route-map or directly on a neighbor?",
+      "a": "Reference it with match ip address prefix-list UPSTREAM inside a route-map, or apply it directly with neighbor ... prefix-list NAME {in|out}.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Commands to display prefix lists?",
+      "a": "show ip prefix-list, show ip prefix-list detail, and show ip prefix-list NAME sum display the configured lists and their counters.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why might a prefix list filter out every route by accident?",
+      "a": "Because of the implicit deny at the end. If a final permit such as 0.0.0.0/0 le 32 is missing, anything not explicitly matched is denied.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does a prefix list auto-include longer prefixes of the stated network?",
+      "a": "No. The stated /len is the only anchor; longer prefixes are included only if le (or a ge/le range) allows them. The longest-prefix behaviour of routing does not apply to matching.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

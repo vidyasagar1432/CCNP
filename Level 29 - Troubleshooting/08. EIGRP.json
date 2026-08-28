@@ -1,0 +1,22 @@
+{
+  "title": "EIGRP",
+  "level": 29,
+  "levelTitle": "Level 29 - Troubleshooting",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "08. EIGRP.md",
+  "cards": [
+    { "q": "What does EIGRP troubleshooting handle?", "a": "Neighbor, K-value, split horizon, and route issues. Failures show as no neighbors, stuck-in-active (SIA), or missing routes.", "tag": "Overview", "context": "Both" },
+    { "q": "What must match for EIGRP neighbors to form?", "a": "The AS number, K-values, hello/dead timers, network in the AS, and authentication.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What is the first EIGRP verification?", "a": "The neighbor table with show ip eigrp neighbors, then show ip eigrp topology and routes.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What does EIGRP state Active mean?", "a": "A route is active and being recomputed, meaning EIGRP is querying neighbors for that route. This is where SIA can occur.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What is SIA in EIGRP?", "a": "Stuck in Active, where a route stays in active state because a neighbor did not reply to a query in time.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "Why do K-value mismatches block EIGRP neighbors?", "a": "Because both neighbors must agree on the composite metric weights; a mismatch prevents the adjacency from forming.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How does split horizon affect EIGRP routes?", "a": "Split horizon on hub links can prevent routes from being advertised back out the interface they were learned on, causing missing routes.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What do EIGRP stub routers do?", "a": "Stub routers stop sending queries, preventing SIA on hub-and-spoke networks because they do not propagate queries.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What is the difference between active and passive EIGRP routes?", "a": "A passive route is stable; an active route is being computed and queried. Watch for SIA on active routes.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What is the feasible successor concept used for?", "a": "It allows alternate loop-free routes, and variance can be used to load-balance across feasible successors.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What does show ip eigrp traffic show?", "a": "The EIGRP packet counts/activity across the links.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "An EIGRP neighbor flap is most likely caused by what?", "a": "A hello/dead timer mismatch or dropped hellos, checked with the traffic counters.", "tag": "Quick Review", "context": "Practical" }
+  ]
+}

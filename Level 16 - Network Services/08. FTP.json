@@ -1,0 +1,94 @@
+{
+  "title": "FTP",
+  "level": 16,
+  "levelTitle": "Level 16 - Network Services",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "08. FTP.md",
+  "cards": [
+    {
+      "q": "What is FTP and what ports does it use?",
+      "a": "FTP (File Transfer Protocol) transfers files over TCP by separating control from data traffic: TCP 21 is the control connection, TCP 20 is the server's source port for active-mode data, and passive mode uses a dynamic/high server port.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How do control and data connections behave in FTP?",
+      "a": "The control connection carries commands and replies and normally stays up for the session, while a separate data connection, established per transfer, carries files and directory listings.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does active FTP mode work?",
+      "a": "The client tells the server which client-side port to use, and the server initiates the data connection from its TCP 20 source port to that port; active mode can cause problems with client-side firewalls and NAT.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does passive FTP mode work?",
+      "a": "The server tells the client a dynamic/high port it is listening on, and the client initiates both the control and data connections; the PASV command enters passive mode, and the server's passive-port range must be permitted through its firewall.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do active and passive FTP compare?",
+      "a": "Both use TCP 21 for control and have the same control port, but in active mode the server initiates data from TCP 20 and is less firewall/NAT-friendly for clients, while in passive mode the client initiates data to a dynamic server port and is generally more friendly.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the exam shortcut for active versus passive FTP?",
+      "a": "Active = server connects to client for data; passive = client connects to server for data.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is traditional FTP insecure?",
+      "a": "It sends usernames, passwords, commands, and file data in cleartext, and the PORT command can be abused for FTP bounce connections to third parties.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the secure FTP alternatives, and what is the SFTP trap?",
+      "a": "FTPS is FTP protected with TLS/SSL, SFTP is file transfer over SSH, and SCP is secure file copy over SSH; SFTP is not secure FTP but a different protocol that operates over SSH.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is an FTP bounce attack?",
+      "a": "Abuse of active-mode behavior, particularly the PORT command, to make an FTP server initiate a connection toward another host/port, enabling port scanning or reaching systems the attacker cannot reach directly.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does Cisco IOS use FTP?",
+      "a": "FTP can transfer supported IOS images and configuration files, for example copy ftp://user:password@10.0.0.5/ios.bin flash:.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do FTP and TFTP compare?",
+      "a": "FTP uses TCP with TCP 21 control, provides authentication but no encryption, and suits larger/managed transfers; TFTP uses UDP 69, has no authentication, and suits simple network-device transfers.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the common FTP reply codes?",
+      "a": "220 service ready, 230 user logged in, 331 user name okay need password, 200 command okay, 250 requested file action completed, 425 can't open data connection, 530 not logged in, 550 requested action not taken/file unavailable.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why can FTP login succeed but the transfer fail?",
+      "a": "The data connection is blocked; opening TCP 21 allows only the control connection, and FTP also requires the appropriate data connection (active-mode client listening or passive-mode server range) to succeed.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "TCP 21 open guarantees FTP file transfers work. Is that true?",
+      "a": "No. TCP 21 only opens the control connection; file transfers also require the data connection to succeed, which can be blocked by firewalls, NAT, or an unopened passive-port range.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

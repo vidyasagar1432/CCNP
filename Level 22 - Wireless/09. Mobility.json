@@ -1,0 +1,76 @@
+{
+  "title": "Mobility",
+  "level": 22,
+  "levelTitle": "Level 22 - Wireless",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "09. Mobility.md",
+  "cards": [
+    {
+      "q": "What is wireless mobility?",
+      "a": "Wireless mobility keeps a client's session alive as it moves between APs and even between WLCs. WLCs join a mobility group; the old (guest/anchor) WLC anchors the client while the foreign WLC serves it, or the anchor forwards traffic. Roaming works because mobility state is shared.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is a mobility group?",
+      "a": "A mobility group is a set of WLCs that trust each other and exchange client state (MAC/IP, security). Group membership provides scalability and the peers communicate over shared keys/certificates.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the WLC roles during a roam?",
+      "a": "Anchor (the first/guest WLC that holds the session), Foreign (the new WLC currently serving the client), and Controller (a group member that coordinates). Anchor is where the subnet/session lives; foreign is where the client is now.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between roaming and mobility?",
+      "a": "Roaming is the client moving between APs/BSSIDs; mobility is the WLC handoff and data path that supports it, with fast roam for low-latency handoff. Mobility is the infrastructure that makes roaming seamless.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between Layer 2 and Layer 3 mobility?",
+      "a": "Layer 2 mobility keeps the client on the same subnet and uses the normal switch path; Layer 3 mobility moves the client to a different subnet, so the anchor WLC must forward traffic. Cross-subnet clients need the anchor to forward.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands configure a mobility group on a WLC?",
+      "a": "wireless mobility group name CORP sets the group ID, wireless mobility member 192.0.2.10 defines a peer WLC IP, and wireless mobility keepalive interval 30 sets the health check timer.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands verify mobility state?",
+      "a": "show wireless mobility summary, show wireless mobility statistics, show wireless mobility client, show ap mobility summary, and show ap summary.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Roams drop sessions. What is the likely cause and the key check?",
+      "a": "Mobility is likely down between WLCs. Check show wireless mobility summary first to see group and peer status.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "There is no handoff, slow cross-subnet roaming, repeated auth, and failing keepalives. What should you check?",
+      "a": "No handoff means the WLCs are not in the same mobility group; slow cross-L3 roaming points to the anchor forwarding path; repeated auth means fast roam is off; keepalive failures indicate a firewall blocking the mobility timers.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the difference between the anchor and foreign WLC during roaming?",
+      "a": "The anchor is the original WLC that holds the client session/subnet; the foreign WLC is the one currently serving the client.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which Mobility quick review facts should you remember?",
+      "a": "A mobility group is shared WLCs; anchor is the original WLC, foreign is the current one; L2 mobility is same subnet, L3 needs anchor forwarding; keepalive checks health; roaming is AP-level; verify with show wireless mobility.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

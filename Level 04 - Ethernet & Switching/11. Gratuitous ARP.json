@@ -1,0 +1,106 @@
+{
+  "title": "Gratuitous ARP (GARP)",
+  "level": 4,
+  "levelTitle": "Level 04 - Ethernet & Switching",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "11. Gratuitous ARP.md",
+  "cards": [
+    {
+      "q": "What is Gratuitous ARP (GARP)?",
+      "a": "GARP is an unsolicited ARP message a device uses to announce or refresh the association between its own IPv4 address and MAC address on the local Layer 2 segment. The most common form is an ARP Request where the sender IP and target IP are the same.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What distinguishes the Ethernet destination MAC from the ARP target MAC in a GARP request?",
+      "a": "In a common GARP request, the Ethernet destination MAC is the broadcast FF:FF:FF:FF:FF:FF while the ARP target MAC field is commonly 00:00:00:00:00:00. They are not the same.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens when a device's MAC changes but its IPv4 address stays the same?",
+      "a": "The device can send GARP such as 10.1.1.10 is at MAC-B so neighboring devices update their ARP caches immediately instead of waiting for old ARP entries to age out.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How is GARP used during HSRP/VRRP gateway failover?",
+      "a": "When a new router becomes active, it can send ARP announcements so neighbors quickly learn that the virtual gateway IP is now at the new active gateway's MAC, redirecting traffic without waiting for existing ARP-cache entries to expire.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does an ARP probe differ from GARP?",
+      "a": "An ARP probe is used before a host claims an IPv4 address to detect conflicts, commonly with Sender IP = 0.0.0.0 and Target IP = the tested address. GARP is an unsolicited announcement/update of an existing address-to-MAC association.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does GARP relate to NIC teaming or interface failover?",
+      "a": "NIC teaming, bonding, or failover mechanisms can generate GARP announcements when traffic moves from one interface/device to another, so neighbors learn the new MAC association. Exact behavior depends on OS, driver, teaming implementation, and design.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How does GARP compare with normal ARP?",
+      "a": "Normal ARP is triggered by needing to resolve an IPv4 address to a MAC, commonly using Request + Reply. GARP is a proactive unsolicited announcement of the sender's own IPv4-to-MAC mapping, commonly an ARP Request with Ethernet destination broadcast and target MAC field 00:00:00:00:00:00, and may refresh existing cache mappings.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "Does GARP guarantee every device updates its ARP cache?",
+      "a": "No. GARP may update neighboring caches, but whether and how a host processes unsolicited ARP announcements is implementation/platform dependent.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How does a switch react to a GARP frame?",
+      "a": "When a GARP frame arrives from a new MAC, the switch can learn that MAC -> ingress port in its CAM/MAC table under normal MAC learning. This is separate from the host ARP cache: ARP resolves IPv4 -> MAC, while the switch learns MAC -> port.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How can GARP be abused and what is the key Cisco mitigation?",
+      "a": "A malicious device can send forged GARP announcements to poison ARP caches, leading to man-in-the-middle, traffic interception, redirection, or denial of service. The primary Cisco protection is Dynamic ARP Inspection (DAI), which validates ARP against trusted bindings commonly obtained through DHCP Snooping.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does IPv6 use GARP?",
+      "a": "No. IPv6 uses Neighbor Discovery (ND) over ICMPv6; there is no IPv6 equivalent of ARP/GARP. IPv6 duplicate-address detection uses DAD (Duplicate Address Detection) with Neighbor Solicitation/Advertisement messages.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is there a universal Cisco IOS command to send a GARP now?",
+      "a": "No. There is generally no universal command that simply means send a GARP now; GARP/ARP announcements are generated automatically by hosts, interfaces, or protocols such as first-hop redundancy mechanisms. The ability to manually trigger one depends on the platform and protocol.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands verify ARP state and inspect ARP security?",
+      "a": "show arp / show ip arp view the table, show ip arp | include 10.1.1.10 filters entries, debug arp (disabled with undebug all or u all) debugs, show ip arp inspection checks DAI, and show ip dhcp snooping binding checks bindings.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the troubleshooting workflow for a MAC/IP change or gateway failover?",
+      "a": "Check the ARP table with show ip arp to verify the expected mapping, check the switch MAC table with show mac address-table to see where the MAC is learned, check DAI with show ip arp inspection and show ip dhcp snooping binding, then capture ARP traffic to spot requests, replies, GARPs, unexpected changes, and spoofing.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which facts belong in the GARP quick review?",
+      "a": "Purpose: proactively announce/update IPv4-to-MAC mapping; protocol ARP; common opcode Request; Sender IP = Target IP; Ethernet destination broadcast; ARP target MAC commonly 00:00:00:00:00:00; scope local Layer 2; main uses MAC/IP update and HSRP/VRRP failover; related to ARP probe; security risk ARP spoofing; key mitigation DAI with DHCP Snooping; IPv6 has no GARP, uses ND/ICMPv6 and DAD.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the one-minute mental model distinguishing normal ARP, GARP, and ARP probe?",
+      "a": "Normal ARP asks Who has this IPv4 address? to find a MAC. GARP proactively announces This IPv4 address is associated with this MAC (sender and target IP are the sender's own). An ARP probe asks Is anyone already using this IPv4 address? before an address is claimed.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

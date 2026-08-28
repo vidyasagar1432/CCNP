@@ -1,0 +1,82 @@
+{
+  "title": "WPA2",
+  "level": 22,
+  "levelTitle": "Level 22 - Wireless",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "11. WPA2.md",
+  "cards": [
+    {
+      "q": "What is WPA2?",
+      "a": "WPA2 is the long-standing Wi-Fi security standard using AES-CCMP for encryption and either 802.1X (enterprise) or PSK (personal) for authentication. The exam emphasizes the two WPA2 modes, the 4-way handshake, and why TKIP/PSK are weak points.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the two WPA2 modes and how do they authenticate?",
+      "a": "WPA2 Personal uses a PSK (shared passphrase) for small networks; WPA2 Enterprise uses 802.1X/RADIUS per-user authentication for corporate networks.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What cipher and protocol does WPA2 use for encryption?",
+      "a": "WPA2 uses the AES cipher with the CCMP protocol, a per-session key (PTK), and is defined in IEEE 802.11i. AES-CCMP replaced the weak TKIP/RC4 used by WPA1.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens in the WPA2 4-way handshake?",
+      "a": "The AP sends an ANonce; the client replies with an SNonce plus MIC; the AP confirms and installs the key; the client confirms. Both sides derive the PTK (pairwise transient key) from Anonce/Snonce plus the PMK.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is WPA2-PSK a weak point?",
+      "a": "The PMK is derived from the passphrase, so it is shared, static, and rarely rotated, and it is vulnerable to offline/online dictionary attacks. PSK is only as strong as the passphrase.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does WPA2 Enterprise derive keys?",
+      "a": "The client authenticates via EAP-over-802.1X to a RADIUS server, which supplies the MSK. The MSK becomes the PMK, which is then used in the 4-way handshake to derive the session PTK.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands configure WPA2 on a WLC WLAN?",
+      "a": "security wpa akm dot1x enables enterprise auth, security dot1x server-auth sets RADIUS server auth, no security wpa akm psk disables PSK, and security wpa ccmp selects AES-CCMP.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands verify WPA2 and client authentication?",
+      "a": "show wlan summary, show wlan id 1, show wireless client summary, show dot11 associations, and show auth-list.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Clients fail authentication or loop in the handshake. What are the causes and checks?",
+      "a": "An auth failure is often a PSK typo (check show dot11 associations); a handshake loop indicates a key mismatch in the 4-way handshake.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "RADIUS auth fails, rekeys misbehave, and dictionary attacks happen. What should you check?",
+      "a": "RADIUS failures point to the dot1x server; rekey issues point to the PMK/security config; dictionary attacks mean a weak PSK, so enforce a strong passphrase policy.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which cipher does WPA2 use and what did it replace?",
+      "a": "WPA2 uses AES-CCMP, not TKIP. AES-CCMP replaced the weak TKIP/RC4 cipher used by WPA1 per IEEE 802.11i.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which WPA2 quick review facts should you remember?",
+      "a": "Cipher is AES-CCMP; Personal uses PSK, Enterprise uses 802.1X; the 4-way handshake derives the PTK from Anonce/Snonce; the PMK comes from the passphrase or MSK; the weak point is PSK; the standard is 802.11i.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

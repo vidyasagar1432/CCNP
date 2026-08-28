@@ -1,0 +1,94 @@
+{
+  "title": "IPsec IKEv2 (IKEv2 vs IKEv1)",
+  "level": 18,
+  "levelTitle": "Level 18 - VPN Technologies",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "07. IPsec IKEv2.md",
+  "cards": [
+    {
+      "q": "What is IKEv2 and how does it differ structurally from IKEv1?",
+      "a": "IKEv2 is the modern IPsec key-exchange standard (RFC 7296) that merges IKEv1's two phases into a single IKE_SA using an IKE_INIT plus IKE_AUTH exchange pair, and it provides built-in NAT-T and EAP support.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the main message exchanges in IKEv2?",
+      "a": "IKE_SA_INIT negotiates the DH, ciphers, and IKE SA, IKE_AUTH authenticates the peer and creates the first child SA, CREATE_CHILD_SA builds later/rekeyed SAs, and INFORMATIONAL handles delete, error, and liveness.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which RFC defines IKEv2?",
+      "a": "RFC 7296 defines IKEv2, replacing the old IKEv1 RFCs 2407, 2408, and 2409.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the default IKE SA and child SA lifetimes on Cisco IOS XE?",
+      "a": "The IKE SA lifetime defaults to 86400 seconds (24 hours) and the IPsec child SA lifetime defaults to 3600 seconds (1 hour).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does IKEv2 handle NAT-T compared to IKEv1?",
+      "a": "IKEv2 has NAT-T built in natively rather than as an add-on; it discovers NAT using NAT_DETECTION_SOURCE_IP and NAT_DESTINATION_IP payloads and runs IKE over UDP 4500.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What authentication methods does IKEv2 support that IKEv1 did not support natively?",
+      "a": "IKEv2 natively supports EAP (such as EAP-MSCHAPv2 and EAP-GTC) for remote access in addition to pre-shared keys and certificates, whereas IKEv1 required add-ons for EAP-style remote access.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which IKEv2 building blocks are configured on IOS XE?",
+      "a": "The blocks are the IKEv2 proposal (encryption, integrity, DH group), IKEv2 policy, IKEv2 keyring (pre-shared keys), IKEv2 profile (match identity, authentication, keyring), the IPsec transform-set, and the IPsec profile.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Does IKEv2 use main mode or aggressive mode?",
+      "a": "No; IKEv2 eliminates the main/aggressive phase-1 modes that IKEv1 used and instead uses the fixed IKE_INIT and IKE_AUTH exchanges.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What ports does IKEv2 use and when is each used?",
+      "a": "IKEv2 uses UDP 500 for IKE and switches to UDP 4500 for NAT-T / ESP-in-UDP when NAT is detected between the peers.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is IKEv2 configured in a site-to-site example on IOS XE?",
+      "a": "Create an IKEv2 proposal, policy, keyring, and profile, then attach the profile to an IPsec profile via set ikev2-profile, and apply that to the tunnel or an IPsec crypto profile.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands verify IKEv2 and IPsec SA state?",
+      "a": "show crypto ikev2 sa, show crypto ikev2 profile, show crypto ikev2 policy, show crypto ipsec sa, show crypto session, and debug crypto ikev2.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What typically causes IKE_SA_INIT to fail between IKEv2 peers?",
+      "a": "A mismatch in the IKEv2 proposal or policy (encryption, integrity, or DH group) or blocked UDP 500/4500 prevents the IKE SA from forming; check show crypto ikev2 sa.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What does IKE_AUTH failure indicate?",
+      "a": "An IKE_AUTH failure usually indicates an authentication problem such as a wrong pre-shared key in the keyring or a mismatched match identity, not a proposal problem.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the IKEv2 quick-review summary?",
+      "a": "IKEv2 is RFC 7296, one IKE_SA with IKE_INIT and IKE_AUTH (no main/aggressive), built-in NAT-T and EAP, UDP 500/4500, and configured on IOS XE with proposal, policy, keyring, and profile blocks, making it the modern preferred IPsec key exchange.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

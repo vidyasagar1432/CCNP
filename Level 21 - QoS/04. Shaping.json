@@ -1,0 +1,82 @@
+{
+  "title": "Shaping",
+  "level": 21,
+  "levelTitle": "Level 21 - QoS",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "04. Shaping.md",
+  "cards": [
+    {
+      "q": "What is shaping in QoS?",
+      "a": "Shaping smooths traffic to a rate by buffering excess instead of dropping it. It works egress-only and adds delay, making it ideal for aligning to a subscribed line rate or a downstream policer without wasting packets.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How does shaping handle excess traffic compared to policing?",
+      "a": "Shaping buffers the excess in a shaping queue and it goes out later, adding delay; policing drops or re-marks excess with no delay. Shaping is egress-only with low loss; policing works ingress/egress with high loss.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the elements of the shaping model?",
+      "a": "CIR (the shaped rate), Bc (committed burst), Be (excess burst), the queue that buffers excess, and added delay/latency.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why would you use shaping rather than policing?",
+      "a": "To align to the access line CIR, avoid drops by not exceeding a downstream policer, smooth bursts for fairness, and avoid flooding a downstream link. Shaping protects against bursty transmission hitting a stricter link.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What command configures shaping and how do 'shape average' and 'shape peak' differ?",
+      "a": "shape average <rate> uses a token bucket (Bc/Be) and is the standard; shape peak permits use of Be to allow extra burst. It is configured in a policy-map attached with service-policy output.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does hierarchical shaping work?",
+      "a": "A parent policy shapes the aggregate/total rate (e.g., 10 Mbps) while child policies carve per-class sub-rates, resulting in per-class buckets within the link rate.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What command shows shaping statistics on an interface?",
+      "a": "show policy-map interface (or show policy-map interface Gi0/1), along with show queueing interface.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A shaper is adding excessive delay; what is the likely cause and what should you check?",
+      "a": "Queue buildup in the shaper's queue. Check the queueing depth/buffer, and ensure the shaped rate matches the link.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "Traffic bursts are leaking through a shaper; what is the likely cause?",
+      "a": "The Bc/Be burst values are too small. Increase Bc so legitimate bursts are buffered and released at the shaped rate.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the fundamental difference between shaping and policing?",
+      "a": "Shaping buffers excess and adds delay; policing drops or re-marks the excess with no buffering.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "On what direction(s) does shaping apply?",
+      "a": "Shaping is egress-only; policing can be applied on ingress or egress.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "For smoothing traffic to an access line rate, should you shape or police?",
+      "a": "Shape, because shaping buffers and smooths bursts to align with the CIR without dropping, whereas policing would drop the excess.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

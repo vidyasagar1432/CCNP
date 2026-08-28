@@ -1,0 +1,100 @@
+{
+  "title": "IPsec",
+  "level": 18,
+  "levelTitle": "Level 18 - VPN Technologies",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "02. IPsec.md",
+  "cards": [
+    {
+      "q": "What does IPsec provide and what are its two phases?",
+      "a": "IPsec provides confidentiality, integrity, and authentication for IP traffic at the packet level. Its two phases are IKE (key management, UDP 500/4500) and ESP/AH (data plane).",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between AH and ESP?",
+      "a": "AH (protocol 51) provides integrity and authentication but does not encrypt and has no NAT traversal; ESP (protocol 50) provides confidentiality, integrity, and authentication and is the standard choice for real encryption. AH is legacy.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between transport mode and tunnel mode in IPsec?",
+      "a": "Transport mode protects only the payload and keeps the original IP header visible, used for host-to-host or GRE; tunnel mode wraps the entire IP packet in a new outer header, used for site-to-site VPNs.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the purpose of IKE phases 1 and 2?",
+      "a": "Phase 1 authenticates the peers and builds a secure channel, producing an ISAKMP SA (main or aggressive mode). Phase 2 negotiates data-plane keys and produces the IPsec SA (quick mode).",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What ports does IKE use, and when is each used?",
+      "a": "ISAKMP uses UDP 500; NAT-T wraps ESP in UDP 4500 when NAT is between the peers. NAT-T is used to allow ESP to pass through NAT.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between main mode and aggressive mode in IKE?",
+      "a": "Main mode uses 6 messages and is secure; aggressive mode uses 3 messages and is faster but weaker.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the differences between IKEv1 and IKEv2?",
+      "a": "IKEv1 has two phases (1+2) with complex SA negotiation and legacy status; IKEv2 uses one exchange with simpler SA negotiation, native/built-in NAT-T, and is the preferred modern standard.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does an IPsec transform-set pair together?",
+      "a": "A transform-set pairs an encryption algorithm (esp-aes) with an integrity algorithm (esp-sha-hmac), defining both encryption and integrity for the tunnel.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is the crypto map attached in legacy IPsec configuration?",
+      "a": "The crypto map (for example crypto map CM 10 ipsec-isakmp) is attached to the physical interface with the crypto map command, and it defines the peer, transform-set, and the interesting-traffic ACL via match address.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the modern approach to IPsec configuration used by DMVPN and FlexVPN?",
+      "a": "The modern approach uses an IKEv2 profile plus an IPsec profile instead of the legacy crypto map and ISAKMP configuration, simplifying configuration.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands verify IPsec SA and IKE state?",
+      "a": "show crypto isakmp sa, show crypto ipsec sa, show crypto map, show crypto session, debug crypto isakmp, and debug crypto ipsec.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Tunnel is up but no traffic passes through IPsec; what is a likely cause?",
+      "a": "A crypto map ACL mismatch in the match address statement means the interesting traffic doesn't match, so no IPsec SA is created. Check the match address ACL.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What happens when NAT breaks ESP, and how is it fixed?",
+      "a": "NAT can break ESP; NAT-T wraps ESP in UDP 4500 to allow it through NAT between the peers.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What causes a transform-set mismatch between IPsec peers?",
+      "a": "The peers have different algorithms configured in their transform-sets; both ends must use the same encryption and integrity algorithms, such as esp-aes with esp-sha-hmac.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the IPsec quick-review summary?",
+      "a": "ESP encrypts, AH authenticates only, tunnel mode wraps the entire packet, transport protects only the payload, IKE uses UDP 500, NAT-T uses UDP 4500, phase 1 produces the ISAKMP SA, phase 2 produces the IPsec SA, and the transform is esp-aes plus esp-sha.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

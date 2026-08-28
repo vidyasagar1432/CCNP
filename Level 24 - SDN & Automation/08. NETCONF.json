@@ -1,0 +1,20 @@
+{
+  "title": "NETCONF",
+  "level": 24,
+  "levelTitle": "Level 24 - SDN & Automation",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "08. NETCONF.md",
+  "cards": [
+    { "q": "What is NETCONF?", "a": "NETCONF is the IETF standard (RFC 6241) for managing network devices over an SSH session using XML RPCs. It works on YANG models, supports transactions and candidate config, and separates operational vs running datastores. It is the richer alternative to RESTCONF.", "tag": "Overview", "context": "Both" },
+    { "q": "What are the NETCONF layers?", "a": "Content (YANG data), Operations (RPCs), Messages (XML), and Transport (SSH), so NETCONF is essentially XML RPCs over SSH on a YANG data model.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What are the key NETCONF RPC operations?", "a": "get (read state), get-config (read running config), edit-config (change config), copy-config (replace), and commit (apply the candidate). edit-config performs the change and commit applies the candidate.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What are the NETCONF datastores and their contents?", "a": "running (current config), candidate (staged changes), startup (config applied on boot), and operational (state data). The candidate datastore lets you stage changes without applying them, making NETCONF transactional.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How do you enable and verify NETCONF on IOS-XE?", "a": "Enable with the netconf-yang and netconf ssh global commands, then verify with show netconf-yang sessions, show netconf-yang datastore, show netconf-yang schemas, and debug netconf-yang.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "How does NETCONF compare to RESTCONF?", "a": "NETCONF uses SSH transport with XML encoding and RPC operations, supports candidate config and transactions; RESTCONF uses HTTP(S) with JSON/XML and REST verbs, with limited candidate and fewer transactions. NETCONF = RPC/XML/SSH, RESTCONF = verbs/JSON/HTTP.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How are NETCONF config changes wrapped in a message?", "a": "Changes are encapsulated in RPC envelopes, for example an rpc containing edit-config with a target of running and a config payload.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How do you troubleshoot NETCONF sessions and edits?", "a": "No session = SSH not enabled (check netconf-yang); edit fails = model/schema problem (check yang schema); changes not applied = candidate was never committed (issue commit); slowness = check sessions; and 500/server errors = check debug netconf-yang.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What is the purpose of the candidate datastore in NETCONF?", "a": "The candidate lets you stage changes without applying them: you edit the candidate and then commit it, which gives transactional, reviewable config changes.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "Why is NETCONF considered richer but heavier than RESTCONF?", "a": "NETCONF offers stateful RPC sessions, full transactions, and candidate config over SSH, but it is more complex, while RESTCONF trades that richness for simpler stateless HTTP/REST operations.", "tag": "Exam Trap", "context": "Interview" }
+  ]
+}

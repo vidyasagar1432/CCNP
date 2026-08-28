@@ -1,0 +1,166 @@
+{
+  "title": "Binary (IPv4)",
+  "level": 5,
+  "levelTitle": "Level 05 - IPv4",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "02. Binary.md",
+  "cards": [
+    {
+      "q": "Why is understanding binary essential for CCNP ENCOR?",
+      "a": "Because IPv4 addresses and subnet masks are 32-bit binary values presented in dotted-decimal; binary underpins IPv4 addressing, subnetting, VLSM, route summarization, wildcard masks, network/broadcast determination, and CIDR prefix lengths, and you must compute common IPv4 binary values quickly without a calculator.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the 8 bit weights of an octet and what are the MSB and LSB?",
+      "a": "The weights are 128 64 32 16 8 4 2 1; the leftmost bit is the most significant bit (MSB) with weight 128 and the rightmost bit is the least significant bit (LSB) with weight 1.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What goes wrong if you reverse the bit weights of an octet?",
+      "a": "You compute the wrong decimal value; always read weights high to low as 128 64 32 16 8 4 2 1, with MSB = 128 and LSB = 1.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you convert binary to decimal?",
+      "a": "Write the bit weights, identify the bits containing 1, and add their weights; for example 11001010 = 128 + 64 + 8 + 2 = 202 and 10110100 = 128 + 32 + 16 + 4 = 180.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do you convert decimal to binary?",
+      "a": "Start with the largest weight 128; if the remaining value is at least that weight, write 1 and subtract it, otherwise write 0, then continue through 64, 32, 16, 8, 4, 2, 1; for example 192 = 11000000 and 200 = 11001000.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Give the binary forms of 240, 248, 252, 254, and 255.",
+      "a": "240 = 11110000, 248 = 11111000, 252 = 11111100, 254 = 11111110, 255 = 11111111.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What decimal range can an octet represent and why are 256, 300, or 512 invalid?",
+      "a": "0–255; an octet holds 8 bits and 8 bits cannot represent any value greater than 255.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the number of 1 bits in a subnet mask represent?",
+      "a": "The prefix length; 1 bits are network bits and 0 bits are host bits, so 11111111.11111111.11111111.00000000 is /24 with 24 network bits and 8 host bits.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Give the last-octet binary pattern of the /25 through /32 masks.",
+      "a": "/25 = 10000000, /26 = 11000000, /27 = 11100000, /28 = 11110000, /29 = 11111000, /30 = 11111100, /31 = 11111110, /32 = 11111111.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you compute host bits and address totals from a prefix length?",
+      "a": "Host bits = 32 − prefix length (/24 → 8, /26 → 6, /30 → 2, /32 → 0); total addresses = 2^host bits and traditional usable hosts = 2^host bits − 2, the −2 accounting for the network and broadcast addresses.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the magic-number/block-size method and what is the interesting octet?",
+      "a": "Block size = 256 − interesting mask octet, where the interesting octet is the first subnet-mask octet that is neither 255 nor 0; it finds subnet boundaries quickly without converting the whole address to binary.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Does /26 mean a block size of 26?",
+      "a": "No; /26 means 26 network bits. The mask is 255.255.255.192 and the block size is 256 − 192 = 64, giving subnet boundaries 0, 64, 128, 192.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Use the magic number to find the network of 192.168.1.130/26.",
+      "a": "Mask 255.255.255.192 gives block size 256 − 192 = 64 with boundaries 0/64/128/192; 130 falls in 128–191, so network = 192.168.1.128, broadcast = 192.168.1.191, and the traditional usable range is 192.168.1.129–192.168.1.190.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the bitwise AND rule and how is it used to find a network address?",
+      "a": "1 AND 1 = 1 and everything else = 0; the network address is IP address AND subnet mask, which forces the host bits to 0.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you find a subnet's broadcast address in binary?",
+      "a": "Set all host bits to 1; for 192.168.1.130/26 the last 6 bits of the final octet become 11111111, so the broadcast is 192.168.1.191.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a wildcard mask and how is it computed?",
+      "a": "It is the inverse of the subnet mask: wildcard = 255.255.255.255 − subnet mask, where 0 = must match and 1 = don't care; 255.255.255.192 → 0.0.0.63, binary 00000000.00000000.00000000.00111111.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Where are wildcard masks commonly used in Cisco configurations?",
+      "a": "In ACLs, OSPF configuration, and Cisco routing configuration.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is /31 addressing per RFC 3021?",
+      "a": "/31 = 255.255.255.254, which traditionally gives 2^1 − 2 = 0 usable hosts, but it is specifically defined for point-to-point links where both addresses can be used, e.g. 10.0.0.0/31 uses 10.0.0.0 and 10.0.0.1.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a /32 address and what are its common uses?",
+      "a": "/32 = 255.255.255.255, all 32 bits are network bits with 0 host bits, and it represents exactly one IPv4 address; common uses include host routes, loopback addresses, router IDs, and specific routing entries.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "For /24, /26, /28, and /30, what are the block size and traditional usable hosts?",
+      "a": "/24 → 256/254, /26 → 64/62, /28 → 16/14, /30 → 4/2; additionally /31 → block 2 with 2 usable on point-to-point links and /32 → block 1 with 1 address.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "Find the network and broadcast for 172.16.50.77/20.",
+      "a": "Mask 255.255.240.0; the interesting octet is the third (240), block size 256 − 240 = 16; 50 falls between 48–63, so network = 172.16.48.0/20, broadcast = 172.16.63.255, and usable range 172.16.48.1–172.16.63.254.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "For 172.16.50.77/20, why is the interesting octet not the fourth octet?",
+      "a": "Because the fourth mask octet is 0; the interesting octet is the first mask octet that is neither 255 nor 0, which here is the third octet (240).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands verify IP routing and interfaces on Cisco IOS?",
+      "a": "show ip interface brief and show ip interface GigabitEthernet0/1 verify interfaces; show ip route shows the routing table and show ip route connected shows only connected routes.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why is the magic-number method a shortcut rather than separate arithmetic?",
+      "a": "Subnetting calculations are fundamentally based on bit boundaries; the magic-number method (256 − interesting mask octet) is simply a shortcut for understanding those binary boundaries.",
+      "tag": "Overview",
+      "context": "Interview"
+    },
+    {
+      "q": "Walk through the fast subnetting workflow for 192.168.10.77/27.",
+      "a": "/27 → mask 255.255.255.224 → interesting octet is the fourth (224) → block size 256 − 224 = 32 → boundaries 0, 32, 64, 96...; 77 falls in 64–95, so network = 192.168.10.64, first host = .65, last host = .94, broadcast = .95.",
+      "tag": "Quick Review",
+      "context": "Practical"
+    },
+    {
+      "q": "What binary core rules should you memorize for IPv4 subnetting?",
+      "a": "IPv4 = 32 bits; each octet = 8 bits; bit weights 128 64 32 16 8 4 2 1; network = IP AND mask; host bits = 32 − prefix; block size = 256 − interesting mask octet; wildcard = inverse of subnet mask.",
+      "tag": "Core Concept",
+      "context": "Both"
+    }
+  ]
+}

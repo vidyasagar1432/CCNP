@@ -1,0 +1,136 @@
+{
+  "title": "Broadcast Domains",
+  "level": 4,
+  "levelTitle": "Level 04 - Ethernet & Switching",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "08. Broadcast Domains.md",
+  "cards": [
+    {
+      "q": "What is a broadcast domain?",
+      "a": "A broadcast domain is the set of Layer 2 devices/interfaces that can receive a Layer 2 broadcast frame (destination MAC FF:FF:FF:FF:FF:FF) within the same logical network. One VLAN equals one Layer 2 broadcast domain, and a Layer 3 boundary separates broadcast domains.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How do hubs, Layer 2 switches, routers, and VLANs affect the broadcast domain?",
+      "a": "A hub does not divide the broadcast domain; a Layer 2 switch has one broadcast domain per VLAN; a router separates broadcast domains; a VLAN defines a Layer 2 broadcast domain; and a trunk carries multiple VLANs without merging their broadcast domains.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does a trunk merge the broadcast domains of the VLANs it carries?",
+      "a": "No. A trunk can carry VLAN 10 and VLAN 20 simultaneously, but broadcasts remain separate: VLAN 10 broadcast stays in VLAN 10 and VLAN 20 broadcast stays in VLAN 20. A trunk transports multiple broadcast domains; it does not merge them.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the relation between SVI and the broadcast domain?",
+      "a": "The VLAN is the Layer 2 broadcast domain; the SVI provides the Layer 3 interface/gateway for that VLAN and enables routing between VLANs. It does not itself define a broadcast domain.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which common protocols use Layer 2 broadcast?",
+      "a": "ARP requests (e.g. who has 10.1.10.20? sent to FF:FF:FF:FF:FF:FF) and DHCP Discover (the client does not yet know the server's address). NetBIOS/NBNS, some service discovery, and some legacy protocols can also broadcast, but not every protocol uses broadcast.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why does broadcast-domain size matter?",
+      "a": "Larger domains mean broadcasts reach more devices, increasing CPU utilization, interrupt processing, network traffic, and unnecessary packet handling. Smaller domains also improve failure containment because a broadcast storm is confined to its VLAN.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Is a broadcast domain a security boundary by itself?",
+      "a": "No. Broadcast traffic is delivered to many devices and can expose ARP, discovery, or configuration information, but proper security requires controls such as VLAN segmentation, ACLs, port security, DHCP snooping, Dynamic ARP Inspection, private VLANs, and Layer 3 firewall policies.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What causes a broadcast storm and what are its effects?",
+      "a": "A common cause is a Layer 2 loop, where broadcast frames circulate repeatedly without effective loop prevention. Effects include excessive bandwidth consumption, MAC-table instability, high switch CPU utilization, packet loss, and network-wide connectivity problems.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do STP and storm control differ in protecting against storms?",
+      "a": "STP/RSTP/MST prevents Layer 2 loops by controlling the active topology. Storm control limits excessive supported traffic categories entering an interface. They solve different problems, and storm control is not a replacement for STP.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the main methods to reduce broadcast-domain size?",
+      "a": "VLAN segmentation (divide a large Layer 2 network into multiple VLANs), inter-VLAN routing to allow communication between separated VLANs, and routed access, where access switches use routed uplinks to a Layer 3 core instead of extending large Layer 2 VLANs.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Does a switch create a single broadcast domain across all its ports?",
+      "a": "No. Each VLAN represents a separate Layer 2 broadcast domain, so a single switch can contain multiple broadcast domains (VLAN 10 = BD 10, VLAN 20 = BD 20).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How do broadcast domains and collision domains differ?",
+      "a": "A broadcast domain concerns Layer 2 broadcast propagation, bounded by VLAN/Layer 3 boundaries. A collision domain concerns Ethernet frame contention/collisions, bounded by switch port/bridge segments. Modern full-duplex Ethernet has broadcasts but no CSMA/CD collisions, so collision domains are mostly a legacy concept.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are Private VLANs?",
+      "a": "Private VLANs (PVLANs) provide additional Layer 2 isolation within a primary VLAN, preventing certain hosts from communicating directly while still allowing communication with permitted destinations such as a promiscuous port. They are not simply additional ordinary broadcast domains.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does IGMP snooping reduce the broadcast domain size?",
+      "a": "No. IGMP snooping reduces unnecessary multicast forwarding by constraining it to interested receivers; it does not reduce the size of the broadcast domain and does not replace VLAN segmentation.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands create VLANs, SVIs, and enable Layer 3 routing?",
+      "a": "vlan 10 with name Users creates a VLAN; interface Vlan10 with ip address 10.1.10.1 255.255.255.0 configures an SVI; ip routing enables the Layer 3 switch to route between VLAN interfaces.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands verify broadcast-domain-related configuration?",
+      "a": "show vlan brief, show vlan, show ip interface brief, show ip route, show interfaces trunk, and show spanning-tree.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Do routers forward Layer 2 broadcasts between VLANs?",
+      "a": "Not by default. Routers and Layer 3 interfaces provide a boundary for Layer 2 broadcasts. Special mechanisms like DHCP relay can intentionally relay certain broadcast-derived protocols, but that is not ordinary Layer 2 broadcast forwarding.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does VRF reduce the broadcast domain?",
+      "a": "No. VRF provides separate Layer 3 routing/forwarding tables and is a segmentation mechanism, but it does not itself divide a Layer 2 broadcast domain.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the troubleshooting workflow for broadcast-related problems?",
+      "a": "Identify the affected VLAN, check VLAN membership and trunk VLAN allowance, check STP topology, look for Layer 2 loops, check broadcast traffic levels, check storm-control config, check multicast/IGMP snooping if applicable, and check Layer 3 boundaries and routing.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which elements belong in the broadcast domain quick review?",
+      "a": "VLAN defines a Layer 2 broadcast domain; Layer 2 switch maintains separate broadcast domains per VLAN; trunk carries VLANs without merging them; router separates broadcast domains; SVI is the Layer 3 gateway for a VLAN; ARP request and DHCP Discover are common broadcasts; STP prevents loops; storm control limits excessive traffic; IGMP snooping constrains multicast; PVLAN isolates within a primary VLAN; VRF separates Layer 3 tables.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the one-minute exam summary of broadcast domains?",
+      "a": "A broadcast domain is the Layer 2 area in which a broadcast can propagate: VLAN = broadcast domain. Multiple VLANs create multiple broadcast domains, and a Layer 3 boundary (router/SVI) separates them. Broadcast domain = VLAN/L3 boundary; collision domain = Layer 2 segment/switch-port concept.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

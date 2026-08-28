@@ -1,0 +1,70 @@
+{
+  "title": "Star Topology",
+  "level": 2,
+  "levelTitle": "Level 02 - Network Topologies",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "02. Star.md",
+  "cards": [
+    {
+      "q": "What is a star topology?",
+      "a": "Every device connects point-to-point to a central device (a hub or, in practice, a switch). It is the physical foundation of modern Ethernet wiring: each host has its own UTP link, and logical behavior depends on whether the center is a hub (shared) or a switch (microsegmented).",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What collision-domain and behavior differences arise from a hub, switch, or router at the center of a star?",
+      "a": "A hub (L1) creates one collision domain for all nodes and repeats frames to every port in half-duplex CSMA/CD. A switch (L2) gives one collision domain per port via microsegmentation with full-duplex and MAC learning. A router (L3) isolates per interface and forms a subnet boundary with different L3 networks per interface.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the advantages of a star topology?",
+      "a": "Fault isolation — a bad cable/port affects only that link while the rest keep working; easy adds/moves by plugging a device into a spare port; scalability by adding ports/switches; and, with a switch, full duplex, per-host bandwidth, and security segmentation via VLANs.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the main disadvantage of a star topology and how is it mitigated?",
+      "a": "The central device is a single point of failure. Mitigation uses redundant switches plus dual-homed hosts/server NICs and HSRP/VRRP gateways.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Where do star topologies appear in enterprise design?",
+      "a": "At the access layer, every endpoint star-wires to its access switch. In spine-leaf, each leaf connects to each spine, forming a logical star/mesh hybrid. In a collapsed core, two distribution switches form a redundant star for each access block.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What commands configure a star access port and add gateway redundancy?",
+      "a": "Use 'interface GigabitEthernet0/1' with 'switchport access vlan 10' and 'spanning-tree portfast' for the host port (no STP delay), and on Vlan10 configure HSRP with 'standby 10 ip 10.1.10.1' for gateway redundancy.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "True or misleading: a star with a hub center is fully full-duplex. What is the truth?",
+      "a": "Misleading. A star with a hub center is physical star but logical bus — all nodes share the same collision domain. Full duplex depends on the center being a switch.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does a star differ from a bus when a single cable fails?",
+      "a": "In a star, a break in one cable isolates only that host — the rest keep working. A bus, by contrast, fails on a single cable break.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the single point of failure in a star and what is the fix?",
+      "a": "The center switch is the SPOF. The fix is a redundant switch pair plus dual-homed hosts, with HSRP/VRRP for the gateway.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "In the star Quick Review, how do hub, switch, and router centers compare for L2 effect and collision domains?",
+      "a": "A hub repeats and shares, giving 1 collision domain for all. A switch does MAC learning with separate domains per port, giving N (one per port). A router provides L3 subnets with collision domains isolated per interface. Central fault impact affects only the bad link, and the SPOF (the center) is mitigated by redundancy plus HSRP.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

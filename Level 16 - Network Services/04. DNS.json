@@ -1,0 +1,172 @@
+{
+  "title": "DNS",
+  "level": 16,
+  "levelTitle": "Level 16 - Network Services",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "04. DNS.md",
+  "cards": [
+    {
+      "q": "What is DNS and which transport ports does it use?",
+      "a": "DNS translates human-readable domain names into IP addresses and provides other service information; it normally uses UDP 53 for queries/responses and TCP 53 for zone transfers or exchanges needing TCP.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the distributed DNS hierarchy?",
+      "a": "A client sends a recursive query to a recursive resolver, which uses iterative queries walking root DNS servers, TLD DNS servers, and the authoritative DNS server, returning the answer to the client.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between recursive and iterative DNS queries?",
+      "a": "In a recursive query the DNS server obtains the final answer on behalf of the client; in an iterative query the server returns the best information it has, such as an answer or referral to the next server.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do recursion and iteration relate?",
+      "a": "Recursion is a service provided by a DNS resolver, while iteration is the normal method that resolver uses when walking the DNS hierarchy; a recursive resolver may answer immediately from cache without contacting other servers.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the parts of the DNS hierarchy?",
+      "a": "The root (.) at the top, Top-Level Domains such as .com/.org/.net/.in, authoritative DNS servers holding zone data, and recursive resolvers performing resolution for clients.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What do the high-priority ENCOR DNS record types do?",
+      "a": "A maps name to IPv4, AAAA maps name to IPv6, CNAME is an alias, MX identifies mail servers, PTR does reverse lookup, NS identifies nameservers, SRV is for service discovery, SOA is zone authority, and TXT carries text/verification data.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does a CAA record specify?",
+      "a": "Which Certificate Authorities may issue certificates for a domain.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the key details of a CNAME record?",
+      "a": "It points to a name, not directly to an IP address, and a CNAME generally cannot coexist with other data at the same DNS name except for exceptions such as DNSSEC-related records.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How are MX records used?",
+      "a": "MX identifies mail servers for a domain and includes a preference value; lower preference values are preferred.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which reverse-DNS zones are used for PTR records?",
+      "a": "in-addr.arpa for IPv4 reverse DNS and ip6.arpa for IPv6 reverse DNS.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does an SRV record contain?",
+      "a": "Service, protocol, priority, weight, port, and target host, as in _sip._tcp.example.com for service discovery.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What information does the SOA record hold?",
+      "a": "The Start of Authority: primary authoritative server, responsible party, serial number, refresh timer, retry timer, expire timer, and negative-cache TTL.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens during a typical DNS resolution of www.example.com?",
+      "a": "The client asks the recursive resolver; if not cached, the resolver queries the root, then the .com TLD, then the authoritative server, receives the A/AAAA answer, and returns it to the client.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does TTL mean for a DNS record?",
+      "a": "Time To Live is how long a record may normally be cached; it is the cache-lifetime parameter, not a guarantee that every cache behaves identically.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the tradeoffs of shorter versus longer TTL?",
+      "a": "Shorter TTL gives faster propagation of changes but more queries; longer TTL gives better caching and fewer queries but changes may remain cached longer.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is NXDOMAIN?",
+      "a": "A DNS response indicating the requested name does not exist; negative responses can also be cached according to DNS negative-caching rules.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands configure DNS on a Cisco router?",
+      "a": "ip domain lookup enables resolution, ip name-server 10.0.0.5 configures DNS servers, and ip domain name ccnp.example sets the router's domain name used for its FQDN.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why is no ip domain lookup commonly used in labs?",
+      "a": "A mistyped IOS command can otherwise be interpreted as a hostname and trigger a DNS resolution attempt; disabling lookup avoids that delay.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does the IOS host table work?",
+      "a": "ip host R2 192.0.2.2 creates a static mapping, show hosts displays host information, and clear host * clears the device's local host cache but does not flush an external DNS resolver's cache.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands verify and troubleshoot DNS?",
+      "a": "show hosts, show running-config | include ip name-server, ping www.example.com, nslookup and dig for testing, debug ip domain for IOS DNS debugging.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is split-horizon DNS (split DNS / DNS views)?",
+      "a": "A configuration that provides different answers depending on where the query originates, e.g. internal users get 10.10.10.10 while Internet users get 203.0.113.10 for the same name.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is DNS round-robin and its limitation?",
+      "a": "Returning multiple A/AAAA records for the same name to distribute clients across addresses; it is basic distribution and not a replacement for a proper load balancer.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is DNS64?",
+      "a": "A mechanism that synthesizes an AAAA record from an IPv4-only A record so an IPv6-only client can reach an IPv4 destination through NAT64.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does DNSSEC provide and not provide?",
+      "a": "DNSSEC provides authentication of DNS data with cryptographic signatures (data origin authentication, integrity, authenticated denial of existence) but does not encrypt normal DNS queries.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the common DNS security concerns?",
+      "a": "DNS spoofing, cache poisoning, unauthorized zone transfers, DNS amplification attacks, malicious/compromised records, and misconfigured recursive resolvers; enterprises should control who can query recursively and who can transfer zones.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "TCP 53 in DNS is used only for very large responses. Is that complete?",
+      "a": "No. TCP 53 is used for zone transfers and DNS exchanges that require TCP; saying TCP is only for large responses is incomplete.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between a hostname and an FQDN?",
+      "a": "A hostname is a bare name such as R1, while an FQDN (Fully Qualified Domain Name), such as R1.ccnp.example, identifies the host within the DNS hierarchy.",
+      "tag": "Core Concept",
+      "context": "Both"
+    }
+  ]
+}

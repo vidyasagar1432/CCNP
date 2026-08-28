@@ -1,0 +1,142 @@
+{
+  "title": "RADIUS",
+  "level": 17,
+  "levelTitle": "Level 17 - Security",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "03. RADIUS.md",
+  "cards": [
+    {
+      "q": "What is RADIUS and what is it commonly used for?",
+      "a": "RADIUS (Remote Authentication Dial-In User Service) is an open-standard AAA protocol widely used for network-access authentication, authorization, and accounting, including 802.1X, enterprise Wi-Fi, VPN, and network access control.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What transport and ports does RADIUS use for authentication and accounting?",
+      "a": "UDP; authentication uses UDP 1812 and accounting uses UDP 1813.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "In a RADIUS deployment, which device is normally the RADIUS client?",
+      "a": "The NAS (switch, wireless controller/AP, VPN gateway, or other access device); the end user's laptop is normally the supplicant, not the RADIUS client.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the three key roles in 802.1X and RADIUS?",
+      "a": "Supplicant (endpoint like laptop/phone), Authenticator (switch/wireless infrastructure that is the RADIUS client/NAS), and Authentication Server (RADIUS server).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does traditional RADIUS encryption compare to TACACS+?",
+      "a": "Traditional RADIUS protects the user password field; TACACS+ encrypts the TACACS+ packet body. Actual modern RADIUS security depends on version, method, attributes, and transport protection.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens when the RADIUS shared secret does not match between client and server?",
+      "a": "RADIUS authentication or accounting can fail.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the key RADIUS packet types?",
+      "a": "Access-Request, Access-Accept, Access-Reject, Access-Challenge, Accounting-Request, and Accounting-Response.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the RADIUS server return in an Access-Accept?",
+      "a": "Authorization/policy information such as VLAN assignment, session timeout, filter/ACL policy, privilege attributes, Vendor-Specific Attributes, and other network-access parameters.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is Access-Challenge used for?",
+      "a": "The server requests additional authentication information, important for multiphase authentication methods.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does 'group radius local' mean every RADIUS Access-Reject causes fallback to local?",
+      "a": "No. A definitive Access-Reject is normally treated differently from a server being unavailable or timing out, so it generally does not cause fallback to local authentication.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are RADIUS attributes used for?",
+      "a": "They transport authentication, authorization, and session information such as User-Name, NAS-IP-Address, Service-Type, Session-Timeout, and Framed-IP-Address between client and server.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are RADIUS Vendor-Specific Attributes (VSAs)?",
+      "a": "VSAs allow vendors to define additional attributes for vendor-specific functionality, e.g., Cisco-specific RADIUS attributes for supported authorization/policy features.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How is RADIUS authorization generally characterized?",
+      "a": "It is generally attribute-based, returning policy that causes a NAS to apply VLAN assignment, session restrictions, IP assignment, access policy, timeouts, or vendor-specific policy.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How are EAP and RADIUS related in 802.1X?",
+      "a": "RADIUS transports EAP-related information between the authenticator/NAS and the authentication server, enabling methods such as EAP-TLS and PEAP.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the typical RADIUS accounting flow?",
+      "a": "The NAS sends an Accounting-Request (start), the server responds with Accounting-Response, and at session termination a stop Accounting-Request/Response occurs; interim updates can be sent during the session.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the 'ip radius source-interface Loopback0' command used for?",
+      "a": "It sets a consistent source interface for RADIUS traffic so the server identifies the client using the expected source IP.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why does a successful ping not prove RADIUS is working?",
+      "a": "Ping proves IP reachability but does not prove UDP 1812/1813 communication works or that the shared secret is correct.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What verification commands are used for RADIUS?",
+      "a": "show aaa servers, show radius statistics, show running-config | section radius, show running-config | section aaa, show aaa sessions, and debug radius.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why is RADIUS heavily associated with 802.1X, wireless, VPN, and network access?",
+      "a": "Because it is the standard open AAA protocol with attribute/VSA-based authorization commonly used for centralized network-access authentication in these environments.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Can RADIUS be used for device administration, and what is the common preference?",
+      "a": "Yes, RADIUS can authenticate device administrators, but for granular network-device command authorization TACACS+ is generally the more appropriate Cisco AAA choice.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the classic memory for RADIUS at the access layer?",
+      "a": "Network access maps to RADIUS while device administration maps to TACACS+, but neither protocol is absolutely restricted to only one use case.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How do RADIUS UDP and TACACS+ TCP handle reliability differently?",
+      "a": "RADIUS uses UDP and implements its own request/response and retransmission behavior at the application level; TACACS+ relies on TCP's connection-oriented reliable transport.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    }
+  ]
+}

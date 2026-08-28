@@ -1,0 +1,142 @@
+{
+  "title": "STP Port Roles",
+  "level": 8,
+  "levelTitle": "Level 08 - STP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "07. Port Roles.md",
+  "cards": [
+    {
+      "q": "What are STP port roles and what is the key distinction from port states?",
+      "a": "Port roles describe the function a port performs in the spanning-tree topology (Root, Designated, Alternate, Backup). Role = what the port is responsible for; State = what the port is currently doing (e.g., Root Port is a role, Forwarding is a state).",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the four STP port roles and their typical RSTP states?",
+      "a": "Root Port (best path toward root, one per non-root switch, normally Forwarding), Designated Port (best path on a segment, normally Forwarding), Alternate Port (backup path toward root, Discarding), Backup Port (backup for a Designated Port on the same segment, Discarding).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does the Root Bridge have a Root Port?",
+      "a": "No. The Root Bridge has no Root Port; its participating active ports are normally Designated Ports. Every non-root switch normally has one Root Port per instance.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "When a switch participates in multiple STP instances, does it have one Root Port for the entire network?",
+      "a": "No. A switch has one Root Port per STP instance: one per VLAN for PVST+/Rapid PVST+ and one per MST instance for MST.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the Root Port selection comparison order?",
+      "a": "Lowest Root Bridge ID, then lowest Root Path Cost, then lowest Sender/Upstream Bridge ID, then lowest Sender/Upstream Port ID, then lowest Local Port ID if a final local tie-break is needed.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why should you not compare only local interface speed when selecting a Root Port?",
+      "a": "STP compares BPDU information and path cost (superior BPDU comparison), not just local interface speed; tie-breakers use bridge/port IDs.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a Designated Port?",
+      "a": "A Designated Port is the best path toward the root for a particular segment. The switch advertising the superior BPDU on that segment becomes the Designated Bridge, and its port becomes the Designated Port.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between a Root Port and a Designated Port?",
+      "a": "A Root Port is the best path from a non-root switch toward the root, selected by the switch. A Designated Port is the best path on a segment toward the root, selected for each segment.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is an Alternate Port and what happens if the Root Port fails?",
+      "a": "An Alternate Port provides an alternate path toward the root, normally Discarding. If the Root Port fails and the alternate is valid, RSTP can rapidly promote it to Root Port and Forwarding.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a Backup Port and when is it usually seen?",
+      "a": "A Backup Port provides redundancy for a Designated Port on the same shared segment (normally Discarding). It is mainly associated with shared-media/half-duplex Ethernet and is uncommon in modern switched networks.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you remember the difference between Alternate and Backup Ports?",
+      "a": "Alternate = backup path to the Root. Backup = backup of a Designated Port on the same segment.",
+      "tag": "Quick Review",
+      "context": "Both"
+    },
+    {
+      "q": "What are the classic 802.1D and RSTP port states, and how do they relate to roles?",
+      "a": "Classic 802.1D states: Blocking, Listening, Learning, Forwarding, Disabled. RSTP states: Discarding, Learning, Forwarding (RSTP combines Blocking+Listening into Discarding). Roles are Root/Designated/Alternate/Backup; typical steady-state combos are Root/Designated→Forwarding and Alternate/Backup→Discarding.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "In the topology SW1(root) with SW2 and SW3, and given SW2→SW1 cost 4 vs SW2→SW3→SW1 cost 8, what roles result on the SW2-SW3 link?",
+      "a": "SW2 selects SW2→SW1 as its Root Port (cost 4). On the SW2-SW3 link, if SW3 has the superior path toward root, SW3 is Designated and SW2's port is Alternate (Discarding).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does RSTP recover when a Root Port fails versus a Designated Port fails?",
+      "a": "If a Root Port fails, the Alternate Port can rapidly become the new Root Port and Forwarding. If a Designated Port fails, another switch may become Designated for the segment; RSTP uses proposal/agreement and rapid role transitions to converge faster than 802.1D.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Why should you not configure classic UplinkFast to make RSTP Alternate ports work?",
+      "a": "RSTP already provides rapid alternate-path recovery through its Alternate Port, Proposal/Agreement, and rapid transitions. UplinkFast (and BackboneFast) are legacy Cisco enhancements built into modern RSTP.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Do you configure STP port roles directly, and how do you influence them?",
+      "a": "No. You influence STP inputs: spanning-tree vlan 10 cost 4 (path cost), spanning-tree vlan 10 port-priority 32 (Port ID tie-break, increments of 16), and spanning-tree vlan 10 root primary (root placement).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands verify port roles and states?",
+      "a": "show spanning-tree shows Role/State/Cost/Prio.Nbr for all active instances; show spanning-tree vlan 10 shows a VLAN; show spanning-tree interface Gi0/1 shows an interface; show spanning-tree active shows active instances.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why is it wrong to say Blocking is a port role?",
+      "a": "Blocking is a classic STP state. Root, Designated, Alternate, and Backup are roles.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is every blocked RSTP port automatically an Alternate Port?",
+      "a": "No. An Alternate Port specifically provides an alternate path toward the Root; a Backup Port is a different, less common role.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does STP always choose the lowest local interface number?",
+      "a": "No. STP first compares the superior BPDU/path information (Root Path Cost, bridge/port IDs); local port IDs are used only as an appropriate final tie-break.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is Root Port selection not based only on cost?",
+      "a": "Root Port selection uses the superior BPDU comparison, including Root Path Cost followed by the required Bridge ID and Port ID tie-breakers; the lowest-cost interface is not automatically the Root Port.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the four core STP port role definitions to remember?",
+      "a": "Root Port = best path to the root; Designated Port = best path for a segment; Alternate Port = backup path to the root; Backup Port = backup Designated Port on the same segment.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

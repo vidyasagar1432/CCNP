@@ -1,0 +1,82 @@
+{
+  "title": "Classification",
+  "level": 21,
+  "levelTitle": "Level 21 - QoS",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "01. Classification.md",
+  "cards": [
+    {
+      "q": "What is classification in QoS?",
+      "a": "The QoS act of identifying which traffic gets which treatment. It groups packets based on fields like DSCP, IP precedence, 802.1p, ACLs, or application signatures, and is always the first step before marking, policing, or queuing.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What layers and bit sizes do the classification fields DSCP, IP precedence, 802.1p, ACL, and NBAR use?",
+      "a": "DSCP is L3 (6 bits), IP precedence is L3 (3 bits), 802.1p is L2 CoS (3 bits), ACL matches at L3/4 (IP/ports), and NBAR matches at L7 (application). Deeper matches are more accurate but more expensive.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a trust boundary in QoS classification, and where should it be set?",
+      "a": "The trust boundary is the point that decides who is trusted. Set it where traffic enters your network: the access edge is untrusted (re-mark), while the core is trusted (keeps DSCP). Ingress switches classify/mark, and camera ports set CoS/DSCP.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between 'trust' and 'classify' modes on a port?",
+      "a": "Trust accepts the existing CoS/DSCP as-is, while classify matches traffic then acts on it. On access ports you often trust CoS but set DSCP, or classify everything.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the four TCP/IP classification tools and what does each match on?",
+      "a": "class-map (match criteria), ACL (IP/ports), NBAR (application), and PBR (route-map match). A class-map bundles match conditions into a named class.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between 'class-map match-all' and 'class-map match-any'?",
+      "a": "match-all requires every criterion to be matched; match-any matches if any one criterion is met.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Where does classification happen and how often should it be done?",
+      "a": "Ingress on routers/switches, with NBAR usually on edge devices. You classify only once at the edge, then trust the marking in the core.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What command shows the classes/matches you have configured?",
+      "a": "show class-map, along with show policy-map to see how classes are treated.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A QoS policy is not being applied to a class; what is the likely cause and what should you check?",
+      "a": "The class has no service-policy attached to the interface (QoS not applied). Check the policy-map and verify a service-policy is attached.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the difference between classification and marking?",
+      "a": "Classification identifies traffic; marking writes a value into the packet.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "At which layer does NBAR classify traffic?",
+      "a": "NBAR (Network Based Application Recognition) classifies at Layer 7 (application layer).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Where should classification occur and what should the core do with markings?",
+      "a": "Classify only at the edge (ingress); the core trusts the existing markings rather than re-classifying.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

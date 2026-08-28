@@ -1,0 +1,88 @@
+{
+  "title": "PPP (Point-to-Point Protocol)",
+  "level": 23,
+  "levelTitle": "Level 23 - Enterprise WAN",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "01. PPP.md",
+  "cards": [
+    {
+      "q": "What is PPP (Point-to-Point Protocol)?",
+      "a": "The classic point-to-point WAN protocol that succeeded HDLC, adding authentication (PAP/CHAP), multilink bonding, and negotiation via LCP/NCP. It is also the framing that PPPoE rides on.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the four-part PPP stack?",
+      "a": "LCP (link control, setup and options), NCP (network control, e.g. IP), authentication (PAP/CHAP, verifies peers), and PPP framing (encapsulation).",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the four LCP phases of a PPP link?",
+      "a": "1) Link established via LCP, 2) authentication (PAP/CHAP), 3) NCP (IPCP), 4) data phase. The link is up only if all phases pass.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does PAP differ from CHAP?",
+      "a": "PAP sends the password in clear text, is one-way, weak, and does not re-authenticate. CHAP uses a hashed challenge/response, is stronger, and re-authenticates periodically.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which PPP authentication is more secure and why?",
+      "a": "CHAP is stronger because it never sends clear passwords — it uses a challenge/response hash and re-authenticates periodically, unlike PAP which transmits the password in the clear.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the command to enable PPP encapsulation on a serial interface?",
+      "a": "encapsulation ppp under the interface, which enables PPP on that serial interface.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does the ppp authentication chap command do?",
+      "a": "Forces CHAP as the authentication method on the PPP interface, and the shared secret is set with ppp chap password.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is Multilink PPP (MLPPP) and what does it do?",
+      "a": "MLPPP bonds multiple links into one logical pipe to achieve higher bandwidth; LCP handles fragmentation and it supports QoS on the bundles, commonly combining serial/T1 links.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which commands verify a PPP link and debug authentication?",
+      "a": "show interface Serial0/0/0 and show ppp multilink verify the link; debug ppp authentication and debug ppp negotiation troubleshoot authentication and negotiation.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A PPP link is down and show interface fails before LCP. What is the likely cause and check?",
+      "a": "LCP failure or no clock is the likely cause; check show interface and ensure encapsulation ppp is set on the interface.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A PPP link shows authentication failure. What is the likely cause and check?",
+      "a": "A secret mismatch is the likely cause; check with debug ppp authentication and verify the ppp chap password matches on both ends.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "No IP address is negotiated on the PPP link (IPCP failure). What is the likely cause and check?",
+      "a": "NCP (IPCP) being blocked is the likely cause; check with debug ppp negotiation.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the key components that make up PPP?",
+      "a": "PPP = LCP + NCP + PAP/CHAP authentication.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "title": "Duplex",
+  "level": 1,
+  "levelTitle": "Level 01 - Physical Layer",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "02. Duplex.md",
+  "cards": [
+    {
+      "q": "What is duplex, and what symptom does a duplex misconfiguration produce?",
+      "a": "Duplex defines whether a link transmits and receives at the same time. Full duplex sends and receives simultaneously, while half duplex does one direction at a time using CSMA/CD. Misconfiguration produces the classic late collisions and runts symptom set, making duplex logic a core troubleshooting skill.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How does CSMA/CD provide deterministic access on a half-duplex link?",
+      "a": "CSMA/CD stands for Carrier Sense (listen before sending), Multiple Access (protect against simultaneous transmissions), Collision (abort on collision), and Detection plus backoff (resend after a collision). It is only viable on 10/100 Mbps hub-based or non-switched topologies.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Why does full duplex have no collisions?",
+      "a": "Full duplex uses separate transmit and receive paths, so there are no collisions and CSMA/CD is not needed. It requires a switched point-to-point link or a fiber duplex pair.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the numeric line utilization of a full-duplex 100 Mbps link?",
+      "a": "A 100 Mbps full-duplex link transfers 200 Mbps of simultaneous line utilization because it carries 100 Mbps in each direction at the same time.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does IEEE 802.3 auto-negotiation determine speed and duplex on 10/100/1000 links?",
+      "a": "Auto-negotiation exchanges link pulses on the electrical layer to determine speed then duplex. If both ends support auto-negotiation, they select the highest common speed and prefer full duplex. 10GBASE-T and above are full-duplex only.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens when one side is forced (for example speed 100 duplex full) and the other is set to auto?",
+      "a": "The auto side reads the fast link pulses to learn the speed but defaults to half duplex because it does not see full-duplex advertisement, causing a duplex mismatch. This is the classic autoneg mismatch behavior.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the symptoms of a duplex mismatch where device A is full and device B is half?",
+      "a": "Device B sees late collisions while device A sees CRC errors and runts. The result is packet loss in both directions, application slowness, and TCP retransmissions. The late collisions counter increments on the incorrectly configured half end.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What duplex do 1000BASE-T and any fiber link support?",
+      "a": "1000BASE-T is full-duplex only, since gigabit has no half-duplex mode. Any fiber link, such as FX, SX, or LX, is also full-duplex only.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands configure and verify duplex, and what shows mismatch errors?",
+      "a": "Configure with 'speed 100' and 'duplex full' on the interface (forcing, with caution). Verify with 'show interfaces GigabitEthernet0/1' and 'show interfaces counters errors' for late collisions, CRC, and runts.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you troubleshoot a slow or error-laden duplex link?",
+      "a": "Run 'show interfaces | include duplex|collision|CRC|runts', verify both ends match using 'show interfaces status' at the distribution switch, then fix by putting both sides on auto (recommended) or forcing them identically.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "If you see a collision counter incrementing on a full-duplex link, where should you look?",
+      "a": "Half-duplex links have collisions; full-duplex links do not. If a collision counter appears on a full-duplex link, look immediately at the other port, because the mismatch error shows up on the other end.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Can you configure 1000BASE-T at 'speed 100 duplex full'?",
+      "a": "No. 1000BASE-T is full-duplex only, so that speed command combination is impossible on a gigabit port. Speed commands on 1G ports relate to fiber or no-negotiation choices, not duplex forcing.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the signature counter of a duplex mismatch on 10/100 Ethernet?",
+      "a": "The late collisions counter is the signature of a duplex mismatch on 10/100 links.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does 1G fiber use auto-negotiation for speed?",
+      "a": "No. 1G fiber has no auto-negotiation for speed (it is fixed), so it is usually configured with 'no negotiate'.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

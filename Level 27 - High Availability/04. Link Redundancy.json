@@ -1,0 +1,64 @@
+{
+  "title": "Link Redundancy",
+  "level": 27,
+  "levelTitle": "Level 27 - High Availability",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "04. Link Redundancy.md",
+  "cards": [
+    {
+      "q": "What is link redundancy and what options provide it?",
+      "a": "Link redundancy protects against link failure using multiple parallel physical links. Options include EtherChannel (bundling links into one logical LAG), link aggregation, and multichassis LAG (M-LAG). Bundling kills STP blocking and spreads load.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is EtherChannel?",
+      "a": "It bundles multiple physical links into one logical link (port-channel), raises bandwidth, provides availability with no single point of failure, shares load via a hash that picks a member link, and auto-redirects on member failure. Only the LAG, not individual links, is blocked by STP.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What protocols negotiate an EtherChannel and their modes?",
+      "a": "LACP (IEEE 802.3ad/802.1AX) is the standard with active/passive modes, PAgP is Cisco-proprietary with desirable/auto modes, and static configuration uses mode on with no negotiation.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does EtherChannel load balancing work?",
+      "a": "A hash selects a member link per flow: src/dst MAC for L2 hashing, src/dst IP for L3, src/dst port for L4, or a mix for full flow. Hashing keeps all packets of a single flow in order on one member.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is M-LAG / vPC?",
+      "a": "A multichassis LAG (generic term) or vPC (NX-OS) that lets two switches share one logical bundle, running active-active on both, and is used for double-homed servers on access.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands configure and verify an EtherChannel?",
+      "a": "Create interface Port-channel1, then bind member interfaces with channel-group 1 mode active (or mode on for static). Verify with show etherchannel summary and show etherchannel load-balance.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the difference between LACP, PAgP, and static EtherChannel?",
+      "a": "LACP is the IEEE standard and uses active/passive modes; PAgP is Cisco-proprietary using desirable/auto; mode on is static with no negotiation. Members must have consistent speed/duplex, and the hash keeps a single flow in order on one member so vPC/M-LAG is active-active across two switches.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are common EtherChannel failure symptoms and their checks?",
+      "a": "Not bundled points to a mode mismatch (check summary), flapping points to speed/duplex mismatch (check config), one-directional behavior points to protocol (check peers), wrong hash points to algorithm (check config), and STP blocking indicates it is not a real LAG (check ports).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the bundle, standard, and failure behavior for link redundancy?",
+      "a": "The bundle is an EtherChannel, the standard is LACP (mode active/passive), Cisco's PAgP uses desirable/auto, static is mode on, the logical unit is a port-channel, a hash maps a flow to a member, M-LAG is vPC, and on failure remaining members auto-redirect.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

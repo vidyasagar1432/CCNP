@@ -1,0 +1,160 @@
+{
+  "title": "Rapid PVST+",
+  "level": 8,
+  "levelTitle": "Level 08 - STP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "04. Rapid PVST+.md",
+  "cards": [
+    {
+      "q": "What is Rapid PVST+?",
+      "a": "Rapid PVST+ (Rapid Per-VLAN Spanning Tree Plus) is Cisco's implementation of RSTP (IEEE 802.1w) running as a separate spanning-tree instance for each VLAN, combining RSTP rapid-convergence mechanics with per-VLAN PVST+ architecture.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Why is it incorrect to confuse Rapid PVST+ with classic PVST+?",
+      "a": "Rapid PVST+ is RSTP per VLAN, while classic PVST+ is based on 802.1D STP per VLAN.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does Rapid PVST+ achieve per-VLAN load balancing?",
+      "a": "Each VLAN has its own RSTP instance and can elect a different Root Bridge, so different VLANs prefer different paths and both redundant uplinks carry useful traffic. Load balancing is achieved by intentionally placing different VLAN roots on different switches.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does Rapid PVST+ automatically load-balance traffic?",
+      "a": "No. Rapid PVST+ does not automatically load-balance; you must intentionally place different VLAN roots on different switches to distribute load.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the Rapid PVST+ operational port states?",
+      "a": "Discarding, Learning, and Forwarding (not the classic Blocking/Listening/Learning/Forwarding).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the Rapid PVST+ port roles?",
+      "a": "Root, Designated, Alternate, and Backup, evaluated per Rapid PVST+ instance rather than per physical interface.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you compute the effective Bridge ID priority in Rapid PVST+?",
+      "a": "Effective priority = configured priority + VLAN ID (e.g., 4096 + VLAN 10 = 4106). The Extended System ID puts the 12-bit VLAN ID in the Bridge ID, and configurable priorities are in increments of 4096 (default 32768).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does Proposal/Agreement work in Rapid PVST+?",
+      "a": "SW1 sends a Proposal toward SW2; SW2 synchronizes its relevant ports and replies with Agreement, allowing SW1 to rapidly transition its port to Forwarding without the long classic timer sequence, while keeping the topology synchronized.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Why should you not memorize that Rapid PVST+ converges in 1-3 seconds or 6 seconds?",
+      "a": "1-3 seconds is not a fixed protocol timer, and 6 seconds (3 missed BPDUs × 2 s) is only a failure-detection rule of thumb. Actual convergence depends on failure type, topology, alternate-path availability, link type, device behavior, and configuration.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the default Rapid PVST+ Hello interval and the missed-BPDU failure detection rule?",
+      "a": "Default Hello is 2 seconds. RSTP can consider a neighbor lost after approximately three missed BPDUs, giving roughly 6 seconds as a failure-detection rule of thumb (distinct from convergence time).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is an edge port/PortFast used for in Rapid PVST+, and why should it not be used on switch-to-switch links?",
+      "a": "PortFast/edge ports connect to end devices (PC, server, printer, IP phone) and move rapidly to Forwarding. It should not be used as a replacement for STP on switch-to-switch links.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does BPDU Guard protect a Rapid PVST+ edge port, and does PortFast disable STP?",
+      "a": "BPDU Guard protects an edge port by error-disabling it if an unexpected BPDU arrives. PortFast does not disable STP; BPDU Guard provides the protection against unexpected BPDUs.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What command configures VLAN-specific path cost and VLAN-specific port priority?",
+      "a": "interface G0/1 then spanning-tree vlan 10 cost 4 sets per-VLAN cost; spanning-tree vlan 10 port-priority 64 sets per-VLAN port priority (default 128, in increments of 16).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What happens when Rapid PVST+ interoperates with a classic 802.1D STP neighbor?",
+      "a": "RSTP must interoperate with the slower protocol on that connection/instance, so the legacy boundary can behave with slower 802.1D behavior, reducing rapid-convergence benefits.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does Rapid PVST+ interoperate with MST?",
+      "a": "At an MST boundary the MST region participates through its Common and Internal Spanning Tree (CIST). MST maps VLANs into fewer instances, so it is not simply one tree for all VLANs.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How do Rapid PVST+ and MST compare regarding VLAN handling and scaling?",
+      "a": "Rapid PVST+ runs one instance per VLAN (per-VLAN control, more CPU/memory as VLANs grow); MST maps multiple VLANs to fewer instances (more scalable). For many VLANs, MST is often considered.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the main operational trade-off of Rapid PVST+?",
+      "a": "It combines per-VLAN control, rapid convergence, and easy Cisco operation, but at the cost of more STP instances and more CPU/memory/BPDU processing.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What command enables Rapid PVST+ and what command sets a VLAN root?",
+      "a": "spanning-tree mode rapid-pvst enables it; spanning-tree vlan 10 priority 4096 or spanning-tree vlan 10 root primary sets/designates a root. root secondary makes a predictable backup (commonly resulting in 28672 under default conditions).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands verify Rapid PVST+ mode, a specific VLAN, and inconsistent ports?",
+      "a": "show spanning-tree summary confirms mode and features; show spanning-tree vlan 10 views a VLAN; show spanning-tree root views roots; show spanning-tree inconsistentports views inconsistent ports; show spanning-tree active views active instances.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the logical load-balancing design using two distribution switches?",
+      "a": "Configure VLAN 10 root on DIST1 and VLAN 20 root on DIST2 so Uplink A carries VLAN 10 traffic and Uplink B carries VLAN 20 traffic. This is STP-level load distribution, not a single VLAN forwarding over both redundant paths simultaneously.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "A physical interface can have different STP roles for different VLANs. Give an example.",
+      "a": "Gi0/1 can be a Root Port for VLAN 10, a Designated Port for VLAN 20, and an Alternate Port for VLAN 30, because STP role is evaluated per Rapid PVST+ instance.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why does more VLANs mean more Rapid PVST+ instances, and what is the consequence?",
+      "a": "Each VLAN runs its own RSTP instance (1 VLAN = 1 instance, 100 VLANs = potentially 100 instances), increasing CPU/memory/BPDU load, which is one reason MST can scale better.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is MST not one tree for all VLANs?",
+      "a": "MST maps VLANs into MST instances, and multiple MST instances can have different topologies, so it is not simply a single spanning tree for everything.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the final memory rule for the STP implementation family?",
+      "a": "PVST+ = 802.1D per VLAN; Rapid PVST+ = 802.1w per VLAN; MST = RSTP-style multiple instances with VLANs mapped into instances.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the key Rapid PVST+ facts in quick review?",
+      "a": "Foundation RSTP/IEEE 802.1w; one RSTP instance per VLAN; Root per VLAN; states Discarding/Learning/Forwarding; roles Root/Designated/Alternate/Backup; rapid mechanism Proposal/Agreement; default Hello 2 s; edge feature PortFast; protection BPDU Guard; missed-BPDU rule of thumb 6 s; command spanning-tree mode rapid-pvst.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

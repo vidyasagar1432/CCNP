@@ -1,0 +1,130 @@
+{
+  "title": "Filtering",
+  "level": 4,
+  "levelTitle": "Level 04 - Ethernet & Switching",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "07. Filtering.md",
+  "cards": [
+    {
+      "q": "What is Layer 2 filtering?",
+      "a": "Filtering at Layer 2 means a switch does not forward a received frame out a particular egress port. It can occur as normal switching behavior or because a configured feature explicitly prevents forwarding, and it is one of the three fundamental behaviors: Forward -> Flood -> Filter.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is same-port filtering and why does a switch perform it?",
+      "a": "When the destination MAC is already learned on the same interface the frame arrived on, the switch does not send the frame back out that port. The destination is already reachable through the same Layer 2 segment, so forwarding it back out would be unnecessary.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Can a Layer 2 switch filter or forward a frame directly between VLANs?",
+      "a": "No. A VLAN 10 frame remains associated with VLAN 10; inter-VLAN communication requires a Layer 3 routing function. This is a VLAN/Layer 2 forwarding boundary, not an ACL-style filtering operation.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is STP blocking a security filtering mechanism?",
+      "a": "No. STP blocking places redundant paths in a non-forwarding state primarily to prevent Layer 2 loops, not as a security filter. Security filtering is performed by features such as ACLs and port security.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the explicit Layer 2 filtering mechanisms on Cisco switches?",
+      "a": "Port Security (switchport port-security), Trunk Allowed VLANs (switchport trunk allowed vlan), Storm Control (storm-control), MAC ACL (mac access-group), VACL (vlan access-map), IP ACL (ip access-group), and Protected Port (switchport protected).",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the port security violation modes and how do they differ?",
+      "a": "Protect drops violating frames without a violation notification; Restrict drops violating frames and generates violation information/counters, possibly SNMP traps/syslog; Shutdown places the port into an error-disabled state.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is sticky port security learning?",
+      "a": "switchport port-security mac-address sticky converts dynamically learned secure MAC addresses into secure MAC entries associated with the port. For persistence across reloads the configuration must be saved appropriately.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do trunk allowed VLANs restrict traffic?",
+      "a": "switchport trunk allowed vlan remove 50 prevents VLAN 50 from being carried across that trunk. This is trunk-boundary VLAN pruning/filtering and must not be confused with VTP pruning, which is a different mechanism.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does storm control limit and how is the threshold expressed?",
+      "a": "Storm control limits excessive broadcast, multicast, and unicast/unknown-unicast traffic entering an interface, configurable per type, e.g. storm-control broadcast level 20. The threshold is commonly a percentage of interface bandwidth.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does storm control fix a Layer 2 loop?",
+      "a": "No. Storm control is a traffic-rate protection mechanism that can drop traffic above the configured threshold, but it does not replace STP or remove the underlying loop. STP prevents the loop; storm control limits excessive traffic.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does a MAC ACL filter on?",
+      "a": "A MAC ACL filters Layer 2 traffic based on source and destination MAC addresses, with permit/deny actions, applied to interfaces via mac access-group <MAC-ACL-NAME> in on supporting platforms.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is a VACL and how is it configured?",
+      "a": "A VACL (VLAN Access Control List) applies filtering policy to traffic within VLANs using vlan access-map associated with VLANs via vlan filter; the actions are forward, drop, or capture.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do IP ACL, MAC ACL, and VACL differ in what they apply to?",
+      "a": "IP ACL applies to Layer 3 interfaces/SVIs/routed interfaces, MAC ACL applies to Layer 2 traffic based on MAC, and VACL applies a VLAN-wide Layer 2/Layer 3 filtering policy.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does switchport protected do?",
+      "a": "It provides Layer 2 isolation between protected ports on the same switch, so protected ports cannot directly exchange Layer 2 traffic with each other. It does not create a separate VLAN and should not be confused with VLAN separation, Private VLANs, port security, or Layer 3 isolation.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Is filtering only about same-port destinations?",
+      "a": "No. Same-port filtering is the classic implicit Layer 2 forwarding decision, but configured features can also intentionally prevent or discard traffic: port security, ACLs, storm control, trunk VLAN restrictions, and protected ports.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How do forward, filter, and flood compare?",
+      "a": "Forward = destination known on another eligible port, send to that specific port. Filter = destination on ingress port or policy prevents forwarding, do not send through that egress. Flood = destination unknown or broadcast/multicast is flooded, send to multiple eligible ports.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands verify filtering and Layer 2 behavior?",
+      "a": "show mac address-table, show mac address-table dynamic, show mac address-table interface GigabitEthernet0/1, show spanning-tree, show spanning-tree interface GigabitEthernet0/1, show interfaces trunk, show port-security, show port-security interface GigabitEthernet0/1, and show storm-control.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the troubleshooting workflow for unexpected Layer 2 filtering?",
+      "a": "Check MAC learning, destination MAC location, ingress/egress VLAN, trunk allowed VLANs, STP port state, port-security status, ACL/VACL policies, storm-control config, protected-port config, then verify interface counters and logs.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which facts belong in the filtering quick review?",
+      "a": "Same-port destination -> frame not sent back out ingress port; different VLAN -> not crossed at Layer 2; STP non-forwarding -> not used for data; port security discards unauthorized source MACs; trunk allowed VLAN prevents VLAN crossing; storm control limits excessive traffic; MAC ACL filters by MAC; VACL applies policy to VLAN traffic; protected port isolates protected ports on the same switch.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the one-minute exam summary of filtering?",
+      "a": "Filtering = the switch decides a frame should NOT be forwarded through a particular egress path. Classic decision: known on other port -> FORWARD, same-port destination -> FILTER, unknown/broadcast -> FLOOD. Configured features add restrictions: port security, trunk allowed VLANs, MAC ACL/VACL policy filtering, storm control, and protected ports.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

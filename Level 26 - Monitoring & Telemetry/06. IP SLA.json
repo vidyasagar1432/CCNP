@@ -1,0 +1,82 @@
+{
+  "title": "IP SLA",
+  "level": 26,
+  "levelTitle": "Level 26 - Monitoring & Telemetry",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "06. IP SLA.md",
+  "cards": [
+    {
+      "q": "What is IP SLA and what does it measure?",
+      "a": "IP SLA (IP Service Level Agreement) generates synthetic probes between routers to measure latency (RTT), jitter (delay variation), loss (percent), and availability along a path; results can react via tracking and are reported through SNMP/syslog.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the common IP SLA operation types and their use?",
+      "a": "ICMP echo for reachability, UDP jitter for voice quality, TCP connect for application checks, HTTP for web availability, and UDP echo for protocol tests; pick the probe type matching what you monitor.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the parts of an IP SLA lifecycle?",
+      "a": "Create the probe configuration, schedule it with frequency/start time, track it so it reacts to state, and define reactions/thresholds for events; scheduling runs it and tracking ties it to routing/reactions.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the IP SLA configuration pattern?",
+      "a": "Enter ip sla 10, define the type such as icmp-echo 192.0.2.5, set frequency and timeout, schedule with ip sla schedule 10 life forever start-time now, then create a track 1 ip sla 10 reachability.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does the track command do with IP SLA?",
+      "a": "A track (e.g. track 1 ip sla 10 reachability) ties the IP SLA result to routing/reacting decisions so routing can adjust based on SLA state.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does IP SLA integrate with other systems?",
+      "a": "It feeds routing via route tracking, triggers events via EEM, and reports via SNMP and syslog.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does IP SLA compare to plain ping?",
+      "a": "IP SLA measures jitter, loss, and MOS with repeatable scheduling and SNMP/tracking integration, while plain ping checks reachability manually with no integration; IP SLA beats ping for real SLA statistics.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do you verify IP SLA configuration and results?",
+      "a": "Use show ip sla statistics, show ip sla config, and show track 1 to verify the configuration and results.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "No IP SLA results are available; what is the likely cause and check?",
+      "a": "Likely a scheduling problem; check that the operation is scheduled with show ip sla config.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Is IP SLA passive or active measurement?",
+      "a": "IP SLA uses synthetic probes that generate real measurable traffic, so it is active, not passive.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which IP SLA operation type measures voice quality?",
+      "a": "UDP jitter measures voice quality, reported as MOS.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which IP SLA settings make up the core config pattern?",
+      "a": "ip sla plus frequency plus schedule (and track) is the configuration pattern; frequency sets the interval and schedule starts it running.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

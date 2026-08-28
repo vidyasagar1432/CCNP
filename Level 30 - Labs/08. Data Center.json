@@ -1,0 +1,118 @@
+{
+  "title": "Data Center",
+  "level": 30,
+  "levelTitle": "Level 30 - Labs",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "08. Data Center.md",
+  "cards": [
+    {
+      "q": "What does the Data Center lab build?",
+      "a": "It uses NX-OS switches with vPC, VXLAN, OTV, and fabric interconnect to build a spine-leaf fabric, extending ENCOR into overlay networks and modern DC data plane concepts.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the key elements of a spine-leaf data center design?",
+      "a": "Spine core NX-OS switches, leaf top-of-rack switches, vPC for dual-homed access, and the VXLAN overlay as the fabric.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is the NX-OS CLI described and how does it differ?",
+      "a": "NX-OS is a feature-driven CLI: features must be enabled with feature commands before the related configuration, and configuration is saved with copy run start.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the vPC setup sequence require?",
+      "a": "Enable feature vpc, create a vpc domain, configure the peer link, add vpc members, and set up the keepalive.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is a vPC?",
+      "a": "A vPC (virtual port channel) is an active-active port channel formed across two switches, unlike a standard standby failover.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the VXLAN overlay setup sequence?",
+      "a": "Create the NVE interface, define VNIs, configure multicast or EVPN for the underlay, and set up VRFs.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does VXLAN provide?",
+      "a": "VXLAN provides Layer 2 over a Layer 3 fabric using NVE interfaces and VNI identifiers.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is OTV used for and what redundancy options exist?",
+      "a": "OTV connects remote data centers with an inter-DC overlay; redundancy is provided by anycast gateway FHRP or legacy HSRP, with fabric extension for scale.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands verify a data center fabric?",
+      "a": "show vpc for vPC status, show nve peers for the overlay, show port-channel for bundles, show ip vrf for VRFs, and show mac address-table for MACs.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What configuration creates a vPC domain and bundles a member port?",
+      "a": "feature vpc, vpc domain 10 with peer-keepalive destination, then interface port-channel with vpc membership.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What configures a VXLAN VNI on the NVE interface?",
+      "a": "Enable feature vn-segment-vlan-based, create interface nve1, then add member vni 10010.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A vPC is down. What is the likely cause and check?",
+      "a": "A peer link problem, so check vPC status with show vpc.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A VXLAN VNI is not coming up. What is the likely cause and check?",
+      "a": "An NVE configuration issue, so check the overlay with show nve peers.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "The vPC keepalive link flaps repeatedly. What is the likely cause?",
+      "a": "A keepalive configuration problem, so review the keepalive settings between the two vPC peers.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "vPC provides active/standby failover between two switches.",
+      "a": "False — vPC is an active-active port channel bundle across two switches, not a standby relationship.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "VXLAN runs Layer 2 directly over a Layer 2 fabric.",
+      "a": "False — VXLAN transports Layer 2 over a Layer 3 fabric using NVE interfaces and VNIs.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Your NX-OS configuration is lost after a reboot. What is the likely cause?",
+      "a": "You did not run copy run start, since NX-OS requires an explicit save to persist the running-config.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "What summarizes data center fabric health?",
+      "a": "Healthy vPC, NVE, and VRF status, verified with show vpc, show nve peers, and show ip vrf.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

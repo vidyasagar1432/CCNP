@@ -1,0 +1,26 @@
+{
+  "title": "Branch Office",
+  "level": 30,
+  "levelTitle": "Level 30 - Labs",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "06. Branch Office.md",
+  "cards": [
+    { "q": "What does the Branch Office lab model?", "a": "A small site connecting to HQ over WAN and VPN, commonly DMVPN or IPsec, using a branch router, a hub router, dual WAN links, and automatic failover.", "tag": "Overview", "context": "Both" },
+    { "q": "What are the core CCNP topics practiced in a branch lab?", "a": "Tunneling, routing through an overlay, NAT, and QoS, along with dual WAN failover.", "tag": "Overview", "context": "Both" },
+    { "q": "What are the typical elements of a branch design?", "a": "A cEdge branch router, two WAN links to two ISPs, a DMVPN or IPsec tunnel, HQ as the hub/datacenter, and a local LAN for users.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How are dual WAN links used in a branch?", "a": "ISP1 is the primary link and ISP2 is the backup, with the tunnel as the overlay over the Internet underlay, providing load/share and failover.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What is the DMVPN tunnel setup sequence?", "a": "Create a loopback and tunnel interface, configure NHRP mapping, apply an IPsec profile, route over the tunnel, then verify.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What makes DMVPN dynamic?", "a": "DMVPN creates a dynamic full-mesh from hubs using NHRP to establish tunnels on demand.", "tag": "Core Concept", "context": "Both" },
+    { "q": "What is the static site-to-site IPsec setup sequence?", "a": "Configure an isakmp policy, define the transform set, create a crypto map, and apply it to the interface.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "Which local services run on a branch router?", "a": "NAT for Internet, DHCP for the LAN, QoS for voice/video, and redundancy across dual WAN links.", "tag": "Core Concept", "context": "Both" },
+    { "q": "What commands verify branch tunnel, crypto, and routing health?", "a": "show ip nhrp for the tunnel, show crypto for the security associations, show ip route for reachability, show track for failover, and show policy-map for QoS.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "How is a tunnel interface configured to use NHRP in a DMVPN branch?", "a": "Set ip nhrp network-id 1 and ip nhrp nhs 1.1.1.1, define the tunnel source (Gi0/1) and tunnel destination (1.1.1.1), and apply tunnel protection ipsec profile DMVPN.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "How is automatic WAN failover implemented on a branch router?", "a": "Use a tracked static route, e.g. ip route 0.0.0.0 0.0.0.0 2.2.2.1 track 1, with track 1 tied to an ip sla 10 reachability probe.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "A DMVPN tunnel is down. What is the likely cause and check?", "a": "An NHRP registration problem, so check with show ip nhrp brief.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "No IPsec security association forms on a branch. What is the likely cause and check?", "a": "An IPsec profile misconfiguration, so check show crypto session.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "There is no automatic failover when a WAN link goes down. What is the likely cause?", "a": "A missing or misconfigured track, so verify the tracking with show track to confirm the ip sla and tracked route.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "A branch relies on a single WAN link with no failover mechanism.", "a": "False — a correct branch uses dual WAN and needs both track and a tracked route to achieve automatic failover.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "What is the 'tunnel to route' verification order for branch health?", "a": "Verify tunnel, then crypto, then routing — show ip nhrp, show crypto, and show ip route in that order.", "tag": "Exam Trap", "context": "Exam" }
+  ]
+}

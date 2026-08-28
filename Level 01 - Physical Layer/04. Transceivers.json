@@ -1,0 +1,94 @@
+{
+  "title": "Transceivers",
+  "level": 1,
+  "levelTitle": "Level 01 - Physical Layer",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "04. Transceivers.md",
+  "cards": [
+    {
+      "q": "What is a transceiver and what does it contain?",
+      "a": "A transceiver converts the electrical signal of the switch's PHY into the optical or electrical form of the media, typically fiber optics. It plugs into a fixed bay or carrier such as SFP, SFP+, or QSFP and contains the laser, optics, and PMD logic.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Match the transceiver form factors SFP, SFP+, SFP28, XFP, QSFP+, QSFP28, QSFP-DD/OSFP, and GBIC to their speeds.",
+      "a": "SFP covers 100M-1G; SFP+ is 10G with the same footprint as SFP; SFP28 is 25G; XFP is legacy 10G; QSFP+ is 4x10G (40G); QSFP28 is 4x25G (100G); QSFP-DD and OSFP span 100G-400G+ with 8 lanes; GBIC is legacy 1G superseded by SFP.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does DOM (Digital Optical Monitoring) provide and how is it used?",
+      "a": "DOM reads laser power TX and RX, temperature, and voltage from the transceiver as a fast link-health diagnostic. You check RX power against the expected receive sensitivity, and a value below threshold indicates a high error rate. DOM data is read from the module via I2C, covered by the transceiver MIB.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What messages and behavior occur with an unsupported or counterfeit transceiver module?",
+      "a": "An unsupported or counterfeit module causes Cisco invalid transceiver messages and the port is disabled (errdisable). Genuine or certified modules are required.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the common transceiver failure modes on fiber links?",
+      "a": "The common failures are an unsupported or counterfeit module causing errdisable, a wrong wavelength (850 nm SR versus 1310 nm LR/LX) on opposite ends causing no link, a wrong fiber type such as an SX module needing MM fiber, dirty connectors causing low RX power and CRC errors, and incorrect use of DAC copper twinax.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is a DAC (Direct Attach Cable)?",
+      "a": "A DAC is a copper twinax SFP+ cable with no optics that saves cost for short reaches of about 7 m or less. It has no DOM and is not optical fiber.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Map 1G MM, 1G SM, 10G MM, 10G SM, 40G MM, and 40G SM transceivers to their module, fiber, connector, and wavelength.",
+      "a": "1G MM is SFP 1000BASE-SX on MMF with LC at 850 nm; 1G SM is SFP 1000BASE-LX on SMF (or MM with mode conditioning) with LC at 1310 nm; 10G MM is SFP+ 10GBASE-SR on MMF with LC at 850 nm about 300 m; 10G SM is SFP+ 10GBASE-LR on SMF with LC at 1310 nm to 10 km; 40G MM is QSFP+ SR4 on MPO-12 at 850 nm to 100 m; 40G SM is QSFP+ LR4 on LC duplex at 1310 nm CWDM to 10 km.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands inspect optical transceiver DOM values and module type?",
+      "a": "Use 'show int tend1/1 transceiver | include Wavelength|Temperature|Tx Power|Rx Power' for DOM values and 'show interfaces transceiver | include SFP|QSFP|XFP|PORT' to verify the module in a port.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you troubleshoot a fiber link that is down?",
+      "a": "Run 'show interface <if> transceiver' to confirm the module is present and TX/RX power is sane, confirm both ends use the same wavelength and correct fiber type, then clean, reseat, and swap in a known-good module. If DOM RX is too low, clean, check fiber and connector, and reseat the module.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "If a 1G SFP module is placed in a 10G SFP+ slot, what speed results?",
+      "a": "SFP and SFP+ share the same mechanics, so a 1G SFP works at 1G in a 10G slot; it does not become 10G.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What distinguishes SR versus LR/LX wavelengths?",
+      "a": "SR is 850 nm for multimode, while LR/LX is 1310 nm for single-mode. A wavelength mismatch causes no link even when light is present.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between 40G SR4 and 40G LR4 in module and connector?",
+      "a": "40G SR4 uses MPO with multimode parallel fiber, while 40G LR4 uses LC duplex with single-mode WDM. The modules and connectors differ, and the exam tests this distinction.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does invalid transceiver indicate?",
+      "a": "Invalid transceiver indicates a compatibility or compliance block, and the port is disabled. The module may be unsupported or counterfeit.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Where is DOM data read from?",
+      "a": "DOM data is read from the module itself, not from the fiber, so know the diagnostic value comes from the transceiver.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

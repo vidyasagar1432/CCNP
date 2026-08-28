@@ -1,0 +1,88 @@
+{
+  "title": "SLAAC",
+  "level": 6,
+  "levelTitle": "Level 06 - IPv6",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "07. SLAAC.md",
+  "cards": [
+    {
+      "q": "What is SLAAC?",
+      "a": "SLAAC (Stateless Address AutoConfiguration, RFC 4862) lets a host build its own global unicast /64 address from a Router Advertisement, with no DHCPv6 server needed. It is the default, natural IPv6 addressing model.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What steps does a host run during SLAAC?",
+      "a": "Generate a link-local address, optionally send a Router Solicitation to ff02::2, receive the Router Advertisement with an on-link /64 prefix, flags, and router lifetime, build the GUA as prefix plus interface ID, then run Duplicate Address Detection (NS to ff02::1:ffxx:xxxx) before using it.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do the RA flags A, M, and O control IPv6 autoconfiguration?",
+      "a": "A=1 M=0 O=0 is SLAAC-only with DNS from RA options (RDNSS); A=0 M=1 O=0 is stateful DHCPv6 with DHCPv6 DNS; A=1 M=1 O=0 uses both with RA or DHCPv6 DNS; A=0 M=0 O=1 gives no auto-addressing so DHCPv6 is needed for both.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Compare SLAAC with DHCPv6.",
+      "a": "SLAAC is automatic RA-only with limited options (RDNSS for DNS/NTP), no server, limited tracking, and suits broad Internet-like use. DHCPv6 is server-assigned and stateful, provides full options and per-lease accounting, needs a server, and suits enterprise policy. The production hybrid is SLAAC for addressing plus DHCPv6 for DNS (A=1 M=0 O=1).",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Why is a /64 mandatory for SLAAC?",
+      "a": "The RA announces a /64 and the interface ID fills the last 64 bits, so /64 is required; a /127 or /60 link breaks SLAAC and would need DHCPv6 or static configuration.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does Duplicate Address Detection work and what do privacy extensions change?",
+      "a": "DAD sends an Neighbor Solicitation with the tentative address; if a Neighbor Advertisement comes back, the address is dropped as a duplicate. Privacy extensions (RFC 4941) use temporary random interface IDs for outbound connections to avoid EUI-64 host tracking, while SLAAC still works.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What Cisco IOS commands enable SLAAC advertisements on a router?",
+      "a": "On the interface use ipv6 nd ra-interval 30 and ipv6 nd prefix 2001:db8:1:10::/64; RAs are enabled by default when an ipv6 address is set. To push DNS too, use ipv6 nd ra dns 2001:db8:53::1.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you verify SLAAC results on a host?",
+      "a": "On Linux use ip -6 addr show to view the autoconfigured address and ip -6 route show default to confirm the default route from the RA sender.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Does SLAAC require a DHCPv6 server?",
+      "a": "No. The 'stateless' in SLAAC means no DHCP server is involved; the router's RA alone provides the addressing information.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does setting the A flag in an RA provide DNS automatically?",
+      "a": "No. The A flag only enables address autoconfiguration; DNS still requires RDNSS carried in the RA or a DHCPv6 server.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is a /64 always required for SLAAC?",
+      "a": "Yes. SLAAC in a /60 or /127 prefix is broken because the interface ID needs a full 64-bit space.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens on a segment with no IPv6 router present?",
+      "a": "Hosts only autoconfigure fe80 link-local addresses; without a router there is no Router Advertisement and no global address.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What ICMPv6 types do RS/RA and NS/NA use?",
+      "a": "Router Solicitation is ICMPv6 Type 133 and Router Advertisement is Type 134; Duplicate Address Detection uses Neighbor Solicitation (135) and Neighbor Advertisement (136).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

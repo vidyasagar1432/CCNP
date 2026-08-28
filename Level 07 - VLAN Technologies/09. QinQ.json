@@ -1,0 +1,118 @@
+{
+  "title": "QinQ (802.1ad / VLAN Stacking)",
+  "level": 7,
+  "levelTitle": "Level 07 - VLAN Technologies",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "09. QinQ.md",
+  "cards": [
+    {
+      "q": "What is QinQ?",
+      "a": "QinQ (commonly associated with IEEE 802.1ad Provider Bridges) is a Layer 2 VLAN-stacking technique that adds an outer VLAN tag to an Ethernet frame that already contains an inner customer VLAN tag. The provider uses the outer S-Tag (Service VLAN) to transport customer VLANs while preserving the customer's original C-Tag.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the memory aid for C-VLAN and S-VLAN?",
+      "a": "C-VLAN identifies the customer's VLAN and S-VLAN identifies the provider's service/tunnel. C-Tag = Customer; S-Tag = Service Provider; QinQ = Customer VLAN inside Provider VLAN.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What TPIDs are commonly used for the S-Tag and C-Tag in QinQ?",
+      "a": "The S-Tag (outer provider tag) commonly uses TPID 0x88A8, while the C-Tag (inner customer 802.1Q tag) commonly uses TPID 0x8100.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How much VLAN-tag overhead does QinQ add compared with an untagged Ethernet frame?",
+      "a": "QinQ adds 8 bytes of VLAN-tag overhead compared with an untagged Ethernet frame, since each VLAN tag (S-Tag and C-Tag) adds 4 bytes.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the CE and PE roles in QinQ?",
+      "a": "CE (Customer Edge) is part of the customer's network and sends standard Ethernet frames or 802.1Q-tagged customer frames. PE (Provider Edge) connects the customer network to the provider network and adds the provider's outer S-Tag; the destination provider edge removes it before delivering customer traffic.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is QinQ used by service providers?",
+      "a": "Without QinQ a provider may have difficulty transporting many customers' VLANs while preserving their individual VLAN numbering. Different customers can each use the same C-VLAN IDs because the provider places each customer's traffic into a different S-VLAN/service context, preserving the customer's VLAN numbering across the provider network.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Does QinQ mean the provider has unlimited VLANs?",
+      "a": "No. QinQ does not mean the provider has no VLAN limits; it provides an additional VLAN namespace/context by stacking tags.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is Cisco's QinQ/802.1Q tunneling configuration mode?",
+      "a": "Cisco switches provide QinQ-style tunneling using 802.1Q tunneling, commonly configured with 'switchport mode dot1q-tunnel', plus 'switchport access vlan 100' (the provider S-VLAN) and 'switchport nonegotiate' on the provider-facing customer port.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Is 'switchport mode dot1q-tunnel' a normal trunk mode?",
+      "a": "No. switchport mode dot1q-tunnel is used for Cisco 802.1Q tunneling/QinQ-style service; it is not simply another normal trunk mode such as switchport mode trunk.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Describe the QinQ frame flow through a provider network.",
+      "a": "Customer sends an 802.1Q-tagged frame; the provider edge adds an S-Tag, giving [S-Tag VLAN 100][C-Tag VLAN 10]; the provider transports it on an S-VLAN; the destination provider edge removes the S-Tag; the customer receives its original C-VLAN (VLAN 10).",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is QinQ vs the double-tagging VLAN-hopping attack?",
+      "a": "QinQ is legitimate VLAN stacking/tunneling where a provider adds an S-Tag to carry customer frames through a service context. A double-tagging attack is a malicious VLAN-hopping technique exploiting nested 802.1Q tags and native-VLAN behavior. Both involve two VLAN tags but differ in purpose and network context.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How do DTP, 802.1Q, QinQ, and VTP differ?",
+      "a": "DTP negotiates whether a Cisco switch link becomes a trunk; 802.1Q is VLAN tagging/encapsulation; QinQ/802.1ad stacks VLAN tags to transport customer VLANs through a provider network; VTP distributes the VLAN database.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the MTU consideration with QinQ?",
+      "a": "QinQ adds another 4-byte VLAN tag, increasing frame size, so every provider link carrying the QinQ frame must support the required frame size. Do not blindly memorize a universal value like 1508 or 1510 without considering the original frame size and platform MTU configuration.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Does QinQ create unlimited VLANs?",
+      "a": "No. QinQ provides an additional VLAN namespace, but the actual number of usable S-VLANs and C-VLANs depends on IEEE VLAN ID restrictions, reserved VLAN IDs, Cisco platform capabilities, software version, and provider design.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the proper understanding of MAC learning in QinQ?",
+      "a": "QinQ remains a Layer 2 Ethernet service. Do not reduce MAC learning to the oversimplified rule 'inner MAC on access, outer MAC on backbone'; actual behavior depends on the provider-bridge/tunneling implementation and platform. QinQ transports customer Layer 2 frames inside a provider VLAN/service context.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What commands verify QinQ/802.1Q tunneling configuration?",
+      "a": "'show interfaces GigabitEthernet0/1 switchport', 'show interfaces trunk', and 'show interfaces GigabitEthernet0/1'. Avoid relying on a single 'show dot1q-tunnel' command as if it exists identically on every platform.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Is the customer's VLAN preserved through QinQ?",
+      "a": "Yes. QinQ does not normally require the provider to renumber the customer's VLANs; the customer VLAN (C-Tag) is preserved through the provider service, with the S-Tag added and removed at the provider edges.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Summarize the QinQ quick review key points.",
+      "a": "QinQ is VLAN stacking / 802.1Q tunneling associated with 802.1ad Provider Bridges; C-VLAN is the customer VLAN; S-VLAN is the provider/service VLAN; C-Tag is the inner customer tag (TPID 0x8100); S-Tag is the outer provider tag (TPID 0x88A8); two tags add 8 bytes; customer VLAN is preserved; Cisco feature is switchport mode dot1q-tunnel; primary use is provider/Metro Ethernet Layer 2 services; QinQ is not VLAN hopping.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

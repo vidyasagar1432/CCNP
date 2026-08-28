@@ -1,0 +1,20 @@
+{
+  "title": "Local Preference (LOCAL_PREF)",
+  "level": 12,
+  "levelTitle": "Level 12 - BGP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "05. Local Preference.md",
+  "cards": [
+    { "q": "What is Local Preference?", "a": "The well-known discretionary BGP attribute that tells the whole AS which outbound eBGP path is preferred; higher is better and it is best-path step 2, right after Weight. It is set at the edge on routes received from eBGP and propagates inside the AS via iBGP so every router makes the same choice.", "tag": "Overview", "context": "Both" },
+    { "q": "What is local-pref's one job in traffic engineering?", "a": "Outbound traffic selection: if inbound routes from upstream A carry a higher local-pref than upstream B, the AS exits via A. Because local-pref rides iBGP, one edge router's decision is shared AS-wide for a consistent exit.", "tag": "Core Concept", "context": "Interview" },
+    { "q": "What is the default local preference and how does it propagate?", "a": "The default is 100. It is set inbound from eBGP (neighbor in), propagates to iBGP peers, and is never sent to eBGP peers, so external routers never see it.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What are the two ways to set local preference?", "a": "Globally for all eBGP routes with bgp default local-preference 200, or per prefix with a route-map (match ip address prefix-list CRITICAL, set local-preference 300) applied with neighbor 192.0.2.2 route-map SETLP in. A neighbor route-map wins over the global default for matching prefixes.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "Compare Weight, Local Pref, and MED by scope and direction.", "a": "Weight is local to a single router, applied inbound to affect outbound choice, and higher wins. Local Pref covers the entire AS, set inbound, higher wins. MED spans to the neighbor AS, set outbound, and lower wins. So weight is local-only, local-pref is AS-wide, and MED is sent to upstreams.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How do you build a primary/backup upstream design with local-pref?", "a": "Set upstream A to local-pref 200 (primary) and upstream B to local-pref 100 (backup). All routers exit via A, and if A's session dies, B's value of 100 becomes the winner automatically.", "tag": "Core Concept", "context": "Both" },
+    { "q": "How do you verify local preference?", "a": "show ip bgp <prefix> shows the local-pref column per path; show ip bgp neighbors <ip> shows negotiated and applied policies. In show ip bgp, local-pref appears in the table and weight is a separate column.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "Which direction wins: higher or lower local-pref?", "a": "Higher wins. Local-pref is best-path step 2, evaluated right after Weight.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "Where must local preference be set and can external routers see it?", "a": "It must be set inbound from eBGP, and it is never seen by external routers because it propagates via iBGP only.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "Is local preference well-known discretionary or well-known mandatory?", "a": "Well-known discretionary, with default 100, scope the entire AS, direction inbound (for outbound traffic), higher wins, and best-path step 2.", "tag": "Quick Review", "context": "Exam" }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "title": "JSON",
+  "level": 24,
+  "levelTitle": "Level 24 - SDN & Automation",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "10. JSON.md",
+  "cards": [
+    {
+      "q": "What is JSON and why is it used in networking?",
+      "a": "JSON (JavaScript Object Notation) is a lightweight data format built on key-value pairs, arrays, and nesting. It is the default payload for REST APIs and RESTCONF and is used across automation tools because it is human-readable and machine-parseable.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the syntax elements of JSON?",
+      "a": "Object { }, array [ ], key-value \"key\": value, string \"text\", number 42, boolean true/false, and null. Everything is key-value pairs, nested objects, or arrays.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does an array of objects look like in JSON?",
+      "a": "An array uses square brackets and holds comma-separated objects, e.g., \"interfaces\": [ {\"name\": \"Gi1\", \"enabled\": true}, {\"name\": \"Gi2\", \"enabled\": false} ] — the common shape for lists of devices or configs.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the JSON syntax rules that make it parse?",
+      "a": "Keys must be double-quoted, no trailing commas are allowed, and objects/arrays nest freely. Malformed JSON such as a trailing comma or unquoted key fails to parse.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does JSON compare to XML?",
+      "a": "JSON is compact with native types and no comments, while XML is verbose, text-based, and supports comments. JSON is the modern choice; XML is the legacy/verbose one.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you parse and generate JSON in Python?",
+      "a": "import json, then data = json.loads(payload) converts a JSON string to a dict and json.dumps(data) serializes a dict back to JSON, e.g., json.dumps(data, indent=2).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does a JSON parse error, key-missing, or type mismatch usually indicate?",
+      "a": "Parse error = trailing comma or invalid syntax; key missing = wrong key in the structure; type mismatch = string vs int (quotes); nesting wrong = array indexing; encoding issues = charset.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why does a trailing comma or unquoted key break JSON?",
+      "a": "JSON is strict: trailing commas and unquoted keys are not valid syntax, so the payload fails to parse instead of being accepted.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you distinguish a JSON array from an object?",
+      "a": "An array uses square brackets [ ] and holds an ordered list of values; an object uses curly braces { } and holds key-value pairs.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

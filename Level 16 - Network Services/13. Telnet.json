@@ -1,0 +1,100 @@
+{
+  "title": "Telnet",
+  "level": 16,
+  "levelTitle": "Level 16 - Network Services",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "13. Telnet.md",
+  "cards": [
+    {
+      "q": "What is Telnet and its fundamental security problem?",
+      "a": "Telnet is a legacy remote-access protocol that uses TCP 23 to provide a virtual terminal session but does not encrypt the session; commands, session data, and authentication information can be captured, so SSH should be used instead.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the protocol basics of Telnet?",
+      "a": "Telnet uses TCP 23, provides no encryption, uses the Network Virtual Terminal (NVT) abstraction for a bidirectional text-based session, and on Cisco devices runs over the VTY lines for remote CLI access.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What risks does an unencrypted Telnet session expose?",
+      "a": "Eavesdropping of session data, credential exposure, session hijacking, man-in-the-middle interception/modification, and compliance risk; the fundamental problem is the lack of encryption.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How is Telnet permitted on Cisco VTY lines?",
+      "a": "With line vty 0 15, transport input telnet, login, and a password; note the VTY range varies by platform.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the transport input options?",
+      "a": "transport input telnet permits Telnet only, transport input ssh permits SSH only, transport input all permits all supported protocols, and transport input none disables incoming remote-access protocols.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which command prevents Telnet while allowing SSH on the VTY lines?",
+      "a": "transport input ssh on those VTY lines blocks Telnet connections and permits only SSH.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How is Telnet restricted with an ACL, and its limitation?",
+      "a": "An access-class such as access-class MGMT in attached to the VTY lines restricts which source addresses can connect; this provides access control but does not encrypt Telnet.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do Telnet and SSH compare?",
+      "a": "Both provide remote CLI access over VTY lines, but Telnet is TCP 23 without encryption and is not recommended, while SSH is TCP 22 with encryption and secure authentication.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What commands manage Telnet sessions on a Cisco device?",
+      "a": "telnet <host> initiates a session, show users shows connected users including VTY sessions, show line shows terminal lines, show sessions shows outbound sessions, and exit or disconnect ends a session.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why would a Telnet connection be refused versus timing out?",
+      "a": "Refused means Telnet is not permitted on the VTY lines (check show running-config | section line vty); timeout usually means TCP 23 is blocked or unreachable (check routing, ACL, firewall).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Do access-class and SSH solve the same problem?",
+      "a": "No. An access-class (ACL) restricts which management sources may connect, while SSH protects the session with encryption; they solve different security problems and are best combined.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How do the common remote-access ports compare?",
+      "a": "Telnet = TCP 23, SSH = TCP 22, FTP control = TCP 21, and DNS = UDP/TCP 53; Telnet and SSH are the two remote CLI protocols to contrast.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does access-class MGMT in encrypt Telnet?",
+      "a": "No. access-class restricts which source addresses can reach the VTY lines; it does not encrypt the traffic, so Telnet remains vulnerable even when ACL-restricted.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Are Cisco devices always SSH-enabled and Telnet-disabled by default?",
+      "a": "Not universally. SSH must be properly configured for secure remote management, and Telnet should be explicitly disabled or restricted; do not assume a default.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the One-Minute Telnet memory?",
+      "a": "TELNET = TCP 23 + no encryption; it offers unencrypted remote terminal access over VTY lines, transport input ssh prevents Telnet on those lines, and SSH on TCP 22 is the secure replacement.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

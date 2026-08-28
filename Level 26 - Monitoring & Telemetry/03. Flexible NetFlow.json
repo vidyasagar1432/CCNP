@@ -1,0 +1,82 @@
+{
+  "title": "Flexible NetFlow",
+  "level": 26,
+  "levelTitle": "Level 26 - Monitoring & Telemetry",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "03. Flexible NetFlow.md",
+  "cards": [
+    {
+      "q": "What is Flexible NetFlow (FNF)?",
+      "a": "FNF is the modern NetFlow engine that lets you define your own records (match = key, collect = non-key fields) using a record, exporter, monitor structure, and exports via NetFlow v9/IPFIX.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the anatomy of an FNF flow record?",
+      "a": "match defines key fields that form the flow identity, collect adds extra (non-key) information fields, flow exporter points to the collector, and flow monitor binds record plus exporter.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between match and collect in FNF?",
+      "a": "match defines the key fields that identify the flow, while collect adds non-key information fields about that flow.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does FNF allow tailoring records to a use case?",
+      "a": "FNF lets you choose match keys and collect fields freely, for example traffic analysis by IPs/ports collecting bytes/start, or top talkers by src/vlan collecting bytes/flows.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does the FNF flow exporter configure?",
+      "a": "It sets the collector destination IP, transport (typically UDP 2055), export version (v9/IPFIX), and options such as templates that describe the record to the collector.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the role of the flow monitor and its cache?",
+      "a": "The monitor binds the record and exporter and is enabled on an interface (input/output); its cache stores resident flow state. Services are independent.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Why choose FNF over NetFlow v5?",
+      "a": "FNF has custom rather than fixed fields, uses templates, supports richer applications, and scales more flexibly than v5.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What other features does FNF integrate with?",
+      "a": "It combines with NBAR for application classification, sampling for high rates, multicast flows, and aggregation for top-N reports.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the FNF configuration flow on an interface?",
+      "a": "Create the flow record with match/collect, a flow exporter with destination and transport udp 2055, a flow monitor binding record and exporter, then apply ip flow monitor M1 input on the interface.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "No flows are cached; what is the likely cause and check?",
+      "a": "Likely an interface application issue; check with show flow monitor cache. No records relate to match (show flow record) and no export relates to the exporter (show flow exporter).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the FNF configuration structure in order?",
+      "a": "The structure is record, then exporter, then monitor, and finally enabling ip flow monitor on the interface.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which export format does Flexible NetFlow use?",
+      "a": "FNF exports via NetFlow v9/IPFIX templates rather than the fixed-format v5.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "title": "BGP Communities",
+  "level": 12,
+  "levelTitle": "Level 12 - BGP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "07. Communities.md",
+  "cards": [
+    {
+      "q": "What are BGP communities?",
+      "a": "Optional transitive tags attached to routes so operators can group routes and apply policy remotely, meaning the upstream applies the action rather than the sender. Because they are transitive, communities travel across AS boundaries, unlike MED. The exam covers the four well-known communities, the 4-byte ASN:value format, and how send-community controls what leaves the router.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the BGP community attribute properties?",
+      "a": "Type optional transitive, scope travels across ASes, standard format 0-65535 (16-bit), extended format ASN:value (32-bit), and the goal is tagging routes plus remote policy.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the four well-known communities and their values?",
+      "a": "NO_EXPORT 0xFFFFFF01 (do not advertise outside the local AS), NO_ADVERTISE 0xFFFFFF02 (do not advertise to any BGP peer), LOCAL_AS 0xFFFFFF03 (do not advertise outside the local confederation sub-AS), and INTERNET 0x00000000 (advertise anywhere, the default).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between NO_EXPORT and NO_ADVERTISE?",
+      "a": "NO_EXPORT still allows the route to flow within the local AS; NO_ADVERTISE stops the route at this router entirely and it is not sent to any BGP peer.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you set and send a community?",
+      "a": "In a route-map use set community 65001:100, then configure neighbor 192.0.2.2 route-map COMM out together with neighbor 192.0.2.2 send-community. Without send-community the attribute is stripped and communities silently vanish.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you send extended communities?",
+      "a": "Add neighbor ... send-community both (or extended). Standard communities are sent with send-community standard, and private 4-byte communities also need the both keyword.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does the receiving side match a community?",
+      "a": "Configure ip community-list standard 10 permit 65001:100, then in a route-map use match community 10 with a set action such as set local-preference 200, applied with neighbor route-map APPLY in. Standard community lists match exact or tagged values; expanded lists use regex.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What shorthand does IOS accept in set community?",
+      "a": "set community no-export, set community no-advertise, and set community local-as; IOS accepts the well-known names directly.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands show communities?",
+      "a": "show ip bgp <prefix> shows the community column, show ip bgp community lists routes with communities, show ip bgp community-list 10 shows routes matching a list, and show community-list displays configured lists.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Quick review of communities?",
+      "a": "Type optional transitive; they cross ASes; NO_EXPORT stays in the AS, NO_ADVERTISE stops here, LOCAL_AS is confederation-local; send with send-community; match with community-list; format is ASN:value.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the number one reason communities vanish in BGP?",
+      "a": "Missing send-community on the neighbor. The community attribute is stripped on transmission unless the neighbor statement is configured.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

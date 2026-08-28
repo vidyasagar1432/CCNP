@@ -1,0 +1,88 @@
+{
+  "title": "vManage",
+  "level": 23,
+  "levelTitle": "Level 23 - Enterprise WAN",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "08. vManage.md",
+  "cards": [
+    {
+      "q": "What is vManage in Cisco SD-WAN?",
+      "a": "The management plane of Cisco SD-WAN — the web UI/API dashboard that onboards devices, pushes templates, monitors health, and gathers analytics. Config flows through it.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are vManage's main functions?",
+      "a": "A single dashboard UI, device config templates, zero-touch onboarding, health/analytics monitoring, and REST APIs for automation — it is where you configure and watch the fabric.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "In which plane does vManage operate?",
+      "a": "Only the management plane; control is vSmart and orchestration is vBond, with the data plane on the WAN edges.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does configuration flow through vManage?",
+      "a": "You build a template in vManage, push it to the device, the device validates it, and you monitor via vManage — configuration is template-driven and pushed centrally.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What configuration features does vManage offer?",
+      "a": "Feature and device templates, a CLI mode for direct config, real-time monitoring, health alerts, and a REST API for automation.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does vManage provide for monitoring and analytics?",
+      "a": "It collects telemetry from every edge, showing device lists/status, links with SLA and usage, events/alerts, and logs for troubleshooting.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How is vManage made highly available?",
+      "a": "By running it in a cluster of multiple vManage nodes with database replication for transparent failover.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands verify vManage connectivity and config?",
+      "a": "show sdwan running-config, show sdwan device, show sdwan vmanage connections, show omp peers, and show sdwan control.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A device is not showing up in vManage. What is the likely cause and check?",
+      "a": "A management plane connectivity problem is likely; check show sdwan device.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "No telemetry is reaching vManage. What is the likely cause and check?",
+      "a": "A connectivity issue between the device and vManage is likely; check show sdwan vmanage connections.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A pushed template is not being applied to a device. What is the likely cause and check?",
+      "a": "A config push failure or device mismatch is likely; check logs and show sdwan running-config.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does vManage support automation in SD-WAN?",
+      "a": "Through its REST API, which enables programmatic and consistent configuration, plus template-driven config for consistent WAN management.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "Distinguish vManage from vSmart and vBond.",
+      "a": "vManage is the management plane (dashboard/templates/monitoring), vSmart is the control plane, and vBond is the orchestration plane.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

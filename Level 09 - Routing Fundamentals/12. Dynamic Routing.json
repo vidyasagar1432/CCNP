@@ -1,0 +1,250 @@
+{
+  "title": "Dynamic Routing",
+  "level": 9,
+  "levelTitle": "Level 09 - Routing Fundamentals",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "12. Dynamic Routing.md",
+  "cards": [
+    {
+      "q": "What is dynamic routing?",
+      "a": "Dynamic routing is a method where routers automatically learn routes to remote networks using routing protocols. Routers communicate to discover neighbors, exchange routing information, learn remote networks, calculate the best path, install routes into the routing table, detect failures, and recalculate routes when the topology changes.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is a routing protocol?",
+      "a": "A routing protocol is a set of rules that routers use to exchange routing information and determine how traffic should reach remote networks. Examples: RIP (Distance Vector), EIGRP (Advanced Distance Vector), OSPF (Link-State), IS-IS (Link-State), and BGP (Path Vector).",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Why is dynamic routing more suitable than static routing for medium and large networks?",
+      "a": "With static routing the administrator must manually configure routes and manually change them after a link failure. Dynamic routing lets routers automatically detect the change, update information, recalculate the best path, and use the new path, so it adapts to failures without manual intervention.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How are dynamic routing protocols classified by how they learn and represent routing information?",
+      "a": "Distance Vector (RIP), Advanced Distance Vector (EIGRP), Link-State (OSPF, IS-IS), and Path Vector (BGP). The key concepts: Distance Vector = 'learn from my neighbors'; Link-State = 'build a map of the network'; Path Vector = 'learn the path through autonomous systems'.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a Distance Vector routing protocol?",
+      "a": "A Distance Vector protocol learns routes based on distance (how far the destination is) and vector (the direction/next hop toward the destination). A router primarily learns routing information from its neighbors; for example, R1 learns from R2 that Network X is 2 hops away with next hop R2.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the distance-vector mental model?",
+      "a": "It is like asking a neighbor for directions: 'How do I reach the airport?' The neighbor says 'Go through me, the airport is 3 roads away.' You do not have a complete map of the city; you only know the destination, distance, and direction.",
+      "tag": "Overview",
+      "context": "Interview"
+    },
+    {
+      "q": "What metric does RIP use and what are the reachable/unreachable hop counts?",
+      "a": "RIP uses hop count; fewer hops is a better path. 1–15 hops is reachable, and 16 hops is unreachable.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the general characteristics of traditional Distance Vector protocols?",
+      "a": "They learn routes from neighbors, advertise routes to neighbors, use a distance metric and a direction/next hop, have mechanisms to prevent routing loops, and may use periodic updates. RIP is the classic example.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is an Advanced Distance Vector protocol and what is the main Cisco example?",
+      "a": "An Advanced Distance Vector protocol retains the basic distance-vector concept but uses more sophisticated mechanisms for route calculation and information exchange. The main Cisco example is EIGRP, which uses DUAL (Diffusing Update Algorithm).",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What three tables does EIGRP maintain?",
+      "a": "The Neighbor Table (information about EIGRP neighbors), the Topology Table (routes learned through EIGRP and information used by DUAL), and the Routing Table (the best routes selected for forwarding).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a Link-State routing protocol?",
+      "a": "A Link-State protocol learns information about the links and topology of the network rather than just asking how far a network is. Each router builds a representation of the network, storing the information in a Link-State Database (LSDB), from which it computes best paths.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the link-state mental model and key difference from distance vector?",
+      "a": "Distance Vector: 'Ask your neighbor for directions.' Link-State: 'Build a map of the entire city and calculate the best route yourself.' Link-state routers build an LSDB and independently calculate best paths from topology information.",
+      "tag": "Overview",
+      "context": "Interview"
+    },
+    {
+      "q": "What is OSPF and what algorithm does it use?",
+      "a": "OSPF (Open Shortest Path First) is a link-state, IGP, classless protocol commonly used in enterprise networks. It uses SPF (Shortest Path First), which is based on Dijkstra's algorithm.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Compare Distance Vector and Link-State protocols. ",
+      "a": "Distance Vector: basic idea is learn from neighbors, knowledge is distance + direction, information source is neighbors, network map is limited, example RIP, algorithm is distance-vector calculation, database is routing information, scalability is lower, and convergence is generally slower. Link-State: basic idea is build topology view, knowledge is network topology, source is link-state information, map is more complete, example OSPF, algorithm is SPF, database is LSDB, scalability is higher, and convergence is generally faster.",
+      "tag": "Quick Review",
+      "context": "Both"
+    },
+    {
+      "q": "What is a Path Vector protocol and what is the main example?",
+      "a": "A Path Vector protocol is another routing-protocol category whose main example is BGP (Border Gateway Protocol), designed primarily for routing between Autonomous Systems. BGP learns the AS_PATH for a route, for example Network X with AS_PATH 65003 65002.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are IGP and EGP, and what is the modern Internet EGP?",
+      "a": "IGP (Interior Gateway Protocol) is used inside an Autonomous System; examples are RIP, EIGRP, OSPF, and IS-IS. EGP (Exterior Gateway Protocol) is used for routing between Autonomous Systems; the modern Internet uses BGP.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Compare dynamic routing protocols by classification and metric.",
+      "a": "RIP: Distance Vector, metric Hop Count. EIGRP: Advanced Distance Vector, DUAL + topology information, metric Bandwidth + Delay. OSPF: Link-State, LSDB + SPF, metric Cost. IS-IS: Link-State, LSDB + SPF, metric Cost. BGP: Path Vector, AS path + attributes, metric Path Attributes.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the general stages of routing protocol operation?",
+      "a": "Neighbor discovery, establish relationship, exchange routing information, build routing database, calculate best paths, install routes, monitor network, detect changes, recalculate, and convergence.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do protocols discover neighbors?",
+      "a": "OSPF uses Hello packets, EIGRP uses Hello messages, and BGP establishes a TCP session with OPEN messages. Hello exchange forms a neighbor relationship.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do protocols exchange routing updates?",
+      "a": "RIP uses periodic updates, EIGRP uses incremental updates, OSPF uses link-state flooding, and BGP uses UPDATE messages.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the route entry O 10.10.20.0/24 [110/20] via 10.10.12.2 mean?",
+      "a": "O = OSPF (the routing protocol), 10.10.20.0/24 = destination, 110 = Administrative Distance, 20 = metric, and 10.10.12.2 = next hop. The protocol database is not the same as the routing table.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is convergence?",
+      "a": "Convergence is the process by which routers reach a consistent routing state after a topology change. Routers detect the failure, exchange information, recalculate, install new routes, and converge. Fast convergence means the network adapts quickly to changes.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is a triggered update?",
+      "a": "A triggered update is routing information sent because a routing change occurred, rather than waiting for the next scheduled update. It is especially important in distance-vector protocols such as RIP.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "When multiple routing sources provide the same destination, which is preferred?",
+      "a": "The router prefers the routing source with the lowest Administrative Distance. For example, with EIGRP AD 90, OSPF AD 110, and RIP AD 120, EIGRP wins because 90 < 110 < 120.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is Administrative Distance (AD)?",
+      "a": "AD measures the trustworthiness of a route source; lower AD is preferred. Common values: Connected 0, Static 1, EIGRP 90, OSPF 110, RIP 120, External EIGRP 170. AD compares different routing sources.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a metric and how is it normally compared?",
+      "a": "A metric determines which path a routing protocol prefers (RIP: hop count, EIGRP: bandwidth + delay, OSPF: cost, IS-IS: cost, BGP: path attributes). The metric is normally compared within the same routing protocol, e.g. OSPF Path A cost 10 vs Path B cost 30, with Path A winning.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is Longest Prefix Match and what does it do?",
+      "a": "Longest Prefix Match is used when forwarding a packet; the most specific route wins. For destination 10.10.20.50 with routes 10.0.0.0/8, 10.10.0.0/16, and 10.10.20.0/24, the /24 route wins because the larger prefix length is more specific (/24 > /16 > /8).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between route installation and packet forwarding?",
+      "a": "Route installation decides which route enters the RIB using Administrative Distance then routing protocol metric. Packet forwarding uses Longest Prefix Match in the FIB, then next-hop resolution and the outgoing interface. They are different concepts.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is ECMP and what are its benefits?",
+      "a": "ECMP (Equal-Cost Multipath) occurs when multiple paths have the same preferred metric, so a router can install multiple paths for load sharing, redundancy, and better link utilization.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is a floating static route?",
+      "a": "A floating static route is a backup static route with a higher AD than the primary route. For example, primary OSPF AD 110 and backup static AD 200; in the normal state OSPF is primary, and if OSPF disappears the static becomes the backup.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is a recursive route lookup?",
+      "a": "A recursive lookup occurs when the router must perform another lookup to resolve a next-hop address. For a route to 10.10.20.0/24 via 192.168.12.2, the router asks how to reach 192.168.12.2; if 192.168.12.0/24 is connected via Gi0/0, the destination resolves through that interface.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is route summarization and what 10.10.0.0/24 through 10.10.3.0/24 summarize to?",
+      "a": "Route summarization combines multiple routes into one larger prefix. The four /24 networks 10.10.0.0/24 through 10.10.3.0/24 summarize to 10.10.0.0/22. Benefits include smaller routing tables, less routing information, better scalability, and reduced routing updates/calculations.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is route redistribution and what considerations apply?",
+      "a": "Redistribution allows routes from one routing protocol to be introduced into another, e.g. OSPF to EIGRP. Important considerations include metric translation, administrative distance, routing loops, route filtering, and route tagging.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is route filtering and what common Cisco tools are used?",
+      "a": "Route filtering controls which routes are accepted or advertised. Common Cisco tools include prefix lists, route maps, and distribute lists. Filtering can be performed inbound, outbound, or during redistribution.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a passive interface?",
+      "a": "A passive interface prevents a routing protocol from forming neighbor relationships on that interface, for example a LAN-facing interface. Example: router ospf 1 / passive-interface GigabitEthernet0/1. The exact advertisement behavior depends on the routing protocol.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What loop-prevention mechanisms do RIP, EIGRP, OSPF, and BGP use?",
+      "a": "RIP: split horizon, route poisoning, poison reverse, hold-down mechanisms, maximum hop count. EIGRP: DUAL, feasibility condition, feasible successor. OSPF: link-state database, SPF, hierarchical areas. BGP: AS_PATH.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are RIB, FIB, and CEF?",
+      "a": "RIB (Routing Information Base) contains selected routing information. FIB (Forwarding Information Base) is optimized for actual packet forwarding. CEF (Cisco Express Forwarding) is Cisco's high-performance forwarding architecture.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between control plane and data plane?",
+      "a": "Control plane determines where a packet should go and includes OSPF, EIGRP, BGP, static routing, and routing-table calculation. Data plane actually forwards the packet. The control plane populates the RIB, which feeds the FIB used by the data plane.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the four major routing concepts to remember?",
+      "a": "Distance Vector: 'how far is the network and which direction should I go?' Advanced Distance Vector: 'I learn from neighbors but maintain more information and use sophisticated calculations.' Link-State: 'what does the network topology look like and what is the best path?' Path Vector: 'what path does the route take through autonomous systems and which path does policy prefer?'",
+      "tag": "Quick Review",
+      "context": "Both"
+    },
+    {
+      "q": "What verification commands apply to routing protocols in general, and OSPF/EIGRP/RIP specifically?",
+      "a": "General: show ip route, show ip protocols, show ip cef. OSPF: show ip ospf neighbor, show ip ospf database, show ip ospf interface, show ip route ospf. EIGRP: show ip eigrp neighbors, show ip eigrp topology, show ip route eigrp. RIP: show ip protocols, show ip route rip.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    }
+  ]
+}

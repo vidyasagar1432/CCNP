@@ -1,0 +1,100 @@
+{
+  "title": "Global Unicast (GUA)",
+  "level": 6,
+  "levelTitle": "Level 06 - IPv6",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "02. Global Unicast.md",
+  "cards": [
+    {
+      "q": "What is a Global Unicast Address (GUA)?",
+      "a": "A GUA is the public, routable IPv6 address a host needs, equivalent to an IPv4 public address but plentiful, so NAT is optional. The prefix range is 2000::/3 (2000 through 3FFF).",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the structure of a Global Unicast Address?",
+      "a": "It is three parts: the global routing prefix assigned by the ISP (typically /48), the site-defined subnet ID in bits 49-64, and the 64-bit interface ID (EUI-64 or random/privacy-derived).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is every LAN a /64 in IPv6?",
+      "a": "A /64 is required for SLAAC and Neighbor Discovery optimizations. A /48 site can be subdivided into 65,536 /64 subnets.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the four ways a host gets a Global Unicast Address?",
+      "a": "SLAAC (router RA advertises a prefix and the host self-configures prefix plus interface ID), DHCPv6 (stateful server hands out address and options), DHCPv6-PD (site router delegates a prefix such as /56 to a CPE), and static manual configuration on interfaces.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Can two IPv6 hosts on the same segment ping each other with only link-local addresses?",
+      "a": "Yes. A host's GUA is optional while link-local is mandatory and automatically configured, so same-segment reachability works with link-local alone; multi-hop routing, however, requires GUAs.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What source address does ping6 use on a router?",
+      "a": "ping6 from a router prefers the interface's own address as the source.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does Cisco recommend for IPv6 GUA addressing?",
+      "a": "Use a tracked prefix from the ISP or DHCPv6-PD for the site, keep a /64 per VLAN with sequential subnets, and enable privacy extensions (temporary randomized interface IDs) on user hosts to prevent host tracking.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do you configure a static GUA on a Cisco IOS interface?",
+      "a": "In interface configuration mode, use ipv6 address 2001:db8:1:10::1/64.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What command advertises a prefix for ND/SLAAC on a Cisco IOS segment?",
+      "a": "ipv6 nd prefix 2001:db8:1:10::/64, though Router Advertisement serving is enabled by default with ipv6 enable.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands verify a Global Unicast Address on Cisco IOS?",
+      "a": "show ipv6 interface GigabitEthernet0/1 | include prefix and show ipv6 route 2001:db8:1:10::/64.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Is 2001:db8::/32 a production IPv6 range?",
+      "a": "No, it is documentation-only and must never be deployed; it is used in exam lab answers but not on real networks.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is a GUA automatically present on an IPv6 interface like link-local is?",
+      "a": "No. Link-local is automatically present while a GUA is not; a host with only a link-local address has no Internet path.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is NAT required for IPv6?",
+      "a": "No. IPv6 addresses are plentiful so NAT is unusual; if prefix translation is needed there is NPTv6, so never answer that NAT is required for IPv6.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does EUI-64 derive an interface ID from a MAC address?",
+      "a": "EUI-64 takes the 48-bit MAC, inserts FFFE in the middle, and flips the U/L bit; for example the calculation is a favorite exam trap.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Can you assume an interface ID is permanently EUI-64?",
+      "a": "No. Privacy extensions (RFC 4941) rotate the interface ID with temporary randomized values, so you should not assume EUI-64 is permanent.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

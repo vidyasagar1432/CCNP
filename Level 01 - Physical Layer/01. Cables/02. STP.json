@@ -1,0 +1,70 @@
+{
+  "title": "STP (Shielded Twisted Pair)",
+  "level": 1,
+  "levelTitle": "Level 01 - Physical Layer",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "02. STP.md",
+  "cards": [
+    {
+      "q": "What is Shielded Twisted Pair (STP) cable and why is it used?",
+      "a": "STP adds a conductive shield (foil or braid) around the pairs or the whole bundle to reject external EMI and reduce radiated emissions. It is useful in electrically noisy environments such as factories, data centers near power feeds, or near high-power equipment.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What must you remember about the acronym STP in cabling versus networking?",
+      "a": "STP here means Shielded Twisted Pair (the cable), not the Spanning Tree Protocol from Level 08. The same acronym refers to two completely different topics, so disambiguate by context.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Describe the TIA shield types U/UTP, F/UTP, U/FTP, S/FTP, and S/UTP.",
+      "a": "U/UTP is unshielded plain UTP. F/UTP has an overall foil shield with unshielded pairs (what Cisco often calls STP). U/FTP has each pair foil-shielded. S/FTP has a braided overall shield plus individually shielded pairs for the best rejection. S/UTP (ScTP) has a braided overall shield with unshielded pairs.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the benefits of shielding a twisted-pair cable?",
+      "a": "Shielding rejects EMI/RFI because the shield provides a reference plane and keeps common-mode currents out, reduces crosstalk between cable runs and against high-power parallel runs, and is required by many European EMC regulations and for higher-category dense deployments.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What happens if a cable shield is not properly grounded, and where should it be grounded?",
+      "a": "An ungrounded shield becomes an antenna that collects and injects noise, making things worse. The shield should be grounded at one end, typically the switch or patch panel side, to avoid ground loops; in structured cabling the patch panel bond handles it.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Where is shielded twisted-pair cabling actually chosen?",
+      "a": "STP is chosen in industrial or campus distribution where motors, VFDs, and high-power AC run parallel, near fluorescent or arc lighting and heavy machinery, in high-density racks where alien crosstalk (AXT) is a risk, and on international, EMC-strict sites.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you check for noise-related errors on a copper switch port?",
+      "a": "A shielded run terminates the same as any copper port at the switch. Check for noise-related errors with 'show controllers gigabitEthernet 0/1' and 'show interface counters errors'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Does shielding extend the 100-meter Ethernet segment length?",
+      "a": "No. Shielding fixes noise, not propagation attenuation; it does not exceed the 100 m copper Ethernet budget. Fiber is what extends distance for longer runs.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is improper grounding worse than having no shield?",
+      "a": "Yes. A shield that is not properly grounded becomes an antenna that collects and injects noise, making the run worse than an unshielded one.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is full shielding always better than UTP?",
+      "a": "No. Full shielding adds termination, grounding complexity, and cost, so UTP remains the default. Shielding is a targeted fix for known noise problems, not always the better choice.",
+      "tag": "Exam Trap",
+      "context": "Interview"
+    }
+  ]
+}

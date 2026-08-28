@@ -1,0 +1,106 @@
+{
+  "title": "Cisco Modeling Labs (CML)",
+  "level": 30,
+  "levelTitle": "Level 30 - Labs",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "02. Cisco Modeling Labs (CML).md",
+  "cards": [
+    {
+      "q": "What is Cisco Modeling Labs (CML)?",
+      "a": "CML (formerly VIRL) is Cisco's official lab environment that runs real Cisco IOS/IOS-XE images on your server via a web UI and API, supporting automation and snapshots — the exam-prep gold standard for CCNP/CCIE.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What makes CML exam-faithful for CCNP practice?",
+      "a": "It runs real Cisco device images (IOS-XE and NX-OS) with unlimited topology nodes, web-based control, an API, and snapshot support.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Which node types does CML support in a lab?",
+      "a": "CSR1000v as router, IOSv as router/switch, NX-OS for data center, ASAv as firewall, vIOS-L2 for switching, and External nodes to connect to a real network.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you build a lab in CML?",
+      "a": "Create nodes, connect links, boot the nodes, configure via console, snapshot the working state, then test.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which automation interfaces does CML provide?",
+      "a": "A REST API for scripts, NETCONF for configuration, Python libraries pyATS/Ansible for automation, and import/export to share labs.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the main benefit of CML snapshots and cloning?",
+      "a": "Snapshots provide instant rollback for experiments, cloning duplicates a lab, and export provides a backup of the working state.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does CML compare to other lab tools?",
+      "a": "It uses real Cisco images, has high fidelity, a web UI, an API, and is licensed — making it best for serious CCNP prep.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which lab tool is considered the highest fidelity among GUI-based tools?",
+      "a": "CML, because it runs real Cisco IOS-XE and NX-OS images with high fidelity.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What configuration interface does a CML device use?",
+      "a": "Standard IOS-XE CLI for the device, with topologies configured through the web UI and API rather than a special CLI.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A CML node will not boot. What is the likely cause and check?",
+      "a": "The likely cause is an image or license issue, so check that resources are sufficient for the node.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A CML automation API call fails. What should you check?",
+      "a": "Check the authentication, typically the API token, since an API 401/auth failure is a common root cause.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A CML snapshot is lost. What is the likely cause?",
+      "a": "The likely cause is storage, so verify disk space and that the snapshot was saved to a persistent location.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "CML runs virtual device images rather than real Cisco IOS images.",
+      "a": "False — CML runs real Cisco IOS/IOS-XE images, which is what makes it exam-faithful.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What resource factors should you plan for when running CML nodes?",
+      "a": "CPU and memory (RAM) per node, since under-provisioned resources cause slow or failed boots.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "Is CML a free tool like some alternatives?",
+      "a": "No — CML requires a license, but it is the best fit for CCNP- and CCIE-grade labs.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which tool is best for serious CCNP/CCIE preparation with real Cisco images and automation support?",
+      "a": "Cisco Modeling Labs (CML), which combines real IOS-XE/NX-OS images, web UI, REST/NETCONF API, and snapshots.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

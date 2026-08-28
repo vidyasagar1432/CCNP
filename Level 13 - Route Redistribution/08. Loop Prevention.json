@@ -1,0 +1,94 @@
+{
+  "title": "Loop Prevention in Redistribution",
+  "level": 13,
+  "levelTitle": "Level 13 - Route Redistribution",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "08. Loop Prevention.md",
+  "cards": [
+    {
+      "q": "Why does bidirectionally redistributing between two protocols create routing loops?",
+      "a": "Redistributing in both directions across two protocols lets a route leave OSPF into EIGRP, come back into OSPF as an EIGRP external, and bounce again — inflating metrics and flapping the RIB. Prevention uses route tags, filters, AD tuning, and limited boundary routers.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Describe the anatomy of a redistribution feedback loop.",
+      "a": "R1 redistributes OSPF to EIGRP (tag 100); R2 receives it in EIGRP and redistributes back into OSPF as an E1/E2; the route in OSPF now shows EIGRP as the external source, so metrics inflate, the table flaps, and the origin is wiped, possibly causing a blackhole.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What are the defenses against redistribution loops and their relative strength?",
+      "a": "Route tags (tag at entry, deny the tag on the way back) are the strongest; filters (deny own prefixes at each boundary) are standard; a single boundary router is simplest; AD tuning is situational; and EIGRP stub/passive is supplemental.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Describe the worked tag-based loop-prevention design.",
+      "a": "On the OSPF-to-EIGRP boundary, tag OSPF ranges with 'set tag 100' via route-map TAG-OSPF. On the EIGRP-to-OSPF boundary, use a route-map DENY-TAG-100 that denies tag 100 (then permits the rest) applied to 'redistribute eigrp 100 ... subnets' — so OSPF-originated routes never return to OSPF.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the single-boundary-router rule for loop prevention?",
+      "a": "One ASBR between two domains eliminates the feedback pair entirely. Multi-boundary is only safe with symmetric filters plus tags on both routers.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Can metric inflation occur even without a full loop in redistribution?",
+      "a": "Yes — even one-directional redistribution across two hops can inflate metrics, so ensure seed metrics are sensible so the return path stays stable.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What are the symptoms that indicate a redistribution loop?",
+      "a": "Metric larger than expected (feedback re-advertisement), route flap between protocols (AD flip at the boundary), a route missing on one side (tag deny too broad), or BGP origin '?' everywhere (redistribute-based injection).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands detect and troubleshoot redistribution loops?",
+      "a": "'show ip route <prefix>' watches metric growth, 'show ip eigrp topology' and 'show ip ospf database external' show E1/E2 tags, 'clear ip route *' after changes, and 'debug ip routing' traces flapping.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the canonical loop-prevention answer on the exam?",
+      "a": "Tags at entry plus deny the tag at return — the tag-based loop defense is the canonical answer to a redistribution loop scenario.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does a single boundary router avoid redistribution loops entirely?",
+      "a": "With only one ASBR there is no feedback pair, because routes do not bounce between two independently redistributing boundary routers.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What must multi-boundary loop-prevention designs do?",
+      "a": "Filter both directions symmetrically — apply matching filters and tags on both boundary routers so no direction lets routes return.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What happens to a route's origin and metric when it gets caught in a redistribution loop?",
+      "a": "The loop wipes the origin — the route becomes external with an inflated metric.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "In the loop prevention quick review, what are the defenses and the best/worst designs?",
+      "a": "Route tag (tag entry, deny return), filter (deny own prefixes), single boundary (no feedback pair), AD tuning (stable winner), stub/passive (limit scope); detect via metric growth/flap; best answer is tag plus symmetric filter; worst is two-way blind redistribute.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "Why can a low-AD source survive a looped metric in a redistribution design?",
+      "a": "Because AD (note 05) beats metric: a low-AD source is preferred even when the metric has been inflated by a loop, so stable AD selection can mask the inflated metric.",
+      "tag": "Quick Review",
+      "context": "Interview"
+    }
+  ]
+}

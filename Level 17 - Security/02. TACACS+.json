@@ -1,0 +1,166 @@
+{
+  "title": "TACACS+",
+  "level": 17,
+  "levelTitle": "Level 17 - Security",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "02. TACACS+.md",
+  "cards": [
+    {
+      "q": "What is TACACS+ and what is it commonly used for?",
+      "a": "TACACS+ (Terminal Access Controller Access-Control System Plus) is a Cisco-developed AAA protocol commonly used for centralized network-device administration, providing authentication, authorization, and accounting.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What transport and port does TACACS+ use?",
+      "a": "TCP port 49.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which device is the TACACS+ client in a deployment?",
+      "a": "The network device (router/switch/AAA client) acts as the TACACS+ client; the TACACS+ server performs centralized AAA functions.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does TACACS+ encryption differ from RADIUS encryption?",
+      "a": "TACACS+ encrypts the TACACS+ packet body using the shared secret (selected header info remains visible); RADIUS traditionally protects the password field rather than the entire packet.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens when the TACACS+ shared secret does not match between device and server?",
+      "a": "Authentication/integrity failures occur, causing authentication failures, timeouts, or server communication problems.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the purpose of TACACS+ command authorization?",
+      "a": "It provides granular per-command authorization so the server can permit or deny individual commands (e.g., show permitted, configure terminal denied) for network-device administration.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "In 'aaa authorization commands 15', what does the number 15 represent?",
+      "a": "The IOS privilege level (15), not the number of commands.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are TACACS+ authorization attribute-value pairs (AV pairs) used for?",
+      "a": "They return authorization information such as privilege level, shell/EXEC authorization, command authorization, and service-specific authorization from the server to IOS.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the purpose of a TACACS+ server group?",
+      "a": "It allows AAA to reference a logical group of TACACS+ servers, providing multiple servers, centralized selection, better redundancy, and different groups for different AAA policies.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does 'aaa authentication login default group tacacs+ local' do?",
+      "a": "It attempts TACACS+ first and provides a local method after TACACS+ when the earlier method is unavailable according to AAA fallback rules.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Does 'group tacacs+ local' mean every TACACS+ rejection automatically falls back to local?",
+      "a": "No. An explicit TACACS+ rejection generally should not be bypassed by automatically trying the local database; fallback depends on the AAA method response (server unavailable/timeout vs explicit rejection).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between the AAA methods 'local' and 'none'?",
+      "a": "'local' uses the device's local username database; 'none' means no authentication/authorization method is required for the service where supported and is not a secure substitute for local fallback.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "Why is a local fallback important for remote devices using TACACS+?",
+      "a": "If the TACACS+ server becomes unreachable, a local fallback allows access; without it, login can fail when the server is down.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "When is TACACS+ preferred over RADIUS?",
+      "a": "TACACS+ is commonly preferred for device administration (TCP, strong separation, granular command authorization); RADIUS is commonly used for network access. This is a use-case guideline, not an absolute restriction.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What TACACS+ source-interface configuration example is given?",
+      "a": "ip tacacs source-interface Loopback0; the server then identifies the device using the expected source address.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why is a successful ping not proof that TACACS+ is working?",
+      "a": "Ping only proves IP reachability; it does not prove TCP 49 is permitted or that the shared secret is correct.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the effect of TACACS+ deadtime?",
+      "a": "IOS can temporarily treat an unavailable server as dead and avoid repeatedly attempting it, improving failover behavior in multi-server deployments.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What verification commands are used for TACACS+?",
+      "a": "show aaa servers, show aaa sessions, show running-config | section aaa, show running-config | section tacacs, and (platform-dependent) show tacacs.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What debug commands are used to troubleshoot TACACS+?",
+      "a": "debug aaa authentication, debug aaa authorization, debug aaa accounting, and debug tacacs; disable with undebug all or no debug all.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why should authentication and authorization be troubleshot separately for TACACS+?",
+      "a": "A user can authenticate successfully yet fail authorization, so the two must be checked independently.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "What are TACACS+ security best practices for device administration?",
+      "a": "Use SSH plus TACACS+ with a strong shared secret, local emergency account, command authorization, accounting, and redundant TACACS+ servers; restrict TCP 49, protect the shared secret, and maintain console/OOB access.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the safe procedure before applying major TACACS+/AAA changes?",
+      "a": "Keep console/OOB access, keep an existing admin session open, configure TACACS+ and local fallback, test auth/EXEC authz/command authz/accounting, open a second SSH session, then close the original.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which protocol uses TCP 49?",
+      "a": "TACACS+.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the main reason TACACS+ is strongly associated with per-command authorization?",
+      "a": "It provides granular command authorization, a major reason it is commonly selected for network-device administration.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "In the TACACS+ vs RADIUS final comparison, what are the authentication and accounting ports for each?",
+      "a": "TACACS+ uses TCP 49 for both; RADIUS uses UDP 1812 (auth) and UDP 1813 (accounting).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does TACACS+ use TCP versus RADIUS using UDP for reliability?",
+      "a": "TACACS+ relies on TCP's connection-oriented, reliable transport; RADIUS uses UDP and handles reliability at the application protocol level (retransmission/timeouts).",
+      "tag": "Core Concept",
+      "context": "Interview"
+    }
+  ]
+}

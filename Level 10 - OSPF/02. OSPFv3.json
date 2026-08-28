@@ -1,0 +1,88 @@
+{
+  "title": "OSPFv3",
+  "level": 10,
+  "levelTitle": "Level 10 - OSPF",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "02. OSPFv3.md",
+  "cards": [
+    {
+      "q": "What is OSPFv3 and its RFC?",
+      "a": "OSPFv3 (RFC 5340) is OSPF for IPv6. It keeps the same core concepts as OSPFv2 - LSAs, LSDB, SPF, areas, DR/BDR - but decouples the protocol logic from IPv4, carrying addresses as prefix options in LSA payloads.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the key difference in how OSPFv2 and OSPFv3 encode addresses in LSAs?",
+      "a": "OSPFv2 encodes addresses in the LSA header, while OSPFv3 carries addresses as prefix options in the LSA payload. This makes OSPFv3 address-family-independent and allows multiple IPv6 prefixes per link.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do OSPFv2 and OSPFv3 differ in authentication?",
+      "a": "OSPFv2 uses MD5/SHA/plaintext authentication carried in the header. OSPFv3 has no OSPF-native authentication and instead relies on IPv6 AH/ESP or IPsec.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does OSPFv3 still require a router ID even on IPv6-only networks?",
+      "a": "Yes, OSPFv3 still requires a 32-bit router-id in IPv4 format. If there is no IPv4 address present, you must manually configure the router-id or OSPF may not start.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the default hello and dead intervals for OSPFv3?",
+      "a": "The same as OSPFv2: 10 seconds hello and 40 seconds dead on broadcast and point-to-point networks. Neighbor states and DR/BDR election are also identical to OSPFv2.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Write the modern OSPFv3 address-family configuration.",
+      "a": "router ospf 1, address-family ipv6, router-id 1.1.1.1, then interface Gi0/1 under the address family, then exit-address-family. The legacy alternative is interface Gi0/1 with ipv6 ospf 1 area 0.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What global IPv6 feature must be enabled or OSPFv3 will not work?",
+      "a": "ipv6 unicast-routing must be enabled globally, otherwise OSPFv3 cannot form neighbors or the network will not function.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why is the term 'multiple prefixes per link' significant in OSPFv3?",
+      "a": "Because the LSA is address-family-independent, a single LSDB can serve any number of IPv6 prefixes on a link, and future address families (like IPv4 within OSPFv3) become possible without a new protocol.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What show commands verify OSPFv3 operation?",
+      "a": "show ospf neighbor, show ospf interface, show ipv6 route ospf, and show ospf database.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "If OSPFv3 will not start, what is the likely cause and check?",
+      "a": "A missing router-id is the most likely cause. Set the router-id with the router-id command. Also check that ipv6 unicast-routing is enabled and hello parameters match.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Is OSPFv3 just 'IPv6-only LSA changes'?",
+      "a": "No. OSPFv3 is an address-family-agnostic payload design; addresses are carried as prefix options in the payload rather than in the LSA header, which enables multiple prefixes per link and future address-family extensibility.",
+      "tag": "Exam Trap",
+      "context": "Interview"
+    },
+    {
+      "q": "How does OSPFv3 authenticate on the exam?",
+      "a": "OSPFv3 uses IPv6 AH/ESP or IPsec - there is no OSPF-native authentication. This differs from OSPFv2 which uses MD5/SHA/plaintext in the header.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is OSPFv3's RFC, address family, and authentication method?",
+      "a": "RFC 5340, address family IPv6, LSA addresses as prefix options in the payload, multiple prefixes per link yes, router ID 32-bit still required, auth IPv6 AH/ESP/IPsec, hello/dead 10/40 seconds, config via address-family ipv6, IPv4 twin is OSPFv2.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "title": "OSPF Virtual Link",
+  "level": 10,
+  "levelTitle": "Level 10 - OSPF",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "12. Virtual Links.md",
+  "cards": [
+    {
+      "q": "What is an OSPF virtual link?",
+      "a": "A virtual link is a logical OSPF tunnel that connects an area to the backbone (Area 0) through a transit area, or patches a discontiguous Area 0. It is a last-resort fix, not a design tool, and masks a broken topology while adding SPF and failure complexity.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the two use cases for an OSPF virtual link?",
+      "a": "1. An area without backbone access - an area physically isolated from Area 0 is connected via a virtual link through a transit area to Area 0. 2. A discontiguous Area 0 - a split backbone is stitched back together. In both cases the virtual link is configured on the ABRs at both ends.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the transit area rules for a virtual link?",
+      "a": "The transit area must not be a stub, totally stubby, or NSSA area - no external-filtered areas can carry the virtual link. Both endpoints are ABRs and the transit area must be in both routers' LSDB. The virtual link is Area 0 traffic riding over the transit area's network.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you configure an OSPF virtual link?",
+      "a": "On BOTH endpoint ABRs enter router ospf 1 and area 2 virtual-link with the other ABR's router-id. For example ABR-A uses area 2 virtual-link <ABR-B's RID> and ABR-B uses area 2 virtual-link <ABR-A's RID>. It uses router-ids, not interface IPs.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the cost of an OSPF virtual link?",
+      "a": "The virtual link's cost equals the cost of the transit-area path between the two ABRs. Routers in the transit area see the path normally, while the two ABRs treat it as a backbone adjacency.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "List the constraints of an OSPF virtual link.",
+      "a": "1. Cannot pass through stub, totally stubby, or NSSA areas. 2. Area 0 itself cannot be the transit area. 3. It is not a substitute for correct design - use only to recover topology. 4. Both endpoints must be ABRs (an interface in the transit area plus Area 0 reachable). 5. Area 0 cannot be a stub area at all.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What command shows the state of OSPF virtual links?",
+      "a": "show ip ospf virtual-links shows the state, which is Up or DOWN. These are also visible in show ip ospf neighbor.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you configure authentication on an OSPF virtual link?",
+      "a": "Add authentication to the virtual-link line, e.g. area 2 virtual-link 2.2.2.2 authentication message-digest and area 2 virtual-link 2.2.2.2 message-digest-key 1 md5 secret.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What kind of area can carry an OSPF virtual link as a transit area?",
+      "a": "Only a standard area. The transit area must not be a stub, totally stubby, or NSSA area, and Area 0 cannot itself be the transit area.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is a virtual link a design tool or a repair mechanism?",
+      "a": "It is a repair mechanism, used only to recover a broken topology. Design answers should avoid it unless the question is specifically about fixing a break, such as a split backbone or an area isolated from Area 0.",
+      "tag": "Exam Trap",
+      "context": "Interview"
+    },
+    {
+      "q": "How are the endpoints of a virtual link identified and why?",
+      "a": "The endpoints are identified by Router IDs, not interface IPs. Stable router-ids matter because if an RID changes, the virtual link flaps.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Summarize the virtual link quick-review facts.",
+      "a": "Purpose is to connect an area to Area 0 or patch a discontiguous backbone; endpoints are both ABRs; identified by router-IDs; transit area must be standard (not stub/NSSA/totally); Area 0 transit not allowed; cost is the transit path cost; last-resort repair; show with show ip ospf virtual-links; state Up/DOWN.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

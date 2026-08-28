@@ -1,0 +1,76 @@
+{
+  "title": "Wireless (RF as a Cable)",
+  "level": 1,
+  "levelTitle": "Level 01 - Physical Layer",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "04. Wireless.md",
+  "cards": [
+    {
+      "q": "What does wireless replace a physical cable with, and how is it covered at the physical layer?",
+      "a": "Wireless replaces a physical cable with radio-frequency (RF) electromagnetic signals. At the physical layer it differs from copper and fiber as a shared medium with over-the-air loss, interference, and regulatory spectrum considerations.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How does wireless (unguided RF) differ from guided copper and fiber media?",
+      "a": "Guided media are private, require physical access for security, are predictable, reach meters to hundreds of km, and have very high stable bandwidth. Wireless uses shared air anyone in range can listen to, suffers interference, multipath and fading, depends on path loss and antennas for distance, and is governed by spectrum plus modulation for bandwidth.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is EIRP and how is it calculated?",
+      "a": "EIRP is the effective isotropic radiated power, calculated as transmit power plus antenna gain minus cable and connector loss. It is used in regulatory and design math for wireless links.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What causes path loss and multipath, and what effects do they have?",
+      "a": "Path loss grows with distance and frequency. Multipath, caused by reflections, produces fading and intersymbol interference. Fading can be fast (moving) or slow, and all of these degrade wireless signal quality and range.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Which channels are non-overlapping on 2.4 GHz, and what is DFS on 5 GHz?",
+      "a": "On 2.4 GHz the non-overlapping channels are 1, 6, and 11. DFS (Dynamic Frequency Selection) channels exist on 5 GHz for radar avoidance.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Where does the client-to-AP link sit in relation to the wired network?",
+      "a": "The client-to-AP link is the radio cable, while the AP attaches to the wired campus via a standard copper or fiber uplink and a CAPWAP tunnel to the WLC. Wireless design starts with an RF survey, channel plan, and power budget.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What RF and switch commands are relevant where the physical layer matters for wireless?",
+      "a": "Use config ap rf txpower and config ap channel on the WLC, and show ap auto-rf. At the switch where the AP plugs in, configure switchport access vlan for the AP management VLAN and power inline max 30000 for PoE to the AP.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Is the air a switched medium like Ethernet?",
+      "a": "No. Wireless shares the medium: unlike switched Ethernet, air cannot be switched, so each AP cell is a single collision domain at RF.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between RF interference and congestion?",
+      "a": "RF interference and congestion (capacity) are different problems. Both can appear in wireless troubleshooting scenarios and must be distinguished when diagnosing a wireless issue.",
+      "tag": "Exam Trap",
+      "context": "Interview"
+    },
+    {
+      "q": "Why would a far wireless user have poor quality in a physical-layer troubleshooting?",
+      "a": "A far user has poor quality because of EIRP and path loss, meaning signal, not the IP configuration, is the first suspect in physical-layer wireless troubleshooting.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "Does wireless mean there is no cable at all end to end?",
+      "a": "No. Actual user traffic reaches clients over the radio but also travels the wired LAN to the controller or gateway, so RF is not wireless everything and the physical layer still matters.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "title": "Gateway Redundancy",
+  "level": 27,
+  "levelTitle": "Level 27 - High Availability",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "05. Gateway Redundancy.md",
+  "cards": [
+    {
+      "q": "What is gateway redundancy (FHRP)?",
+      "a": "It keeps the default gateway (first-hop redundancy protocol) available by sharing a virtual IP among routers. Protocols are HSRP (Cisco-proprietary), VRRP (standard), and GLBP (load-balancing). Hosts point at the virtual IP rather than a single router.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How does an FHRP group operate?",
+      "a": "Routers share a virtual IP and use a virtual MAC that hosts use; the active router forwards while the standby watches, and failover to the standby is automatic.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the FHRP protocols and their key attributes?",
+      "a": "HSRP is Cisco-proprietary using Active/Standby states; VRRP is the IETF standard using Master/Backup; both default to priority 100 with the larger priority winning. GLBP uses an AVG/AVF model and is load-balanced rather than active-passive.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are HSRP details and requirements?",
+      "a": "HSRP groups run 0–4095, the virtual MAC is 0000.0c07.acXX, hellos use UDP 1985, preemption is enabled with the preempt command, and the higher priority wins.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the differences between HSRP and VRRP?",
+      "a": "HSRP is Cisco-proprietary with Active/Standby states, doesn't require the VIP to be the group IP, uses UDP 1985, and virtual MAC 0c07.acxx. VRRP is IETF with Master/Backup states, its group IP defaults to its own IP, uses protocol 112, and virtual MAC 0000.5e0001XX.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does GLBP achieve load balancing?",
+      "a": "An AVG (active virtual gateway) assigns unique virtual MACs to multiple AVFs (active virtual forwarders), so both members are active and load is balanced per host.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What commands configure HSRP, VRRP, and GLBP?",
+      "a": "For HSRP use standby group ip VIP, standby group priority value, and standby group preempt. VRRP uses vrrp group ip VIP and GLBP uses glbp group ip VIP. Election is by priority, then higher IP wins.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands verify gateway redundancy?",
+      "a": "show standby brief and show standby verify HSRP state, show vrrp brief verifies VRRP, and show glbp verifies GLBP.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the key FHRP exam distinctions?",
+      "a": "HSRP and VRRP are active-passive while GLBP load-shares. HSRP states are Active/Standby and VRRP are Master/Backup. Virtual MACs differ: HSRP 0c07.acXX vs VRRP 0000.5e0001XX. Higher priority wins and ties break to higher IP. HSRP uses UDP 1985 while VRRP uses 112.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are common FHRP failure symptoms and their checks?",
+      "a": "No VIP points to config (check show standby), both active points to timer issues (check spans), wrong active points to priority (check brief), duplicates point to group IDs, and node failover issues point to preempt configuration.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which FHRP protocol is which standard and how is the active elected?",
+      "a": "HSRP is Cisco, VRRP is IETF, and GLBP is load-sharing. They share a virtual IP, the active forwards, the election is by priority (then higher IP), MACs differ per protocol, and hello UDP is 1985 for HSRP and 112 for VRRP.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

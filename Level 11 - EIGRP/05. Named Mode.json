@@ -1,0 +1,142 @@
+{
+  "title": "EIGRP Named Mode",
+  "level": 11,
+  "levelTitle": "Level 11 - EIGRP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "05. Named Mode.md",
+  "cards": [
+    {
+      "q": "What is named-mode EIGRP?",
+      "a": "Named-mode EIGRP is the modern EIGRP configuration model that organizes EIGRP under a single named process with router eigrp <name>. Address families are configured beneath it, and named mode can support IPv4 and IPv6 address families within the same named process, each with its own autonomous-system number, plus multiple VRF address families.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the key differences between classic and named EIGRP?",
+      "a": "Classic uses router eigrp <AS> with the AS at process level, separate ipv6 router eigrp for IPv6, interface settings mostly on interfaces, and a relatively flat hierarchy. Named uses router eigrp <name>, the AS per address family, interface settings under af-interface, topology settings under topology base, and a hierarchical one-process multi-address-family model.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the three configuration modes under named EIGRP?",
+      "a": "1. Address-family configuration mode (config-router-af). 2. Address-family interface configuration mode (config-router-af-interface), entered with af-interface. 3. Address-family topology configuration mode (config-router-af-topology), entered with topology base.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands are configured at the address-family level in named EIGRP?",
+      "a": "network, eigrp router-id, metric weights, af-interface, topology, and shutdown / no shutdown.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How is IPv4 EIGRP enabled in named mode?",
+      "a": "For named IPv4 EIGRP, the network command identifies local interfaces on which EIGRP should operate, for example network 10.1.0.0 0.0.255.255 under the IPv4 address family, followed by no shutdown to activate the process.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How is IPv6 EIGRP configured in named mode?",
+      "a": "IPv6 is configured as an address family, for example address-family ipv6 unicast autonomous-system 100 with eigrp router-id and no shutdown. Unlike the IPv4 family, the IPv6 address family does not use the IPv4-style network command; IPv6 EIGRP is enabled on interfaces through the IPv6 address-family/interface configuration model.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Where and how are interface-specific EIGRP settings configured in named mode?",
+      "a": "Under the named EIGRP process and address family using af-interface <interface>, not directly under interface configuration mode. Settings include authentication, bandwidth-percent, BFD, hello/hold timers, passive-interface, split horizon, and shutdown for that interface.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you apply interface-specific EIGRP settings to all interfaces at once?",
+      "a": "Use af-interface default under the address family. Individual interfaces can then be configured separately as required, for example af-interface default with passive-interface.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What do these EIGRP interface knobs do: passive-interface, hello-interval, bandwidth-percent, and bfd?",
+      "a": "passive-interface suppresses EIGRP hellos and neighbor formation on the interface. hello-interval changes the hello interval. bandwidth-percent limits EIGRP's usable interface bandwidth. bfd enables BFD-based fast failure detection.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands belong under topology base in named EIGRP?",
+      "a": "distance, variance, maximum-paths, traffic-share, default-metric, redistribute, offset-list, distribute-list, auto-summary, and topology-specific timers.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does the variance command behave in EIGRP?",
+      "a": "Variance controls unequal-cost load balancing. A route must still satisfy EIGRP's loop-free (feasibility) condition before it can be installed, and its metric must fall within the configured variance relative to the successor. variance 1 means normal equal-cost behavior; variance 2 allows eligible unequal-cost paths within the multiplier. It is configured under topology base.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does maximum-paths control in EIGRP?",
+      "a": "maximum-paths controls the maximum number of parallel EIGRP routes installed, for example maximum-paths 4 under topology base.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How is EIGRP administrative distance configured in named mode?",
+      "a": "Under topology base with distance eigrp 90 170, where 90 is internal EIGRP and 170 is external EIGRP.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the shutdown / no shutdown behavior in named EIGRP?",
+      "a": "Simply creating the address family does not necessarily start EIGRP. No shutdown activates the EIGRP process/address family. If an address family is configured but neighbors do not form, check whether it is administratively shut down.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does one named process carry both IPv4 and IPv6 EIGRP?",
+      "a": "One named EIGRP process contains both address families, for example router eigrp CAMPUS with address-family ipv4 unicast autonomous-system 100 and address-family ipv6 unicast autonomous-system 100, each address family having its own AS configuration.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What causes 'no IPv4 neighbors', 'no neighbors' with an AS mismatch, and an interface that is silent in named EIGRP?",
+      "a": "No IPv4 neighbors: the address family may be shut down, so use no shutdown under the IPv4 AF. No neighbors: AS number mismatch, or an interface not matched by the IPv4 network statement. Interface silent: passive-interface configured, so check the af-interface settings.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What can cause IPv6 EIGRP to not work, and how is a missing router ID fixed?",
+      "a": "The IPv6 address family may not be configured or active, so check the IPv6 AF and its no shutdown. A missing or invalid router ID under IPv6 EIGRP is fixed by configuring eigrp router-id.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands verify named EIGRP operation?",
+      "a": "show eigrp address-family ipv4 neighbors, show eigrp address-family ipv4 topology, show eigrp address-family ipv4 interfaces, and show running-config | section router eigrp. Also useful: show ip eigrp neighbors, show ip eigrp topology, show ip protocols, and show ip route eigrp.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How are EIGRP K-values configured, and what happens when they mismatch?",
+      "a": "K-values are configured through metric weights, for example metric weights 0 1 0 1 0 0. Neighboring EIGRP routers must use compatible K-values or the adjacency will not form.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the core mental model for named EIGRP?",
+      "a": "Named EIGRP = Name → Address Family → af-interface + topology base. The router eigrp NAME process contains address families; each family has af-interface settings (hello/hold, authentication, passive, BFD) and topology base settings (variance, maximum-paths, distance, redistribution). This hierarchy is the most important thing to remember for ENCOR.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Is the autonomous-system number the named EIGRP process identifier?",
+      "a": "No. The name identifies the EIGRP named process (router eigrp CAMPUS); the AS number is configured per address family, for example address-family ipv4 unicast autonomous-system 100.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "In classic EIGRP versus named EIGRP, what is the correct interface configuration model?",
+      "a": "Named EIGRP uses af-interface <interface> under the address family for interface-specific settings. Do not confuse this with a generic interface-level address-family hierarchy where such settings are applied directly under interface configuration mode.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

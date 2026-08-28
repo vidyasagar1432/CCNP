@@ -1,0 +1,22 @@
+{
+  "title": "AS_PATH Attribute",
+  "level": 12,
+  "levelTitle": "Level 12 - BGP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "04. AS Path.md",
+  "cards": [
+    { "q": "What is the AS_PATH attribute?", "a": "The well-known mandatory BGP attribute that records the sequence of autonomous systems a route has traversed. It serves loop prevention (a route whose AS_PATH already contains my AS is discarded) and path selection (step 4 of the best-path algorithm, where shorter is preferred). Operators manipulate it with as-path prepend to steer inbound traffic.", "tag": "Overview", "context": "Both" },
+    { "q": "What are the two forms of AS_PATH?", "a": "AS_SEQUENCE, an ordered list of ASes traversed such as 65010 65020 65030, and AS_SET, an unordered set such as {65010, 65020} that comes from aggregation.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How does each eBGP advertisement treat the AS_PATH?", "a": "Every eBGP advertisement prepends the local AS to the list; iBGP does not modify AS_PATH because the route stays within the same AS.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How does AS_PATH prevent loops?", "a": "If a router's own AS appears anywhere in an incoming route's AS_PATH, the route is rejected because it has already passed through this AS. This makes BGP loop-free at the AS level even without split horizon.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How does AS_PATH affect best-path selection and why prepend?", "a": "The shorter AS_PATH wins when everything before it (weight, local-pref, origin) ties, at step 4. You cannot shorten a path, so prepending exists to make other paths appear longer and steer inbound traffic away.", "tag": "Core Concept", "context": "Both" },
+    { "q": "How do you prepend an AS_PATH with a route-map?", "a": "route-map PREPEND permit 10 with match ip address prefix-list HOST and set as-path prepend 65001 65001 65001, applied to neighbor 192.0.2.2 with route-map PREPEND out. Prepend your own AS multiple times to make the path appear longer, and only prepend your own AS number.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What do the AS_PATH regex symbols mean?", "a": "^ starts the AS_PATH, $ ends it, . matches any single character, _ matches a separator (space or brace), * means zero or more, + means one or more. ^65001$ means exactly one AS, ^65001_ means starts with 65001, and _65001_ means contains 65001.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How do you filter routes by AS_PATH?", "a": "Create an as-path access-list with ip as-path access-list 10 permit ^65001_ 65002$ and apply it to a neighbor with filter-list 10 in (or out).", "tag": "Core Concept", "context": "Practical" },
+    { "q": "Command to test AS_PATH regular expressions?", "a": "show ip bgp regexp ^65001 lists paths matching the regex; show ip as-path-access-list shows configured regex ACLs, and show ip bgp <prefix> shows the full AS_PATH per path.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "AS_PATH quick summary?", "a": "Type well-known mandatory; job is loop prevention plus the step-4 tie-break; eBGP prepends the own AS while iBGP leaves it unchanged; prepend your own AS multiple times; AS_SET appears from aggregation only; filter with filter-list / ip as-path; shorter path wins.", "tag": "Quick Review", "context": "Exam" },
+    { "q": "What does the regex pattern ^$ match?", "a": "An empty AS_PATH, which indicates a locally originated route.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "When does an AS_SET appear in an AS_PATH?", "a": "Only from aggregation (aggregate-address with as-set); normal advertisement produces AS_SEQUENCE. Do not expect AS_SET in ordinary BGP updates.", "tag": "Exam Trap", "context": "Exam" }
+  ]
+}

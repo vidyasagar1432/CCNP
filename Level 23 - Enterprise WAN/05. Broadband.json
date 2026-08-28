@@ -1,0 +1,76 @@
+{
+  "title": "Broadband",
+  "level": 23,
+  "levelTitle": "Level 23 - Enterprise WAN",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "05. Broadband.md",
+  "cards": [
+    {
+      "q": "What is a broadband WAN?",
+      "a": "A WAN that rides DSL, cable, or fiber over a shared access network, almost always using PPPoE as the session/auth layer. It is cheap and everywhere but asymmetric, shared, and less predictable than MPLS.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the common broadband types and their characteristics?",
+      "a": "DSL (phone lines, ADSL/VDSL), cable (coax, shared), fiber (GPON/EPON, high speed), and fixed wireless (RF, rural). Fiber is fastest/most symmetric; DSL and cable are asymmetric.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What characteristics make broadband a best-effort service?",
+      "a": "It is asymmetric (download > upload), shared with the neighborhood, has variable latency, low predictability, and no SLA, though it is low cost.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the session model used on broadband?",
+      "a": "Access is DSL/cable/fiber, the session layer is PPPoE, authentication is CHAP/RADIUS, and IP is provided via IPCP or DHCP.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do enterprises typically use broadband?",
+      "a": "As a primary link for small sites, a secondary/backup or DIA link for larger sites, or as cheap SD-WAN transport, with QoS being limited.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the enterprise broadband playbook for design?",
+      "a": "Use MTU 1492 for PPPoE, expect the CPE to NAT, use DIA/local breakout, and pair broadband with MPLS for redundancy.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Why is the MTU set to 1492 on a broadband link?",
+      "a": "Because PPPoE adds overhead, so the link MTU must be reduced to 1492.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands verify a broadband/PPPoE link?",
+      "a": "show pppoe session, show interface Dialer1, show ip interface brief, plus ping/traceroute and show nbar for traffic checks.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A broadband connection is slow. What is the likely cause and check?",
+      "a": "A shared/asymmetric link or contention is likely; check bandwidth and latency.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "No PPPoE session comes up on broadband. What is the likely cause and check?",
+      "a": "PPPoE is down; check with show pppoe session.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why is broadband treated as a secondary/DIA or SD-WAN transport rather than a primary SLA link?",
+      "a": "Because it is asymmetric, shared, best-effort, and has no SLA, so it is not reliable enough alone and is typically paired with MPLS or used for backup/DIA and SD-WAN transport.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

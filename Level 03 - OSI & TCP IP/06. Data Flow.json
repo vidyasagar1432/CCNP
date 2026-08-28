@@ -1,0 +1,76 @@
+{
+  "title": "Data Flow",
+  "level": 3,
+  "levelTitle": "Level 03 - OSI & TCP IP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "06. Data Flow.md",
+  "cards": [
+    {
+      "q": "What is data flow in networking?",
+      "a": "Data flow is the lifecycle of a unit of data from a source application to a destination application across a network: encapsulation down the source, transmission across intermediate devices, and decapsulation up the destination, plus the peer-to-peer and directional concepts that frame each journey.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Describe the 7-step end-to-end journey of data.",
+      "a": "1) App generates data; 2) Down the stack: transport adds ports (segment), network adds IP (packet), link adds Ethernet (frame), physical sends bits; 3) Each switch forwards by destination MAC and re-encapsulates a new L2 header; 4) Each router strips Ethernet, checks TTL/sum, looks up the route, and rewrites a new L2 header; 5) NAT/tunnel/firewall devices may alter addresses mid-path; 6) Destination decapsulates up to the app; 7) The application replies in reverse (full duplex possible).",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What does the 'peer-to-peer' concept mean in the OSI model?",
+      "a": "Peer layers talk to their peers logically: TCP at A understands TCP at B, and OSPF at each router talks to OSPF on its neighbor, even though machines exchange frames on the wire. It is the logical same-layer-to-same-layer relationship, not file sharing.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What are the four directional classes of data flow and their examples?",
+      "a": "Unicast (one source to one destination: normal HTTP, SSH), Broadcast (one to all on the segment: ARP request, DHCP discover), Multicast (one group to subscribed members: video feed, OSPF hello), and Anycast (one address to the nearest of several: DNS anycast, VRRP anycast gateway).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between anycast and multicast?",
+      "a": "Anycast sends to the nearest of several identical destinations sharing one address (e.g. DNS anycast), while multicast sends to a group of subscribed members. Where each device receives the traffic is the key distinction, frequently tested at L3/IPv6.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a flow's identity in TCP/IP?",
+      "a": "A TCP flow is identified by the 5-tuple: source IP, destination IP, source port, destination port, and protocol. This is used by NetFlow, ACLs, and firewalls to identify a flow, and real-time UDP RTP flows use the same concept for QoS classification.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do switches, routers, ACLs/firewalls, and load balancers control data flow?",
+      "a": "Switches filter/forward based on the MAC table; routers pick the next hop by longest-prefix match; ACLs/firewalls accept or drop by the 5-tuple; QoS marks and queues flows; load balancers distribute flows across servers.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What changes to destination MAC and to source/destination IP as data hops across a network?",
+      "a": "The destination MAC (and source MAC) change on every link, but the source and destination IPs typically remain constant unless NAT is applied.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Should you say 'the frame travels over the router'?",
+      "a": "No. Routers strip the L2 header, so a full IP packet is routed and the L2 frame is recreated on each link. The frame itself does not travel across the router.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens to TTL as a packet is routed?",
+      "a": "TTL always decreases with each router (L3) forwarding hop.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What command shows the next-hop CEF path for a flow, and what captures flow records?",
+      "a": "show ip fib shows the CEF next-hop for a flow. NetFlow captures flow records with commands such as ip flow-export destination, plus traceroute and ping observe the flow journey.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    }
+  ]
+}

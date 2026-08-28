@@ -1,0 +1,100 @@
+{
+  "title": "MPLS Basics",
+  "level": 20,
+  "levelTitle": "Level 20 - MPLS",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "01. MPLS Basics.md",
+  "cards": [
+    {
+      "q": "What is MPLS and how does it forward packets?",
+      "a": "MPLS (Multi-Protocol Label Switching) forwards packets using short fixed-length labels instead of IP longest-prefix lookups. The labels sit in a shim header between L2 and L3, and MPLS enables traffic engineering, Layer 3 VPNs (L3VPN), and pseudo-wires (L2VPN).",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Why is MPLS widely used in service-provider backbones?",
+      "a": "It provides fast label-based forwarding, traffic engineering paths (MPLS-TE), label-stack VPNs, and Layer-2 services via pseudo-wires, making it carrier-grade and standard in SP backbones.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Where does the MPLS shim header sit in the protocol stack?",
+      "a": "It sits between Layer 2 and Layer 3, at layer 2.5, between the L3 IP header and the L2 Ethernet/PPP framing.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What 'simple forwarding paradigm' do labels give the MPLS core?",
+      "a": "Label-based forwarding using the operations swap, push, and pop.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What operations do edge routers and core routers perform on labels?",
+      "a": "Edge routers (LERs) push and pop labels; core routers (LSRs) only swap labels. Forwarding decisions inside the core are label-based.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does each MPLS domain element do: LSP, LER, LSR, and FEC?",
+      "a": "LSP is the label-switched path (the tunnel from ingress to egress LER); LER is the edge router that pushes/pops; LSR is the core router that swaps; FEC is the class of packets sharing a label.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the IOS-XE commands to enable MPLS?",
+      "a": "ip cef (CEF prerequisite), mpls ip (enable label distribution globally), and interface-level 'mpls ip' (enable per link). MPLS rides on CEF and LDP.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What key benefit keeps the MPLS core customer-route-free?",
+      "a": "Transparency: the core needs no customer routes, so the core stays free of customer prefixes, which is the key to L3VPN scaling and reduces core route count.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does MPLS provide in terms of services and scaling?",
+      "a": "Speed via label forwarding, transparency (core needs no customer routes), services (VPN/TE/pseudowire), and scaling via fewer core routes.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What command shows the MPLS forwarding table?",
+      "a": "show mpls forwarding-table.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What command shows MPLS LDP bindings?",
+      "a": "show mpls ldp bindings.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you test MPLS connectivity to a specific IPv4 FEC?",
+      "a": "Use 'ping mpls ipv4 10.0.0.2/32'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the likely cause and check when no labels appear?",
+      "a": "LDP is not up, so check show mpls ldp.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the likely cause and check when traffic blackholes in MPLS?",
+      "a": "CEF is off, so check show ip cef.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does the quick review say MPLS uses for forwarding and where it sits?",
+      "a": "MPLS forwards using labels, sits at layer 2.5, with edges doing push/pop, the core doing swap, LSP as the path, FEC as the class, enablers CEF + LDP, and services VPN / TE / PW.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

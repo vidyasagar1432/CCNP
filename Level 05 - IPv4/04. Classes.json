@@ -1,0 +1,124 @@
+{
+  "title": "IP Address Classes",
+  "level": 5,
+  "levelTitle": "Level 05 - IPv4",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "04. Classes.md",
+  "cards": [
+    {
+      "q": "What are the historical IPv4 address classes and are they used for modern unicast subnetting?",
+      "a": "Classful addressing historically divided IPv4 into Classes A–E based on the first octet; it is obsolete for modern unicast addressing because CIDR and VLSM allow any appropriate prefix length, but the ranges still help recognize historical classes, multicast, and special-purpose ranges.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How do you determine the historical class of an IPv4 address, and what decides the modern network split?",
+      "a": "The historical class is determined from the first octet; in modern networking the prefix length/mask determines the network/host split, not the class.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "Give the first-octet ranges, first bits, and historical default prefixes for Classes A through E.",
+      "a": "A: 0–127, first bit 0, /8; B: 128–191, first bits 10, /16; C: 192–223, first bits 110, /24; D: 224–239, first bits 1110, multicast; E: 240–255, first bits 1111, reserved/experimental.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the traditional classful usable host counts per network?",
+      "a": "Class A: 2^24 − 2 = 16,777,214; Class B: 2^16 − 2 = 65,534; Class C: 2^8 − 2 = 254; these apply only to the historical classful model since modern CIDR does not require the class default mask.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What class do 10.1.1.1, 172.16.1.1, 192.168.1.1, 224.0.0.1, and 240.0.0.1 belong to?",
+      "a": "10.1.1.1 → Class A range; 172.16.1.1 → Class B range; 192.168.1.1 → Class C range; 224.0.0.1 → Class D/multicast; 240.0.0.1 → Class E range.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does an address in the Class B range have to use a /16 mask today?",
+      "a": "No; 172.16.1.1/24 and 172.16.1.1/27 are perfectly valid, because the first octet no longer forces the historical /8, /16, or /24 mask.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the three RFC 1918 private ranges, their counts, and their class associations?",
+      "a": "10.0.0.0/8 (16,777,216 addresses, Class A association), 172.16.0.0/12 (1,048,576, Class B), 192.168.0.0/16 (65,536, Class C); they are CIDR blocks rather than modern class networks, and the class association is only a memory aid.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Is every 172.x.x.x address RFC 1918 private?",
+      "a": "No; only the 172.16.0.0/12 block spanning 172.16.0.0–172.31.255.255 is private, so 172.16.x.x through 172.31.x.x are private while 172.32.x.x is public/non-RFC1918.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between classful and classless addressing?",
+      "a": "Classful addressing fixed the network boundary by class (A /8, B /16, C /24); classless addressing, the modern method, uses CIDR and VLSM where the prefix length explicitly defines the boundary, and the prefix length wins over the historical class.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Which routing protocols are classful and why does it matter?",
+      "a": "RIPv1 and IGRP are classful; they do not carry the subnet mask in their updates and so cannot properly support arbitrary VLSM/CIDR prefixes. Classless examples include RIPv2, EIGRP, OSPF, IS-IS, and BGP.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Is classful addressing the same thing as a classful routing protocol?",
+      "a": "No; they are related historical concepts but not the same thing — classful addressing concerns address structure, while classful routing protocols like RIPv1 and IGRP concern how routes are exchanged without subnet-mask information.",
+      "tag": "Exam Trap",
+      "context": "Interview"
+    },
+    {
+      "q": "Is 169.254.0.0/16 an RFC 1918 private range?",
+      "a": "No; it is IPv4 link-local, used when a host cannot obtain an address through normal configuration such as DHCP, and it is not part of RFC 1918 private space.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Is 127.x.x.x ordinary Class A unicast space?",
+      "a": "No; although 127 falls within the historical Class A first-octet range, 127.0.0.0/8 is reserved for loopback and is not ordinary unicast space.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is 0.0.0.0 and how does it relate to the default route?",
+      "a": "0.0.0.0 is the IPv4 unspecified address whose meaning depends on context; 0.0.0.0/0 represents the default route, but 0.0.0.0 itself should not be treated as meaning the default route in every context.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What special ranges are associated with Classes D and E?",
+      "a": "Class D is multicast (224.0.0.0/4, range 224.0.0.0–239.255.255.255) and Class E (240.0.0.0/4) is reserved/experimental; normal unicast host counts do not apply to either.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Do you calculate normal unicast host counts for Class D or Class E addresses?",
+      "a": "No; Class D is multicast and Class E is reserved/experimental, so there is no host/network split as there is for ordinary unicast address space.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What do 192.168.1.0/24, /25, /26, and /27 have in common on a classless network?",
+      "a": "They are all valid classless prefixes for the same address; although 192.168.1.0 is historically Class C with a /24 default, modern CIDR permits different prefix lengths on that address.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does a modern Cisco configuration handle an address from the historical Class B range?",
+      "a": "Configuration is classless, e.g. ip address 172.16.1.1 255.255.255.0; although 172.16.1.1 is historically Class B, the /24 prefix determines the network boundary.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the single modern rule that contrasts class versus prefix length?",
+      "a": "Class tells you only the historical category of the address; the prefix length tells you the modern network boundary.",
+      "tag": "Core Concept",
+      "context": "Both"
+    }
+  ]
+}

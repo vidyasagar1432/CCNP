@@ -1,0 +1,64 @@
+{
+  "title": "NSF",
+  "level": 27,
+  "levelTitle": "Level 27 - High Availability",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "02. NSF.md",
+  "cards": [
+    {
+      "q": "What is NSF (Nonstop Forwarding)?",
+      "a": "NSF lets a router continue forwarding traffic while its control plane recovers during a supervisor/route-processor switchover. It works with SSO, and peers detect it via NSF capabilities, so forwarding continues while routing state is rebuilt.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How do SSO and NSF work together?",
+      "a": "SSO keeps control-plane state, and NSF preserves forwarding while routing rebuilds gracefully, resulting in a seamless failover.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does graceful restart work during an NSF switchover?",
+      "a": "Capabilities are announced so the restart is peer unaware of any drop, routes are re-learned/reconstructed, and CEF keeps forwarding from the FIB, so convergence incurs no full flap.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What role does an NSF-aware (helping) neighbor play?",
+      "a": "It detects the NSF-capable peer via hello/graceful signals, continues forwarding to the disabled peer, bridges the restart to avoid a flap, and holds state until final convergence after rebuild.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What commands enable NSF?",
+      "a": "mode sso is the prerequisite, then under router ospf 1 use nsf (with nsf cisco for Cisco-specific or nsf ietf for the IETF standard), and for BGP use bgp graceful-restart under router bgp.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does NSF differ from BGP graceful restart (GR)?",
+      "a": "NSF applies to OSPF/EIGRP and uses a local curator with Cisco/IETF standards, while BGP GR applies to BGP and relies on the peer per RFC 4724. Both share the same zero-loss goal.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What must be true for NSF to work?",
+      "a": "NSF requires SSO as its foundation, relies on CEF/FIB being independent of the control plane, is configured with nsf under the routing protocol or bgp graceful-restart, and peers must be NSF-aware to cooperate.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands verify NSF?",
+      "a": "show ip ospf nsf verifies OSPF NSF, and show bgp neighbors with the Restart filter verifies BGP graceful restart.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the forwarding behavior, base, and goal of NSF?",
+      "a": "Forwarding continues while the control plane rebuilds, SSO is its base, CEF/FIB is independent of the control plane, OSPF uses nsf and BGP uses graceful-restart, peers are aware, and the goal is zero loss.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

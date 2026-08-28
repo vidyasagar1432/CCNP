@@ -1,0 +1,64 @@
+{
+  "title": "HTTP",
+  "level": 16,
+  "levelTitle": "Level 16 - Network Services",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "10. HTTP.md",
+  "cards": [
+    {
+      "q": "What is HTTP and its standard port?",
+      "a": "HTTP (Hypertext Transfer Protocol) is the request/response protocol for the web on TCP 80, and on Cisco gear it also powers the embedded HTTP/HTTPS server for web-based device management; HTTPS (443) replaces it for management.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What does an HTTP request/response consist of?",
+      "a": "A method (GET, POST, PUT, DELETE), a URI for the resource, a protocol version (HTTP/1.1 with keep-alive by default), headers such as Host and Content-Type, and a body for POST/PUT data.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the common HTTP methods and key distinction?",
+      "a": "GET reads a resource, HEAD returns headers only, POST sends data/creates, PUT updates/replaces, and DELETE removes; GET is idempotent/read-only while POST changes state.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What do the HTTP status code classes mean?",
+      "a": "1xx informational (100 continue), 2xx success (200 OK), 3xx redirect (301/302), 4xx client error (404 not found), and 5xx server error (500/503); the exam-relevant failures are 4xx and 5xx.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does HTTP handle sessions and connections?",
+      "a": "HTTP is stateless, so sessions rely on cookies/tokens, and keep-alive reuses TCP connections under HTTP/1.1.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What commands enable the Cisco embedded HTTP server?",
+      "a": "ip http server enables web management, ip http port 80 sets the port, ip http authentication local authenticates via the local user database, and ip http access-class restricts access with an ACL; the server also supports GUI and some REST/NetConf APIs.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do HTTP and HTTPS compare for device management?",
+      "a": "HTTP uses port 80 with no encryption, while HTTPS uses port 443 with TLS; HTTPS is recommended for management, and in modern Cisco defaults HTTP is off.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What should you check when a device web page won't load?",
+      "a": "Whether ip http server is enabled, the URL path (404), authentication config (401/403), an ACL or TCP 80 blocking (access-class), and server stats for keep-alive/proxy slowness.",
+      "tag": "Quick Review",
+      "context": "Practical"
+    },
+    {
+      "q": "Which protocol should secure Cisco device web management?",
+      "a": "HTTPS (TCP 443), not plain HTTP; the recommended management stack is ip http server (secure variant) plus authentication and access-class restrictions.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

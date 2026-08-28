@@ -1,0 +1,76 @@
+{
+  "title": "IOS XE Architecture (Linux-based / daemons)",
+  "level": 28,
+  "levelTitle": "Level 28 - Cisco IOS and IOS XE",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "09. IOS XE Architecture (Linux-based).md",
+  "cards": [
+    {
+      "q": "What is the IOS XE architecture?",
+      "a": "IOS XE runs as modular applications (daemons) on top of a Linux kernel, where a single IOSd daemon implements the classic IOS control plane inside a Controller framework, giving process isolation and cleaner software management.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What role does the IOSd daemon play in IOS XE?",
+      "a": "IOSd is the daemon that runs the classic IOS control plane, implementing routing and switching logic inside the Controller framework.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the key differences between classic IOS and IOS XE?",
+      "a": "Classic IOS is a monolithic image, while IOS XE is modular daemons on a Linux kernel with strong process isolation, SMU patching without full reload, and support for model-driven management and streaming telemetry.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is an SMU in IOS XE?",
+      "a": "An SMU (Small Maintenance Upgrade) is a targeted patch or subpackage that can be applied without a full device reload, unlike a classic IOS upgrade which requires one.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What management capabilities does IOS XE add beyond the CLI?",
+      "a": "IOS XE adds model-driven management such as RESTCONF and NETCONF plus streaming telemetry, which classic monolithic IOS does not provide.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are subpackages and composite images in IOS XE?",
+      "a": "IOS XE components are packaged as RPMs/subpackages; SMUs and FSUs are submajor patches, while a composite image bundles everything for install.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "From the operator's perspective, how does IOS XE differ from classic IOS?",
+      "a": "The CLI and configuration behavior appear identical, but behind the scenes the control plane and features run as separate Linux processes and daemons.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which commands verify IOS XE architecture and daemons?",
+      "a": "show version, show platform, show platform software, show processes cpu, show processes memory, and show logging.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A newly installed feature is missing on IOS XE even though the image is loaded; what is likely wrong?",
+      "a": "The feature package (subpackage) may not be installed or activated; check show version and installed packages, since IOS XE modular packaging gates features independently.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the key exam distinction between classic IOS and IOS XE architecture?",
+      "a": "Classic IOS is a monolithic image, while IOS XE is a modular Linux-based architecture where the IOS control plane runs as the IOSd daemon, enabling SMU patches and model-driven management.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the IOS XE architecture quick-review summary?",
+      "a": "IOS XE runs IOS as the IOSd daemon on a Linux kernel inside a Controller, giving modular daemons, strong isolation, SMU patching without reload, and model-driven management, while keeping the CLI identical to classic IOS.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

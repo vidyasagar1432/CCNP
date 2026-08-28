@@ -1,0 +1,94 @@
+{
+  "title": "Seed Metrics in Redistribution",
+  "level": 13,
+  "levelTitle": "Level 13 - Route Redistribution",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "04. Seed Metrics.md",
+  "cards": [
+    {
+      "q": "What is a seed metric and what happens if none is given when redistributing?",
+      "a": "A seed metric is the initial metric the boundary router assigns to every redistributed route as it enters the receiving protocol. Giving no seed metric makes redistributed routes unusable — EIGRP and OSPF reject them or treat them as max.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the default seed metrics for EIGRP, OSPF, BGP, RIP, and IS-IS?",
+      "a": "EIGRP has no default seed (routes are not advertised); OSPF uses auto-cost or 20 for external routes; BGP defaults to MED 0; RIP defaults to 16 (direct of 1-hop) or metric 1; IS-IS defaults to metric 0.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which redistribution point is the #1 exam point regarding seed metrics?", 
+      "a": "EIGRP has no default seed metric, so it must always be supplied or redistributed routes are not advertised.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the five components of the EIGRP metric and their units?",
+      "a": "Bandwidth (kbps, lowest link speed), delay (microseconds/10, cumulative latency), reliability (0-255, 255 perfect), load (0-255, 1 idle), and MTU (bytes, max frame). Example seed: metric 10000 100 255 1 1500.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does 'default-metric' set the EIGRP seed metric for all redistributed sources?",
+      "a": "'default-metric 10000 100 255 1 1500' under the EIGRP topology base applies the seed to every redistributed source at once, serving as a per-source fallback.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What do the OSPF redistribution keywords 'metric', 'metric-type 1', 'metric-type 2', and 'subnets' do?", 
+      "a": "metric assigns the cost; metric-type 1 makes it E1 (cost accumulates); metric-type 2 makes it E2 (cost ignored in the AS, the default); subnets redistributes all prefixes, not just classful ones.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens if the 'subnets' keyword is omitted when redistributing into OSPF?", 
+      "a": "Only classful routes are redistributed, losing CIDR subnets.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the BGP seed metric and why is default MED 0 a concern?", 
+      "a": "BGP uses MED as its seed; with 'redistribute ospf 1 metric 100' the MED is 100. The default MED of 0 is dangerously attractive, so set a positive MED for external routes.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does 'metric-type 1' vs 'metric-type 2' mean for OSPF external route cost?", 
+      "a": "E1 (metric-type 1) makes the cost accumulate across the AS, while E2 (metric-type 2, the default) ignores the cost accumulation inside the AS.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why can seed metrics become asymmetric in multi-protocol redistribution?", 
+      "a": "The metric chosen on one side does not retroact on the other side; so OSPF→EIGRP uses an EIGRP 5-tuple on the EIGRP router, EIGRP→OSPF uses cost on the OSPF router, and multi-homed designs need consistent MEDs to avoid asymmetric flows.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Which commands show redistribution and seed metric configuration?", 
+      "a": "'show ip protocols' shows redistribution and default-metric; 'show ip route <prefix>', 'show run | include redistribute', 'show ip bgp <prefix>' (MED), and 'show ip eigrp topology'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the correct order of the EIGRP metric values in a seed command?", 
+      "a": "Bandwidth, delay, reliability, load, MTU (BW delay reliability load MTU).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "In the seed metric quick review, what are the defaults per protocol?", 
+      "a": "EIGRP requires BW delay rel load MTU (its seed is mandatory); OSPF uses cost with subnets and metric-type; BGP uses MED default 0; default-metric applies to all sources.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "A provider prefers a customer's redistributed routes unexpectedly. What is likely the cause in BGP?", 
+      "a": "MED is 0 by default when no metric is set, which is attractive to providers; set a positive metric to make the routes less attractive.",
+      "tag": "Quick Review",
+      "context": "Practical"
+    }
+  ]
+}

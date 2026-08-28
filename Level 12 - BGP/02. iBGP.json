@@ -1,0 +1,20 @@
+{
+  "title": "iBGP",
+  "level": 12,
+  "levelTitle": "Level 12 - BGP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "02. iBGP.md",
+  "cards": [
+    { "q": "What is iBGP?", "a": "Internal BGP; it runs between routers in the same AS to carry BGP routes from edge to edge without re-advertising them to the IGP. It does not change next-hop and applies split horizon, so it needs a full mesh, next-hop-self at eBGP boundaries, and route reflectors or confederations to scale.", "tag": "Overview", "context": "Both" },
+    { "q": "Why run iBGP instead of leaking eBGP routes into the IGP?", "a": "eBGP routes at the edge would flood the IGP and lose BGP attributes (local-pref, AS_PATH, MED) because an IGP cannot carry BGP attributes. iBGP carries those attributes within the AS while keeping the IGP small.", "tag": "Core Concept", "context": "Interview" },
+    { "q": "What are the two exam-critical iBGP rules?", "a": "Next-hop is NOT changed, so iBGP peers may lack a route to the next hop and you need next-hop-self at the eBGP boundary; and iBGP-learned routes are NOT re-advertised to other iBGP peers, so routes stop at the receiving router unless you use a full mesh, route reflector, or confederation.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "Why does iBGP require a full mesh?", "a": "Because of split horizon a route received from one iBGP peer is not re-advertised to another iBGP peer, so every iBGP speaker must peer with every other iBGP speaker, requiring n(n-1)/2 sessions. At scale this explodes, hence route reflectors and confederations.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How do you configure a basic iBGP session and fix next-hop?", "a": "router bgp 65001 with neighbor 10.0.0.2 remote-as 65001 (identical remote-as means iBGP) and neighbor 10.0.0.2 next-hop-self. There is no TTL 1 constraint, loopbacks are typical, and next-hop-self is placed where eBGP routes enter the iBGP mesh.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "How does iBGP prevent loops inside and outside the AS?", "a": "Inside the AS, a router does not re-advertise an iBGP-learned route to another iBGP peer (split horizon), preventing loops within the AS. Outside the AS, when advertising an iBGP-learned route to eBGP the AS_PATH is prepended so it cannot loop back.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What is the BGP synchronization rule today?", "a": "The legacy rule said do not advertise an iBGP route until the IGP carries it too. It is disabled by default on modern IOS, and the exam expects synchronization off.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How do you see the routes an iBGP neighbor advertises and receives?", "a": "show ip bgp neighbors 10.0.0.2 advertised-routes shows routes sent to that peer and show ip bgp neighbors 10.0.0.2 received-routes shows routes received from it. Next hops are visible in show ip bgp.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What is the iBGP quick summary?", "a": "Peers in the same AS, AD 200, next-hop unchanged, split horizon yes (no transit), fix next hop with next-hop-self, scale with reflector or confederation, synchronization off by default, and peering is typically loopback plus update-source.", "tag": "Quick Review", "context": "Exam" },
+    { "q": "Why may an iBGP route never be installed in the RIB?", "a": "Because iBGP does not change next-hop, the next hop may be the eBGP neighbor's address which is not in the RIB. Fix it with next-hop-self at the boundary or ensure IGP recursion reaches the next hop; verify with show ip bgp and show ip cef.", "tag": "Exam Trap", "context": "Exam" }
+  ]
+}

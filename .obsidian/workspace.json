@@ -1,0 +1,258 @@
+{
+  "main": {
+    "id": "96e5817e360ab2dd",
+    "type": "split",
+    "children": [
+      {
+        "id": "2c3b1bd0bff4f2f5",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "9ee289856649cea9",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Level 08 - STP/01. STP.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "01. STP"
+            }
+          }
+        ]
+      },
+      {
+        "id": "9ee4cdf53dfb658b",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "56e18719ff43b769",
+            "type": "leaf",
+            "state": {
+              "type": "copilot-agent-chat-view",
+              "state": {},
+              "icon": "copilot-agent",
+              "title": "Copilot Agent"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "d49ff214f1a31dff",
+    "type": "split",
+    "children": [
+      {
+        "id": "7a4c150de646cf7f",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "902a46c294419e5d",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "df77e9ac96086442",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "031ff268b3ce9100",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 271.12109375
+  },
+  "right": {
+    "id": "c6dd6a47c8a00ea1",
+    "type": "split",
+    "children": [
+      {
+        "id": "39e400aff8335244",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "555bbf76b488ebcb",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "00. MOC - CCNP Study Map.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks"
+            }
+          },
+          {
+            "id": "86ca716c7f2476fe",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "00. MOC - CCNP Study Map.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links"
+            }
+          },
+          {
+            "id": "bdf9d5307f39e212",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "f18235710b067d29",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "860285fc0f3a183c",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Level 08 - STP/01. STP.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline"
+            }
+          },
+          {
+            "id": "7d89de05ca9fb5db",
+            "type": "leaf",
+            "state": {
+              "type": "git-view",
+              "state": {},
+              "icon": "git-pull-request",
+              "title": "Source Control"
+            }
+          }
+        ],
+        "currentTab": 5
+      }
+    ],
+    "direction": "horizontal",
+    "width": 283.9609375
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false,
+      "copilot:Open Copilot Agent Chat": false,
+      "obsidian-git:Open Git source control": false
+    }
+  },
+  "active": "7d89de05ca9fb5db",
+  "lastOpenFiles": [
+    "Level 08 - STP/02. RSTP.md",
+    "Level 08 - STP/04. Rapid PVST+.md",
+    "Level 08 - STP/05. MST.md",
+    "Level 08 - STP/07. Port Roles.md",
+    "Level 08 - STP/06. Root Bridge.md",
+    "Level 08 - STP/01. STP.md",
+    "Level 08 - STP/03. PVST+.md",
+    "Level 08 - STP/10. PortFast.md",
+    "Level 08 - STP/08. Port States.md",
+    "00. MOC - CCNP Study Map.md",
+    "Level 09 - Routing Fundamentals/03. Metrics.md",
+    "Level 06 - IPv6/index.md",
+    "Level 08 - STP/index.md",
+    "Level 09 - Routing Fundamentals/index.md",
+    "Level 09 - Routing Fundamentals/12. Dynamic Routing.md",
+    "Level 28 - Cisco IOS and IOS XE/11. Device-Level Security Hardening.json",
+    "Level 28 - Cisco IOS and IOS XE/11. Device-Level Security Hardening.md",
+    "Level 28 - Cisco IOS and IOS XE/10. YANG & RESTCONF.json",
+    "Level 28 - Cisco IOS and IOS XE/10. YANG & RESTCONF.md",
+    "Level 28 - Cisco IOS and IOS XE/09. IOS XE Architecture (Linux-based).json",
+    "Level 28 - Cisco IOS and IOS XE/09. IOS XE Architecture (Linux-based).md",
+    "Level 27 - High Availability/08. Redundancy Design & Best Practices.json",
+    "Level 27 - High Availability/08. Redundancy Design & Best Practices.md",
+    "Level 27 - High Availability/07. StackWise VSS.json",
+    "Level 27 - High Availability/07. StackWise VSS.md",
+    "Level 27 - High Availability/06. ISSU.json",
+    "Level 27 - High Availability/06. ISSU.md",
+    "Level 21 - QoS/12. QoS Marking & Trust Boundaries.json",
+    "Level 21 - QoS/12. QoS Marking & Trust Boundaries.md",
+    "Level 21 - QoS/11. DSCP PHB Deep-Dive.json",
+    "Level 21 - QoS/11. DSCP PHB Deep-Dive.md",
+    "Level 21 - QoS/10. LLQ & CBWFQ.json",
+    "Level 21 - QoS/10. LLQ & CBWFQ.md",
+    "Level 21 - QoS/09. Modular QoS CLI.json",
+    "Level 21 - QoS/09. Modular QoS CLI.md",
+    "Level 19 - Multicast/09. PIM Designated Router (DR) & Assert.md"
+  ]
+}

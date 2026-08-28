@@ -1,0 +1,82 @@
+{
+  "title": "Two-Tier (Collapsed Core)",
+  "level": 2,
+  "levelTitle": "Level 02 - Network Topologies",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "07. Two-Tier.md",
+  "cards": [
+    {
+      "q": "What is a two-tier (collapsed core) topology?",
+      "a": "It merges the distribution and core layers into a single collapsed core on top of the access layer. It fits small/medium sites with fewer devices, lower cost, simpler operations, and centralized routing/policy — the design most real branches and small campuses use.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the two tiers in a two-tier design and their roles?",
+      "a": "Access tier handles endpoints, VLAN ports, and PoE, typically on L2/L3 access switches. The collapsed core/distribution performs inter-VLAN routing, default gateways, WAN edge, and policy on an L3 switch/router HA pair. This block does everything the 3-tier distribution did plus the core's fast backbone role.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why would you choose a two-tier design over three-tier?",
+      "a": "For cost and simplicity (fewer chassis, easier licensing and operations), small-site scale where traffic does not justify a separate core, and faster convergence from fewer router hops. It suits branch offices, remote sites, SMB campuses, and small data centers.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How is high availability handled in the collapsed core block?",
+      "a": "The collapsed core is the single critical point, so deploy it as an HSRP/VRRP pair with dual uplinks from every access switch. Access switches dual-home to the two cores (EtherChannel or L2 trunk with STP). Consider routed access (L3 to the access edge) so each access switch is its own L3 device with ECMP to the cores.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "When should you move from two-tier to three-tier?",
+      "a": "Move to three-tier when there are more than 5k users, multiple buildings, heavy core aggregation, strict segmentation, or when campus core and WAN/complete functions diverge, in which case a dedicated core siloizes the load.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What commands configure a collapsed-core switch as the default gateway and dual-home an access switch?",
+      "a": "On the L3 switch pair: configure 'interface Vlan10' with 'ip address 10.1.10.1 255.255.255.0', 'no shutdown', 'standby 10 ip 10.1.10.254', and 'standby 10 priority 110'. On the access switch, dual-home via a trunk with 'switchport trunk encapsulation dot1q', 'switchport mode trunk', and 'channel-group 1 mode active' to form an EtherChannel.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the exam synonym for a two-tier topology?",
+      "a": "The exam term is 'collapsed core' — memorize that synonym.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Where does two-tier put routing?",
+      "a": "Two-tier puts routing at the distribution/core merger, not at the access layer.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the single point of failure in a two-tier network, and what is required for the best design?",
+      "a": "The collapsed core is the SPOF; a single-core two-tier fails hard. An HA pair is required for the 'best design' answer.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Could a two-tier plus WAN distribution be described as three-tier?",
+      "a": "No. Count only the campus L3 tiers separating hosts from the WAN edge; if the distribution and core functions are merged, it is two-tier even with a WAN distribution.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does the access layer in a two-tier design still use VLANs and STP?",
+      "a": "Yes, unless the design has gone fully routed. Access still uses VLANs and STP unless routed access is chosen.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "In the two-tier Quick Review, summarize layers, cost, convergence, HA, and sizing.",
+      "a": "Layers are access plus collapsed core (distribution merged into core); cost is low for SMB/branch; convergence is fast with fewer hops; the guideline is to always HA the pair with HSRP/VRRP and dual uplinks; a large campus moves to three-tier; and routed access is an optional choice for the fastest convergence.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

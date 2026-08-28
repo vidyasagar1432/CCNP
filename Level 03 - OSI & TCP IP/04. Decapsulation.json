@@ -1,0 +1,106 @@
+{
+  "title": "Decapsulation",
+  "level": 3,
+  "levelTitle": "Level 03 - OSI & TCP IP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "04. Decapsulation.md",
+  "cards": [
+    {
+      "q": "What is decapsulation?",
+      "a": "Decapsulation is the reverse of encapsulation. At the receiver, each layer strips its own header/trailer, validates it, and passes the payload up to the next-higher layer until the application receives the original data.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What does a switch do during decapsulation?",
+      "a": "A Layer 2 switch removes the Ethernet header and checks FCS, then re-encapsulates the same frame out another port. It does not read IP or TCP headers.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does a router do during decapsulation?",
+      "a": "A router strips the Ethernet header, reads the IP header, rewrites a new L2 header, and forwards or terminates the IP packet. It does not add L4 info.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does the target host do during decapsulation?",
+      "a": "The target host decapsulates all layers and delivers the payload to the application.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does a tunnel endpoint do during decapsulation?",
+      "a": "A tunnel endpoint strips the outer headers (IP and GRE/IPsec) and passes the inner packet through or decrypts it.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the key rule about intermediate routers during decapsulation?",
+      "a": "Intermediate routers decapsulate and re-encapsulate the L2 (Ethernet) header only; the L3/L4 headers are untouched except for TTL/hop fields.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the L2 layer check during decapsulation, and what happens on failure?",
+      "a": "L2 checks the FCS (CRC); a mismatch means the frame is dropped and counters show CRC errors.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does the L3 layer check during decapsulation?",
+      "a": "L3 checks the IPv4 header checksum and TTL (if TTL reaches zero it generates an ICMP TTL exceeded and drops). IPv6 checks the hop limit only.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the L4 layer check during decapsulation?",
+      "a": "L4 checks the TCP/UDP checksum and port matching, plus TCP ACK/sequence logic.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is the IPv4 header checksum recomputed at every hop but not for IPv6?",
+      "a": "The TTL decrements with every routed hop, which changes the IPv4 header, so its checksum must be recomputed each hop. IPv6 removed the header checksum entirely and only checks the hop limit.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you view the encapsulation boundary on the wire?",
+      "a": "Use a packet capture tool like Wireshark: choose an interface, filter the frame, and expand headers layer by layer. Router commands include debug ip icmp and debug ip packet detail.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which direction does each endpoint use: encapsulate or decapsulate?",
+      "a": "The source encapsulates (going down the stack) and the destination decapsulates (going up the stack). Do not flip the direction.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does a router 'decapsulate for a host'?",
+      "a": "No. A router decapsulates L2, reads L3, then re-encapsulates a brand-new L2 header, so MAC addresses change on every hop.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which layer performs the FCS/CRC error check?",
+      "a": "The FCS check is a Layer 2 (Data Link) function, and CRC errors are reported on switch interfaces.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does an intermediate tunnel endpoint decapsulate?",
+      "a": "An intermediate tunnel endpoint decapsulates only the outer header (IP and GRE/IPsec), leaving the inner packet as payload.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does IPv6 check at L3 during decapsulation?",
+      "a": "IPv6 checks only the hop limit; there is no header checksum to validate.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

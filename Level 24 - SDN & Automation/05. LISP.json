@@ -1,0 +1,76 @@
+{
+  "title": "LISP",
+  "level": 24,
+  "levelTitle": "Level 24 - SDN & Automation",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "05. LISP.md",
+  "cards": [
+    {
+      "q": "What is LISP?",
+      "a": "LISP (Locator ID Separation Protocol) separates identity (EID) from location (RLOC): hosts keep stable IDs while mapping to current network locations through a map server/control plane. It is the control plane of SD-Access, enabling host mobility and policy without changing IPs.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What do the terms EID and RLOC mean in LISP?",
+      "a": "EID (Endpoint Identifier) is the endpoint identity, typically the host IP, while RLOC (Routing Locator) is the current location, typically the site IP. A map translates EID to RLOC, so EIDs travel while RLOCs are the current location.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the main LISP roles and devices?",
+      "a": "ITR (ingress tunnel router), ETR (egress tunnel router), MR/MS (map resolver/map server, the control plane), and PxTR (proxy, for interop with non-LISP networks). ITR/ETR are the edges; MS/MR is the control plane; PxTR handles legacy interop.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the LISP mapping flow step by step?",
+      "a": "1) The ITR needs a destination, 2) it sends a map-request to the MR/MS, 3) the MS returns the EID to RLOC mapping, and 4) the ITR encapsulates traffic to the ETR.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between the LISP control plane and data plane?",
+      "a": "The control plane performs the map lookup against the map server, while the data plane encapsulates traffic toward the resolved RLOC. Control = map lookup; data = encapsulation.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does LISP support SD-Access host mobility?",
+      "a": "LISP maps EIDs so hosts roam while keeping the same IP: the SD-Access control plane is LISP, the data plane is VXLAN, and the EID persists across moves.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the benefits of LISP?",
+      "a": "Mobility (host keeps the same IP), scaling (splits the routing table), policy (mapping control), and interoperability with legacy networks through PxTR. LISP decouples routing scale from endpoint movement.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Which commands verify and debug LISP operation?",
+      "a": "show lisp session, show lisp map-cache, show lisp eid-table, show lisp ipv4 database, show lisp ipv4 map-cache, and debug lisp.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you troubleshoot LISP mapping and mobility issues?",
+      "a": "No map means a problem with the MR/MS (check map-cache); broken mobility points to EID issues (check eid-table); legacy failures point to PxTR (check database); slow lookups to the cache (debug lisp); and a down session to the underlay.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the LISP role misused as the control plane versus edges?",
+      "a": "A common trap: MS/MR (map server/map resolver) is the control plane, while ITR and ETR are the edge routers that encapsulate/decapsulate at ingress and egress. PxTR provides interoperability with non-LISP networks.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why can a LISP host roam without changing its IP?",
+      "a": "Because the EID (identity) stays constant and only the RLOC (location) changes; the map server keeps the EID-to-RLOC mapping updated, so the host keeps its IP while roaming.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    }
+  ]
+}

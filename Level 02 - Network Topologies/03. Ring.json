@@ -1,0 +1,76 @@
+{
+  "title": "Ring Topology",
+  "level": 2,
+  "levelTitle": "Level 02 - Network Topologies",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "03. Ring.md",
+  "cards": [
+    {
+      "q": "What is a ring topology?",
+      "a": "Every device connects to exactly two neighbors, forming a closed loop. Frames travel in one direction (token ring / FDDI) around the ring. Physically, modern rings are often implemented as a 'ring-of-stars' where each node is a hub/switch and the hubs form the logical ring.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between a logical ring and a physical star-ring?",
+      "a": "A logical ring means data circulates in a defined path regardless of physical wiring. A physical star-ring (IBM token ring, 16 Mbps) wired each node to a MAU, which closed the ring internally — so it is 'ring logic, star wiring.'",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Describe Token Ring (IEEE 802.5) and FDDI. What are their speeds and key traits?",
+      "a": "Token Ring (IEEE 802.5) is 4/16 Mbps using token passing for deterministic access, with each station having a 48-bit MAC address — legacy. FDDI is 100 Mbps with dual counter-rotating rings and survived as a campus backbone legacy technology.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does token passing control access in a ring?",
+      "a": "A small 'token' frame circulates; a station that holds the token may send one frame, then passes the token on. In a single-token ring only one station transmits at a time, giving deterministic access with no collisions.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does a ring monitor / active monitor do in a token ring?",
+      "a": "It watches for lost tokens and other failures to keep the ring operating.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the pros and cons of a ring topology?",
+      "a": "Pros: no collisions thanks to token passing (up to 16 Mbps), deterministic delay for real-time traffic, dual FDDI ring self-heals, and no bandwidth contention under light load. Cons: one break in a single ring takes the whole ring down, nodes are hard to add/remove, it is expensive/complex and not Ethernet, and it is legacy, replaced by switched Ethernet.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What media-access method does a ring use, and why can you never mention collisions in a token ring?",
+      "a": "A ring uses token passing, not CSMA/CD. Because only one station transmits at a time, there are no collisions in a token ring, so mentioning collisions there is wrong.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Must a ring be physically wired in a circle?",
+      "a": "No. The physical layout can be star (each node wired to a MAU that closes the ring internally); only the logic is a ring. Saying 'it must be wired in a circle' is wrong.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens to a single ring versus a dual ring when there is a break?",
+      "a": "A single ring halves/splits and goes down on a break, while a dual-ring (FDDI) survives by self-healing using its counter-rotating second ring.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Where does ring topology normally appear in modern networks?",
+      "a": "Ring is a legacy physical/distribution-layer topology; modern switches use STP trees rather than rings. Ring-like path diversity survives in Metro Ethernet rings, which redirect traffic the other way on a fiber cut.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "In the ring Quick Review, what are the key access, speed, and failure numbers?",
+      "a": "Access is by token passing (deterministic, one sender at a time). Speeds are 4/16 Mbps for Token Ring and 100 Mbps for FDDI — legacy numbers. Physical wiring is star-type (MAU) with ring logic; a break splits a single ring but dual FDDI self-heals. There are no collisions in a ring versus CSMA/CD shared media.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

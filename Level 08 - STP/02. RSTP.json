@@ -1,0 +1,166 @@
+{
+  "title": "RSTP (Rapid Spanning Tree Protocol)",
+  "level": 8,
+  "levelTitle": "Level 08 - STP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "02. RSTP.md",
+  "cards": [
+    {
+      "q": "What is RSTP and how does it differ fundamentally from classic STP?",
+      "a": "RSTP (IEEE 802.1w) is the rapid evolution of classic 802.1D STP. It provides much faster Layer-2 convergence using explicit port roles, rapid state transitions, point-to-point link assumptions, and a Proposal/Agreement synchronization mechanism instead of the long 802.1D timer sequence. It still elects a Root Bridge.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the fundamental spanning-tree objective that RSTP preserves?",
+      "a": "Allow Layer-2 redundancy while maintaining a loop-free forwarding topology. RSTP does not eliminate the Root Bridge election or path-selection process; it improves how quickly the topology can safely transition after a change.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the three operational RSTP port states?",
+      "a": "Discarding, Learning, and Forwarding.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do the classic 802.1D states map to RSTP states?",
+      "a": "Blocking and Listening both map to Discarding, Learning maps to Learning, Forwarding maps to Forwarding, and Disabled is not an RSTP operational state.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the four RSTP port roles?",
+      "a": "Root Port, Designated Port, Alternate Port, and Backup Port.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is an Alternate Port and when can it become useful?",
+      "a": "An Alternate Port is a backup path toward the Root Bridge. If the Root Port fails, the Alternate Port may rapidly become the new Root Port and enter forwarding.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a Backup Port and how does it differ from an Alternate Port?",
+      "a": "A Backup Port is a redundant path to the same shared segment where another port on the same switch is already the Designated Port. Alternate = backup path toward the Root; Backup = backup for a Designated Port on the same segment.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why should you never use Blocking as an RSTP port role?",
+      "a": "Blocking describes classic STP behavior; RSTP uses Discarding as the corresponding operational state. RSTP roles are Root, Designated, Alternate, and Backup.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does the Proposal/Agreement handshake enable rapid RSTP convergence?",
+      "a": "A switch sends a Proposal BPDU on a port it wants to become Designated; the neighbor synchronizes its other non-edge ports and replies with Agreement; the proposing switch can then rapidly transition the port to Forwarding, maintaining a loop-free topology.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Why does RSTP not blindly transition a port to Forwarding?",
+      "a": "It uses synchronization and Agreement to maintain a loop-free topology before a proposed port enters Forwarding.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How does RSTP detect failures without always waiting for the classic Max Age process?",
+      "a": "It uses frequent BPDUs, port roles, link status, Proposal/Agreement, Alternate ports, and rapid topology-change handling. An Alternate Port can often transition rapidly when the Root Port fails.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "In RSTP, which switches generate BPDUs?",
+      "a": "Every RSTP switch generates BPDUs, rather than only the Root Bridge originating BPDUs and non-root switches relaying them.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the approximate RSTP BPDU failure-detection rule of thumb and the default Hello interval?",
+      "a": "Default Hello is 2 seconds. RSTP can consider a neighbor lost after about 3 missed BPDUs, giving roughly 3 × 2 s ≈ 6 seconds as a failure-detection rule of thumb.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is it wrong to say RSTP convergence equals 6 seconds or always 1-3 seconds?",
+      "a": "Failure detection is separate from topology convergence, and actual convergence depends on the failure, topology, link characteristics, and configuration. An Alternate Path can transition rapidly without waiting for Max Age, and no fixed time is guaranteed.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the two RSTP link types and which supports rapid Proposal/Agreement best?",
+      "a": "Point-to-point (typically full-duplex switch-to-switch) and Shared (half-duplex/shared media). Point-to-point links are ideal for the Proposal/Agreement mechanism.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is an RSTP Edge Port and what type of device should it connect to?",
+      "a": "An Edge Port connects to an end device (PC, server, printer, IP phone, or other end host) that does not participate in STP, allowing immediate transition to Forwarding. It should not normally connect to another switch.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What command enables an edge port in Cisco, and why is PortFast not the same as disabling STP?",
+      "a": "interface G0/10 then spanning-tree portfast. PortFast causes the port to transition rapidly as an edge port; it does not disable STP.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "How does BPDU Guard protect RSTP edge/PortFast ports?",
+      "a": "If an unexpected BPDU arrives on an edge port (indicating a possible switch or loop), BPDU Guard protects the network, typically placing the port into an error-disabled condition.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does RSTP simplify topology-change handling compared with classic 802.1D?",
+      "a": "RSTP uses the Topology Change (TC) flag in its normal BPDUs and neighboring switches pass it along, rather than relying on the classic separate TCN propagation process to the Root.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What command enables RSTP on a per-VLAN basis in Cisco, and what is it called?",
+      "a": "spanning-tree mode rapid-pvst enables Rapid PVST+, which runs an RSTP instance per VLAN so each VLAN can have its own Root Bridge, port roles, and topology.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What happens when RSTP must interoperate with a legacy 802.1D STP switch?",
+      "a": "RSTP is backward-compatible, but the portion of the topology at the legacy boundary operates with slower 802.1D behavior, limiting rapid-convergence benefits across that boundary.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does RSTP replace the fundamental BPDU path-selection logic?",
+      "a": "No. RSTP still uses the basic BPDU comparison (lowest Root Bridge ID, lowest Root Path Cost, lowest Sender Bridge ID, lowest Sender Port ID) to determine Root/Designated/Alternate/Backup roles.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which command views the STP mode and summary, and which verifies a specific VLAN?",
+      "a": "show spanning-tree summary confirms the active spanning-tree mode; show spanning-tree vlan 10 views a specific VLAN. show spanning-tree root views the Root Bridge.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the one-line mental model for RSTP?",
+      "a": "RSTP = STP topology logic + explicit roles + rapid synchronization + rapid transitions.",
+      "tag": "Quick Review",
+      "context": "Both"
+    },
+    {
+      "q": "What are the RSTP standards, states, roles, and key mechanism in quick review?",
+      "a": "Standard IEEE 802.1w; states Discarding/Learning/Forwarding; roles Root/Designated/Alternate/Backup; every RSTP switch generates BPDUs; default Hello 2 s; rapid mechanism is Proposal/Agreement; link types point-to-point/shared; edge feature PortFast; protection BPDU Guard; Cisco per-VLAN version Rapid PVST+.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "Classic STP uses timers to transition; what does RSTP use instead?",
+      "a": "RSTP uses explicit roles, rapid synchronization, and Proposal/Agreement to safely transition, keeping the same fundamental STP objective but converging much faster.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "title": "Telemetry",
+  "level": 26,
+  "levelTitle": "Level 26 - Monitoring & Telemetry",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "08. Telemetry.md",
+  "cards": [
+    {
+      "q": "What is streaming telemetry and how does it deliver data?",
+      "a": "Streaming telemetry pushes subscriptions of device data continuously to collectors (push model, unlike SNMP pull), encoded as protobuf/JSON and transported over gRPC/gNMI/NETCONF; it is the modern scalable replacement for polling.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How does push differ from pull in monitoring?",
+      "a": "In pull (SNMP) the collector asks for data; in push (streaming telemetry, NetFlow) the device sends data itself, on change or interval, with no polling overhead.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the streaming telemetry protocol stack?",
+      "a": "The stack is a YANG data model plus a transport: encoding via protobuf/JSON, transport via gRPC (best), modeled via gNMI/NETCONF, with a subscription specifying path and interval.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are gNMI, gRPC, and NETCONF used for in telemetry?",
+      "a": "gNMI is the standard for network management/telemetry, gRPC is a high-performance transport, and NETCONF does configuration plus telemetry; gNMI over gRPC is the modern pairing, with Cisco using model-driven telemetry on IOS-XE/XR.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is model-driven telemetry (MDT) on Cisco?",
+      "a": "MDT subscribes to a YANG data path and streams data to a collector, using on-change or interval subscriptions with a Darwin/cadence tuning.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does telemetry compare to SNMP and NetFlow?",
+      "a": "SNMP is pull with limited richness and poll-cycle latency, NetFlow is push with flow data, and telemetry is push with full model richness, on-change low latency, and the best scale.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the design considerations for streaming telemetry?",
+      "a": "Account for push CPU overhead, continuous bandwidth use, TLS for security, and a collector that must scale to handle sustained stream load.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands configure a streaming telemetry subscription?",
+      "a": "Enter telemetry ietf subscription 10, set encoding encode-kvgpb, filter xpath to the YANG path (e.g. /interfaces/interface/statistics), stream yang-push, update-policy periodic 30000, and a receiver with ip address, port, and protocol grpc-tcp.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "No telemetry stream is received; what is the likely cause and check?",
+      "a": "Likely a subscription issue; check with show telemetry. Also check the xpath filter for no data, the gRPC receiver port, update-policy for cadence, and encoding compatibility (kvgpb).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Is telemetry push or pull compared to SNMP?",
+      "a": "Telemetry is push (device sends continuously, no polling) while SNMP is pull/poll.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What defines the data that streaming telemetry reports?",
+      "a": "Data is defined by YANG models and paths (the filter xpath), formatted as protobuf/JSON.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the two subscription modes in telemetry?",
+      "a": "On-change subscriptions (device pushes when data changes) and periodic subscriptions (pushed at a fixed interval via update-policy).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the Cisco term for YANG-path-based streaming telemetry?",
+      "a": "Model-driven telemetry (MDT).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

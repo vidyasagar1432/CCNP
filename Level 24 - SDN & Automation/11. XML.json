@@ -1,0 +1,70 @@
+{
+  "title": "XML",
+  "level": 24,
+  "levelTitle": "Level 24 - SDN & Automation",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "11. XML.md",
+  "cards": [
+    {
+      "q": "What is XML and where is it used in networking?",
+      "a": "XML (eXtensible Markup Language) is a tag-based data format where every value is wrapped in opening and closing tags and attributes add metadata. It is verbose but strict, and it is what NETCONF RPCs are written in, alongside legacy APIs.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the structural elements of XML?",
+      "a": "Element: <tag>value</tag>, attribute: <tag attr=\"v\">, a single document root, nested child elements, and namespaces declared with xmlns. Everything is nested elements with tags.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the XML well-formedness rules?",
+      "a": "Tags must match (each opening tag needs a closing tag), there is one document root, tags are case-sensitive, special characters are escaped (&amp;, &lt;, &gt;), and attribute values must be quoted. A missing closing tag breaks well-formedness.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens if an XML document lacks a matching closing tag?",
+      "a": "The document is not well-formed, so parsing fails; well-formed XML requires every opening tag to have a matching closing tag and exactly one root element.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is XML used in network automation?",
+      "a": "NETCONF carries everything as XML RPCs, YANG models can be encoded in XML, legacy integrations use SOAP/SNMP-ish XML, and configuration data is transported as device XML.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does XML compare to JSON?",
+      "a": "XML is tag-based, verbose, strict, supports attributes and comments, but is text-typed and legacy; JSON is compact, light, native-typed, and modern. XML has attributes where JSON has none.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you parse XML in Python?",
+      "a": "Use xml.etree.ElementTree: root = ET.fromstring(payload) builds the tree, then root.find(\"name\").text reads a node's text, and root.iter(\"interface\") iterates over matching elements.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you troubleshoot XML parsing and extraction failures?",
+      "a": "Parse error = unmatched tag (check well-formedness); wrong node = bad path (use find/iter); lost attribute = quoting; namespace issues = missing xmlns (map it); and escaping problems come from raw ampersands that are not escaped.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the difference between an XML attribute and a child element?",
+      "a": "An attribute is metadata placed inside the start tag as name=\"value\" (e.g., <device name=\"R1\">), while a child element is a nested element wrapped in its own tags (e.g., <name>R1</name>).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which protocol depends on XML for all of its RPC payloads?",
+      "a": "NETCONF: every operation is an XML RPC carried over SSH, which is why XML well-formedness and escaping matter for NETCONF.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

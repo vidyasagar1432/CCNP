@@ -1,0 +1,82 @@
+{
+  "title": "VRF (Virtual Routing and Forwarding)",
+  "level": 20,
+  "levelTitle": "Level 20 - MPLS",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "07. VRF.md",
+  "cards": [
+    {
+      "q": "What is a VRF?",
+      "a": "A VRF (Virtual Routing and Forwarding) is a per-tenant virtual routing table plus forwarding instance on a PE router. Each VRF has its own RIB, FIB (CEF), interfaces, and routes, isolating customers even though they share the same physical router and core.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What does a VRF contain?",
+      "a": "A VRF contains its own RIB (routes), CEF/FIB (forwarding), CE-facing interfaces, routing protocol (eBGP/OSPF/EIGRP/static), and labels (VPN service label). Isolation is at both the control and data plane.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does a VRF differ from the global routing table?",
+      "a": "The global table is the main table visible to all routes and used for the core/Internet, while a VRF is a per-VRF table seeing only its own routes, shared per customer, and used for L3VPN. The core/global table stays clean of customer prefixes.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between an RD and an RT?",
+      "a": "An RD (route distinguisher) makes prefixes unique in MP-BGP, giving identity, while an RT (route target) is the import/export membership policy that controls who shares the VRF.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the purpose of each VRF configuration command: ip vrf, rd, route-target, ip vrf forwarding?",
+      "a": "ip vrf NAME creates the VRF; rd sets the route distinguisher; route-target sets import/export policy; and ip vrf forwarding binds an interface to the VRF. BGP uses 'address-family ipv4 vrf' per VRF.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you configure a VRF to support BGP?",
+      "a": "Create the VRF with 'ip vrf CUST1', set rd and route-target, bind CE-facing interfaces with 'ip vrf forwarding', and under BGP use 'address-family ipv4 vrf CUST1'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What VRF-aware features need special handling?",
+      "a": "Static routes, eBGP/iBGP, and OSPF can be per-VRF, and ping/traceroute, SNMP, and Telnet are VRF-aware and often need the 'vrf' keyword, such as 'ping vrf CUST1'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands verify VRF routing and forwarding?",
+      "a": "show ip vrf, show ip vrf detail, show ip route vrf CUST1, show ip cef vrf CUST1, and ping vrf CUST1.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the likely cause and check when an interface is not in a VRF?",
+      "a": "The binding is missing, so check show ip vrf and re-apply 'ip vrf forwarding'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What happens to the IP address when you apply 'ip vrf forwarding' to an interface?",
+      "a": "'ip vrf forwarding' removes the IP address, so you must re-apply the 'ip address' command afterward.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "In VRF terms, what do RD and RT each define?",
+      "a": "RD defines uniqueness (identity) while RT defines membership (who shares the VRF).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does the VRF map to the quick review table?",
+      "a": "A VRF is a virtual table that isolates the RIB, FIB, and interfaces, uses RD for uniqueness and RT for membership, is bound via 'ip vrf forwarding', uses a BGP AF per VRF, is pinged with 'ping vrf', and serves L3VPN.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

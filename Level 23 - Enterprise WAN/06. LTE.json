@@ -1,0 +1,82 @@
+{
+  "title": "LTE (Cellular)",
+  "level": 23,
+  "levelTitle": "Level 23 - Enterprise WAN",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "06. LTE.md",
+  "cards": [
+    {
+      "q": "What is LTE/5G cellular as a WAN transport?",
+      "a": "A wireless WAN transport ideal for primary in rural areas, backup, or roaming/merchant sites. It uses a SIM + APN on a cellular interface, gets IP via DHCP/static, and shines as an SD-WAN transport for automatic failover.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Why choose LTE as a WAN link?",
+      "a": "Coverage works anywhere with signal, speed is LTE/5G, setup is simple with SIM + APN, it works on the move (mobility), and it requires no fixed wiring.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the typical use cases for LTE?",
+      "a": "Primary for remote/rural sites, backup for failover, roaming for moving vehicles, and as an SD-WAN transport.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the LTE interface model?",
+      "a": "A cellular interface such as Cellular0/0/0, identified by the SIM (subscriber identity), with an APN (provider access point) and a cellular profile configured for the carrier.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the basic LTE interface configuration?",
+      "a": "Under interface Cellular0/0/0: ip address negotiated, cellular profile 1, no shutdown; plus a dialer-list (e.g. dialer-list 1 protocol ip permit) to trigger data.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does the cellular profile command do on an LTE interface?",
+      "a": "It sets the APN/access-point profile used to connect to the carrier.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the characteristics of an LTE link?",
+      "a": "Moderate latency, variable bandwidth, data caps, variable predictability, and per-usage cost — so it must be treated as best-effort and metered.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does SD-WAN make LTE useful for failover?",
+      "a": "SD-WAN treats LTE as one of multiple transports, provides automatic failover, and can route by application via policy, making LTE a seamless automatic fallback.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which commands verify an LTE cellular link?",
+      "a": "show cellular 0/0/0 hardware, show cellular 0/0/0 radio, show cellular 0/0/0 profile, show interface Cellular0/0/0, and show ip interface brief.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "An LTE interface has no signal. What is the likely cause and check?",
+      "a": "Poor coverage is likely; check show cellular 0/0/0 radio.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "An LTE interface gets no IP address. What is the likely cause and check?",
+      "a": "An APN/profile problem is likely; check show cellular 0/0/0 profile.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What identifies a device on an LTE/5G network?",
+      "a": "The SIM provides subscriber identity, and the APN/access profile connects it to the provider; the router itself uses serial number and cellular profile identity.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "title": "Fiber",
+  "level": 1,
+  "levelTitle": "Level 01 - Physical Layer",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "03. Fiber.md",
+  "cards": [
+    {
+      "q": "What is fiber-optic cabling and what are its two dominant varieties?",
+      "a": "Fiber-optic cabling carries light (photons) through a glass or plastic core using total internal reflection, offering far longer reach, higher bandwidth, and immunity to EMI compared with copper. The two dominant varieties are single-mode (SMF) and multimode (MMF).",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How does light travel down an optical fiber?",
+      "a": "Light injected at an angle into the core bounces down the fiber via total internal reflection at the core-cladding boundary, because the cladding has a lower refractive index than the core.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Compare single-mode (SMF) and multimode (MMF) fiber in terms of core, light source, reach, and color coding.",
+      "a": "MMF has a 50 or 62.5 µm core, uses LED/VCSEL sources, is limited by modal dispersion to roughly 100-550 m reach, is cheaper, and is color coded aqua (OM3/OM4) or grey (OM1/OM2). SMF has an ~9 µm core, uses lasers, is limited by attenuation to 10-120 km+, is more expensive, and is color coded yellow (OS1/OS2).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Describe the multimode OM1 through OM5 classes and their 10G reach where applicable.",
+      "a": "OM1 is 62.5 µm and OM2 is 50 µm (both legacy, LED-based). OM3 and OM4 are 50 µm laser-optimized fiber supporting 10G at 300 m and 550 m respectively. OM5 is 50 µm wideband fiber that supports 4-WDM for 100G+ at 150 m+.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the single-mode OS classes and how do higher speeds use them?",
+      "a": "OS1 is for indoor use and OS2 for outdoor or wider reach. Single-mode is usually 10G and above, and 40/100/400G links use multiple wavelengths via WDM over SMF.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why are fiber links duplex and what is polarity?",
+      "a": "Fiber links are duplex: one fiber for transmit and one for receive, typically as an LC duplex pair. Polarity is the connector or link arrangement that ensures TX(A) aligns to RX(B) through panels (an A-to-B flip), avoiding light being returned to the same port.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What factors make up an optical power budget?",
+      "a": "Optical loss includes each connector (~0.5 dB), each splice (~0.1-0.3 dB), and cable attenuation (MMF ≤3.5 dB/km at 850 nm; SMF ≤0.4 dB/km at 1310 nm and ≤0.25 dB/km at 1550 nm). If the budget exceeds the receiver sensitivity, the link fails or has a high bit error rate.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands verify a fiber link and its SFP module optics?",
+      "a": "Use 'show interfaces tend1/1', 'show interfaces transceiver details' for DOM data such as optical power and temperature, and 'show inventory | include SFP' to identify which module is in the port.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What limits the distance of multimode versus single-mode fiber?",
+      "a": "Multimode distance limits are dispersion-based (modal dispersion), while single-mode reach is loss-based (attenuation and power budget).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is fiber always faster than copper Ethernet?",
+      "a": "No. Speed is protocol and module dependent, not determined by fiber itself. Fiber's real strengths are its longer distance and immunity to noise.",
+      "tag": "Exam Trap",
+      "context": "Interview"
+    },
+    {
+      "q": "What are the color codes for OM3/OM4 multimode and single-mode fiber?",
+      "a": "Aqua indicates OM3/OM4 multimode fiber, and yellow indicates single-mode fiber (OS1/OS2). These are easy-credit color-code questions.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How do 40GBASE-SR4 and 100GBASE-SR4 connect compared with LC duplex?",
+      "a": "40GBASE-SR4 and 100GBASE-SR4 use parallel fibers with MPO connectors (QSFP uses MPO-12/24), whereas LC duplex is the legacy pattern for smaller runs.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is OM5 fiber?",
+      "a": "OM5 is 50 µm laser-optimized wideband multimode fiber supporting 4-WDM for 100G+; it is not a newer single-mode type.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "title": "IGMP",
+  "level": 19,
+  "levelTitle": "Level 19 - Multicast",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "01. IGMP.md",
+  "cards": [
+    {
+      "q": "What is IGMP and what does it do on the LAN?",
+      "a": "IGMP is the host-to-router protocol that manages multicast group membership on a LAN segment at the Layer 2/3 boundary. Routers use it to learn which groups hosts want to receive, and without members the router stops forwarding the group's traffic.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Which IGMP version is the default, and what does IGMPv3 add?",
+      "a": "IGMPv2 is the default; IGMPv3 adds source-specific include/exclude filtering, which is required for SSM.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How do IGMPv1, v2, and v3 differ?",
+      "a": "v1 uses general queries with a slow leave (about 2 minutes) and no SSM; v2 adds a fast leave-group message; v3 supports source-specific reports with include/exclude source lists, enabling SSM.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the roles on an IGMP segment, and who wins the querier election?",
+      "a": "The querier is the elected router that sends general queries, members are hosts that send reports, and non-members stay silent. One querier per LAN is elected, and the lowest IP address wins.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What destination address do general IGMP queries use?",
+      "a": "General queries are multicast to 224.0.0.1.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Where do IGMPv2 and v3 reports go?",
+      "a": "Reports are multicast to 224.0.0.22, used by both v2 and v3.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What destination address does an IGMPv2 leave message use?",
+      "a": "Leave messages are sent to 224.0.0.2.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does a host stay an active IGMP member?",
+      "a": "The host keeps sending reports; no report means the router times the host out and removes its membership.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does ip pim sparse-mode do for IGMP on an interface?",
+      "a": "It enables both PIM and IGMP on the interface.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands force IGMPv3, make the router join a group, and create static membership?",
+      "a": "ip igmp version 3 forces v3 (SSM-ready), ip igmp join-group makes the router join a group for testing, and ip igmp static-group creates static membership.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is IGMP snooping, and what is an mrouter port?",
+      "a": "IGMP snooping is a switch feature that inspects IGMP reports so group traffic is forwarded only to member ports instead of being flooded to all ports; the mrouter port is the port that faces the router.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which commands verify IGMP groups, IGMP interfaces, and snooping?",
+      "a": "show ip igmp groups shows learned groups, show ip igmp interface shows per-interface IGMP status, and show ip igmp snooping groups verifies snooping on the switch; show ip mroute tracks the multicast tree.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "On a router with no IGMP groups listed at all, what is the likely cause?",
+      "a": "PIM is not enabled on the interface; check with show ip igmp interface.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Multicast group traffic is flooding to all switch ports; what is likely wrong?",
+      "a": "IGMP snooping is disabled on the switch; check with show ip igmp snooping.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Is IGMP a router-to-router multicast routing protocol?",
+      "a": "No. IGMP covers host-to-router membership only, on the LAN side at the Layer 2/3 boundary; it is not used between routers.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which IGMP version provides fast leave, and how?",
+      "a": "IGMPv2 sends an explicit leave-group message to 224.0.0.2, speeding up removal versus v1's slow timeout-based leave.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "title": "Multi-Area OSPF",
+  "level": 30,
+  "levelTitle": "Level 30 - Labs",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "09. Multi-Area OSPF.md",
+  "cards": [
+    { "q": "What does the Multi-Area OSPF lab practice?", "a": "It builds area 0 plus non-backbone areas with ABRs, LSA types, and summarization in a routed topology, verifying adjacencies, the LSDB, and inter-area routes.", "tag": "Overview", "context": "Both" },
+    { "q": "What is the typical multi-area OSPF topology?", "a": "A core in backbone area 0, ABRs connecting area 0 to other areas, internal routers in non-backbone areas, and ASBRs originating external routes in any area.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What is the OSPF configuration sequence for a multi-area network?", "a": "Enable router ospf, add network statements, assign each subnet to an area, set the router-id, then verify.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "How are subnets mapped to areas in OSPF?", "a": "Using the network <net> <mask> area <id> command, which assigns subnets to specific areas.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What does OSPF LSA Type 3 represent?", "a": "A summary LSA originated by an ABR, used for inter-area route advertisements.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What are OSPF LSA types 1, 2, 4, and 5?", "a": "Type 1 is router, Type 2 is network, Type 4 is ASBR summary, and Type 5 is external.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What is OSPF LSA Type 7 used for?", "a": "Type 7 (NSSA external) carries external routes within an NSSA area.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What are the functions of an OSPF ABR?", "a": "An ABR connects an area to the backbone, summarizes routes as LSA Type 3, filters via area ranges, and routes to all areas.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How do the OSPF area types differ in flooding behavior?", "a": "Standard areas carry all LSAs, stub areas carry no Type 5 external LSAs, totally stubby areas carry no Type 3 or 5, and NSSA uses Type 7 for externals.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "Why use stub or NSSA areas?", "a": "They limit external routing flooding into the area, reducing the LSDB and resource demand.", "tag": "Core Concept", "context": "Both" },
+    { "q": "What command summarizes a range of subnets on an ABR?", "a": "area 1 range 10.1.0.0 255.255.0.0, which advertises a summarized route for area 1.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "Which commands verify OSPF neighbors, LSDB, and inter-area routes?", "a": "show ip ospf neighbor, show ip ospf database, and show ip route ospf, plus show ip ospf for ABR status.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "Two OSPF routers do not form an adjacency. What is the likely cause and check?", "a": "An area or hello mismatch, so check with show ip ospf neighbor.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "An area has LSDB gaps or missing routes. What is the likely cause and check?", "a": "A flooding problem, so check the database with show ip ospf database for missing LSAs.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "Can a non-backbone area exist without attaching to area 0?", "a": "No — all areas must attach to backbone area 0, typically through ABRs.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "A stub area cannot receive Type 7 NSSA external routes.", "a": "True — only NSSA areas use Type 7 for external routes; stub areas simply have no Type 5 externals.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "What is the correct OSPF verification order?", "a": "Verify neighbors first, then the database, then inter-area routes — neighbor, database, route.", "tag": "Exam Trap", "context": "Practical" },
+    { "q": "Which OSPF concept uses an area range and what does it achieve?", "a": "Summarization on the ABR using area range, which reduces inter-area LSA flooding and route table size.", "tag": "Quick Review", "context": "Both" }
+  ]
+}

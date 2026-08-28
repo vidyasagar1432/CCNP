@@ -1,0 +1,76 @@
+{
+  "title": "VRF Lite",
+  "level": 25,
+  "levelTitle": "Level 25 - Virtualization & Cloud",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "07. VRF Lite.md",
+  "cards": [
+    {
+      "q": "What is VRF-lite?",
+      "a": "Using VRFs without MPLS or MP-BGP: separate routing tables and interfaces provide L3 segmentation on a single router. It is cheap and simple, ideal for small multi-tenant or service-separation designs.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the key difference between VRF-lite and MPLS L3VPN?",
+      "a": "VRF-lite uses no MPLS and no MP-BGP, has no label stack, scales to small size, and is single-site; MPLS L3VPN uses MPLS + MP-BGP, two-label forwarding, scales large, and spans the WAN.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does VRF-lite work across routers?",
+      "a": "Each router on the path defines a VRF per tenant, binds interfaces per VRF, uses per-VRF IGP or static routes, and every link end must map to the same VRF.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What configurations create a VRF-lite VRF and bind an interface?",
+      "a": "ip vrf GUEST with an optional rd 65000:10, then ip vrf forwarding GUEST plus ip address on the interface, and address-family ipv4 vrf GUEST under router bgp for per-VRF BGP.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the use cases for VRF-lite?",
+      "a": "Small sites with cheap isolation, separate guest/management tables, lab segmentation, and simplified enterprise-core designs. It suits single-site segmentation without a service provider.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the limitations of VRF-lite?",
+      "a": "Manual scaling per hop, RD/RT are not global (local only), no WAN/MPLS transit, and per-device complexity. Beyond a few devices, MPLS VPNs scale better.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands verify VRF-lite?",
+      "a": "show ip vrf (and detail), show ip route vrf GUEST, show ip cef vrf GUEST, and ping vrf GUEST to test reachability inside the VRF.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Routes don't appear in VRF-lite after configuration. What should you check?",
+      "a": "Confirm the link is assigned to the VRF (show ip vrf), verify both ends map the same VRF to the link, and check that the BGP address-family for the VRF is configured.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does VRF-lite compare on MPLS, MP-BGP, and labels?",
+      "a": "VRF-lite has no MPLS, no MP-BGP, and no label stack; this lack of labels is its scale limit, making L3VPN the scalable upgrade path.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the role of RD in VRF-lite?",
+      "a": "The rd is optional and only locally relevant in VRF-lite; route targets are not used globally because MP-BGP is not involved.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Match the quick review: MPLS, MP-BGP, isolation, scope, scale, RD/RT, WAN, upgrade.",
+      "a": "MPLS = none; MP-BGP = none; isolation = per-router; scope = single site; scale = small; RD/RT = local; WAN = no; upgrade = MPLS L3VPN.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

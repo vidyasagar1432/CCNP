@@ -1,0 +1,76 @@
+{
+  "title": "Media Conversion",
+  "level": 1,
+  "levelTitle": "Level 01 - Physical Layer",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "06. Media Conversion.md",
+  "cards": [
+    {
+      "q": "What is media conversion and how does it affect higher layers?",
+      "a": "Media conversion changes a signal between different physical media, most commonly between copper Ethernet (100BASE-TX or 1000BASE-T) and fiber optics, or between electrical and optical realms generally. The conversion is transparent to L2 and L3: the frame bytes are unchanged.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What does a media converter do at the physical layer?",
+      "a": "A media converter converts between electrical encoding (from the PCS) and optical on-off signals, leaving the Ethernet frame itself untouched. It may re-clock and regenerate like a repeater, but most modern ones operate as transparent switches doing L1 conversion inside a standalone media converter.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Where is media conversion typically used?",
+      "a": "Media conversion is used to extend distance beyond the 100 m UTP limit using fiber for 550 m to 10 km, in EMI environments where copper is impossible such as industrial or between buildings, to convert between different optics such as multimode to single-mode in patch panels or switches, and for legacy 10/100 links versus new gigabit links.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Give examples of media conversion types and their direction.",
+      "a": "100BASE-TX to 100BASE-FX converts RJ45 to ST or SC duplex (a classic); 1000BASE-T to 1000BASE-X converts RJ45 to an LC SFP or standalone module; 10GBASE-T to 10GBASE-LR converts RJ45 Cat6a to LC single-mode; multimode to single-mode uses mode conditioning, such as 1000BASE-LX with mode conditioning; and PoE conversion separates UTP power from fiber plus an injector.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the key caveats of media converters?",
+      "a": "Media conversion is transparent, so the L2 MAC and frames are unchanged. It adds latency of microseconds, which is fine for campus but should be counted in long chains. Fiber carries no power, so devices behind converters need their own power or PoE injector. Do not cascade converters unlimitedly because regeneration and re-timing can accumulate bit errors.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does a media converter differ from a router?",
+      "a": "A media converter is not a router. It operates at L1 and L2 only, providing no VLAN or ACL logic, no MAC learning or filtering, and mostly no VLANs, whereas a router performs L3 forwarding.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands verify the media type of a port and its transceiver?",
+      "a": "A copper SFP is itself a media converter inside the switch port. Use 'show interface gi0/12' and 'show interface transceiver | include Type|Media|Speed' to verify whether a fiber SFP or copper SFP is installed.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "If a PoE device sits behind a fiber link and a media converter, what is needed?",
+      "a": "Fiber carries no power, so a PoE device behind a fiber media converter needs separate power or a PoE injector. This forgotten power requirement is a classic design gap.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is required when connecting multimode and single-mode fiber?",
+      "a": "Connecting multimode to single-mode converges badly without mode conversion, so you must use the proper technique such as a 1000BASE-LX mode-conditioning patch cable rather than directly joining the fibers.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why should you avoid cascading multiple media converters?",
+      "a": "Cascading converters accumulates latency and bit errors, so you should avoid stacking too many in a chain. Designs keep the number of converters short.",
+      "tag": "Exam Trap",
+      "context": "Interview"
+    },
+    {
+      "q": "What happens if the speeds do not match on both sides of a media converter?",
+      "a": "Speed must match on both sides (100, 1000, or 10G); a converter that re-negotiates silently caps the link when the speeds mismatch.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

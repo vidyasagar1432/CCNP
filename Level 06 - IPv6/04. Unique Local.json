@@ -1,0 +1,82 @@
+{
+  "title": "Unique Local (ULA)",
+  "level": 6,
+  "levelTitle": "Level 06 - IPv6",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "04. Unique Local.md",
+  "cards": [
+    {
+      "q": "What is a Unique Local Address (ULA)?",
+      "a": "A ULA (RFC 4193) is the IPv6 equivalent of RFC 1918 private space: not globally routable but practically unique. Its prefix is fc00::/7, and the fd form is the one actually used.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between fc00::/8 and fd00::/8?",
+      "a": "fc00::/8 is reserved for future centrally-assigned semantics, while fd00::/8 has the L bit set (locally assigned) and is where your ULAs live.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the structure of a Unique Local Address?",
+      "a": "Seven prefix bits plus an L bit, a 40-bit global ID, a 16-bit subnet, and a 64-bit interface ID. Example: fd12:3456:789a:0001::1 is the fd12:3456:789a::/48 prefix with subnet 0001.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does a ULA (fd) compare to a link-local (fe80) address?",
+      "a": "A ULA is site-wide and routable inside the organization for internal-only reachability, while link-local is one-link only and used for neighbor operations. Both are filtered or never visible outside the network.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "When should you use a ULA instead of a GUA?",
+      "a": "Use ULA for internal services such as DNS, print, and management that need stable addresses independent of the ISP, for dual-stack labs without a real ISP prefix, for site mergers (random IDs give low collision), and as migration tooling while GUA grows in parallel.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How should ULAs be handled at the enterprise edge?",
+      "a": "Never advertise ULAs to the Internet; outbound BGP/EGP prefix filtering should include fd00::/8 and fe80::/10. You can route ULAs internally and NAT is not needed, unlike IPv4 private addressing.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do you configure and verify a ULA on Cisco IOS?",
+      "a": "Configure with ipv6 address fd12:3456:789a:1::1/64, then verify with show ipv6 interface Gi0/1 | include fd and show ipv6 route fd12:3456:789a::/48.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Is fc00::/8 available for locally assigned ULAs?",
+      "a": "No. Only fd00::/8 (L bit set) is locally assigned; fc00::/8 is reserved for future centrally-defined assignments.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Can a ULA be routed inside the enterprise?",
+      "a": "Yes, unlike link-local, a ULA is site-routable, but it must never leave the enterprise.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is ULA the IPv6 equivalent of IPv4 NAT private space that needs NAT?",
+      "a": "No. You typically do not NAT ULAs; you simply route them internally.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why should the 40-bit global ID of a ULA be randomly generated?",
+      "a": "A predictable 40-bit global ID causes collisions in designs, so it should be randomly generated to make address overlaps across sites unlikely.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the full ULA prefix range?",
+      "a": "fc00::/7, which covers both fc00 and fd00 ranges; if an exam asks for the ULA range, answer fc00::/7.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

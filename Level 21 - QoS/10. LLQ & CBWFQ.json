@@ -1,0 +1,76 @@
+{
+  "title": "LLQ & CBWFQ (Low Latency Queuing)",
+  "level": 21,
+  "levelTitle": "Level 21 - QoS",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "10. LLQ & CBWFQ.md",
+  "cards": [
+    {
+      "q": "What are CBWFQ and LLQ?",
+      "a": "CBWFQ (Class-Based Weighted Fair Queuing) gives each class a guaranteed bandwidth share, while LLQ (Low Latency Queuing) adds a strict-priority class, typically voice EF, served before all others but rate-limited so it cannot starve other classes.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How does CBWFQ schedule traffic?",
+      "a": "CBWFQ matches traffic into classes and gives each class a guaranteed bandwidth share with the bandwidth command, serving packets proportionally to each class's weight.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does the priority command do in LLQ?",
+      "a": "The priority command creates a strict-priority LLQ class that is served first and is policed to the configured rate so it cannot monopolize the link and starve other classes.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between priority and bandwidth commands?",
+      "a": "priority defines a strict-priority, policed LLQ class, while bandwidth defines a guaranteed weighted CBWFQ share that is not strict-priority.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why must the LLQ priority class be policed?",
+      "a": "A strict-priority queue would otherwise consume the entire link and starve all lower-priority classes; policing it to the configured priority value guarantees other classes still get service.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which traffic is typically placed in the LLQ priority class?",
+      "a": "Voice traffic marked EF is typically placed in the LLQ priority class because it is latency and jitter sensitive.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does queue-limit do in CBWFQ?",
+      "a": "queue-limit sets the per-class queue depth, controlling how many packets can buffer before tail-drop occurs for that class.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands verify queuing state?",
+      "a": "show policy-map interface, show queueing interface, show class-map, and show policy-map.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Voice traffic jitters on a congested WAN link; what is the likely fix?",
+      "a": "Add an LLQ priority class for the voice EF traffic so it is served before other classes and not queued behind data.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What happens if the LLQ priority value is configured too high?",
+      "a": "Other classes can be starved of bandwidth because the priority queue is served first; LLQ's priority class must be appropriately limited.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the LLQ and CBWFQ quick-review summary?",
+      "a": "CBWFQ guarantees per-class bandwidth while LLQ adds a strict, policed priority class for voice EF, so use priority for latency-sensitive traffic and bandwidth for video/data to keep voice jitter-free without starving other classes.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

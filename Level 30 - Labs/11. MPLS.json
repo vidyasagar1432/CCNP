@@ -1,0 +1,124 @@
+{
+  "title": "MPLS",
+  "level": 30,
+  "levelTitle": "Level 30 - Labs",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "11. MPLS.md",
+  "cards": [
+    {
+      "q": "What does the MPLS lab configure and verify?",
+      "a": "It configures LDP on the core, verifies label bindings and FIB entries, and builds an L3VPN with MP-BGP, tying IGP, LDP, and BGP together on the provider edge.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the MPLS core setup sequence?",
+      "a": "Build an OSPF core, enable mpls ip and LDP, verify labels, then build the VPN.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands check LDP sessions, bindings, and installed labels?",
+      "a": "show mpls ldp neighbor, show mpls ldp bindings, and show mpls forwarding.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does mpls ip on an interface do?",
+      "a": "It enables LDP label distribution on that interface; alternatively mpls ldp autoconfig under OSPF enables it across the core.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the L3VPN build sequence?",
+      "a": "Define a VRF, assign VRF interfaces, configure MP-BGP vpnv4, set the rd and rt, then advertise routes.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What makes up an L3VPN?",
+      "a": "A VRF combined with MP-BGP vpnv4, carrying VPNv4 routes with their labels.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How are labels distributed in an MPLS VPN and what does MP-BGP carry?",
+      "a": "LDP distributes the transport labels while MP-BGP carries both the VPN labels and VPNv4 routes.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the MPLS label stack in an L3VPN?",
+      "a": "Two labels: the first is the transport label from LDP, and the second is the VPN label from BGP.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are PHP, implicit null, and explicit null in MPLS?",
+      "a": "PHP pops the label, implicit null means pop-only, and explicit null means keep the label (do not pop at the penultimate hop).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands verify LDP, FIB, VRF, and VPNv4 state?",
+      "a": "show mpls ldp neighbor, show mpls forwarding, show ip vrf, show bgp vpnv4 (or show bgp vpnv4 unicast), and show ip vrf detail.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What configuration creates a VRF and its route-target?",
+      "a": "vrf definition CUST, then rd 65000:100 and route-target both 65000:100 under the VRF.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How is a VPNv4 neighbor activated and communities exchanged?",
+      "a": "Under router bgp, use address-family vpnv4, then neighbor 10.0.0.2 activate and neighbor 10.0.0.2 send-community both.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the role of the route-target in MP-BGP?",
+      "a": "The route-target controls import/export between VRFs (inter-VRF connectivity) and its exchange requires send-community.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "No LDP labels are being distributed. What is the likely cause and check?",
+      "a": "LDP protocol or interface configuration issue, so check show mpls ldp bindings.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A VRF remains empty of routes. What is the likely cause and check?",
+      "a": "An MP-BGP VPNv4 activation or RD/RT mismatch, so check show bgp vpnv4 and the VRF detail.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which single protocol handles both transport and VPN labels in MPLS?",
+      "a": "None — LDP distributes transport labels while MP-BGP distributes the VPN labels; both are required.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "mpls ip under router ospf is sufficient; interfaces need no additional label configuration.",
+      "a": "False — mpls ldp autoconfig under OSPF enables LDP, but mpls ip must be applied on interfaces to enable LDP label distribution (shown as an alternate method).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "A VPN route does not import into the VRF. What should you verify?",
+      "a": "The RD and RT match and that send-community is enabled, since route-targets rely on community exchange.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the recommended MPLS VPN verification order?",
+      "a": "Verify LDP, then FIB, then VPNv4 — LDP, FIB, VPNv4.",
+      "tag": "Quick Review",
+      "context": "Practical"
+    }
+  ]
+}

@@ -1,0 +1,208 @@
+{
+  "title": "Static NAT",
+  "level": 15,
+  "levelTitle": "Level 15 - NAT",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "01. Static NAT.md",
+  "cards": [
+    {
+      "q": "What is Static NAT?",
+      "a": "Static NAT creates a permanent one-to-one mapping between an inside local address and an inside global address, giving an inside host a predictable public representation on the outside network.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "In which directions does Static NAT translate?",
+      "a": "Static NAT is bidirectional: inside-to-outside traffic has its source translated (10.0.0.10 → 203.0.113.10), and outside-to-inside traffic has its destination translated (203.0.113.10 → 10.0.0.10). The mapping exists even when there is no active traffic.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Does Static NAT automatically make an inside server reachable from the outside?",
+      "a": "No. Inbound connectivity still requires the NAT router to have a route to the inside host, the outside network to reach the inside-global address, a valid return path through the NAT router, and ACL/firewall/security policies that permit the traffic. NAT changes addresses; it does not repair routing or override security policy.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Define the four Cisco NAT address terms: Inside Local, Inside Global, Outside Local, Outside Global.",
+      "a": "Inside Local is the address assigned to the inside host as represented on the inside/local network. Inside Global is the address that represents the inside host to the outside network. Outside Global is the address assigned to the outside host by its owner. Outside Local is the address that represents the outside host from the inside network's perspective.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you read the terms Inside/Outside and Local/Global in NAT terminology?",
+      "a": "Inside/Outside identifies which side of the NAT boundary the host belongs to, while Local/Global describes how that address is represented in the NAT context.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "For a normal Internet NAT setup where the outside host is not translated, what is true of Outside Local and Outside Global?",
+      "a": "Outside Local equals Outside Global, because the outside host's address is not translated.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What command creates a static one-to-one NAT mapping, and what does it translate in each direction?",
+      "a": "ip nat inside source static 10.0.0.10 203.0.113.10. Outbound, the source 10.0.0.10 is translated to 203.0.113.10; inbound, the destination 203.0.113.10 is translated to 10.0.0.10.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Does network-level static NAT translate TCP/UDP ports?",
+      "a": "No. Network-level static NAT translates only the IP address, so a packet to 10.0.0.10:443 becomes 203.0.113.10:443 with the port unchanged at 443. Port translation requires static PAT.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What do ip nat inside and ip nat outside do?",
+      "a": "They are interface commands that define the NAT boundary. Traffic is processed by NAT when it crosses an interface marked ip nat inside and an interface marked ip nat outside, e.g. ip nat inside on Gi0/0 and ip nat outside on Gi0/1.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Does creating a static NAT mapping require an ACL?",
+      "a": "No. The ip nat inside source static command alone creates the mapping. ACLs are commonly used with dynamic NAT/PAT to classify which inside traffic is translated, and can still be used independently to permit or deny traffic.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens if an inside server's replies are sent through another router instead of the NAT router?",
+      "a": "Reverse NAT may never occur correctly. The server needs a valid return path, normally a default gateway of 10.0.0.1 pointing to the NAT router's inside address, so its replies cross the NAT boundary.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What command maps one external TCP port to an internal service (port forwarding)?",
+      "a": "ip nat inside source static tcp 10.0.0.10 80 203.0.113.10 8080, which forwards traffic to 203.0.113.10:8080 to 10.0.0.10:80. This is static PAT.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How can multiple internal services share one public IP address?",
+      "a": "With multiple static PAT statements using different ports, e.g. ip nat inside source static tcp 10.0.0.10 80 203.0.113.10 8080 and ip nat inside source static tcp 10.0.0.20 443 203.0.113.10 8443, so each service is reached via a distinct public port.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the exam difference between Static NAT and Static PAT?",
+      "a": "Static NAT maps an entire IP address 1:1 (10.0.0.10 ↔ 203.0.113.10) and does not translate ports, while Static PAT maps a specific protocol/port (10.0.0.10:80 ↔ 203.0.113.10:8080). Static PAT allows a global IP to be shared and is used for port forwarding; static NAT typically gives a public server a predictable address.",
+      "tag": "Quick Review",
+      "context": "Both"
+    },
+    {
+      "q": "Compare inbound initiation for Static NAT, Dynamic NAT, and PAT.",
+      "a": "Static NAT supports externally initiated traffic because its mapping is fixed and predictable. Dynamic NAT normally cannot accept inbound traffic before a translation exists because it uses a temporary pool address. PAT requires an existing translation or an explicit static PAT to support inbound traffic.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "True or false: 'Static NAT is the only NAT that allows inbound traffic.'",
+      "a": "False. Externally initiated traffic requires a predictable translation/mapping plus appropriate routing and security, not simply being 'static NAT.' Static PAT and, with the right preconditions, other mechanisms can also support matching traffic.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What command verifies NAT translations, and what does it show?",
+      "a": "show ip nat translations. It shows the protocol, inside global, inside local, outside local, and outside global addresses and ports, and confirms active and configured translations.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Do Static NAT mappings time out when idle?",
+      "a": "No. A configured static mapping has no normal dynamic timeout and remains until the configuration is removed with no ip nat inside source static. A static translation can appear in show ip nat translations even when there is no active session.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does clear ip nat translation * remove a configured static NAT mapping?",
+      "a": "No. clear ip nat translation * clears only dynamic/active translation entries; a static mapping is removed with no ip nat inside source static 10.0.0.10 203.0.113.10.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does show ip nat translations verbose add, and which state is associated with static translations?",
+      "a": "On supported platforms it provides additional detail such as flags and timers. Static translations are associated with the static state/flag.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does show ip nat statistics report?",
+      "a": "It reports NAT interfaces, active/static/dynamic translation counts, NAT configuration, and hit/miss counters, useful for confirming NAT activity.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What command verifies the applied NAT configuration?",
+      "a": "show running-config | section ip nat, plus show running-config interface GigabitEthernet0/0 and ...0/1 to confirm ip nat inside/outside on the right interfaces.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do NAT and ACLs/firewalls differ?",
+      "a": "NAT answers 'what address should this packet use?', while ACLs/firewalls answer 'is this traffic permitted?'. NAT is not a security feature; even a correct translation can be denied by an ACL, so for a public server you must explicitly control which services are reachable.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How do NAT and routing differ?",
+      "a": "NAT changes the address representation of a packet, while routing determines where the packet should go. The NAT router must still have a route to the inside network (e.g. 10.0.0.0/24), and the server must know how to return traffic toward the NAT router.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "When internal clients access a NAT'd service by name, does Cisco NAT automatically rewrite DNS responses?",
+      "a": "No, that behavior is not universal; it depends on the IOS/IOS XE release, platform, and configuration. Enterprise designs often use split-horizon DNS so internal clients get the internal address (10.0.0.10) while external clients get the public address (203.0.113.10), avoiding hairpin-NAT dependence.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is hairpin (U-turn/NAT loopback) NAT?",
+      "a": "It occurs when an inside host accesses another inside host using that host's inside-global/public address, e.g. PC1 at 10.0.0.20 connecting to 203.0.113.10 which maps back to server 10.0.0.10. Support varies by platform/release, so verify behavior on the exact IOS/IOS XE image in a lab.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does the extendable keyword do on a static NAT statement?",
+      "a": "It allows additional static translation entries to coexist when the complete translation tuple can distinguish them, useful when multiple static translations would otherwise conflict on the same global address (e.g. different protocols/ports). It does not mean 'static NAT becomes PAT.'",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between ip nat inside source static and ip nat outside source static?",
+      "a": "inside source translates an inside host's address (Inside Local → Inside Global), the normal setup. outside source translates the outside host's address and is used for overlapping address spaces or representing external addresses internally. inside source does not mean simply 'traffic coming from inside'; it identifies the NAT address being translated.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What command debugs NAT activity, and what does its output mean?",
+      "a": "debug ip nat shows translation events such as NAT: s=10.0.0.10->203.0.113.10, where s is source, 10.0.0.10 the original address, and 203.0.113.10 the translated address. Debugging can consume significant CPU, so use it carefully on production devices and disable it with undebug all or no debug all.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Show the complete config needed for a web server at 10.0.0.10 to be reachable as 203.0.113.10.",
+      "a": "ip nat inside source static 10.0.0.10 203.0.113.10; on Gi0/0 (10.0.0.1/24) configure ip nat inside, and on Gi0/1 (198.51.100.1/24) configure ip nat outside. The server uses IP 10.0.0.10, mask 255.255.255.0, default gateway 10.0.0.1.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "In what order should you troubleshoot a failing Static NAT setup?",
+      "a": "Check interface/physical status, verify ip nat inside/outside placement, verify the static NAT config, check routing to the inside host, check the server's default gateway/return route, check ACL/firewall policies, check the NAT translation table (show ip nat translations), test the actual application/port, and use debugging only when necessary.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Summarize Static NAT in one quick-review line.",
+      "a": "Static NAT is a fixed, permanent 1:1 mapping between an inside local and inside global address that is bidirectional, requires no pool and no ACL, consumes one global address per mapping, does not translate ports, does not time out, is not a security feature, and is verified with show ip nat translations and show ip nat statistics.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "State the exam takeaway for Static NAT and Static PAT.",
+      "a": "Static NAT = permanent, predictable 1:1 address mapping; Static PAT = permanent, predictable protocol/port mapping. NAT translates addresses, routing determines where packets go, and ACLs/firewalls determine whether traffic is permitted.",
+      "tag": "Core Concept",
+      "context": "Both"
+    }
+  ]
+}

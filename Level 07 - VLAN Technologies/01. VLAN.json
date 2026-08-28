@@ -1,0 +1,226 @@
+{
+  "title": "VLAN",
+  "level": 7,
+  "levelTitle": "Level 07 - VLAN Technologies",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "01. VLAN.md",
+  "cards": [
+    {
+      "q": "What is a VLAN (Virtual Local Area Network)?",
+      "a": "A VLAN is a feature that logically divides a Layer 2 switched network into multiple broadcast domains. Devices in the same VLAN can communicate at Layer 2, while devices in different VLANs are isolated at Layer 2 and require Layer 3 routing to communicate.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "A VLAN is a Layer 2 broadcast domain, while an IP subnet is what kind of domain?",
+      "a": "An IP subnet is a Layer 3 addressing/routing domain. VLANs and subnets are related in normal designs but are not the same thing.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What benefits do VLANs provide?",
+      "a": "VLANs provide logical segmentation without separate physical switches, broadcast-domain separation, better scalability and organization, and separation of users, servers, voice, management, and other traffic.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How is an Ethernet frame received from an access port normally handled, and how are frames on a trunk identified?",
+      "a": "An Ethernet frame received from an access port is normally untagged, and the switch associates it internally with the port's configured VLAN. When multiple VLANs traverse a trunk link, 802.1Q tagging is normally used to identify the VLAN to which each frame belongs.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the size of the 802.1Q VLAN Identifier (VID)?",
+      "a": "The 802.1Q VID is 12 bits, giving 4096 possible values, of which 4094 are usable VLAN IDs (1-4094).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What do VLAN IDs 0, 4095, and 1002-1005 represent?",
+      "a": "VLAN 0 is reserved and indicates priority tagging rather than a specific VLAN. VLAN 4095 is reserved. VLAN 1002-1005 are legacy Cisco default VLANs associated with FDDI/Token Ring.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the Cisco VLAN number ranges?",
+      "a": "VLAN 1 is the default VLAN, 2-1001 is the normal VLAN range, 1002-1005 are legacy VLANs, and 1006-4094 is the extended VLAN range.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the important characteristics of VLAN 1 on Cisco switches?",
+      "a": "VLAN 1 is the default VLAN on Cisco switches. It exists by default, switch ports are assigned to VLAN 1 by default, it cannot normally be deleted, it is the default native VLAN on many Cisco configurations, and control-plane protocols may use VLAN 1 depending on the protocol/platform.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Is changing the native VLAN by itself a security control?",
+      "a": "No. Changing the native VLAN is not, by itself, a security control. Security comes from correct VLAN configuration, trunk restrictions, access controls, switch hardening, and Layer 3 policy.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What VLANs of traffic does a broadcast in VLAN 10 reach, and why?",
+      "a": "A broadcast generated in VLAN 10 is forwarded only within the VLAN 10 Layer 2 domain; it does not automatically cross into VLAN 20, VLAN 30, or VLAN 40, because each VLAN is a separate Layer 2 broadcast domain.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What type of traffic do VLANs contain at Layer 2?",
+      "a": "VLANs contain Layer 2 broadcast traffic such as ARP broadcasts, DHCP Discover broadcasts, and other Ethernet broadcasts, which reduces the size of individual broadcast domains.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between a VLAN and an IP subnet?",
+      "a": "A VLAN is a Layer 2 concept that identifies a broadcast domain and is used by switches for Layer 2 segmentation. An IP subnet is a Layer 3 concept that defines an IP addressing and routing boundary and is used by routers and Layer 3 switches.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is the normal enterprise design relationship between VLANs and IP subnets?",
+      "a": "The common enterprise design is one IP subnet per VLAN, such as VLAN 10 to 10.10.10.0/24, VLAN 20 to 10.10.20.0/24, allowing a Layer 3 gateway/SVI to provide inter-VLAN routing.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do devices in different VLANs communicate?",
+      "a": "Devices in different VLANs cannot communicate directly through normal Layer 2 switching; they require a Layer 3 device such as a router, Layer 3 switch, or firewall.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is an SVI and how is it used for inter-VLAN routing?",
+      "a": "An SVI (Switch Virtual Interface) is a logical Layer 3 interface associated with a VLAN on a Layer 3 switch. It is assigned an IP address, becomes the default gateway for hosts in that VLAN, and allows inter-VLAN routing.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the commands to create a VLAN and assign an access port to it?",
+      "a": "Create a VLAN with 'vlan 10' and 'name Users'. Assign an access port with 'interface GigabitEthernet0/1', 'switchport mode access', and 'switchport access vlan 10'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands verify VLANs and access-port configuration?",
+      "a": "Use 'show vlan brief', 'show vlan id 10', 'show interfaces GigabitEthernet0/1 switchport', and 'show interfaces trunk'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is a trunk used for, and what are common trunk connections?",
+      "a": "A trunk is used when multiple VLANs must traverse a single physical link. Common examples include switch-to-switch, switch-to-router, switch-to-firewall, and switch-to-hypervisor connections.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does 'switchport trunk allowed vlan 10,20,30' do?",
+      "a": "It restricts the trunk so it carries only the listed VLANs (10, 20, and 30), reducing unnecessary VLAN propagation and limiting the scope of potential Layer 2 problems.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the native VLAN on an 802.1Q trunk?",
+      "a": "The native VLAN is the VLAN whose traffic is normally sent untagged on an 802.1Q trunk. Both ends of the trunk should agree on the native VLAN; a mismatch can cause connectivity problems.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the best practices for native VLAN configuration?",
+      "a": "Use a dedicated/unused native VLAN where appropriate, do not use the native VLAN for normal user traffic, ensure both trunk endpoints use the same native VLAN, and explicitly control the allowed VLAN list.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Why are VLANs not treated as a complete security boundary?",
+      "a": "VLANs provide logical Layer 2 separation but a compromised host inside a VLAN can still attack other devices in that same VLAN, and inter-VLAN traffic can be routed. Additional controls such as ACLs, firewall policies, and VRFs are required for strong isolation.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is VXLAN's VNI and how does it compare to VLAN IDs?",
+      "a": "VXLAN (Virtual Extensible LAN) uses a 24-bit VNI (VXLAN Network Identifier), providing a much larger segmentation namespace than the traditional 12-bit VLAN IDs. It is used in Cisco SD-Access as part of the fabric data plane and segmentation architecture.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "A VLAN equals an IP subnet. True or false?",
+      "a": "False. A VLAN is a Layer 2 broadcast domain, while an IP subnet is a Layer 3 addressing/routing concept.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Do access ports tag frames from normal end hosts?",
+      "a": "Normally no. Frames received from normal end hosts on access ports are untagged, and the switch internally associates them with the configured access VLAN.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Are trunks untagged?",
+      "a": "Normally no. 802.1Q trunks normally use VLAN tags to identify VLAN membership; only the native VLAN is normally transmitted untagged.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does VLAN 1 carry all VLANs on a trunk?",
+      "a": "No. VLAN 1 is simply one VLAN. A trunk can carry VLAN 1 together with other allowed VLANs, but VLAN 1 does not carry the other VLANs.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does avoiding VLAN 1 provide extra security?",
+      "a": "No. VLAN 1 is the default VLAN and cannot normally be deleted on Cisco switches. Avoiding VLAN 1 for user traffic is a design practice, but VLAN 1 itself does not provide additional security.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Do VLANs 1006-4094 always require 'vlan database' configuration?",
+      "a": "No. Modern Cisco IOS/IOS XE platforms generally use normal configuration mode (e.g., 'vlan 1006' / 'name EXTENDED_VLAN'). Older Cisco platforms may have different VLAN configuration mechanisms; always consider the platform and IOS/IOS XE release.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is VLAN 0 a normal VLAN?",
+      "a": "No. VLAN ID 0 is reserved and is used for priority-tagged frames; it does not identify a normal VLAN.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is VLAN ID 4095 usable?",
+      "a": "No. VLAN ID 4095 is reserved. The usable 802.1Q VID range is 1-4094.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands verify VLAN configuration and status?",
+      "a": "'show vlan brief', 'show vlan id 10', 'show interfaces Gi0/1 switchport', 'show interfaces trunk', 'show running-config | section vlan', 'show ip interface brief', and 'show mac address-table vlan 10'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How are MAC addresses learned in relation to VLANs?",
+      "a": "MAC addresses are learned per VLAN, meaning the MAC address table is VLAN-specific.",
+      "tag": "Quick Review",
+      "context": "Both"
+    },
+    {
+      "q": "What are the key facts in the VLAN quick review?",
+      "a": "VLAN is a logical Layer 2 broadcast domain; VLAN ID is 12-bit; usable range is 1-4094; VLAN 1 is default; VLAN 0 is priority-tagged/reserved; VLAN 4095 reserved; 1002-1005 legacy; access port carries one VLAN untagged; trunk carries multiple VLANs with 802.1Q; native VLAN untagged; VLANs contain broadcasts; different VLANs need L3 routing.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the core mental shortcut for VLANs?",
+      "a": "VLAN = L2 segmentation and a broadcast boundary; Access port = ONE VLAN; Trunk = MANY VLANs; Different VLANs = ROUTER/L3 SWITCH; chain is VLAN to Broadcast Domain to Access/Trunk to 802.1Q to Inter-VLAN Routing.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What should you always verify when troubleshooting VLAN connectivity?",
+      "a": "Verify VLAN membership, trunk state, allowed VLANs, and native VLAN configuration.",
+      "tag": "Quick Review",
+      "context": "Practical"
+    }
+  ]
+}

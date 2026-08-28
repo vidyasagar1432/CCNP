@@ -1,0 +1,136 @@
+{
+  "title": "EIGRP Stub",
+  "level": 11,
+  "levelTitle": "Level 11 - EIGRP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "07. Stub.md",
+  "cards": [
+    {
+      "q": "What is an EIGRP stub router?",
+      "a": "An EIGRP stub router is an EIGRP router configured to advertise only selected types of routes and to limit how EIGRP queries propagate. It is designed for branch, spoke, and remote-site routers that should not be treated as transit paths. Benefits include limiting query scope, reducing unnecessary query propagation, helping prevent Stuck-in-Active (SIA), improving convergence scalability, and clearly identifying an edge router's routing role.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What route options can an EIGRP stub advertise?",
+      "a": "connected (connected routes), static (static routes), summary (summary routes), redistributed (redistributed routes), receive-only (receive routes but advertise none), and leak-map (permit selected routes to be advertised under specific configurations). Exact options depend on IOS/IOS XE version and configuration mode.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the default behavior of eigrp stub alone?",
+      "a": "Plain eigrp stub is equivalent to eigrp stub connected summary, so by default the stub advertises connected routes and summary routes. It does not automatically advertise all routes learned through EIGRP.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "When is eigrp stub connected used?",
+      "a": "It advertises connected routes, which is useful when the router needs to advertise its directly connected networks to the hub.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "When is eigrp stub static used?",
+      "a": "It advertises static routes, which is useful when a branch router has static routes that need to be advertised through EIGRP.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does the summary option do for an EIGRP stub?",
+      "a": "It advertises summary routes, useful when the router is advertising summarized prefixes. A summary route can include a default route when a default summary route is actually configured.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "When should redistributed be added to an EIGRP stub?",
+      "a": "It allows redistributed routes to be advertised by the stub, useful when the branch router has routes learned from another routing source that are intentionally redistributed into EIGRP, for example eigrp stub connected static redistributed.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does eigrp stub receive-only do?",
+      "a": "It is a special mode where the router can receive EIGRP routes but does not advertise any EIGRP routes. It is useful when a router should participate in receiving EIGRP information but advertise nothing back.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does an EIGRP stub limit query propagation?",
+      "a": "When the hub loses a route and has no feasible successor, it knows the stub is an edge router with a limited set of advertised routes, so it does not need to query the stub for destinations the stub cannot advertise. This bounds the query domain and prevents active computations from spreading across a large part of the topology.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Does EIGRP stub eliminate every SIA condition?",
+      "a": "No. EIGRP stub limits query propagation and reduces the scope of active computations, which significantly improves scalability and reduces SIA risk, but it does not magically eliminate every possible SIA condition because SIA can result from failures elsewhere in the topology.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does EIGRP stub fit a hub-and-spoke design?",
+      "a": "Spokes configured as stubs advertise their own permitted routes such as connected LANs and static branch routes to the hub. The hub learns those routes, but the spokes are not intended to advertise routes learned from the hub back as transit routes (for example traffic follows STUB A → HUB → STUB B).",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Does EIGRP stub mean the router advertises nothing?",
+      "a": "No. A normal stub advertises routes according to its configured options, for example eigrp stub connected static advertises connected and static routes but not ordinary EIGRP-learned routes. The only special case is eigrp stub receive-only, which advertises no EIGRP routes.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is an EIGRP stub configured in named mode?",
+      "a": "Under the address-family topology base, for example router eigrp CAMPUS → address-family ipv4 unicast autonomous-system 100 → topology base → eigrp stub connected static.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Where is the EIGRP stub command configured in classic mode?",
+      "a": "Under the EIGRP router configuration, for example router eigrp 100 followed by eigrp stub connected static.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the common EIGRP stub configurations and their usages?",
+      "a": "Default eigrp stub equals connected + summary. eigrp stub connected static is a typical branch configuration. eigrp stub connected static redistributed is used when the branch intentionally advertises redistributed routes. eigrp stub receive-only receives EIGRP routes but advertises none.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Can an EIGRP stub learn routes from its neighbors?",
+      "a": "Yes. A stub router can receive routes such as 10.0.0.0/8, 172.16.0.0/16, and 192.168.0.0/16 from the hub. Its stub configuration controls what it advertises, not whether it can receive EIGRP routes.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How should the stub and transit routing relationship be worded?",
+      "a": "Do not say 'stub blocks all transit traffic.' The accurate wording is: stub controls EIGRP route advertisement and query propagation so the router is not treated as a transit source for routes it should not provide.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do you identify an EIGRP stub peer and verify EIGRP operation?",
+      "a": "show ip eigrp neighbors detail can identify a neighbor as a stub peer. show ip eigrp topology examines routes, successors, feasible successors, and topology state. In named mode, use address-family commands such as show eigrp address-family ipv4 neighbors and show eigrp address-family ipv4 topology.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you troubleshoot missing routes on an EIGRP stub?",
+      "a": "Spoke advertises no expected routes: check the eigrp stub options. Connected routes missing: add connected. Static routes missing: add static. Redistributed routes missing: add redistributed. Stub advertises nothing: receive-only is configured. Queries propagating farther than expected: the edge router is not configured as a stub.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Where should EIGRP stub be placed, and where should it be avoided?",
+      "a": "Stub is intended for branch, spoke, remote-office, and stub-LAN routers. Avoid configuring it on a router that is intentionally a major transit point in the EIGRP topology.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the core formula for EIGRP stub?",
+      "a": "EIGRP Stub = Edge Router + Controlled Route Advertisement + Limited Query Propagation + Reduced SIA Risk. The default command is eigrp stub, which behaves as connected + summary; the special mode eigrp stub receive-only receives routes and advertises nothing.",
+      "tag": "Core Concept",
+      "context": "Both"
+    }
+  ]
+}

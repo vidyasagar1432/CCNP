@@ -1,0 +1,154 @@
+{
+  "title": "MAC Learning",
+  "level": 4,
+  "levelTitle": "Level 04 - Ethernet & Switching",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "04. MAC Learning.md",
+  "cards": [
+    {
+      "q": "What is MAC learning?",
+      "a": "MAC learning is the process by which a switch dynamically builds its MAC address table (CAM table) by examining the Source MAC address of incoming Ethernet frames and associating it with the VLAN and ingress port where the frame was received.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the fundamental switching rule for MAC learning?",
+      "a": "Learn from the Source MAC; forward using the Destination MAC. MAC learning lets the switch replace unnecessary flooding with selective forwarding.",
+      "tag": "Overview",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens when a source MAC address arrives on a new port?",
+      "a": "The switch updates the MAC table to reflect the new location, e.g. AAAA.AAAA.AAAA moves from Gi0/1 to Gi0/2. Repeated movement is commonly described as MAC movement or MAC flapping.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Why does a switch not require manual configuration of every host MAC?",
+      "a": "The switch dynamically learns by observing traffic: it reads the source MAC and ingress port of each frame. Initially, before a destination is learned, traffic may be flooded; once learned, the switch performs selective unicast forwarding (first learn, then selectively forward).",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is unknown-unicast flooding and what causes it?",
+      "a": "When the destination MAC is not present in the MAC table, the switch treats the frame as an unknown unicast and floods it out other eligible ports in the same VLAN except the ingress port. Once the destination is learned, the switch uses selective forwarding.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Is unknown-unicast flooding the same as broadcast?",
+      "a": "No. Unknown-unicast flooding is not the same as broadcast: the destination MAC remains a unicast MAC; the switch simply does not yet know which port leads to it.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does MAC table aging work?",
+      "a": "Dynamic MAC entries have an aging timer; a commonly encountered Cisco IOS default is 300 seconds (5 minutes), though it varies by platform. Receiving traffic from the MAC refreshes its state; when the timer expires inactive entries are removed and can be relearned.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do static MAC entries differ from dynamic ones?",
+      "a": "Dynamic entries are learned automatically and age out. Static entries are manually configured with mac address-table static and generally do not age out through the normal dynamic MAC aging process.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is MAC learning said to occur within a VLAN context?",
+      "a": "The switch learns MAC + VLAN, not MAC alone. The same MAC can legitimately appear in different VLANs on different ports without indicating a duplicate device, because each VLAN is a separate Layer 2 broadcast domain.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "In which VLAN does a switch learn a MAC on an access port?",
+      "a": "On an access port (switchport mode access, switchport access vlan 10), untagged frames are learned in the configured access VLAN, yielding Source MAC + VLAN 10 -> Gi0/1.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does a switch learn MACs on a trunk port?",
+      "a": "For a tagged 802.1Q frame, the VLAN tag determines the VLAN context, so a source MAC received in VLAN 20 is learned in VLAN 20. An untagged frame received on a trunk is associated with the configured native VLAN.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What VLAN is an untagged frame on a trunk associated with?",
+      "a": "The configured native VLAN. Do not say an untagged frame on a trunk is learned in no VLAN; it is associated with the trunk's native VLAN.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does STP affect MAC learning?",
+      "a": "Spanning Tree determines which Layer 2 paths actively forward traffic. A port in an STP discarding/blocking (non-forwarding) state does not normally learn source MAC addresses from user data frames.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is MAC flapping and what are common causes?",
+      "a": "MAC flapping is repeated MAC movement, where the same MAC is learned on different ports in sequence. Causes include Layer 2 loops, incorrect cabling, redundant paths, STP topology changes, VM mobility, hypervisor networking, duplicate MACs, HSRP/VRRP virtual MACs, and misconfigured switches.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Does MAC flapping always mean a rogue switch?",
+      "a": "No. MAC movement does not automatically mean a rogue switch; always investigate the topology and connected devices first.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens when the MAC table is full?",
+      "a": "If the switch cannot learn a new destination MAC because its finite hardware table is full, that MAC remains unknown and traffic destined for it is subject to unknown-unicast flooding. CAM capacity is platform-dependent, not a universal size.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do MAC learning and ARP relate when troubleshooting?",
+      "a": "ARP maps IPv4 address to MAC, and the MAC table maps MAC + VLAN to switch port. Combining both, you can trace an IPv4 address to a MAC address and then to the switch port it is connected to.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does Port Security build on normal MAC learning?",
+      "a": "Port Security adds a policy on top of MAC learning, restricting which MACs are allowed on a port using static secure, dynamic secure, or sticky secure MACs, maximum MAC limits, and violation modes (shutdown, restrict, protect).",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which commands display MAC learning information?",
+      "a": "show mac address-table, show mac address-table vlan 10, show mac address-table address AAAA.AAAA.AAAA, show mac address-table dynamic, show mac address-table static, show mac address-table aging-time, and show mac address-table count.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you configure MAC aging and a static MAC entry?",
+      "a": "mac address-table aging-time 300 sets the aging timer and mac address-table static AAAA.AAAA.AAAA vlan 10 interface GigabitEthernet0/1 creates a static entry. Exact commands/options can vary between IOS, IOS XE, and switch platforms.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the troubleshooting workflow if you know the host's IPv4 address?",
+      "a": "Check show arp to map IPv4 to MAC, then show mac address-table address <MAC> to find the VLAN and switch port, then check the interface and trace the neighbor/uplink.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What steps diagnose suspected MAC flapping?",
+      "a": "Identify the MAC, check where it is currently learned, look for MAC-move/flapping messages, identify connected devices, trace the uplinks, check STP topology, check for Layer 2 loops, and check for duplicate or virtual MAC addresses.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which facts belong in the MAC learning quick review?",
+      "a": "Learning = Source MAC -> VLAN + ingress port; Forwarding = Destination MAC -> CAM lookup; known destination = selective forwarding, unknown = flooding; dynamic entries age out (common Cisco default 300 seconds); static entries normally do not dynamically age; learning is per VLAN; tagged trunk traffic learns in its tag VLAN, untagged trunk traffic in the native VLAN; STP discarding ports do not learn; ARP = IPv4 -> MAC; MAC table = MAC + VLAN -> port.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the one-minute mental model of MAC learning?",
+      "a": "On every frame the switch learns Source MAC + VLAN + ingress port into the CAM. To forward, it looks up Destination MAC + VLAN; known -> forward to the learned port, unknown -> flood within the VLAN. Troubleshooting chain: IPv4 -> ARP -> MAC -> MAC/CAM table -> switch port.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "title": "Recovery",
+  "level": 28,
+  "levelTitle": "Level 28 - Cisco IOS and IOS XE",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "08. Recovery.md",
+  "cards": [
+    {
+      "q": "What does recovery cover on IOS and IOS XE?",
+      "a": "Regaining access after lost passwords, corrupt images, or failed boots. Methods include password recovery using the config-register trick, ROMMON for image recovery, and emergency access on modern IOS XE.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What do the config-register values 0x2102, 0x2142, and 0x2100 mean?",
+      "a": "0x2102 is normal boot (with ROM monitor available), 0x2142 ignores the startup-config and is used for recovery, and 0x2100 boots directly to ROMMON.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the steps for IOS password recovery?",
+      "a": "Power cycle or send the break sequence, set the register to 0x2142, boot, copy startup-config running-config to restore the config, change the password, reset config-register 0x2102, save, and reload.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is ROMMON and when do you use it?",
+      "a": "ROMMON (ROM monitor) is a minimal bootloader environment reached by the break sequence or config-register 0x2100. It allows booting without an image using commands such as boot, dir, and set, for example boot flash:... .",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How can you recover a corrupt or missing IOS image?",
+      "a": "From ROMMON, boot a flash image, use a USB device image, load slowly via Xmodem over the console, or copy from TFTP in ROMMON; on IOS XE use rommon with xmodem or USB.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is emergency access on IOS XE and which command enables it?",
+      "a": "Emergency access is the modern IOS XE way to regain access when locked out. platform console virtual enables the virtual console so you can set a security password and exit back to normal operation.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "After password recovery, why must you reset the config-register to 0x2102 before reloading?",
+      "a": "Because 0x2142 ignores the startup-config; leaving it set means the device will keep skipping the saved config on every future boot instead of loading it normally.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "You cannot reach ROMMON with the break sequence. What is the likely cause?",
+      "a": "The break signal was missed due to timing. Send the break sequence during the boot window, or verify console connection and timing; ROMMON access also comes from config-register 0x2100.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    }
+  ]
+}

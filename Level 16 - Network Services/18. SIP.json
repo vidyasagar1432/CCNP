@@ -1,0 +1,25 @@
+{
+  "title": "SIP (Session Initiation Protocol)",
+  "level": 16,
+  "levelTitle": "Level 16 - Network Services",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "18. SIP.md",
+  "cards": [
+    { "q": "What is SIP and which ports does it use?", "a": "SIP (Session Initiation Protocol) is the signaling protocol for VoIP/UC that sets up, tears down, and locates sessions; it runs on TCP/UDP 5060 and on 5061 when transported over TLS, and it carries no voice media itself.", "tag": "Overview", "context": "Both" },
+    { "q": "What is the essential SIP and RTP pair?", "a": "SIP handles signaling on 5060/5061 and RTP carries the media on even UDP ports from 16384 up; SIP sets up the call and RTP carries the voice, and both are needed for VoIP.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What are the main SIP methods?", "a": "INVITE establishes a session, ACK confirms the INVITE, BYE ends the session, REGISTER registers the user with a registrar, OPTIONS performs a capability query, and CANCEL aborts a pending setup.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What are the SIP entities in the SIP triangle?", "a": "UAC (caller), UAS (called party or server), Registrar (records addresses), Proxy (routes signaling), and Redirect (returns an alternative path); a SIP UA can be both UAC and UAS.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How is a SIP address formatted?", "a": "As a SIP URI like sip:bob@corp.example, used in the To, From, and Contact headers.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What is the role of SDP in a SIP call?", "a": "SDP is carried in the INVITE body and negotiates the codecs plus the media IP addresses and ports used for RTP.", "tag": "Core Concept", "context": "Both" },
+    { "q": "How does a basic SIP call flow proceed?", "a": "UAC sends INVITE, the UAS responds with 100 trying and 180 ringing, then 200 OK with SDP, the UAC confirms with ACK, media flows directly between endpoints, BYE ends the call, and 200 OK acknowledges it.", "tag": "Core Concept", "context": "Both" },
+    { "q": "Does RTP flow through the SIP proxy after call setup?", "a": "No. After the ACK, media (RTP) flows end-to-end directly between the endpoints, not through the SIP proxy.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "Why does NAT cause one-way audio in VoIP?", "a": "NAT usually translates the signaling correctly but breaks the media path, because RTP behind NAT gets only partially translated or the SDP still references unreachable addresses, so signaling works while audio is one-way.", "tag": "Core Concept", "context": "Both" },
+    { "q": "What damage can a NAT ALG cause for SIP?", "a": "A NAT ALG can rewrite the SDP media addresses and ports incorrectly, breaking the RTP session; fixes include media-address or static RTP port maps and proper ALG/inspection configuration.", "tag": "Core Concept", "context": "Both" },
+    { "q": "What are the SIP security mechanisms?", "a": "Digest authentication over SIP, and SIP over TLS on port 5061 with certificates for confidentiality; treat SIP signaling as an attack surface that needs protection.", "tag": "Core Concept", "context": "Both" },
+    { "q": "How do you troubleshoot common SIP failures?", "a": "No call setup usually means TCP/UDP 5060 is blocked (check the ACL), one-way audio points to RTP/NAT problems (check SDP and media ports), registration failures mean the registrar is unreachable (check status), dropped calls suggest BYE handling (check call legs), and an auth loop indicates a digest mismatch (check credentials).", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What Cisco commands help verify SIP?", "a": "show sip-ua calls, show sip-ua status, debug ccsip messages, and show udp to confirm the local process is listening on 5060.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What are the memorizable SIP exam traps?", "a": "SIP is signaling on 5060/5061 and RTP is media; the methods are HTTP-like (INVITE, ACK, BYE, REGISTER); audio flows directly between endpoints after ACK; NAT breaks media rather than signaling producing one-way audio; SIP over TLS uses 5061.", "tag": "Quick Review", "context": "Exam" },
+    { "q": "SIP carries the voice payload. Is that correct?", "a": "No. SIP is the signaling protocol and carries no voice; RTP carries the media payload, with SIP setting up the session and SDP negotiating the codecs and media ports.", "tag": "Exam Trap", "context": "Exam" }
+  ]
+}

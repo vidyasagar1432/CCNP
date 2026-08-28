@@ -1,0 +1,64 @@
+{
+  "title": "Configuration Backup",
+  "level": 28,
+  "levelTitle": "Level 28 - Cisco IOS and IOS XE",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "07. Configuration Backup.md",
+  "cards": [
+    {
+      "q": "What is configuration backup?",
+      "a": "Copying the running or startup config to external storage (TFTP, SCP, FTP, or USB) or using the archive feature, and restoring it later. A backup is only useful if you can restore it.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What should you back up for disaster recovery?",
+      "a": "The running-config (system:running-config) and the startup-config (nvram:startup-config), plus the IOS image stored on flash; the archive feature keeps automatic snapshots.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands copy the running-config to an external target?",
+      "a": "copy running-config tftp:, copy running-config scp:, copy running-config ftp:, copy running-config usb0:, or copy run flash:config.bak for a local flash copy.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does the archive feature provide versioned backups?",
+      "a": "archive enters archive mode; path sets the destination (for example tftp://...), write-memory forces an auto-save, maximum 14 keeps 14 versions, and show archive lists the saved snapshots.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do you restore a config from a server, from startup-config, or from an archive?",
+      "a": "copy tftp: running-config restores from a server, copy start run restores the saved config, configure replace file: applies an archived config, and copy flash: running-config restores a flash copy.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How is archive version management controlled?",
+      "a": "maximum sets how many versions are kept, archives are numbered with timestamps in the names, and show archive config differences shows changes between configurations.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the best practices for configuration backup?",
+      "a": "Schedule backups with automation, keep copies off-box so they survive device loss, verify backups by comparing hashes, and document the restore steps.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Why is copy running-config startup-config not an off-box backup?",
+      "a": "It writes the config only to NVRAM on the same device, so it survives a reload but not device loss or hardware failure. Real disaster recovery requires copying the config off the device.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "A backup copy to a server fails. What do you check first?",
+      "a": "Reachability to the target, for example ping the TFTP or SCP server, plus free space on the destination and the correct file path.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    }
+  ]
+}

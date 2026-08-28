@@ -1,0 +1,184 @@
+{
+  "title": "EIGRP DUAL",
+  "level": 11,
+  "levelTitle": "Level 11 - EIGRP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "01. DUAL.md",
+  "cards": [
+    {
+      "q": "What is DUAL in EIGRP?",
+      "a": "DUAL (Diffusing Update Algorithm) is the algorithm EIGRP uses to select loop-free paths and perform fast convergence.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How is EIGRP technically classified as a routing protocol?",
+      "a": "EIGRP is an advanced distance-vector routing protocol. It exchanges routing information with neighbors and maintains a topology table with multiple paths, but it does not maintain a link-state database and does not run OSPF's SPF algorithm.",
+      "tag": "Overview",
+      "context": "Exam"
+    },
+    {
+      "q": "What are EIGRP's three tables and their purposes?",
+      "a": "Neighbor table: directly connected EIGRP neighbors and adjacency information. Topology table: EIGRP-learned routes including paths, metrics, and successor/FS information. Routing table: the best EIGRP paths installed for packet forwarding.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which EIGRP table does DUAL operate on?",
+      "a": "DUAL operates using the EIGRP topology table. The routing table contains only the best paths selected by the routing process, not all EIGRP paths learned from neighbors.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a successor in EIGRP?",
+      "a": "The successor is the neighbor providing the best path (by EIGRP composite metric) to a destination; its route is installed in the routing table.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is Feasible Distance (FD)?",
+      "a": "FD is the total EIGRP metric from the local router to the destination through the successor, roughly local metric to the neighbor plus the neighbor's reported distance.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is Reported Distance (RD)?",
+      "a": "RD is the metric a neighboring EIGRP router reports for reaching the destination. It is also called Advertised Distance (AD).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is EIGRP's feasibility condition?",
+      "a": "RD(neighbor) < FD(current successor), with strictly less than. RD < FD makes the neighbor a feasible successor; RD = FD or RD > FD does not.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why does the feasibility condition guarantee a loop-free backup path?",
+      "a": "If B reports RD(B to X) < FD(A to X), B's own distance to X is already smaller than A's current feasible distance, so B cannot loop back through A and is a safe loop-free feasible successor.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Memory trick to distinguish FD and RD?",
+      "a": "FD = Full Distance from ME to the destination through the successor; RD = Reported Distance from the NEIGHBOR to the destination.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens when the successor fails and a valid feasible successor exists?",
+      "a": "The FS is promoted to successor and the route is updated, with no diffusing computation and no queries for that destination. This is a major reason EIGRP converges very quickly.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What happens when the successor fails and no feasible successor exists?",
+      "a": "EIGRP does not install an arbitrary backup route. The route becomes Active, EIGRP sends queries to neighbors, receives replies, completes a diffusing computation, and selects a new route. Queries can propagate through multiple routers, increasing convergence time.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What do Passive and Active mean for an EIGRP route?",
+      "a": "Passive means the route is stable and EIGRP is not performing a diffusing computation. Active means DUAL is searching for a new path after the successor was lost with no FS; it does not mean the interface is down.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is Stuck-in-Active (SIA) in EIGRP?",
+      "a": "A route becomes SIA when EIGRP does not receive the required query responses within the expected time. Causes include unreachable neighbors, excessive query propagation, large query domains, router overload, and network instability. Check with show ip eigrp topology active.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Neighbor A gives total metric 20 (RD 10) and neighbor B total metric 25 (RD 15). Who is successor and who is feasible successor?",
+      "a": "A is the successor with FD 20. B is a feasible successor because its RD of 15 is strictly less than FD 20. If A fails, B becomes successor with no diffusing computation.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are EIGRP's default K-values and which metric components do they select?",
+      "a": "Default K-values are K1 = 1, K2 = 0, K3 = 1, K4 = 0, K5 = 0. By default the EIGRP metric primarily uses bandwidth (K1) and delay (K3).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How are EIGRP queries and replies transported?",
+      "a": "Queries and replies are reliably transported using EIGRP's Reliable Transport Protocol (RTP).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What command shows the EIGRP topology table, and which variant shows all paths including non-feasible successors?",
+      "a": "show ip eigrp topology displays topology information including successor and metric data. show ip eigrp topology all-links shows additional paths, including those that are not currently feasible successors.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What command shows EIGRP routes that are Active (undergoing a diffusing computation)?",
+      "a": "show ip eigrp topology active.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands show EIGRP neighbors and EIGRP packet activity?",
+      "a": "show ip eigrp neighbors displays neighbor relationships and adjacency information. show ip eigrp traffic examines EIGRP packet activity, including queries and replies.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What command shows the EIGRP routes installed in the routing table?",
+      "a": "show ip route eigrp.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Walk through EIGRP's key DUAL relationship chain.",
+      "a": "Neighbor reports RD → local router calculates the total path metric → best path becomes Successor → the successor's metric becomes FD → other paths are tested: RD < FD means FS, otherwise not FS.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Summarize EIGRP DUAL's decision process in one line.",
+      "a": "Pick the best path as successor; if it fails and a feasible successor (RD < FD) exists, promote it with no diffusing computation; otherwise the route goes Active, queries are sent, and a diffusing computation selects a new path.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Exam trap: what is the difference between FD and RD?",
+      "a": "FD is your total metric to the destination through the successor; RD is the neighbor's reported metric to the destination. Do not swap them: FD is ours, RD is the neighbor's.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is the path with the second-lowest total metric automatically a feasible successor?",
+      "a": "No. A path is only a feasible successor if its RD is strictly less than FD, regardless of its total metric.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does DUAL require every EIGRP router to possess a complete topology map of the entire network?",
+      "a": "No. EIGRP maintains topology information learned from neighbors, but DUAL does not require every router to have a complete topology map of the network.",
+      "tag": "Exam Trap",
+      "context": "Interview"
+    },
+    {
+      "q": "Is querying neighbors the normal way EIGRP converges after a successor failure?",
+      "a": "No. The preferred fast-convergence path is promoting an existing feasible successor when the successor fails; queries are required only when no feasible successor is available.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "In EIGRP troubleshooting, what causes 'no feasible successor', 'slow convergence', and a route stuck Active?",
+      "a": "No FS: no alternate path satisfies RD < FD. Slow convergence: no FS, so queries are required. Route stuck Active: required query replies are not received. Check show ip eigrp topology active for routes in Active state.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "In the EIGRP symptom table, what do 'unexpected successor' and 'FS not selected' indicate?",
+      "a": "Unexpected successor: another path has a better EIGRP metric. FS not selected: the candidate's RD >= FD. Compare RD with FD using show ip eigrp topology.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    }
+  ]
+}

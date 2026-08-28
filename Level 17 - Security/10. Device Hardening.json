@@ -1,0 +1,154 @@
+{
+  "title": "Device Hardening",
+  "level": 17,
+  "levelTitle": "Level 17 - Security",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "10. Device Hardening.md",
+  "cards": [
+    {
+      "q": "What is device hardening?",
+      "a": "Device hardening is the process of reducing a network device's attack surface and protecting its management and control functions, e.g., AAA, strong hashing, SSH-only management, login brute-force protection, and disabling unnecessary services/interfaces.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Which credential command should be used instead of 'enable password'?",
+      "a": "'enable secret', which stores the enable credential using a cryptographic hash rather than the legacy clear-text-style mechanism.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the Cisco password hash types 0, 5, 7, 8, and 9?",
+      "a": "Type 0 is clear text (weak); type 5 is MD5-based (legacy/weak); type 7 is reversible obfuscation (weak); type 8 uses PBKDF2-SHA-256 (strong); type 9 uses scrypt (stronger). Prefer type 8/9 when supported.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Is 'service password-encryption' strong encryption?",
+      "a": "No. It provides type 7 reversible obfuscation for certain legacy plaintext passwords and does not replace 'secret'.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between type 8 and type 9 password hashes?",
+      "a": "Type 8 uses PBKDF2-SHA-256; type 9 uses scrypt.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the purpose of AAA in device hardening?",
+      "a": "AAA (authentication, authorization, accounting) is a core device-hardening mechanism providing centralized authentication and control, typically with TACACS+ for admin access, RADIUS where appropriate, and local users as fallback.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What commands are needed to configure SSH?",
+      "a": "Configure hostname, ip domain-name, a local username, 'crypto key generate rsa modulus 2048', and 'ip ssh version 2'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What command restricts VTY lines to SSH only?",
+      "a": "'transport input ssh' under the VTY lines.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is SSH-only management combined with a management ACL on VTY lines?",
+      "a": "Use 'transport input ssh' (prevents Telnet) plus 'access-class MGMT in' (limits source addresses) plus 'login local' and 'exec-timeout 5 0'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does 'login block-for 120 attempts 3 within 60' do?",
+      "a": "3 failed login attempts within 60 seconds cause login access to be blocked for 120 seconds.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does 'login quiet-mode access-class MGMT' do?",
+      "a": "During a login quiet period it restricts access to the source addresses permitted by the ACL, controlling access during the quiet period.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What console line hardening settings are recommended?",
+      "a": "exec-timeout 5 0 (disconnect idle sessions), logging synchronous, and 'login local' if local console authentication is required.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How should an unused AUX line be hardened?",
+      "a": "With 'line aux 0', 'transport input none', 'no exec', and 'exec-timeout 0 1' as available; do not leave an unnecessary AUX access path enabled.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What does 'no ip source-route' do?",
+      "a": "It disables IP source routing, which otherwise allows the sender to influence the path an IP packet takes.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands disable HTTP and HTTPS management?",
+      "a": "'no ip http server' disables HTTP; 'no ip http secure-server' disables HTTPS separately.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What legacy services should be disabled when unused?",
+      "a": "TCP small servers (no service tcp-small-servers), UDP small servers (no service udp-small-servers), and PAD (no service pad).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why should unused physical interfaces be shut down?",
+      "a": "To prevent an unused physical port from becoming an unintended entry point; combine with access-port security controls like port security, BPDU Guard, DHCP Snooping, DAI, and IPSG.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which SNMP version is preferred for secure monitoring?",
+      "a": "SNMPv3, because it supports authentication and privacy/security features; restrict SNMP sources with a management ACL.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why are logging and time synchronization important for security?",
+      "a": "Security events are much more useful with accurate timestamps, so enable 'service timestamps log datetime msec', configure NTP (authenticated where required), and use centralized syslog where appropriate.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the purpose of a security banner, and does it prevent attacks?",
+      "a": "A banner (banner motd) provides a legal/security warning; it does not technically prevent an attack but is commonly part of an organizational security baseline.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does 'exec-timeout 5 0' mean?",
+      "a": "5 minutes and 0 seconds; it disconnects idle interactive sessions.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Is a VTY 'access-class' the same as an interface traffic-filtering ACL?",
+      "a": "No. A VTY access-class controls management access to the line, not normal interface data-plane traffic filtering.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What verification commands are used for device hardening?",
+      "a": "show running-config | section aaa, show ip ssh, show crypto key mypubkey rsa, show login, show line, show ip http server status, show logging, show ntp status, and show ip interface brief.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "If Telnet still works after hardening, what is the likely cause and fix?",
+      "a": "The VTY allows Telnet; fix by setting 'transport input ssh'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    }
+  ]
+}

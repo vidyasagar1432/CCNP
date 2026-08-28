@@ -1,0 +1,94 @@
+{
+  "title": "PIM Sparse Mode (PIM-SM)",
+  "level": 19,
+  "levelTitle": "Level 19 - Multicast",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "03. PIM Sparse.md",
+  "cards": [
+    {
+      "q": "What is PIM-SM and why is it the production default?",
+      "a": "PIM-SM (Sparse Mode) is the production default for IP multicast. It assumes receivers are sparse and uses a pull model: nobody receives traffic until they explicitly join, and joins flow through a Rendezvous Point (RP) that builds a shared (*,G) tree, which may later switch to a source-based (S,G) SPT.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Walk through the PIM-SM pull model sequence.",
+      "a": "A receiver sends an IGMP report; the DR joins (*,G) toward the RP so a shared tree is built; the source registers to the RP; then the last-hop router performs the SPT switchover. Traffic flows only to those who asked.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the roles of the RP, DR, FHR, and LHR in PIM-SM?",
+      "a": "The RP is the core of the shared tree where sources register and receivers join; the DR is the first-hop router for the source or last-hop for the receiver; the FHR is the source's DR and the LHR is the receiver's DR.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the two PIM-SM tree types?",
+      "a": "The shared tree (*,G) via the RP is used initially, and the shortest-path tree (S,G) goes directly from the source after the SPT switchover.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does a source register with the RP?",
+      "a": "The source sends multicast to the FHR, which sends a register message that encapsulates the multicast packet in unicast to the RP; the RP answers with a register-stop and then forwards traffic down the shared tree.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does ip pim spt-threshold 0 do, and what is the default?",
+      "a": "It makes the last-hop router switch immediately to the (S,G) shortest-path tree; the default is 0 kbps, so switchover is immediate by default and yields the shortest path with best latency.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands enable PIM-SM with a static RP?",
+      "a": "Globally ip multicast-routing and ip pim rp-address <RP-IP>; per interface use ip pim sparse-mode.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How can the static RP mapping be replaced?",
+      "a": "Auto-RP or BSR provide dynamic group-to-RP mapping, removing the need for a static ip pim rp-address.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which commands verify PIM-SM operation?",
+      "a": "show ip mroute, show ip pim rp mapping, show ip pim interface, and show ip pim neighbor; debug ip pim for diagnosis.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "No multicast traffic and registering is failing in PIM-SM; where do you look?",
+      "a": "Check the RP mapping and reachability with show ip pim rp mapping and ping the RP, and use debug ip pim to trace FHR-to-RP register failures.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Traffic stays on the shared tree only and never switches to the SPT; why?",
+      "a": "The spt-threshold is preventing (S,G) switchover; check show ip mroute and the ip pim spt-threshold setting.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "PIM-SM shows an RP mismatch between static and dynamic mapping; what do you verify?",
+      "a": "That the group-to-RP mapping is consistent; verify with show ip pim rp mapping.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Can PIM-SM operate without an RP?",
+      "a": "No. PIM-SM requires an RP for the shared tree and the register process; without it the multicast tree cannot be built.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the quick review summary for PIM-SM?",
+      "a": "Pull/join model, an RP is required, shared tree (*,G) then SPT (S,G), register is unicast to the RP, threshold 0 means immediate switchover, it is the default mode, and config is rp-address plus ip pim sparse-mode.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

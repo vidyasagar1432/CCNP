@@ -1,0 +1,88 @@
+{
+  "title": "Multicast (IPv6)",
+  "level": 6,
+  "levelTitle": "Level 06 - IPv6",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "06. Multicast.md",
+  "cards": [
+    {
+      "q": "What is IPv6 multicast?",
+      "a": "IPv6 multicast uses the ff00::/8 prefix and is richer than IPv4 multicast because flags and scopes are embedded in the address. It replaces broadcast entirely: any-to-any neighbor operations and the all-nodes group are multicast groups.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the format of an IPv6 multicast address?",
+      "a": "ff followed by flag bits (T, P, R and others), a 4-bit scope, and a 112-bit group ID. T=0 marks a well-known permanent group.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the IPv6 multicast scope values?",
+      "a": "1 interface-local, 2 link-local, 5 site-local, 8 organization-local, E global, and F reserved. Examples are ff01::10, ff02::1, ff05::2, ff08::, and ff0e::.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What do the well-known IPv6 multicast groups map to?",
+      "a": "ff02::1 all nodes, ff02::2 all routers, ff02::5 OSPFv3 all-SPF routers, ff02::6 OSPFv3 DR/BDR, ff02::A EIGRP routers, ff02::1:2 all DHCPv6, ff02::1:3 LLMNR, ff02::16 MLDv2, and ff02::FB mDNS.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is MLD and how is it used?",
+      "a": "Multicast Listener Discovery (MLD) is IPv6's equivalent of IGMP: MLDv1 behaves like IGMPv2 and MLDv2 adds source filtering and supports SSM with (S,G). Routers use it to learn who wants a group, and switches use MLD snooping to forward group traffic only to interested ports.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does IPv6 multicast replace broadcast?",
+      "a": "IPv6 has no broadcast address. Neighbor Discovery uses solicited-node multicast ff02::1:ff00:0/104, DHCPv6 messages use ff02::1:2, and link-local multicast ff02 with TTL=1 is scoped to the link and never routed.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do you enable IPv6 multicast and PIM on Cisco IOS?",
+      "a": "On the interface use ipv6 multicast routing and ipv6 mld version 2, define ipv6 router pim, then ipv6 pim sparse-mode on the interface. Verify with show ipv6 mroute and show ipv6 mld groups.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What do the ff02 and ff05 scopes mean for routing?",
+      "a": "The scope is embedded in the address and determines the routing boundary: ff02 is link-local and never routed, while ff05 is site-local and routed within the site.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does IPv6 have a broadcast address?",
+      "a": "No. Whenever asked about IPv6 broadcast, the correct answer is that multicast and Neighbor Discovery replace it.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is ff02::1 a broadcast address?",
+      "a": "No. ff02::1 is the all-nodes multicast group that takes over the role of IPv4 broadcast, but it is a multicast group, not a broadcast address.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the IGMP analog in IPv6 and how is SSM enabled?",
+      "a": "MLD (Multicast Listener Discovery) is the IGMP analog; MLDv2 enables Source-Specific Multicast using (S,G) source filtering.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the solicited-node multicast prefix and what is it used for?",
+      "a": "ff02::1:ff00:0/104, used by Neighbor Discovery to target a single neighbor; calculating the solicited-node address is a favorite exam problem.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which multicast groups do OSPFv3 and EIGRP use?",
+      "a": "OSPFv3 uses ff02::5 (all-SPF routers) and ff02::6 (DR/BDR), while EIGRP for IPv6 uses ff02::A; the hex numbering such as ::9 versus ::A often appears in protocol questions.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "title": "SD-Access",
+  "level": 24,
+  "levelTitle": "Level 24 - SDN & Automation",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "03. SD-Access.md",
+  "cards": [
+    {
+      "q": "What is SD-Access?",
+      "a": "SD-Access is Cisco's intent-based campus fabric: a VXLAN overlay (data plane) with a LISP control plane and ISE policy, orchestrated by DNA Center. It delivers macro/micro segmentation, host mobility, and policy-driven access across the wired and wireless campus.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the three planes of SD-Access and their technologies?",
+      "a": "Control plane = LISP, data plane = VXLAN, and policy = ISE with SGT. In short: LISP routes, VXLAN tunnels, ISE decides access.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the main fabric roles in SD-Access?",
+      "a": "Fabric edge (access switch = entry point), border (exit to outside/legacy networks), control plane node (LISP map server = mapping), and fabric WLC (wireless). Edge = entry, border = exit, control = mapping.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between macro and micro segmentation in SD-Access?",
+      "a": "Macro segmentation separates networks using a Virtual Network (VN) built on a VRF carried by VXLAN; micro segmentation separates security groups inside those networks using ISE/SGT. Macro = separate networks, micro = security groups within them.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why does SD-Access keep host IPs stable during roaming?",
+      "a": "Because policy is group-based and follows the security group, not the VLAN, so hosts keep their IP addresses while roaming anywhere in the fabric.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What are the key components of the SD-Access stack and their jobs?",
+      "a": "VXLAN (data plane tunnels), LISP (EID to RLOC mapping), ISE (AAA + SGT), and DNA Center (orchestration). Together they form the SD-Access stack.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands verify SD-Access LISP, VXLAN, and host tracking?",
+      "a": "show lisp session, show lisp map-cache, show vxlan vni, show vlan vn-segment, show ip device tracking, and show authentication sessions.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you troubleshoot roaming, VXLAN, and policy failures in SD-Access?",
+      "a": "If a host can't roam, check LISP with show lisp map-cache; if VXLAN is down, verify the VNI with show vxlan vni; wrong policy points to ISE/SGT (check authentication sessions); fabric down points to DNA Center; and lost segmentation means the macro/micro mapping (vlan vn-segment) is misconfigured.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which protocol is the SD-Access data plane and which is the control plane?",
+      "a": "A common mix-up: VXLAN is the data plane, LISP is the control plane, and ISE/SGT handles policy. DNA Center orchestrates all three.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does SD-Access enforce policy on groups rather than VLANs?",
+      "a": "ISE assigns Security Group Tags (SGTs) used for micro segmentation, so policy is group-based and follows the SGT rather than being tied to a VLAN.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

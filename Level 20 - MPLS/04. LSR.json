@@ -1,0 +1,70 @@
+{
+  "title": "LSR (Label Switch Router)",
+  "level": 20,
+  "levelTitle": "Level 20 - MPLS",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "04. LSR.md",
+  "cards": [
+    {
+      "q": "What is an LSR and where does it sit in the MPLS domain?",
+      "a": "The LSR (also called P router in VPN terms) lives in the core of the MPLS domain. It forwards packets by swapping the top label based on the LFIB, with no IP lookup and no customer routes, and runs IGP plus LDP to build label bindings for core reachability.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the core responsibilities of an LSR?",
+      "a": "Swap labels driven by the LFIB, run LDP for label distribution, run IGP for core reachability, and remain transparent by carrying no customer routes.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the LSR forwarding-flow steps?",
+      "a": "Receive a labeled packet, do an LFIB lookup using the incoming label, swap the label, then forward out the interface. Only the top label is examined and swapped.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What protocol and port does LDP use, and what does it exchange?",
+      "a": "LDP uses UDP/TCP 646 and exchanges label-to-FEC bindings triggered by IGP routes, producing core LSPs. Downstream routers advertise bindings and upstream routers install them.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does the core stay routing-free of customer prefixes?",
+      "a": "The core holds no customer routes, so it remains transparent and scales because only core reachability prefixes are carried.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What happens at the penultimate LSR with PHP?",
+      "a": "The penultimate LSR pops the label (using implicit null), so the egress LER receives a naked IP packet, unless explicit null is used to preserve QoS.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What commands configure and control LDP on an LSR?",
+      "a": "'mpls ip' enables globally, 'interface ... mpls ip' enables per core link (every core link needs it), and 'mpls ldp router-id' chooses the router-id.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the likely cause and check when there is no label swap on an LSR?",
+      "a": "The cause is a missing LFIB entry, so check show mpls forwarding-table.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the likely cause and check when LDP is not up?",
+      "a": "The IGP is down or a link is down, so check show mpls ldp neighbor.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does the LSR position map to the quick review table?",
+      "a": "The LSR is in the core, forwards via LFIB swap, uses LDP on port 646, does PHP at the penultimate hop, holds core-only routes, is enabled with 'mpls ip', and is verified with show mpls forwarding-table.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

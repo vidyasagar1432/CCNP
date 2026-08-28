@@ -1,0 +1,20 @@
+{
+  "title": "Terraform",
+  "level": 24,
+  "levelTitle": "Level 24 - SDN & Automation",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "15. Terraform.md",
+  "cards": [
+    { "q": "What is Terraform?", "a": "Terraform is Infrastructure as Code (IaC): you declare the desired state in HCL and Terraform plans and applies the changes against providers (cloud, and via Cisco providers for DNA Center, IOS-XE, Meraki, SD-WAN). Its key difference from Ansible is that it is state-based and declarative with a plan/apply workflow.", "tag": "Overview", "context": "Both" },
+    { "q": "How does the declarative model of Terraform work?", "a": "You declare the desired state in HCL, Terraform computes a plan (the diff), applies the change to make it so, and tracks what exists in state. Terraform reconciles the current state to the desired state.", "tag": "Core Concept", "context": "Interview" },
+    { "q": "What is the Terraform core workflow and what does each command do?", "a": "terraform init installs providers, terraform plan previews changes, terraform apply executes the plan, and terraform destroy removes resources. Plan then apply is the safe workflow.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What does an HCL file consist of?", "a": "A provider block (e.g., provider \"iosxe\" with host and username) and resource blocks (e.g., resource \"iosxe_interface\" with attributes like name, description, shutdown). provider = platform, resource = object, name = key, attribute = value.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "How does Terraform compare to Ansible?", "a": "Terraform is declarative with state and a plan/apply workflow, best for provisioning infrastructure; Ansible is imperative/push-based, runs playbooks, has no state, and is used for config and management. Terraform = state + plan, Ansible = push/imperative.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "Which Cisco providers allow Terraform to manage network gear?", "a": "iosxe (IOS-XE config), dnacentersdk (DNA Center), meraki (cloud), and sdwan (SD-WAN). These Cisco providers let Terraform drive real network devices.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "Why does IaC plus plan make infrastructure auditable and repeatable?", "a": "State-based tracking and plan previews make every change visible and repeatable before it is applied, so runs are consistent and auditable across multicloud.", "tag": "Core Concept", "context": "Interview" },
+    { "q": "How do you troubleshoot Terraform init, plan, and apply issues?", "a": "Init errors = provider problems, run terraform init; plan drift = stale state, refresh; apply failures = authentication in the provider; resource not found = wrong name, check terraform state list; and destroy surprises are avoided by reviewing the plan first.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What distinguishes Terraform from Ansible in one exam-ready sentence?", "a": "Terraform is declarative and state-based with a plan/apply workflow for provisioning, while Ansible is imperative, push-based, and stateless for configuration and management.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "Which Terraform command shows providers being installed before anything else?", "a": "terraform init installs the required providers and is the first command; plan, apply, and destroy follow in the workflow.", "tag": "Exam Trap", "context": "Exam" }
+  ]
+}

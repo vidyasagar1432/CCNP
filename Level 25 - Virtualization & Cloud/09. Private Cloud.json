@@ -1,0 +1,76 @@
+{
+  "title": "Private Cloud",
+  "level": 25,
+  "levelTitle": "Level 25 - Virtualization & Cloud",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "09. Private Cloud.md",
+  "cards": [
+    {
+      "q": "What is a private cloud?",
+      "a": "Cloud-like infrastructure (self-service, elastic, metered) that runs on dedicated, on-premises resources, e.g. VMware or OpenStack under your control. It keeps data and compliance in-house but adds capex and operational cost.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the defining characteristics of a private cloud?",
+      "a": "Owned by your organization, located on-prem or dedicated, dedicated tenancy, and full control. It is the cloud model on your own hardware.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How are cloud features delivered locally in a private cloud?",
+      "a": "Self-service via a portal, elasticity from hypervisor resource pools, metering via usage tracking, and orchestration through tools like vRealize or OpenStack.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What platforms build a private cloud?",
+      "a": "VMware vSphere (most common), OpenStack (open source), Nutanix (hyperconverged), and Azure Stack (hybrid).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Compare private versus public cloud on cost, control, compliance, and scale.",
+      "a": "Private: capex cost, full control, easier compliance, limited scale. Public: opex cost, limited control, shared compliance, elastic scale.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "When does a private cloud win over public?",
+      "a": "For regulated data (compliance), latency-sensitive local workloads, legacy integration, and cost control under steady load. Sensitive and steady workloads stay on-prem.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What networking options does a private cloud use?",
+      "a": "Virtual switches (vSwitch), VLANs for segmentation, NSX for SDN overlays, and internal east-west traffic.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What commands inspect private cloud networking on ESXi?",
+      "a": "esxcli network vswitch standard list shows vSwitches and esxcli network ip interface list shows IP interfaces; otherwise use platform consoles/APIs.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "VMs in a private cloud have no network. What do you check?",
+      "a": "Check the vSwitch and its portgroups, then VLAN/portgroup isolation, host capacity/pools, and storage (datastore) for slowness.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which platforms are the classic private-cloud stacks?",
+      "a": "VMware and OpenStack; Azure Stack serves as the hybrid option.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Match the quick review: owner, tenancy, cost, control, platform, compliance, scale, network.",
+      "a": "Owner = you; tenancy = dedicated; cost = capex; control = full; platform = VMware/OpenStack; compliance = easier; scale = limited; network = vSwitch/NSX.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

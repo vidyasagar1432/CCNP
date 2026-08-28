@@ -1,0 +1,22 @@
+{
+  "title": "ACL",
+  "level": 29,
+  "levelTitle": "Level 29 - Troubleshooting",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "11. ACL.md",
+  "cards": [
+    { "q": "What does ACL troubleshooting check?", "a": "Order, direction, implicit deny, wildcard masks, and placement. Symptoms are traffic silently dropped or wrong traffic passing.", "tag": "Overview", "context": "Both" },
+    { "q": "What command shows ACL entry hit counters?", "a": "show access-lists, which shows the entries and their hit counters to prove matches.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What are the key rules of ACL processing?", "a": "First match wins, there is an implicit deny at the end, wildcard (inverse) masks are used, direction is in/out, and placement is near source or destination.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What masks do ACLs use?", "a": "Wildcard masks, which are the inverse of subnet masks. For example 0.0.0.255 matches a /24 and 0.0.0.0 matches a single host. Using a subnet mask format in an ACL is wrong.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "Why does an ACL that drops all traffic exist?", "a": "Because of the implicit deny at the end of the list, if no matching permit statement is found.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "Where should standard and extended ACLs be placed?", "a": "Standard ACLs near the destination; extended ACLs near the source. Inbound ACLs go closest to the source, outbound on egress.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What does ip access-group 100 in do?", "a": "Applies ACL 100 inbound on an interface, filtering traffic as it arrives.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What does a hit counter of 0 on an ACL entry indicate?", "a": "The ACL is not matching traffic, often due to wrong direction, wrong placement, or a mask/order error.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What is the difference between in and out ACL direction?", "a": "In filters traffic as it arrives on the interface; out filters traffic as it leaves the interface.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What command verifies which ACL is applied to an interface?", "a": "show ip interface <if> (with the interface), which shows the applied ACLs and their direction.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "An ACL permit that is too broad is the result of what?", "a": "A wrong entry order, where a broad permit earlier in the list matches traffic that should be handled by a later, more specific entry.", "tag": "Quick Review", "context": "Exam" },
+    { "q": "What does the any keyword match in an ACL?", "a": "All addresses, regardless of source or destination.", "tag": "Core Concept", "context": "Exam" }
+  ]
+}

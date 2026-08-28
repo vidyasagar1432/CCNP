@@ -1,0 +1,70 @@
+{
+  "title": "Patch Panels",
+  "level": 1,
+  "levelTitle": "Level 01 - Physical Layer",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "05. Patch Panels.md",
+  "cards": [
+    {
+      "q": "What is a patch panel and why does it exist?",
+      "a": "A patch panel is the structured-cabling termination point where horizontal or riser cables are landed and then patched to active equipment with short jumper cables. It enables moves, adds, and changes without disturbing permanent cabling and keeps equipment clean and serviceable.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What purposes do patch panels serve?",
+      "a": "Patch panels provide a termination point for UTP, STP, or fiber before equipment, centralize connections at the distribution frame (IDF/ER) and data center pod, allow changeability so a user port can be patched to a different switch without pulling cable, and protect the more fragile permanent link while defining the 90 m plus 10 m budget split.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What types of patch panels exist and what are they used for?",
+      "a": "RJ-45 copper modular panels for Cat5e/6/6a UTP use keystone jacks with A/B colors. Fiber LC panels handle LC duplex runs, SC/MPO panels handle MPO backbone or 40/100G breakout trunks, and MTP/MPO breakout panels fan out 12/24 to LC for high-density data centers. Blank or keystone panels allow mixed use.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do horizontal cable and patch cables relate to the 100-meter budget?",
+      "a": "The horizontal cable from the panel to the wall outlet in the workspace is limited to 90 m. Patch cables (panel to switch and wall to device) sum to no more than 10 m. The backbone or riser uplink goes to the distribution or core in a separate MDF or IDF frame.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What design rules apply when working with patch panels?",
+      "a": "Always label port maps, maintain a cable database or use LLDP/CDP to auto-discover the logical neighbor behind each patch, maintain fiber polarity across two panels so it flips, and leave spare RU or horizon so future add-ons do not require rewiring.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands document the neighborhood on a patched link?",
+      "a": "Use 'show cdp neighbors detail' and 'show lldp neighbors detail' to document the logical neighbor behind each patch. In a suspected bad port, physically swap the patch cord at the panel as one of the first layer 1 troubleshooting steps.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Do patch panels influence the network path?",
+      "a": "No. Panels are Layer 1 terminations and do not make the network choose a path. CDP or LLDP neighbors may differ from the panel map, which is a maintenance curiosity rather than a failure.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What must be maintained across fiber patch panels and why?",
+      "a": "Fiber polarity must be maintained across panels with an A-to-B flip, so light goes TX to RX. If polarity is not maintained, a loop or no-link occurs.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does a patch panel have a MAC address or IP address?",
+      "a": "No. A patch panel is not an active device and has no MAC address or IP address; it is a passive Layer 1 termination.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the first layer 1 step when a link appears bad?",
+      "a": "Physically swap the patch cord at the panel first; a bad patch produces a bad link that is indistinguishable at L1 from other media errors until you inspect the specific port.",
+      "tag": "Quick Review",
+      "context": "Practical"
+    }
+  ]
+}

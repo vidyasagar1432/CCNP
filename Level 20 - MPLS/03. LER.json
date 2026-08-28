@@ -1,0 +1,76 @@
+{
+  "title": "LER (Label Edge Router)",
+  "level": 20,
+  "levelTitle": "Level 20 - MPLS",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "03. LER.md",
+  "cards": [
+    {
+      "q": "What is an LER and where does it sit in the MPLS domain?",
+      "a": "The LER (also called PE in VPN terms) sits at the edge of the MPLS domain. It does the IP-to-label transition, pushing a label on ingress and popping it on egress, and runs the full IP routing stack (IGP plus MP-BGP for VPNs).",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the LER's edge responsibilities by direction?",
+      "a": "On ingress it classifies then pushes a label; on egress it pops the label and delivers IP; the core side faces MPLS (the LSP) and the CE side faces the customer.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the ingress LER steps for forwarding a packet?",
+      "a": "Receive IP from CE, do a CEF lookup to find the FEC, push the transport label (plus service label if VPN), then forward into the core. The push is decided by the FEC.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the egress LER steps for delivering a packet?",
+      "a": "Receive the labeled packet from the core, pop the label (after PHP), route or deliver to the CE, with VRFs separating customers.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Why does the egress LER often receive an explicit null with PHP?",
+      "a": "Because with PHP the label has already been popped, so the egress often receives an explicit null to keep the Exp (QoS) field.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What roles combine to make an LER act as a PE in a VPN?",
+      "a": "The PE is an LER that also runs VRF (per-customer routing table), MP-BGP (exchange VPNv4 routes), LDP (core label), and CE-facing PE-CE routing.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "In an LER configuration, how are core-facing and CE-facing interfaces handled?",
+      "a": "Core-facing interfaces get 'mpls ip', while CE-facing interfaces go into a VRF using 'ip vrf forwarding' with an IP address.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands verify VRF and label forwarding on an LER?",
+      "a": "show ip cef, show mpls forwarding-table, show ip vrf, show ip vrf detail, and show ip route vrf CUST1.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the likely cause and check when there is no label push on a router?",
+      "a": "The cause is CEF or FEC missing, so check show ip cef.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the likely cause and check when a CE is unreachable?",
+      "a": "The VRF may be missing or the interface not bound, so check show ip vrf.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does the LER position map to the quick review table?",
+      "a": "The LER is at the edge, pushes on ingress, pops on egress, acts as the PE in a VPN, uses a VRF on the CE side, applies 'mpls ip' on the core side, runs IGP plus MP-BGP for routing, and classifies packets into FECs.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

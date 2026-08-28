@@ -1,0 +1,22 @@
+{
+  "title": "Wireless",
+  "level": 29,
+  "levelTitle": "Level 29 - Troubleshooting",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "15. Wireless.md",
+  "cards": [
+    { "q": "What does wireless troubleshooting cover?", "a": "RF issues, client association, authentication, and controller problems. Symptoms are weak signal, no association, slow rates, or roaming gaps.", "tag": "Overview", "context": "Both" },
+    { "q": "What is the wireless troubleshooting order?", "a": "RF/signal, association, authentication, then DHCP/IP, then roaming. Check RF first, then association, auth, and IP.", "tag": "Core Concept", "context": "Both" },
+    { "q": "What are the top RF issues to check?", "a": "Interference and weak RSSI/signal. Also check SNR, AP coverage, and client rate.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What gates a client's ability to associate?", "a": "The SSID (including whether it is hidden) and security (ACL/PSK/802.1X) settings.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What does show ap summary show?", "a": "The health/state of the APs on the controller.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What does show client detail 00:11:22:33:44:55 show?", "a": "The detailed state of a specific client on the controller.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "Why does a client that is associated still fail to work?", "a": "Because associated does not mean authenticated. A client can associate but still fail authentication or DHCP.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "What are the possible client states?", "a": "Assoc (MAC joined), Auth (security passed), IP (DHCP done), Run (working), and Idle (no traffic).", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How does 5 GHz differ from 2.4 GHz in troubleshooting?", "a": "The interference characteristics differ between the two bands, affecting which channels you check.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "A client can associate but gets no IP address. What is the likely cause?", "a": "A missing DHCP helper/relay on the client subnet (or a DHCP problem), because association succeeded but IP assignment failed.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "Roaming drops are most likely caused by what?", "a": "Fast roaming (802.11r-style fast roam) being off, or coverage gaps between APs.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What does show wlan summary show?", "a": "The WLANs configured on the controller, useful when an SSID is missing.", "tag": "Quick Review", "context": "Practical" }
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "title": "Neighbor Discovery (ND / NDP)",
+  "level": 6,
+  "levelTitle": "Level 06 - IPv6",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "09. Neighbor Discovery.md",
+  "cards": [
+    {
+      "q": "What is Neighbor Discovery (ND)?",
+      "a": "ND is IPv6's layer-2-to-3 bootstrap that directly replaces IPv4 ARP, ICMP redirects, and router discovery, and it is powered entirely by ICMPv6 messages. It runs as part of every IPv6 link.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the five Neighbor Discovery messages and their ICMPv6 types?",
+      "a": "Router Solicitation (RS) type 133 sent to ff02::2, Router Advertisement (RA) type 134 carrying prefix and flags, Neighbor Solicitation (NS) type 135 used like ARP, Neighbor Advertisement (NA) type 136 replying with the MAC, and Redirect type 137 pointing to a better next hop.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does ND replace ARP entirely?",
+      "a": "Instead of an ARP broadcast, NS/NA messages go to the solicited-node multicast address; RARP is replaced by ND; the RA provides the default gateway; and duplicate address checking is done by DAD using NS/NA.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the solicited-node multicast address?",
+      "a": "ff02::1:ffXX:XXXX, derived from the target's address. Because it targets roughly 1/65536 of the link instead of the whole link, it is far more scalable than IPv4 broadcast.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What roles does Neighbor Discovery play?",
+      "a": "Address resolution (link-layer to MAC cached in the neighbor cache), router discovery (default gateways from RA), address auto-configuration (prefix from RA into SLAAC), Duplicate Address Detection, Neighbor Unreachability Detection, Redirect to a better route, and stateless DHCPv6 signaling through the M/O flags.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the IPv6 neighbor cache reachability states?",
+      "a": "INCOMPLETE means an NS was sent but no NA returned; REACHABLE means reachability is confirmed; STALE means no recent traffic; DELAY waits briefly before probing; and PROBE sends NS messages to confirm reachability.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What security exposures does ND introduce and how are they mitigated?",
+      "a": "RA spoofing lets a rogue router advertise itself as the default gateway for a MITM attack, mitigated with RA Guard per port and SAVI; NA spoofing is like ARP poisoning and is handled with ND snooping and an anti-spoofing (DAI analog) mechanism.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do you tune ND on a Cisco IOS interface?",
+      "a": "Use ipv6 nd ra-interval 30, ipv6 nd ra-lifetime 1800, ipv6 nd prefix 2001:db8:1:10::/64 to advertise the prefix, and ipv6 nd managed-config-flag for M=1.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What command views the IPv6 neighbor cache?",
+      "a": "show ipv6 neighbors, and show ipv6 interface Gi0/1 | include Neighbor shows ND-related interface state.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Does IPv6 use ARP?",
+      "a": "No. Neighbor Discovery is ICMPv6-based, so any statement that IPv6 uses ARP is wrong.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the destination of an NS message?",
+      "a": "The solicited-node multicast address, not the all-nodes multicast group.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you tell router discovery messages from neighbor messages?",
+      "a": "RS (133) and RA (134) are router discovery, while NS (135) and NA (136) are neighbor messages; do not mix up the type numbers.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What IPv4 artifacts does ND replace?",
+      "a": "ND replaces ARP, but also ICMPv4 redirects, and additionally provides DAD and SLAAC support.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Who supplies the default route even when DHCPv6 is used?",
+      "a": "The Router Advertisement always gives the default route; ND supplies it even under DHCPv6.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What mitigates a spoofed router advertisement that sets a rogue default gateway?",
+      "a": "RA Guard, a per-port defense that blocks rogue RAs and prevents the MITM default-gateway attack.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

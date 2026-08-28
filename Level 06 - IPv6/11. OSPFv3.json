@@ -1,0 +1,94 @@
+{
+  "title": "OSPFv3",
+  "level": 6,
+  "levelTitle": "Level 06 - IPv6",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "11. OSPFv3.md",
+  "cards": [
+    {
+      "q": "What is OSPFv3?",
+      "a": "OSPFv3 (RFC 5340) is OSPF re-engineered for IPv6: the protocol logic and LSA structure survive, but the protocol no longer carries IPv4 addresses in its LSAs because addressing moved to separate LSA types such as Intra-Area-Prefix, and IPv6 link-local addresses form the neighbor and next-hop basis. Modern IOS-XE also runs IPv4 unicast inside OSPFv3 via address families.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How does OSPFv3 differ from OSPFv2?",
+      "a": "OSPFv3 travels over IPv6 protocol 89 using multicast ff02::5 and ff02::6; neighbors are identified by link-local addresses; addressing is stored in the Intra-Area-Prefix (Type 9) LSA instead of inside Type 1/2; Router-ID is configured or auto-derived; it supports address families; and configuration is area-based rather than wildcard network statements.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the two OSPFv3 configuration flavors on IOS-XE?",
+      "a": "Traditional uses ipv6 enable plus ipv6 ospf 1 area 0 on the interface under router ospf 1; the address-family style uses router ospfv3 1 with an address-family ipv6 unicast and ospfv3 1 ipv6 area 0 on the interface, and can also enable an IPv4 unicast AF.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do OSPFv3 LSA types differ from OSPFv2?",
+      "a": "Type 1 Router and Type 2 Network describe IPv6 interfaces and the DR's segment; Type 8 Link-Local carries link-local information (new); Type 9 Intra-Area-Prefix stores the actual IPv6 prefixes; Type 3 Inter-Area-Prefix summarizes IPv6; and Types 4, 5, and 7 handle ASBR, AS-external, and NSSA external routes.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does OSPFv3 identify neighbors and next hops?",
+      "a": "Neighbors are identified by their link-local addresses, so show ipv6 ospf neighbor displays fe80 addresses, and the next hop on transit links is link-local. Loopback peers are reachable via GUA, and if a link's fe80 changes the adjacency may flap, so use a stable link-local address.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the interface cost default in OSPFv3?",
+      "a": "The default interface cost is 1 for any speed, unlike OSPFv2's 10^8/BW reference; tune it manually with ipv6 ospf cost. Area, DR/BDR election, and protocol 89 mechanics are the same as OSPFv2.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you configure OSPFv3 in address-family mode?",
+      "a": "On the interface set ipv6 address 2001:db8:1:10::1/64 and ospfv3 1 ipv6 area 0, then under router ospfv3 1 set router-id 1.1.1.1 and address-family ipv6 unicast.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands verify OSPFv3?",
+      "a": "show ipv6 ospf, show ipv6 ospf neighbor, show ipv6 ospf database, and show ospfv3 1 address-family ipv6 unicast interface Gi0/1.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Where does OSPFv3 store the actual IPv6 prefixes?",
+      "a": "Not inside the LSAs themselves: the Intra-Area-Prefix LSA (Type 9) stores the actual IPv6 prefixes for an area.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What addresses appear in OSPFv3 hello and neighbor operations?",
+      "a": "Link-local addresses; do not expect real global unicast addresses in the neighbor identifiers.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What multicast addresses does OSPFv3 use?",
+      "a": "ff02::5 for all SPF routers and ff02::6 for DR/BDR, not the IPv4 224.0.0.5 and 224.0.0.6.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How is the OSPFv3 router-ID selected by default?",
+      "a": "It is auto-selected from the highest IPv4 loopback (or interface address) 0.0.0.x style, or it can be explicitly configured; distinguish between the two.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does OSPFv3 scale interface cost by bandwidth automatically?",
+      "a": "No. The cost default is fixed at 1 and does not scale by bandwidth like OSPFv2's 10^8/BW reference unless manually configured.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is OSPFv3 strictly an IPv6-only protocol?",
+      "a": "No. OSPFv3 can also carry IPv4 unicast through its address-family support, so never state that OSPFv3 is IPv6-only.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "title": "SSL VPN (Remote Access)",
+  "level": 18,
+  "levelTitle": "Level 18 - VPN Technologies",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "05. SSL VPN.md",
+  "cards": [
+    {
+      "q": "What is SSL VPN and what are its two flavors?",
+      "a": "SSL VPN gives remote users secure access through a web browser or AnyConnect client using TLS/HTTPS on port 443, with no pre-installed IPsec client. The two flavors are clientless (portal to internal apps) and AnyConnect full-tunnel.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Why is SSL VPN firewall-friendly?",
+      "a": "SSL VPN rides TLS over TCP 443, which passes through most firewalls and NAT, making it the main advantage over IPsec for remote access.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between clientless and AnyConnect SSL VPN modes?",
+      "a": "Clientless mode is a browser-based portal that provides access to internal apps with zero install; AnyConnect mode installs a full VPN tunnel providing complete network access.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between TLS and DTLS in an AnyConnect full-tunnel VPN?",
+      "a": "TLS (TCP 443) is the primary transport; DTLS (UDP 443) is the optimized transport that reduces latency for real-time applications.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What security layers does SSL VPN use for authentication and posture?",
+      "a": "User authentication uses LDAP/RADIUS/AAA; MFA uses a token or certificate; posture uses endpoint checking via AnyConnect; and group policy defines split-tunnel or full-tunnel behavior.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the comparison between SSL VPN and IPsec remote access?",
+      "a": "SSL VPN uses a browser or AnyConnect client and port 443 that works anywhere, offers fine-grained app access and moderate corporate control with low setup friction; IPsec RA requires an IPsec client and ports 500/4500 that are often blocked, offers full-tunnel, strong control, but higher setup friction. SSL VPN wins on reachability while IPsec wins on raw control.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are typical headend platforms for SSL VPN?",
+      "a": "Cisco ASA/ASAv or ISR hosts the SSL VPN service; AnyConnect is licensed per user and group-policies define access. ISR uses the webvpn gateway syntax, while ASA uses ASDM/ASA syntax.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands verify SSL VPN sessions?",
+      "a": "show vpn-sessiondb anyconnect, show vpn-sessiondb svc, show webvpn, and show crypto ikev2 sa.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "The SSL VPN portal is unreachable; what is a likely cause?",
+      "a": "Port 443 is blocked by an ACL on the path; check the ACL permitting TCP 443 to the headend.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A remote user has no full tunnel even though the SSL VPN authenticates; what should you check?",
+      "a": "The split-tunnel versus full-tunnel policy is set by the group-policy; check that the group-policy is not set to split-tunnel limiting the networks.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "Why does SSL VPN beat IPsec for per-user reachability through NAT and firewalls?",
+      "a": "SSL VPN uses TCP 443 (TLS), which passes through nearly all NAT and firewalls, whereas IPsec uses ports 500/4500 that are often blocked, so SSL VPN provides better per-user reachability.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the SSL VPN quick-review summary?",
+      "a": "SSL VPN uses TLS on 443, has clientless and AnyConnect modes, full tunnel via AnyConnect, fast path via DTLS 443, browser or client, AAA/MFA/cert auth, is NAT friendly, and is compared with IPsec remote access.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

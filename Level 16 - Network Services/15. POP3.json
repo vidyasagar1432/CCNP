@@ -1,0 +1,70 @@
+{
+  "title": "POP3",
+  "level": 16,
+  "levelTitle": "Level 16 - Network Services",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "15. POP3.md",
+  "cards": [
+    {
+      "q": "What is POP3 and how does it handle mail?",
+      "a": "POP3 (TCP 110) downloads email from a server to a single client and typically removes it from the server, making it a simple offline download-and-go protocol; its secure variant is POP3S on TCP 995.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the POP3 model?",
+      "a": "The client pulls mail from the server (port 110, secure 995), mail is stored client-locally with the server usually emptied, it is offline, and there is no synchronization across clients.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do POP3 and IMAP compare?",
+      "a": "POP3 downloads mail and typically deletes it from the server, has poor multi-device support, is offline, uses a single INBOX, and uses ports 110/995; IMAP keeps mail on the server, syncs across devices, is online, uses server folders, and uses ports 143/993.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does a basic POP3 session look like?",
+      "a": "USER/PASS authenticate, LIST lists messages with numbers, RETR n downloads a message, DELE n marks one for deletion, and QUIT finalizes the session, with deletions applied at QUIT.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "When does POP3 actually delete a marked message?",
+      "a": "Deletions marked with DELE are finalized when the client sends QUIT at session close.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the POP3 ports and security modes?",
+      "a": "110 is plaintext and 995 is POP3S over TLS; mail credentials should not cross on 110, so 995 (or STARTTLS) is required.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "When should you choose POP3 versus IMAP?",
+      "a": "Choose POP3 for a single client, low server load, and offline travel access; choose IMAP for multiple devices that need synchronization or server-side search.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Why is POP3 a DLP consideration for network teams?",
+      "a": "Because mail data lands on endpoints rather than staying on servers, so network teams treat POP3 mostly as a traffic/permit need and a data-loss concern.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How would you troubleshoot a can't-connect POP3 failure?",
+      "a": "Check whether TCP 110 is blocked by an ACL or firewall, verify credentials (-ERR auth), use 995 when TLS is required (connection reset), and confirm the server load/status on timeouts.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Mail seems to vanish from a POP3 mailbox — why?",
+      "a": "POP3 downloads and deletes messages from the server by default; if retention is required, enable a keep-on-server option.",
+      "tag": "Quick Review",
+      "context": "Practical"
+    }
+  ]
+}

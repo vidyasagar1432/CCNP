@@ -1,0 +1,88 @@
+{
+  "title": "STP",
+  "level": 29,
+  "levelTitle": "Level 29 - Troubleshooting",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "05. STP.md",
+  "cards": [
+    {
+      "q": "What does STP troubleshooting focus on?",
+      "a": "Loops, root placement, and blocked-port issues. Key checks are root, bridge priority, port roles/states, and topology changes.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the core STP verification picture?",
+      "a": "The root switch and port roles (root port, designated, alternate, backup), viewed with show spanning-tree.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What command shows root and port roles?",
+      "a": "show spanning-tree. show spanning-tree root shows root roles and show spanning-tree detail shows timers.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why is a blocking port normal in STP?",
+      "a": "Blocking ports are normal backup paths (alternate or backup roles) that prevent loops. Loops are the critical failure, not blocking ports.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What selects the root bridge?",
+      "a": "The lowest bridge priority wins; the lowest MAC address is the tiebreaker. Root can be forced with spanning-tree vlan X root primary.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does a MAC flip or broadcast storm typically indicate in STP?",
+      "a": "A loop in the network, where a blocking port is missing or unblocked.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the standard protection configuration for access ports?",
+      "a": "PortFast together with BPDU Guard, which allows fast host connectivity and blocks rogue switches.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between Root Guard and Loop Guard?",
+      "a": "Root Guard blocks a wrong root from taking over; Loop Guard blocks silent failures by protecting against loss of BPDUs.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does spanning-tree bpduguard enable do?",
+      "a": "It shuts down a port that receives BPDUs, blocking a rogue switch from being connected.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does PortFast accomplish for host ports?",
+      "a": "It makes the port skip the blocking state so it can come up quickly, instead of waiting the normal time.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What causes a topology change (TC) storm?",
+      "a": "A flapping port that repeatedly triggers topology changes and flushes the MAC table.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do PortFast and RSTP improve convergence?",
+      "a": "PortFast skips blocking on access ports and RSTP provides fast role transitions, removing most convergence delay.",
+      "tag": "Quick Review",
+      "context": "Both"
+    },
+    {
+      "q": "A 30-second wait before a port comes up most likely indicates what?",
+      "a": "No PortFast configured on a host/access port, so the port is waiting through the blocking/listening delay.",
+      "tag": "Quick Review",
+      "context": "Practical"
+    }
+  ]
+}

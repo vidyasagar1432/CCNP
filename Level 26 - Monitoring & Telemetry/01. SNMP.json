@@ -1,0 +1,106 @@
+{
+  "title": "SNMP",
+  "level": 26,
+  "levelTitle": "Level 26 - Monitoring & Telemetry",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "01. SNMP.md",
+  "cards": [
+    {
+      "q": "What is SNMP and over which UDP ports does it operate?",
+      "a": "Simple Network Management Protocol, used to monitor and configure network devices. Polls use UDP 161 and traps use UDP 162.",
+      "tag": "Overview",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the four components of the SNMP model?",
+      "a": "Manager (NMS) which polls/collects, Agent which runs on the device, MIB the data tree, and OID the address of the data, plus community/security for access.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the SNMP manager do and how does it access device data?",
+      "a": "The manager polls the agent's MIB via OIDs to collect data.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the five SNMP operations and what does each do?",
+      "a": "GET reads one OID, GETNEXT walks the MIB, SET changes a value, TRAP sends an alert, and INFORM sends an acknowledged alert; GET/SET/GETNEXT are Manager-to-Agent, TRAP/INFORM are Agent-to-Manager.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which SNMP versions use a community string and which is secure?",
+      "a": "v1 and v2c use community strings in clear text (weak); v3 provides authentication plus encryption.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the MIB and OID in SNMP?",
+      "a": "MIB is the device database (data tree); an OID is the dotted address of a value in the MIB, for example 1.3.6.1.2.1.1.1 is sysDescr.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do you walk a MIB and read a value via SNMP from the CLI?",
+      "a": "Use snmpget to read one OID (e.g. snmpget -v2c -c public host 1.3.6.1.2.1.1.1.0) and snmpwalk to walk the entire tree (e.g. snmpwalk -v2c -c public host .1).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the core SNMP configuration commands on a Cisco device?",
+      "a": "The core is snmp-server community (v1/v2c access with RO/RW), snmp-server host (trap destination), and snmp-server group/user for v3 security.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands does the snmp-server host and community configuration accomplish?",
+      "a": "snmp-server community defines v1/v2c access (e.g. public RO, secret RW) and snmp-server host sets the trap destination with optional v3 parameters.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How is v3 SNMP security configured?",
+      "a": "Create a group with a security level (e.g. snmp-server group GRP v3 priv) and a user bound to that group with auth and privacy settings (e.g. snmp-server user admin GRP v3 auth sha Pass1 priv aes 128 Pass2).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the differences between SNMP v2c and v3?",
+      "a": "v2c uses a community string, has no authentication, no encryption, and is legacy/lab use; v3 uses no community, supports SHA/MD5 auth, AES/DES encryption, and is for production.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What command shows SNMP status, MIB, and sessions?",
+      "a": "show snmp, show snmp mib, and show snmp sessions.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A device gives no SNMP response; what is the likely cause and check?",
+      "a": "Likely a community string problem; check with show snmp.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "No traps are received from a device; what is the likely cause and check?",
+      "a": "Likely a host/port issue on the trap destination; check with show snmp host.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which UDP port do SNMP polls and traps use?",
+      "a": "Polling uses UDP 161 and traps use UDP 162.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does SNMP data get transferred and addressed?",
+      "a": "Data lives in the MIB (data tree) and is addressed by dotted-decimal OIDs.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

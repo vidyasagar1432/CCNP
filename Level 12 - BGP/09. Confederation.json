@@ -1,0 +1,70 @@
+{
+  "title": "BGP Confederation",
+  "level": 12,
+  "levelTitle": "Level 12 - BGP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "09. Confederation.md",
+  "cards": [
+    {
+      "q": "What is a BGP confederation?",
+      "a": "An alternative to route reflectors for scaling iBGP: the AS is split into sub-ASes that peer with each other using eBGP-like sessions while presenting a single confederation AS to the outside world. It reduces the iBGP full-mesh burden, though it is rarer in the exam than reflectors.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How do confederation and route reflector differ?",
+      "a": "Route reflector is a hub-and-spoke model with clients guarded by ORIGINATOR_ID and CLUSTER_LIST; confederation splits the AS into eBGP-style sub-ASes guarded by the confederation AS_PATH subset. Confederation needs a sub-AS split, appears less often in the exam, and both lose no attributes.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What AD do confederation eBGP sessions use?",
+      "a": "AD 200, like iBGP, not 20. iBGP within a sub-AS uses AD 200, confederation eBGP (other sub-AS) uses AD 200 with eBGP-like behavior but attributes kept, and only real eBGP with an outside AS uses AD 20.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which attributes survive confederation sub-AS boundaries?",
+      "a": "Local-pref, MED, and next-hop are preserved across sub-AS boundaries, unlike with real eBGP. Next hop is not changed between sub-ASes (unless next-hop-self is needed for real eBGP), and AS_PATH is extended with the confederation sequence that is stripped before the route leaves to the real world.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you configure a confederation?",
+      "a": "router bgp 64512 with bgp confederation identifier 65001 giving the public AS, bgp confederation peers 64513 64514 listing the other sub-ASes, and neighbor 10.0.0.2 remote-as 64513 for the confederation eBGP peer.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does a confederation prevent loops?",
+      "a": "Confederation sub-ASes appear in the confederation sequence, and a route carrying your confederation ID in the confed part is rejected. The confederation sequence is stripped at the real eBGP boundary, so outsiders see a clean AS_PATH of real ASes.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "When should you choose confederation over route reflectors?",
+      "a": "When the AS is already segmented by policy or geography and you want eBGP-like boundary control without changing attributes. Otherwise route reflectors are simpler to operate.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Do local-pref, MED, and next-hop change across sub-AS boundaries?",
+      "a": "No, they are preserved, unlike real eBGP. This is the key exam distinction between confederation peers and true external eBGP peers.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the outside world see in the AS_PATH from a confederation?",
+      "a": "Only the confederation identifier. The confederation sequence of sub-ASes is stripped before the route is advertised to a real eBGP neighbor.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Confederation quick summary?",
+      "a": "Model of sub-ASes; confed eBGP AD is 200; attributes preserved; public AS is the confederation identifier; the sub-AS list is confederation peers; loop guard is the confed AS_PATH; the outside view has confed ASes stripped; alternative is route reflector.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

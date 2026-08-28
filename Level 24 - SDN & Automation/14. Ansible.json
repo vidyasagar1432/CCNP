@@ -1,0 +1,20 @@
+{
+  "title": "Ansible",
+  "level": 24,
+  "levelTitle": "Level 24 - SDN & Automation",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "14. Ansible.md",
+  "cards": [
+    { "q": "What is Ansible?", "a": "Ansible is a push-based, agentless automation tool. Playbooks written in YAML run modules against inventory hosts over SSH. For networking, modules like ios_command, ios_config, and restconf/ncclient configure devices.", "tag": "Overview", "context": "Both" },
+    { "q": "What does the agentless push model mean?", "a": "Nothing installs on the device; Ansible pushes from the controller over SSH to the hosts listed in the inventory. Ansible controls everything from its controller.", "tag": "Core Concept", "context": "Interview" },
+    { "q": "What are the key Ansible components?", "a": "Playbook (YAML tasks = the automation recipe), inventory (hosts/groups), module (unit of work), task (one module run), and play (tasks run on hosts).", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What is the structure of an Ansible playbook?", "a": "A playbook lists plays that target hosts and run tasks. Key keywords: hosts (target group), connection (network_cli for network devices), tasks (list of modules), and a module such as ios_config with options like lines.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What do the main Cisco Ansible network modules do?", "a": "ios_command runs show commands, ios_config pushes configuration, ios_facts gathers device state, ios_l3_interface manages interfaces structurally, and restconf/ncclient work over YANG. ios_facts plus structured modules enable idempotent config.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What does idempotency mean for Ansible playbooks?", "a": "An idempotent playbook produces the same result every run and is safe to re-run: it checks the desired state and does not duplicate config, so it treats config as code.", "tag": "Core Concept", "context": "Interview" },
+    { "q": "How do you run and verify Ansible against network devices?", "a": "Run with ansible-playbook -i inventory site.yaml, list inventory with ansible-inventory --list, and test reachability with ansible routers -m ping or ad-hoc commands like ansible routers -m ios_command -a \"commands='show version'\".", "tag": "Core Concept", "context": "Practical" },
+    { "q": "How do you troubleshoot Ansible failures?", "a": "Unreachable = SSH/auth problem (test with -m ping); missing module = collection not installed; parse error = YAML indentation; idempotency/state drift = ios_config; privilege issues = enable/provider settings.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "Is Ansible agent-based or agentless, and how does it push config?", "a": "Ansible is agentless and push-based: it pushes from the controller over SSH using network_cli for devices, with no software installed on the target.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "Which Ansible module gathers device state to build structured, idempotent config?", "a": "ios_facts gathers the current device state; combined with structured modules like ios_l3_interface it lets playbooks compare and apply only what changed.", "tag": "Exam Trap", "context": "Exam" }
+  ]
+}

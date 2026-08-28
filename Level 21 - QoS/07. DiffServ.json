@@ -1,0 +1,82 @@
+{
+  "title": "DiffServ (Differentiated Services)",
+  "level": 21,
+  "levelTitle": "Level 21 - QoS",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "07. DiffServ.md",
+  "cards": [
+    {
+      "q": "What is DiffServ and why is it the de-facto enterprise/SP QoS model?",
+      "a": "DiffServ is the QoS architecture where each packet carries its own class in the DSCP field and each router applies a per-hop behavior (PHB). It has no signaling and no reservations, so it scales well and is the de-facto model for enterprise/SP QoS.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How do DiffServ and IntServ differ in model, signaling, scale, and guarantee?",
+      "a": "DiffServ is per-class with no signaling, excellent scale, and statistical guarantees; IntServ is per-flow with RSVP signaling, poor scale, and hard guarantees.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the DSCP and ECN fields and what does PHB mean?",
+      "a": "DSCP is 6 bits (packet class), ECN is 2 bits (congestion marks), and PHB is the treatment applied per class by each router. DSCP selects the PHB each router applies.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What PHBs map to voice, video conferencing, video stream, signaling, and control?",
+      "a": "EF (46) = voice/low latency, AF4x (34/36/38) = video conferencing, AF3x (26/28/30) = video stream, AF2x (18/20/22) = signaling/OAM, and CSx/CS6 = control.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is AF traffic structured and what does the third digit mean?",
+      "a": "AF classes (AF1x-AF4x) have three drop precedences where x1 is low drop, x2 is medium, and x3 is high. Within an AF class, lower drop number = lower drop probability = better survival.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "In the DiffServ model, what does the edge versus core do with traffic?",
+      "a": "The edge classifies and marks once; the core trusts and applies PHBs consistently (e.g., CBWFQ/WRED), and the provider honors the DSCP or contract.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How should EF, AF, and best effort be treated in a QoS policy?",
+      "a": "EF goes to LLQ (priority), AF to bandwidth plus WRED (random-detect dscp-based), and best effort to the default class/bandwidth.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "A PHB is not being applied to traffic; what is the likely cause and check?",
+      "a": "There is no service-policy attached to the interface. Check the policy-map and its attachment.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "All AF traffic in a class is being dropped; what is the likely cause and check?",
+      "a": "Wrong drop precedence (e.g., x3 high-drop) or a bad random-detect drop profile. Check the DSCP in the class-map and the WRED drop thresholds.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What DSCP value and PHB is used for voice, and how many drop levels does AF have?",
+      "a": "EF (46) is voice; AF (Assured Forwarding) has three drop levels/precedences per class.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does DiffServ use signaling or reservations?",
+      "a": "No, DiffServ has no signaling and no reservations; it relies on DSCP and PHB, and is statistical rather than hard-guaranteed.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between DiffServ and IntServ guarantees?",
+      "a": "DiffServ provides statistical guarantees per class; IntServ provides hard, per-flow guarantees.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "title": "802.11 (Wi-Fi)",
+  "level": 22,
+  "levelTitle": "Level 22 - Wireless",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "02. 802.11.md",
+  "cards": [
+    {
+      "q": "What is IEEE 802.11?",
+      "a": "802.11 is the IEEE standard family for WLANs. It defines the MAC and PHY layers, the management frames that run association, and the amendment generations (a/b/g/n/ac/ax) that add speed and bands.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the three 802.11 frame types and what do they do?",
+      "a": "Management frames (beacon, probe, auth, assoc) run the association lifecycle; control frames (RTS/CTS, ACK) manage the medium; data frames carry the payload.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does the CSMA/CA access mechanism work?",
+      "a": "A station listens to sense the channel, waits a random backoff (DIFS/AIFS), sends when the channel is clear, and the receiver confirms with an ACK.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Why does wireless use CSMA/CA with ACKs instead of collision detection?",
+      "a": "Wireless stations cannot detect collisions while transmitting in the shared RF medium, so they use carrier sense multiple access with collision avoidance (CSMA/CA) and have the receiver confirm receipt with an ACK.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is the management frame flow for a station joining a WLAN?",
+      "a": "Beacon (AP to STA) for discovery, probe request/response for searching, authentication for identity, then association to join the BSS.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How often do APs send beacons and what do they advertise?",
+      "a": "APs send beacons roughly every 100 ms to advertise the BSSID/SSID and the presence of the network for discovery.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the legacy 802.11 amendments b, a, and g and their speeds?",
+      "a": "802.11b uses 2.4 GHz at 11 Mbps; 802.11a uses 5 GHz at 54 Mbps; 802.11g uses 2.4 GHz at 54 Mbps. All are legacy amendments.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the modern 802.11 amendments n, ac, and ax and their key features?",
+      "a": "802.11n (Wi-Fi 4) uses 2.4/5 GHz at up to 600 Mbps with MIMO; 802.11ac (Wi-Fi 5) uses 5 GHz at ~1.7 Gbps with wide channels; 802.11ax (Wi-Fi 6) uses 2.4/5/6 GHz at ~9.6 Gbps with OFDMA.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the exam mnemonic for the 802.11 amendments?",
+      "a": "n = MIMO; ac = 5 GHz fast with wide channels; ax = OFDMA and 6 GHz support.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What do RTS, CTS, and NAV do in 802.11?",
+      "a": "RTS (request to send) reserves the medium, CTS (clear to send) grants it, and NAV is the wait timer stations honor. RTS/CTS mitigates hidden-node problems.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What problem does RTS/CTS solve?",
+      "a": "It mitigates hidden-node problems, where a station cannot hear another station and collisions result.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What do the PHY and MAC layers cover in 802.11?",
+      "a": "The PHY layer covers OFDM/OFDMA and modulation; the MAC layer covers CSMA/CA and frames; an L2.5 layer handles interop such as WPA.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands show 802.11 radio, client, and AP status?",
+      "a": "show ap radio summary, show ap dot11 5ghz summary, show wireless client summary, show ap config general, and show ap monitor.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "No beacon is seen from an AP, and clients see no network. What is the likely cause and check?",
+      "a": "The radio is likely disabled. Check the AP radio state with show ap radio summary.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "The WLAN is slow and association is failing. What are the likely causes?",
+      "a": "Slow performance is often caused by legacy clients lowering the data rate; association failures are often an authentication mismatch. Check the dot11 rate settings for slow clients and the client authentication for assoc failures.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which 802.11 quick review facts should you remember?",
+      "a": "Access is CSMA/CA with receiver ACK; frames are management/control/data; n = MIMO, ac = 5 GHz, ax = OFDMA/6 GHz; RTS/CTS solves hidden node; beacons every ~100 ms.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

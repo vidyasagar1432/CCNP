@@ -1,0 +1,64 @@
+{
+  "title": "Redundant Supervisors",
+  "level": 27,
+  "levelTitle": "Level 27 - High Availability",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "03. Redundant Supervisors.md",
+  "cards": [
+    {
+      "q": "What are redundant supervisors and why are they used?",
+      "a": "Redundant supervisors protect a chassis switch by running a standby supervisor in the same or second slot, providing chassis HA, fast failover via hot standby, shared config, and control continuity. A second supervisor is brain redundancy.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the three supervisor redundancy modes and how do they differ?",
+      "a": "RPR keeps no state on standby (cold, slow switchover with reload), RPR+ shares the startup config (medium failover), and SSO does full sync with fast, zero-drop failover. SSO provides the highest availability.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does RPR behave on switchover?",
+      "a": "The standby boots for failover, config is reloaded from NVRAM/Flash, no state is synchronized, the switchover causes a forwarding drop, and RPR is used for basic HA—swap the brain, reload the box.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does RPR+ differ from RPR?",
+      "a": "RPR+ shares the startup config and the same image with minimal state, so switchover is faster than RPR; it is a mid-tier option between RPR and SSO.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you choose between RPR, RPR+, and SSO?",
+      "a": "Match the mode to the HA budget: RPR for minimal HA or legacy use, RPR+ for config sharing, and SSO for zero-loss failover as the production choice.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What commands configure and verify supervisor redundancy?",
+      "a": "Under redundancy, use mode rpr | rpr-plus | sso with main-cpu and state processor 1 supervisor. Verify with show redundancy states and confirm supervisors with show module including Supervisor.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the ordering and key distinction of redundancy modes?",
+      "a": "Modes are ordered RPR less than RPR+ less than SSO by capability. RPR has no state and reloads, RPR+ shares the config, and SSO provides full sync with zero-loss failover; all require a dual supervisor, configured with mode under redundancy.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are common redundant-supervisor failure symptoms and checks?",
+      "a": "Wrong mode points to config (check show redundancy), no standby points to the module (check show module), slow failover points to RPR (promote the mode), sync issues point to SSO (check states), and forced switchover is for maintenance via force-switchover.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What mode best fits each HA need?",
+      "a": "RPR fits minimal HA with no state, RPR+ fits shared config, and SSO fits zero-loss full-sync failover; verify with show redundancy, with SSO being the best and HA chassis its main use.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

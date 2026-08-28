@@ -1,0 +1,88 @@
+{
+  "title": "Policing",
+  "level": 21,
+  "levelTitle": "Level 21 - QoS",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "03. Policing.md",
+  "cards": [
+    {
+      "q": "What is policing in QoS?",
+      "a": "Policing enforces a rate by dropping (or re-marking) excess traffic; it does not buffer. It uses the token bucket model and works on ingress or egress. Policing is burst-sensitive, adds no delay, and is often used to meter customer or class rates.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How do policing and shaping differ in how they handle excess traffic, delay, and location?",
+      "a": "Policing drops/re-marks excess with no added delay and works on ingress or egress; shaping buffers excess, adds delay, and works egress-only. Policing drops; shaping delays.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What do CIR, Bc, and Be mean in the token bucket model?",
+      "a": "CIR is the fill rate (bps), Bc is the committed burst, and Be is the excess burst. Packets that conform (tokens available) pass; those that exceed (no tokens) get dropped or re-marked.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the three policing actions and when is each used?",
+      "a": "transmit (when traffic conforms), drop (when it violates), and set dscp plus transmit (to re-mark traffic that exceeds). Re-mark and transmit is gentler than dropping.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What command configures a policer and its actions?",
+      "a": "police cir <rate> bc <burst> be <burst>, followed by conform-action, exceed-action, and violate-action. It is configured inside a policy-map class that is attached with service-policy.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "In the dual-bucket policing model, what are the three states and their actions?",
+      "a": "conform (Bc available) = transmit; exceed (only Be available) = re-mark; violate (no tokens) = drop. The dual-bucket model gives three outcomes.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What command attaches a policer to the ingress of an interface?",
+      "a": "service-policy input <policy-map-name> under the interface. Output uses service-policy output instead.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Where is policing commonly used and why?",
+      "a": "Customer rate limiting (enforce SLAs), bandwidth control (meter classes), mark-down (re-mark over rate), and ingress protection (stop floods).",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What command shows whether policing is being applied and matching rates?",
+      "a": "show policy-map interface (or show policy-map interface Gi0/1) shows per-interface policing stats.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Traffic is being dropped too aggressively by a policer; what is the likely cause and fix?",
+      "a": "The burst size (Bc/Be) is too small. Increase bc/be so legitimate bursts conform.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "How does policing differ from shaping in terms of buffering?",
+      "a": "Policing never buffers; it drops or re-marks excess traffic, whereas shaping buffers the excess.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Can policing be applied on egress?",
+      "a": "Yes, policing works on ingress or egress, whereas shaping is egress-only.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Re-marking is not working on a policer even though traffic exceeds the rate; what should you check?",
+      "a": "Check the conform-action/exceed-action (and violate-action) statements in the police command configuration.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    }
+  ]
+}

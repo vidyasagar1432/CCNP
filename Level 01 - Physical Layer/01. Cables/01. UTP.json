@@ -1,0 +1,88 @@
+{
+  "title": "UTP",
+  "level": 1,
+  "levelTitle": "Level 01 - Physical Layer",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "01. UTP.md",
+  "cards": [
+    {
+      "q": "What is Unshielded Twisted Pair (UTP) and how does it reject interference?",
+      "a": "UTP is the most common copper LAN cabling, made of four twisted pairs of copper wire that carry signals differentially. Twisting and the balanced differential signal cancel electromagnetic interference (EMI) and crosstalk. It is cheap, familiar, and standardized in the TIA/EIA-568 series.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Why are adjacent pairs in a UTP cable twisted at different rates?",
+      "a": "Twisting pairs at different rates (varying lay/length) causes unwanted coupling (crosstalk and EMI) induced on one pair to be out of phase with the other, so it cancels at the differential receiver. The receiver reads the difference between the two opposite-polarity conductors (+V and -V).",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What are the four UTP pairs and their color-code pins?",
+      "a": "The pairs are orange (1-2), green (3-6), blue (4-5), and brown (7-8). The pairs are not contiguous pins; 3-6 splits around 4-5, a legacy of the telephone-based 10BASE-T design that used pins 1, 2, 3, and 6.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Match Cat 5, Cat 5e, Cat 6, Cat 6a, Cat 7, and Cat 8 to their Ethernet purpose.",
+      "a": "Cat 5 (100 MHz) for 100BASE-TX; Cat 5e (100 MHz) up to 1000BASE-T gigabit over 4 pairs; Cat 6 (250 MHz) for 1000BASE-T and 10GBASE-T up to 55 m; Cat 6a (500 MHz) for 10GBASE-T up to 100 m; Cat 7 (600 MHz) shielded, limited use; Cat 8 (2000 MHz) for 25/40GBASE-T short data-center runs under 30 m.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How many pairs do 100BASE-TX and 1000BASE-T each use on a UTP cable?",
+      "a": "100BASE-TX uses two pairs: 1-2 for transmit and 3-6 for receive. 1000BASE-T uses all four pairs bidirectionally with echo cancellation.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the 100-meter rule for twisted-pair Ethernet?",
+      "a": "The maximum segment length for twisted-pair Ethernet is 100 m total, made up of 90 m horizontal run plus 10 m of patch and user cables. 2.5GBASE-T and 5GBASE-T (NBASE-T) reuse Cat 5e/6 at higher speeds over the same 100 m.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between a straight-through and a crossover cable?",
+      "a": "A straight-through cable has the same pinout on both ends and connects device to switch. A crossover cable swaps the transmit and receive pairs and is used for switch-to-switch, host-to-host, or legacy host-to-host connections.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is auto-MDIX and why does it make cable selection less critical?",
+      "a": "Auto-MDIX (automatic medium-dependent interface crossover) lets a PHY detect the peer and swap transmit/receive internally, making straight versus crossover cable selection irrelevant on modern equipment. It is enabled with auto-MDIX (mdix auto), default on for 10/100/1000 Mbps.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What commands configure and verify a gigabit interface's negotiation on Cisco IOS?",
+      "a": "On the interface, use speed auto, duplex auto, and mdix auto to enable auto-MDIX (default in most IOS images). Verify with 'show interfaces GigabitEthernet0/1' and 'show interfaces status' for a quick media, duplex, and speed view.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "In cabling contexts, what does the acronym STP refer to and how is it disambiguated?",
+      "a": "In cabling, STP is Shielded Twisted Pair (the cable), not the Spanning Tree Protocol. Because the exam uses the same initials, you must disambiguate by context, such as the presence of the word cable.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does the 100-meter rule include patch cables and user cables?",
+      "a": "Yes. The 100-meter rule is a total budget: 90 m of horizontal cable plus 10 m of patch and user cables, all included within the 100 m maximum segment length.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "With modern auto-MDIX, what cable works for a switch-to-switch connection?",
+      "a": "A straight-through cable works switch-to-switch on modern equipment because auto-MDIX detects the peer and swaps internally. Older exam patterns requiring a crossover are less relevant on newer exams, but the pinout concept should still be known.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the MHz rating of Cat 5 versus Cat 5e?",
+      "a": "Both Cat 5 and Cat 5e are rated at 100 MHz. Cat 5e adds stricter specifications that allow gigabit (1000BASE-T), so you must not claim a higher MHz rating for 5e.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

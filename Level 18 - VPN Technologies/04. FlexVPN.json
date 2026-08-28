@@ -1,0 +1,82 @@
+{
+  "title": "FlexVPN",
+  "level": 18,
+  "levelTitle": "Level 18 - VPN Technologies",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "04. FlexVPN.md",
+  "cards": [
+    {
+      "q": "What is FlexVPN and what does it replace?",
+      "a": "FlexVPN is Cisco's IKEv2-based VPN framework that does site-to-site, remote access, hub-and-spoke, and spoke-to-spoke using the same IKEv2 profile building blocks. It modernizes IPsec by replacing the legacy crypto map/ISAKMP config with profiles and simplifies DMVPN-style deployments.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the IKEv2 profile building blocks in FlexVPN?",
+      "a": "The building blocks are crypto ikev2 proposal (encryption + integrity + DH), crypto ikev2 policy (proposal + lifetime), crypto ikev2 keyring (pre-shared keys), crypto ikev2 profile (match + auth + keyring), and crypto ipsec profile (transform + ikev2 profile). This provides one consistent config language across every VPN type.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What modes does FlexVPN support?",
+      "a": "FlexVPN supports site-to-site (static tunnel between sites), remote access (client to server over IKEv2), hub-and-spoke (DMVPN-style with IKEv2), and spoke-to-spoke (dynamic shortcuts). It uses the same building blocks with different match/authentication setup.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the crypto ikev2 profile configure in FlexVPN?",
+      "a": "The crypto ikev2 profile configures match identity, authentication (remote and local pre-share), and the local keyring, tying together identity matching and authentication for the peer.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the differences between FlexVPN and DMVPN?",
+      "a": "DMVPN uses IKEv1 or v2 with NHRP + mGRE config and hub-spoke modes with crypto map/profiles; FlexVPN is native IKEv2, uses profiles, adds remote access mode, is profile-based, and is less complex and unified. FlexVPN can also run hub-spoke using NHRP.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does FlexVPN remote access work?",
+      "a": "An IKEv2 client (AnyConnect) uses the same IKEv2 profile on the server side; certificates or pre-shared keys authenticate, and dynamic virtual tunnel interfaces (VTIs) scale client tunnels.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which commands verify FlexVPN operation?",
+      "a": "show crypto ikev2 profile, show crypto ikev2 sa, show crypto ipsec sa, show crypto session, and debug crypto ikev2.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "No IKE SA is forming in FlexVPN; what is a likely cause?",
+      "a": "An IKEv2 proposal or policy mismatch; verify with show crypto ikev2 sa that the encryption, integrity, and DH group match between peers.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What causes an authentication failure in FlexVPN?",
+      "a": "A keyring or match identity problem; the IKEv2 profile's match identity remote address must match the peer, and the correct keyring must be configured. Verify with show crypto ikev2 sa and the ikev2 profile.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "How is FlexVPN best distinguished from DMVPN in an exam?",
+      "a": "FlexVPN is IKEv2-profile-first while DMVPN is an NHRP + mGRE model. FlexVPN uses the IKEv2 profile model, not crypto map/ISAKMP, and can also do remote access and hub-spoke.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the FlexVPN quick-review summary?",
+      "a": "FlexVPN is based on IKEv2, uses profiles for config, supports S2S/RA/hub/spoke modes, uses a pre-shared keyring, a crypto ipsec profile as transform, tunnel protection profile to attach it, cert or pre-shared authentication, and DMVPN (NHRP) as an alternative.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What are common proposal options in FlexVPN IKEv2?",
+      "a": "Common proposals use AES-GCM encryption with SHA-256 integrity, such as aes-gcm-256 with sha256 and DH group 14.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    }
+  ]
+}

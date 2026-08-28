@@ -1,0 +1,172 @@
+{
+  "title": "MST (Multiple Spanning Tree, 802.1s)",
+  "level": 8,
+  "levelTitle": "Level 08 - STP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "05. MST.md",
+  "cards": [
+    {
+      "q": "What is MST and what is its main purpose?",
+      "a": "MST (Multiple Spanning Tree, IEEE 802.1s) reduces STP scale by mapping multiple VLANs to a smaller number of spanning-tree instances (MSTIs). It uses RSTP mechanisms for rapid convergence and supports per-instance load balancing.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the MST mental model?",
+      "a": "Many VLANs → few MST instances → less STP overhead → per-instance load balancing.",
+      "tag": "Quick Review",
+      "context": "Both"
+    },
+    {
+      "q": "What is an MST region and what three parameters identify it?",
+      "a": "An MST region is a group of switches with an identical MST configuration, identified by matching MST region name, MST revision number, and VLAN-to-MST instance mapping.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens to switches whose MST region name, revision, or VLAN mapping differ?",
+      "a": "They are considered to be in different MST regions. Different regions are not automatically a problem; multiple regions can be connected, but the switches do not form one region.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the IST (MST instance 0)?",
+      "a": "MST instance 0 is the Internal Spanning Tree (IST). It always exists, cannot be removed, carries VLANs not explicitly mapped to another MSTI, represents the region internally, and participates in the CIST.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is an MSTI and what can each one have independently?",
+      "a": "An MSTI is an MST instance (MSTI 1-15) that groups VLANs. Each MSTI can have its own Root Bridge, port roles, port states, path costs, and load-balancing behavior; VLANs in the same MSTI share that instance's topology.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the CIST?",
+      "a": "The Common and Internal Spanning Tree (CIST) provides the overall spanning-tree structure connecting switches within a region, multiple MST regions, and MST regions to external STP/RSTP/PVST+ domains. It is the common spanning-tree view across the entire bridged network.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between an MST Region, the IST, MSTIs, and the CIST?",
+      "a": "An MST Region is a group of switches with identical MST configuration; IST/MST 0 is the mandatory instance in every region; MSTI 1-15 are additional instances for VLAN groups; CIST is the common spanning-tree structure connecting regions and external domains.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why use MST instead of per-VLAN STP when there are many VLANs?",
+      "a": "Per-VLAN STP creates one instance per VLAN (1000 VLANs ≈ 1000 instances), while MST groups VLANs into fewer instances (e.g., MSTI 1-5 covering 1000 VLANs), significantly reducing STP control-plane overhead.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which spanning-tree feature should you associate with many VLANs, fewer STP instances, and scalability?",
+      "a": "MST.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands configure a region name, revision, and VLAN-to-instance mapping, then enable MST?",
+      "a": "spanning-tree mst configuration, then name CORP, revision 2, instance 1 vlan 10-50, exit, then spanning-tree mode mst.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you configure an MST instance root?",
+      "a": "spanning-tree mst 1 priority 4096 or the convenience commands spanning-tree mst 1 root primary and spanning-tree mst 2 root secondary, which adjust bridge priority rather than guaranteeing permanent primary/secondary status.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Does the revision number automatically synchronize the MST configuration?",
+      "a": "No. The revision number is part of region identification only; all switches must actually have matching name, revision, and VLAN-to-instance mapping.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the key trade-off when VLANs are mapped to the same MSTI?",
+      "a": "You gain scalability by giving up independent spanning-tree topology per VLAN; VLANs in the same MSTI cannot have different STP topologies inside that MSTI.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does MST provide Layer-2 load balancing, and at what granularity?",
+      "a": "Different MSTIs can have different Root Bridges (e.g., MSTI 1 root = SW1, MSTI 2 root = SW2). MST load balancing is per instance, not per VLAN.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does MST use RSTP convergence mechanisms or slow 802.1D?",
+      "a": "MST uses RSTP (802.1w) mechanisms such as port roles, Proposal/Agreement, edge ports, and rapid transitions for rapid convergence; it is not slow per-VLAN STP.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does an MST region appear to external networks?",
+      "a": "The region is represented through the CIST as a logical spanning-tree entity; the external network does not need to understand every internal MSTI.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What can create an MST region boundary?",
+      "a": "Different region name, different revision, different VLAN-to-instance mapping, or a neighbor using a different spanning-tree domain/protocol. A region boundary is not inherently an error; the CIST/root/path relationships must simply be correct.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does MST interoperate with a PVST+/Rapid PVST+ environment?",
+      "a": "Cisco supports PVST+ simulation at the MST boundary, so the MST region uses its internal instances while the PVST+/Rapid-PVST+ side operates per-VLAN. Boundary/root consistency must be maintained.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the MST instance limit on common Cisco IOS/IOS XE implementations?",
+      "a": "16 total instances: MST 0 (IST) plus MST 1-15 user-defined MSTIs. VLANs not mapped to MSTI 1-15 remain in MST 0 (IST).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands verify MST information and MST configuration?",
+      "a": "show spanning-tree mst displays MST instances, roots, port roles/states, and boundary info; show spanning-tree mst configuration displays region name, revision, VLAN-to-instance mapping, and configuration digest; show spanning-tree mst 1 shows a specific instance.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the most common cause of switches unexpectedly forming different MST regions?",
+      "a": "A mismatch in region name, revision, or VLAN-to-instance mapping. Check with show spanning-tree mst configuration.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why is it wrong to say MST creates one STP instance per VLAN?",
+      "a": "MST maps multiple VLANs to a smaller number of MST instances, not one instance per VLAN.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is it wrong to say MST has only one root bridge for the entire MST network?",
+      "a": "Different MSTIs can have different Root Bridges, while the CIST has its own root relationship.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Can MST 0 (IST) be removed or disabled?",
+      "a": "No. MST 0 (IST) always exists and cannot be removed; it carries unmapped VLANs.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Are two different MST regions always a configuration error?",
+      "a": "No. Different MST regions can be intentional and legitimate; they become a problem only when the resulting spanning-tree design, root, or path relationships are incorrect.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "What are the key MST facts in quick review?",
+      "a": "Standard IEEE 802.1s/802.1Q; maps many VLANs to fewer instances; region identity = name + revision + VLAN mapping; instance 0 IST mandatory; MSTIs 1-15; load balancing per MSTI; RSTP-based convergence; CIST is the overall common tree; verification show spanning-tree mst.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

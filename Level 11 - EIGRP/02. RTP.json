@@ -1,0 +1,166 @@
+{
+  "title": "EIGRP RTP (Reliable Transport Protocol)",
+  "level": 11,
+  "levelTitle": "Level 11 - EIGRP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "02. RTP.md",
+  "cards": [
+    {
+      "q": "What is EIGRP RTP?",
+      "a": "RTP (Reliable Transport Protocol) is EIGRP's own transport mechanism for delivering EIGRP packets between neighbors. Despite the name it is not TCP or UDP; it runs directly over IP and provides reliable delivery via sequence numbers, acknowledgments, and retransmissions.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How is EIGRP carried over IPv4?",
+      "a": "EIGRP runs directly over IP using IP protocol 88, commonly using IPv4 multicast address 224.0.0.10 for local EIGRP routers. It uses no TCP or UDP ports.",
+      "tag": "Overview",
+      "context": "Exam"
+    },
+    {
+      "q": "What are EIGRP's five packet types and their reliability?",
+      "a": "Hello (unreliable): neighbor discovery and keepalive. Update (reliable): advertise routing/topology information. Query (reliable): ask neighbors for a route during DUAL computation. Reply (reliable): respond to a query. ACK (unreliable): acknowledge receipt of a reliable packet.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What mechanisms does EIGRP RTP use for reliable delivery?",
+      "a": "Sequence numbers, acknowledgments, retransmissions, Retransmission Timeout (RTO), and SRTT (Smooth Round-Trip Time). If a reliable packet is not acknowledged within the retransmission period, EIGRP retransmits it to the affected neighbor.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why are EIGRP Hello packets intentionally unreliable?",
+      "a": "If a Hello is lost, the next Hello arrives shortly afterward, so there is no need to retransmit every Hello.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How does EIGRP use sequence numbers and acknowledgments?",
+      "a": "Router A sends a reliable packet such as an Update with a sequence number, Router B returns an ACK, and if A does not receive the expected ACK before the RTO expires, it retransmits the packet. This provides reliability without TCP.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the exam distinction between EIGRP RTP and TCP?",
+      "a": "EIGRP does not run over TCP or UDP. RTP is an EIGRP-specific transport mechanism that runs with EIGRP using IP protocol 88 and has no TCP or UDP ports.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does EIGRP decide between multicast and unicast delivery?",
+      "a": "EIGRP uses multicast 224.0.0.10 when appropriate, and reliable packets can initially be sent multicast. When a reliable multicast packet is not acknowledged by a particular neighbor, EIGRP retransmits it individually by unicast to that neighbor. Reliable is not always unicast and not always multicast.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the common default EIGRP Hello and Hold timers?",
+      "a": "Broadcast and many point-to-point interfaces: Hello 5 seconds, Hold 15 seconds. NBMA networks: Hello 60 seconds, Hold 180 seconds. The hold timer is commonly 3 times the Hello timer.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Do EIGRP Hello timers have to match between neighbors?",
+      "a": "No. Unlike OSPF, EIGRP neighbors do not require matching Hello intervals. Each router advertises a hold time, and the receiving router uses that hold time to determine how long it can go without hearing from the neighbor.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens if EIGRP K-values do not match between neighbors?",
+      "a": "The EIGRP adjacency does not form. Default classic EIGRP K-values are K1 = 1, K2 = 0, K3 = 1, K4 = 0, K5 = 0, so by default the metric uses bandwidth and delay.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the relationship between DUAL and RTP?",
+      "a": "DUAL decides what routing information is needed; RTP provides the reliable delivery mechanism for the EIGRP packets used to exchange that information. Memory trick: DUAL = Decides, RTP = Delivers.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What role does RTP play when a route is Active?",
+      "a": "When a route goes Active, DUAL sends queries and awaits replies, and RTP provides reliable delivery of those Query and Reply packets.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are SRTT and RTO in EIGRP?",
+      "a": "SRTT (Smooth Round-Trip Time) is a smoothed estimate of the time required for communication with a neighbor. RTO (Retransmission Timeout) determines how long EIGRP waits before retransmitting a reliable packet when the expected acknowledgment has not arrived.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Besides receiving Hellos, what must match for an EIGRP adjacency to form?",
+      "a": "The EIGRP AS/process relationship, K-values, network/interface compatibility, authentication when configured, primary addressing/network configuration, and successful EIGRP packet communication.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are common causes of EIGRP neighbor flapping and the commands to check it?",
+      "a": "Packet loss, interface instability, physical problems, congestion, hold timer expiration, or incorrect network/interface configuration. Check show ip eigrp neighbors and show ip eigrp interfaces.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are common causes of no EIGRP neighbors forming?",
+      "a": "Incorrect EIGRP configuration, K-value mismatch, incorrect AS/process configuration, authentication mismatch, interface/network problems, EIGRP packets being filtered, multicast communication problems, or IP protocol 88 being blocked. Check show ip eigrp neighbors, show ip eigrp interfaces, and show ip protocols.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What causes reliable EIGRP packet retransmissions, and should RTO be changed manually?",
+      "a": "Packet loss, congestion, one-way communication, neighbor instability, or interface problems. Check show ip eigrp neighbors and show ip eigrp traffic for SRTT, RTO, and retransmission activity. Do not assume changing RTO manually is the normal fix; EIGRP uses its measured timing information.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does high RTO, unanswered queries, and a failed adjacency each suggest in EIGRP troubleshooting?",
+      "a": "High RTO: slow or unreliable neighbor communication, check show ip eigrp neighbors. Queries unanswered: neighbor or query communication problem, check show ip eigrp traffic. Adjacency fails: K-value mismatch, check show ip protocols or configuration.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What information does show ip eigrp neighbors display?",
+      "a": "Neighbor status, hold time, SRTT, RTO, sequence-related information, and uptime.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does show ip eigrp traffic report?",
+      "a": "Hello, Update, Query, Reply, and ACK counts plus overall EIGRP packet activity.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What do show ip eigrp interfaces, show ip eigrp topology, and show ip eigrp topology active display?",
+      "a": "show ip eigrp interfaces lists EIGRP-enabled interfaces with neighbor info and interface-specific parameters. show ip eigrp topology shows successors, feasible successors, FD, RD, and route state. show ip eigrp topology active shows Active routes for troubleshooting queries and SIA conditions.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What debug command inspects EIGRP packets, and why use it carefully?",
+      "a": "debug eigrp packets. Use carefully in production because debugging can generate significant output and CPU load.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Is the EIGRP ACK packet itself acknowledged?",
+      "a": "No. ACK packets are unreliable and are not themselves acknowledged. An ACK simply confirms receipt of a reliable EIGRP packet such as an Update.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Since EIGRP runs directly over IP, does it use TCP or UDP ports?",
+      "a": "No. EIGRP uses IP protocol 88, which is an IP protocol number, not a TCP or UDP port number. There is no TCP port 88 or UDP port 88, and EIGRP does not run over TCP or UDP.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is SIA simply an RTP failure?",
+      "a": "No. SIA (Stuck-in-Active) occurs when a route remains Active because required query processing or replies do not complete in time. It is fundamentally a DUAL query/reply and query-domain convergence problem, not an RTP failure.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

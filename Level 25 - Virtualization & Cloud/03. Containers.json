@@ -1,0 +1,94 @@
+{
+  "title": "Containers",
+  "level": 25,
+  "levelTitle": "Level 25 - Virtualization & Cloud",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "03. Containers.md",
+  "cards": [
+    {
+      "q": "What are containers?",
+      "a": "Packages of an application plus its dependencies that run as isolated but kernel-shared workloads, with no guest OS and no hypervisor overhead. They boot in seconds and scale easily.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How do containers achieve isolation and resource control?",
+      "a": "Namespaces provide isolation and cgroups limit and track resources, all sharing the host kernel with no separate kernel per container.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the five layers of a container?",
+      "a": "Shared host kernel, namespaces (isolation), cgroups (resources), image (app + dependencies), and a runtime such as Docker or containerd.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Compare a container and a VM on kernel, boot, overhead, isolation, and density.",
+      "a": "Container: shared kernel, boots in seconds, low overhead, lighter isolation, high density. VM: own kernel, boots in minutes, high overhead, strong isolation, low density.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the container components image, container, and registry?",
+      "a": "An image is a read-only template; a container is a running image; a registry stores and shares images. Kubernetes (K8s) is the typical orchestrator.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the benefits of containers?",
+      "a": "They are portable (run the same everywhere), light enough for fast startup, easy to scale by replication, and a natural fit for CI/CD.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What networking models do containers use?",
+      "a": "Bridge (NAT by default), host (share the host network), overlay (multi-node mesh), and CNI, the plugin standard that connects containers to networks.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is CNI in container networking?",
+      "a": "The Container Network Interface, a plugin standard that connects containers to networks. It is the key standard for container network management.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are containerized network functions (NFs)?",
+      "a": "Network functions shipped as containers, such as containerized IOS-XE routers, cloud microservices, and vendor vAppliances. They represent the modern approach to network functions.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands manage and run containers?",
+      "a": "docker ps lists containers, docker pull fetches an image, docker run -d image starts one detached, and kubectl get pods works with an orchestrator.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A container won't start or has no network. What do you check?",
+      "a": "For a startup failure, check for port conflicts (docker ps); for no network, check the CNI/bridge configuration and the container's networks.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does a container differ from a VM in isolation and resource overhead?",
+      "a": "A container shares the host kernel with namespace/cgroup-based isolation and low overhead; a VM has its own kernel with strong isolation and higher overhead.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What makes containers the modern approach to network functions?",
+      "a": "Containerized network functions run network services as portable, kernel-shared workloads instead of full VMs.",
+      "tag": "Quick Review",
+      "context": "Both"
+    },
+    {
+      "q": "Summary: kernel, isolation, limits, boot, overhead, and network of containers.",
+      "a": "Kernel is shared; isolation via namespaces; limits via cgroups; boot in seconds; low overhead; networking via CNI; vs VM they are lighter.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

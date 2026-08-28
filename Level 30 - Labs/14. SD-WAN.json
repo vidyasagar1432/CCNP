@@ -1,0 +1,124 @@
+{
+  "title": "SD-WAN",
+  "level": 30,
+  "levelTitle": "Level 30 - Labs",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "14. SD-WAN.md",
+  "cards": [
+    {
+      "q": "What does the SD-WAN lab bring up and verify?",
+      "a": "It brings up the control plane (vManage/vSmart/vBond), onboards vEdge/cEdge routers, and verifies transport tunnels, BFD, and policy, modernizing WAN design with centralized control.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the SD-WAN components and their roles?",
+      "a": "vManage is the dashboard, vSmart applies policy, vBond is the orchestrator, vEdge/cEdge are the routers, and vAnalytics handles reporting.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the correct SD-WAN bring-up order?",
+      "a": "The control plane (vManage, vSmart, vBond) comes up first, then the data plane, so 'control plane first, data plane follows'.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the vEdge/cEdge onboarding flow?",
+      "a": "Define the DNA/port, discover vBond, upload to vManage, contact vSmart, and then transport tunnels form.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does an edge router register in SD-WAN?",
+      "a": "The vEdge first finds vBond (the orchestrator), then registers to vManage and contacts vSmart.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What commands verify SD-WAN control and tunnel health?",
+      "a": "show sdwan control connections, show sdwan control local-properties, show sdwan tunnel, show sdwan interface, and show sdwan policy.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the first check when troubleshooting SD-WAN?",
+      "a": "show sdwan control connections, to confirm the control plane is up.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do BFD and SLA affect SD-WAN?",
+      "a": "BFD provides liveness, SLA provides class metrics, and together they drive path selection, path preference, and fallback with vSmart applying policy.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What drives SD-WAN path selection and failover?",
+      "a": "BFD liveness and SLA metrics, which vSmart uses to apply policy for path preference and backup fallback.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the SD-WAN policy types and their scope?",
+      "a": "Centralized policy is applied by vSmart, data policy uses match/action, control policy affects routing, localized policy applies at the device, and app-aware policy handles priority.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is SD-WAN policy?",
+      "a": "Policy is vSmart-applied match/action rules that govern data, control, and localized routing behavior.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the SD-WAN lab flow?",
+      "a": "Deploy the controllers, onboard the edge, check control connections, bring up tunnels, apply policy, then verify.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the default DTLS control-plane port used by SD-WAN?",
+      "a": "DTLS 12346 is used for the SD-WAN control plane.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "An edge router has no control connections. What is the likely cause and check?",
+      "a": "A vBond discovery problem, so check show sdwan control connections.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Transport tunnels are down in SD-WAN. What is the likely cause and check?",
+      "a": "A TLOC issue, so check the tunnel state with show sdwan tunnel.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "SD-WAN policy is not being applied. What is the likely cause and check?",
+      "a": "vSmart is not pushing the policy, so check show sdwan policy.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "The SD-WAN data plane can be brought up before the control plane is ready.",
+      "a": "False — the control plane (vManage, vSmart, vBond) must be up first; the data plane follows.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "What port and protocol does the SD-WAN control plane use, and why does it matter?",
+      "a": "DTLS over UDP port 12346 carries control-plane signaling; knowing it helps verify and troubleshoot controller connectivity.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What summarizes core SD-WAN health?",
+      "a": "The control-connection and tunnel tables, verified with show sdwan control connections and show sdwan tunnel.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

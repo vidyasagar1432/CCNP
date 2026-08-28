@@ -1,0 +1,82 @@
+{
+  "title": "VPN",
+  "level": 29,
+  "levelTitle": "Level 29 - Troubleshooting",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "14. VPN.md",
+  "cards": [
+    {
+      "q": "What does VPN troubleshooting check?",
+      "a": "The tunnel, IKE phases, transforms, and interesting traffic. Failures show as no tunnel, crypto not established, or no traffic protected.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the two crypto checks for a VPN tunnel?",
+      "a": "The IKE SA (show crypto isakmp sa, Phase 1) and the IPsec SA (show crypto ipsec sa, Phase 2 plus traffic).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the difference between IKE Phase 1 and Phase 2?",
+      "a": "Phase 1 builds the ISAKMP/IKE SA (the tunnel to build the tunnel), and Phase 2 builds the IPsec SA for protecting data traffic.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What gates whether Phase 2 can form?",
+      "a": "Interesting traffic, defined by the crypto ACL (proxy IDs). If the traffic is not interesting, Phase 2 does not establish.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What parameters must match between the two VPN peers?",
+      "a": "Proposal (encryption/hash), authentication (PSK or cert), lifetime, DH group, and proxy IDs (ACL match). Mismatch in any parameter blocks the tunnel.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does a tunnel being up but no protected traffic indicate?",
+      "a": "The ACL/proxy ID does not match the actual traffic, so the tunnel is up but traffic is not protected.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does clear crypto sa do?",
+      "a": "Resets the IPsec security associations, tearing down and rebuilding the tunnel.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What debug command traces Phase 1 (ISAKMP) negotiation?",
+      "a": "debug crypto isakmp. debug crypto ipsec handles Phase 2, and debug crypto ikev2 handles IKEv2.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the difference between IKEv1 and IKEv2?",
+      "a": "IKEv1 uses main or aggressive mode for Phase 1, while IKEv2 uses a single exchange.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does DPD do, and what happens when it fails?",
+      "a": "DPD (Dead Peer Detection) detects a dead peer; when it fails the tunnel flaps.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "MTU issues in a VPN tunnel cause what?",
+      "a": "Fragmentation problems, where the encapsulation overhead splits packets and breaks traffic.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "A VPN with SA but no traffic flowing is most likely caused by what?",
+      "a": "A proxy ID or crypto map mismatch, so the interesting traffic ACL does not match the actual data.",
+      "tag": "Quick Review",
+      "context": "Practical"
+    }
+  ]
+}

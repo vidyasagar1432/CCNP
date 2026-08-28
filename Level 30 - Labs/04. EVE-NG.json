@@ -1,0 +1,106 @@
+{
+  "title": "EVE-NG",
+  "level": 30,
+  "levelTitle": "Level 30 - Labs",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "04. EVE-NG.md",
+  "cards": [
+    {
+      "q": "What is EVE-NG?",
+      "a": "EVE-NG (Emulated Virtual Environment Next Generation) is a web-based lab platform that runs real images (IOS, NX-OS, ASA, and third-party VMs), with a free pro edition, ideal for big multi-vendor CCNP topologies.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Why is EVE-NG well suited to large CCNP topologies?",
+      "a": "It is web-based, has a free tier, supports multiple real multi-vendor images on one platform, and offers browser console plus an API.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Which image types can EVE-NG run?",
+      "a": "IOS/IOS-XE routers, NX-OS switches, ASA firewalls, vIOS-L2 for switching, Linux VMs as hosts, and containers for Linux nodes.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between EVE-NG Community and Pro editions?",
+      "a": "Community is a free basic tier, while Pro unlocks the image pool and image import; Pro+ is the licensed version.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you run a lab in EVE-NG?",
+      "a": "Log in via the web UI, add a node, connect it, boot, open the console, and save the topology — all from the browser with no desktop app.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which collaboration and scaling features does EVE-NG offer?",
+      "a": "Multi-user support for team labs, an API for automation, snapshots to save states, templates for reuse, and external network connectivity to bridge to real networks.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What hardware should you plan for an EVE-NG deployment?",
+      "a": "A Linux/ESXi host with many GB of RAM, disk for image storage, and CPU per node, scaled according to node count.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does EVE-NG compare to GNS3 and CML?",
+      "a": "EVE-NG uses a web UI, has a free tier, supports multi-vendor images, offers an API and high fidelity, and is best for large labs.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the EVE-NG API endpoint used for automation?",
+      "a": "The EVE API is accessed via https://&lt;host&gt;/api/..., with snapshot and export handled through the UI.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "An EVE-NG node will not boot. What is the likely cause and check?",
+      "a": "The likely cause is an image problem, so check that the image is imported correctly for the node type.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "An EVE-NG console fails to open. What is the likely cause and check?",
+      "a": "The likely cause is a Java/HTML5 mode setting, so check the console mode being used.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "An EVE-NG API call returns a 401 error. What should you check?",
+      "a": "Check the authentication token, since an API 401 error is caused by an authentication problem.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "EVE-NG can only run Cisco images.",
+      "a": "False — EVE-NG supports multi-vendor images from Cisco and third-party vendors on one platform.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the Pro edition of EVE-NG unlock that Community does not?",
+      "a": "The Pro edition unlocks the free image pool and the ability to import images such as Cisco QCOW files.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is EVE-NG a desktop application like GNS3?",
+      "a": "No — EVE-NG is entirely web-based; everything including console access is done from the browser.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which web-based free tool is best for large multi-vendor CCNP topologies with snapshots and API access?",
+      "a": "EVE-NG, which provides a free tier, real multi-vendor images, browser console, snapshots, and an API for big-scale labs.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

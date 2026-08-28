@@ -1,0 +1,76 @@
+{
+  "title": "OSPF Areas",
+  "level": 10,
+  "levelTitle": "Level 10 - OSPF",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "08. Areas.md",
+  "cards": [
+    {
+      "q": "What is the purpose of OSPF areas?",
+      "a": "OSPF areas partition the domain to bound flooding and SPF computation. Every area keeps its own LSDB; Area 0 (backbone) is mandatory and all areas connect to it directly or via virtual link. ABRs sit between areas and generate Type-3 summaries, which is what makes OSPF scale.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the role of Area 0 (the backbone) in OSPF?",
+      "a": "Area 0 is the transit core through which inter-area routes must pass. All non-backbone areas attach to Area 0 (directly or via virtual link), and ABRs have interfaces in at least 2 areas, at least one being Area 0.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Define the four OSPF router roles by location.",
+      "a": "Internal router has all interfaces in one area. ABR has interfaces in at least 2 areas (one is Area 0). Backbone router has an interface in Area 0. ASBR redistributes routes from outside OSPF. A router can be both ABR and ASBR.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do areas help OSPF scale?",
+      "a": "Without areas there is one giant domain-wide LSDB and every flap triggers full-domain SPF. With areas, each area has its own LSDB, flaps are contained to their area, Type-3/4/5 summaries at the ABR provide summarized inter-area routes, bounding CPU and memory.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How do LSAs flow across OSPF areas?",
+      "a": "Intra-area Type 1/2 goes to the ABR which generates Type 3 into the next area. An ASBR generates Type 5 flooded domain-wide (except stub areas). An ASBR in an NSSA generates Type 7 which the ABR converts to Type 5.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is required for neighbors to form within an OSPF area?",
+      "a": "All routers in an area must agree on the area ID and parameters such as authentication and stub flags. Area type (stub, etc.) must match on all routers in the area.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands verify the area a router belongs to and its border routers?",
+      "a": "show ip ospf shows OSPF and area details, show ip ospf interface brief shows the area per interface, show ip ospf database shows which LSAs live in which area, and show ip ospf border-routers shows the ABRs/ASBRs.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the exam definition of an ABR?",
+      "a": "An ABR (Area Border Router) has interfaces in at least 2 areas, with at least one interface in Area 0. It sits between areas and generates Type-3 summaries.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Can a non-backbone area connect to Area 0 only via a virtual link?",
+      "a": "Yes. All areas must touch Area 0, directly or via a virtual link if a physical connection is not possible. Area 0 is mandatory transit, and inter-area traffic goes through it.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the area X range command do and where is it used?",
+      "a": "area X range is the ABR summarization (note 14) tool for inter-area routes. It is not configurable inside areas - summarization only happens at the ABR.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Summarize the OSPF areas quick-review facts.",
+      "a": "Area 0 backbone is mandatory; inter-area routes transit through 0; ABR has interfaces in 2+ areas including 0; ASBR redistributes external; each area has its own LSDB and SPF scope; Type 1/2 are intra-area only; Type 3 is ABR inter-area; a broken backbone needs a virtual link; summarize with area X range.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

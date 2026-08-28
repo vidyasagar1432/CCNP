@@ -1,0 +1,154 @@
+{
+  "title": "NTP (Network Time Protocol)",
+  "level": 16,
+  "levelTitle": "Level 16 - Network Services",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "05. NTP.md",
+  "cards": [
+    {
+      "q": "What is NTP and why does accurate time matter?",
+      "a": "NTP (Network Time Protocol) synchronizes device clocks across a network using UDP 123 and a hierarchical stratum system; accurate time is important for syslog timestamps, troubleshooting, security events, authentication/certificates, monitoring, forensics, and event correlation.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is stratum 0 in NTP?",
+      "a": "A reference clock such as an atomic clock or GPS receiver; it is the actual time source and is not itself an ordinary NTP server.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is stratum 1?",
+      "a": "An NTP server directly synchronized to a stratum-0 reference clock.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does stratum 16 mean?",
+      "a": "An unsynchronized or unusable NTP source.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does a device's stratum relate to its source?",
+      "a": "A device normally becomes one stratum higher than its selected synchronization source; for example, syncing to a stratum-2 server makes it approximately stratum 3.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Is the lowest stratum always the selected NTP source?",
+      "a": "No. Lower stratum is generally preferred, but NTP selection also considers clock quality, synchronization distance, reachability, delay, offset, jitter, and other criteria.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the NTP operating modes on Cisco IOS?",
+      "a": "Client/server with ntp server X, peer with ntp peer X, and local master with ntp master N; devices can operate as clients, servers, or peers.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does ntp peer X do and its important caveat?",
+      "a": "It establishes a peer relationship where two devices can synchronize with each other for redundancy; NTP peers do not mean both devices necessarily have the same stratum, since selection still uses stratum and other criteria.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does ntp master 2 do?",
+      "a": "It makes the router provide NTP using its local clock at the configured stratum (2); it is not equivalent to syncing to a real external reference clock and is suited to labs, isolated networks, or fallback.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is NTP broadcast mode?",
+      "a": "A distribution method where the server sends NTP updates to clients without each client polling in the normal unicast model, reducing polling overhead; accuracy depends on the overall implementation, not just the mode.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why configure ntp source Loopback0?",
+      "a": "To specify a stable source IP for NTP packets, simplifying ACLs, access control, routing, and device identification; ntp source chooses the source address/interface and does not itself bypass ACLs or guarantee reachability.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands configure NTP authentication?",
+      "a": "ntp authentication-key creates the key, ntp trusted-key marks it as trusted, ntp authenticate enables authentication processing, and both sides must agree on key ID, key value, and trust.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does NTP polling work?",
+      "a": "Clients poll sources at intervals determined by the implementation and sync state, not continuously every second; the interval can change as NTP adjusts to source quality and stability.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What must work for NTP communication?",
+      "a": "UDP 123 reachability including IP connectivity, routing, ACLs, firewalls, and correct authentication; a successful ping does not prove UDP 123 is permitted.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What do show ntp status, show ntp associations, and show clock provide?",
+      "a": "show ntp status shows sync state, stratum, reference clock and ID; show ntp associations shows configured/learned peers and selection state; show clock shows the current device time.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does the * symbol mean in show ntp associations?",
+      "a": "It identifies the currently selected system peer; + indicates a candidate/acceptable peer and - another candidate.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between ntp master and ntp server?",
+      "a": "ntp server X means synchronize this device's clock from server X, while ntp master N means this device provides NTP using its local clock as a stratum-N source.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Does NTP make OSPF, BGP, or EIGRP timers function correctly?",
+      "a": "No. Those protocols maintain their own timers; NTP instead provides synchronized time for event timestamps, syslog, troubleshooting, security monitoring, authentication, and incident correlation.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between NTP and PTP?",
+      "a": "NTP is network-wide time synchronization over UDP 123 with typical millisecond-level precision for enterprise devices, while PTP (IEEE 1588) targets high-precision synchronization for industrial, telecom, and financial systems.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are common NTP security issues and practices?",
+      "a": "Issues include spoofing, unauthorized time sources, malicious time manipulation, and amplification abuse; practices include using trusted sources, ACLs/firewalls, NTP authentication, disabling unneeded services, and reliable upstream sources.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What are the NTP stratum values to remember?",
+      "a": "Stratum 0 = reference clock, 1 = directly synced to stratum 0, 2 = normally synced to stratum 1, and 16 = unsynchronized/unusable.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the symptoms of an unsynchronized NTP device and their causes?",
+      "a": "Check show ntp status and show ntp associations; causes include an unreachable server, UDP 123 blocked, wrong server address, routing problems, ACL/firewall, authentication mismatch, wrong source, or an unsynchronized server.",
+      "tag": "Quick Review",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands form the minimal Cisco NTP configuration?",
+      "a": "ntp server <ip> to sync, optionally ntp source Loopback0, ntp master N for a local source, authentication via ntp authentication-key/ntp trusted-key/ntp authenticate, verified with show clock, show ntp status, and show ntp associations.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the One-Minute NTP mental model?",
+      "a": "Reference clock (stratum 0) feeds stratum-1 servers, then stratum-2 servers, then stratum-3 clients; on Cisco, ntp server syncs, ntp peer peers, ntp master serves from local clock, ntp source selects the source IP, and show ntp status/associations verify selection.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

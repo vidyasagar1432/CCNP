@@ -1,0 +1,94 @@
+{
+  "title": "OSPF to BGP Redistribution",
+  "level": 13,
+  "levelTitle": "Level 13 - Route Redistribution",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "02. OSPF to BGP.md",
+  "cards": [
+    {
+      "q": "Why does an enterprise inject OSPF routes into BGP, and what are the two big BGP specifics involved?",
+      "a": "It advertises internal networks to service providers. The two big BGP specifics are that MED is set from the OSPF metric, and BGP origin becomes '?' (incomplete) when using redistribute instead of network statements.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the two methods for injecting OSPF routes into BGP, and how do their origin and MED differ?",
+      "a": "The 'network' statements produce origin 'i' (IGP) with MED from the OSPF metric; 'redistribute ospf' produces origin '?' (incomplete) with MED from the OSPF metric. Network requires the route to already be in the BGP table, while redistribute injects regardless.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the command 'redistribute ospf 1 metric 100' set in BGP?",
+      "a": "It sets the MED to 100 for the redistributed OSPF routes; otherwise the default MED is 0.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does a route-map filter and set attributes when redistributing OSPF into BGP?",
+      "a": "A route-map matches prefixes with a prefix-list and sets attributes like metric (MED), communities, and local-pref, then is applied to the redistribute ospf command to select and control which OSPF routes enter BGP.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the BGP origin codes and their preference?",
+      "a": "Origin 'i' (IGP) has value 0 and is preferred, 'e' (EGP) has value 1, and '?' (incomplete) has value 2 and is least preferred. Preferring a lower origin value; a neighbor that prefers 'i' may rank redistribute-based ('?') routes lower.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which OSPF route types are redistributed into BGP by default, and what care is needed?",
+      "a": "Both intra-area and inter-area OSPF routes redistribute by default. External OSPF routes need care: filter them to avoid re-advertising provider-learned routes back, using 'redistribute ospf match internal external 1 external 2' to select specific types.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the best-practice BGP injection method for precise advertisement with origin 'i'?",
+      "a": "Use explicit 'network' statements for precise prefixes (origin 'i') plus 'redistribute connected route-map' for connected routes you want to announce.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which BGP commands verify and troubleshoot OSPF redistribution into BGP?",
+      "a": "'show ip bgp', 'show ip bgp <prefix>', 'show ip bgp neighbors <ip> advertised-routes', and 'show ip bgp | include \"^[b|>]\"'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the classic origin trap between 'network' and 'redistribute' in OSPF-to-BGP?",
+      "a": "'redistribute' produces origin '?' (incomplete) while 'network' produces origin 'i'; use network when origin 'i' matters for best-path ranking.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does BGP MED inherit when redistributing OSPF, and what overrides it?",
+      "a": "MED inherits the OSPF metric by default, unless an explicit 'metric' value or route-map set overrides it.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why should external OSPF routes be filtered from BGP redistribution?",
+      "a": "External OSPF routes should be filtered to avoid re-advertising provider-learned routes back into the network, which can create loops.",
+      "tag": "Exam Trap",
+      "context": "Interview"
+    },
+    {
+      "q": "What requirement does the BGP 'network' command have before it can advertise a route?",
+      "a": "The route must already exist in the BGP table (from a network statement or another source) for 'network' to advertise it; 'redistribute' injects it regardless.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "A neighbor receives redistributed OSPF routes with origin '?' unexpectedly. What caused it and how do you fix it?",
+      "a": "Using redistribute instead of network produced the '?' origin; switch to network statements to get origin 'i' where it matters.",
+      "tag": "Quick Review",
+      "context": "Practical"
+    },
+    {
+      "q": "In the OSPF-to-BGP quick review, how do methods, origin, and MED compare?",
+      "a": "Methods are network/redistribute; redistribute gives origin '?', network gives origin 'i'; MED is the OSPF metric or a set value; filter with route-map; external routes must be filtered; verify with show ip bgp.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

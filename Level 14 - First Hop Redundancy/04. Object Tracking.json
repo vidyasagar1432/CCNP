@@ -1,0 +1,172 @@
+{
+  "title": "Object Tracking",
+  "level": 14,
+  "levelTitle": "Level 14 - First Hop Redundancy",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "04. Object Tracking.md",
+  "cards": [
+    {
+      "q": "What is Object Tracking?",
+      "a": "Object Tracking allows Cisco IOS/IOS XE to monitor the state of an object such as an interface, route, or IP SLA operation, and make another feature react to that object's state, producing an Up or Down state that a subscribed feature consumes.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Why is object tracking important with FHRPs?",
+      "a": "An FHRP router may have a healthy LAN interface while its upstream path is broken; without tracking the router may remain preferred and black-hole traffic, while tracking lets the FHRP react to upstream interface, route, or IP SLA conditions and change priority/weighting so another gateway becomes preferred.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What are the two parts of object tracking architecture?",
+      "a": "Object tracking has two parts: define what to monitor (for example track 1 interface GigabitEthernet0/1 line-protocol) and reference that object from a feature (for example standby 10 track 1 decrement 20).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Does creating a tracking object alone change anything?",
+      "a": "No. Creating a tracking object alone does not necessarily change anything; the object must be consumed or referenced by another feature such as HSRP or a static route for it to have an effect.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the common object-tracking types?",
+      "a": "Common object-tracking types are interface line protocol, interface IP routing, IP route reachability, IP SLA operation result, and track lists that combine other tracking objects using boolean conditions such as AND or OR.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does interface line-protocol tracking monitor?",
+      "a": "Interface line-protocol tracking monitors the line-protocol operational state of an interface, representing whether it is operational at Layer 2; for FHRP uplink tracking the line-protocol state is commonly used.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the difference between line-protocol and ip routing interface tracking?",
+      "a": "Line-protocol tracking monitors the interface's line protocol state, while ip routing tracking monitors the interface's IP-routing usability/state; they examine different interface conditions.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does IP route tracking monitor?",
+      "a": "IP route tracking monitors whether a particular route exists in the routing table: when the route is present the track is Up, and when it disappears the track is Down, which is useful when routing reachability matters rather than merely physical interface state.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does IP SLA tracking work?",
+      "a": "IP SLA tracking monitors the result of an IP SLA operation: when the probe succeeds the track object is Up, and when it fails the track object goes Down, letting an FHRP or routing feature react to remote reachability beyond the local interface.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Is IP SLA automatically end-to-end application monitoring?",
+      "a": "No. IP SLA is only as end-to-end as the operation being performed; for example an ICMP echo probe tests ICMP reachability to that destination, not whether every application or every path is healthy.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a track list?",
+      "a": "A track list combines multiple tracking objects using logical conditions such as AND or OR into a final Up/Down state, so a feature can react to a combination of conditions rather than one individual object.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What states can a tracking object report?",
+      "a": "A tracking object can report Up (condition satisfied), Down (condition failed), or Not present/Unknown (required information not currently available).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does object tracking affect HSRP priority?",
+      "a": "Object tracking can decrement HSRP priority: for example standby 10 priority 110 with standby 10 track 1 decrement 20 reduces the priority to 90 when track 1 is Down, allowing another HSRP router with higher priority to become Active.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do multiple HSRP track objects combine their decrements?",
+      "a": "Multiple track objects each decrement HSRP priority cumulatively: with priority 110, track 1 decrement 20 and track 2 decrement 15, a single failure gives 90 and both failures give 110 - 20 - 15 = 75.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does object tracking affect for HSRP, VRRP, and GLBP?",
+      "a": "HSRP tracking can decrement priority, VRRP tracking can influence priority (where supported), and GLBP tracking decrements weighting.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does GLBP weighting tracking make an AVF inactive?",
+      "a": "With a config such as glbp 10 weighting 110 lower 80 upper 100 plus glbp 10 track 1 decrement 40, a track failure reduces the weighting to 70; because 70 is below the lower threshold 80, the AVF becomes inactive.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What do the GLBP lower and upper weighting thresholds control?",
+      "a": "The lower threshold controls when an AVF becomes inactive, and the upper threshold controls when the forwarder can become active again; do not assume weighting of 0 is the only inactivity condition.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the key practical advantage of object tracking with an upstream failure?",
+      "a": "When the client-facing interface stays up but the ISP path fails, IP SLA tracking detects the failure, drops the track object Down, decreases HSRP priority, and makes a backup router preferred, preventing traffic black-holing.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How does object tracking compare to raw interface state?",
+      "a": "Without tracking an FHRP only knows its local interface is up; interface tracking reveals an uplink is down, route tracking reveals a route is missing, and IP SLA tracking reveals a remote destination is unreachable, providing increasingly useful information.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How does object tracking control a static route?",
+      "a": "A static route can be tied to a track object, for example ip route 0.0.0.0 0.0.0.0 10.0.0.1 track 1: when the tracking object is Up the route is installed, and when it is Down the tracked static route is removed so a backup route can become preferred.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How is object tracking used with PBR?",
+      "a": "Object tracking can be used with Policy-Based Routing via set ip next-hop verify-availability, where PBR verifies whether a configured next hop is available using tracking information; if the preferred next hop becomes unavailable, a backup next hop can be selected.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Is PBR verify-availability itself the track object?",
+      "a": "No. The tracking object is separately defined and provides state, while PBR verify-availability is the action/mechanism that consumes that state.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands verify object tracking and its consumers?",
+      "a": "The primary command is show track; related commands are show standby (HSRP), show glbp, show vrrp, show ip sla statistics, and show ip route.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the object tracking troubleshooting workflow?",
+      "a": "Check that the tracking object is configured, whether it is Up or Down, whether it is referenced by the feature, whether the decrement/weighting is correct, whether the FHRP priority/weight changed, whether preemption is configured, and whether the backup router's resulting priority is higher.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the most important object tracking memory rule for FHRPs?",
+      "a": "HSRP tracking changes priority, VRRP tracking changes priority, and GLBP tracking changes weighting.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the core idea of object tracking?",
+      "a": "Object tracking connects network conditions to routing or FHRP behavior, allowing a router to react to failures that a simple local interface-state check may not detect, making FHRP failover depend on actual network reachability or path health.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the object tracking mental model?",
+      "a": "Choose what to watch (interface, route, or IP SLA), which produces a track state of Up or Down; that state feeds a consumer feature such as HSRP (priority), GLBP (weighting), or routing/PBR.",
+      "tag": "Core Concept",
+      "context": "Both"
+    }
+  ]
+}

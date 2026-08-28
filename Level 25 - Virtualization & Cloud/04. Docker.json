@@ -1,0 +1,82 @@
+{
+  "title": "Docker",
+  "level": 25,
+  "levelTitle": "Level 25 - Virtualization & Cloud",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "04. Docker.md",
+  "cards": [
+    {
+      "q": "What is Docker?",
+      "a": "The most common container runtime/platform: you build images from a Dockerfile, share them in a registry, and run them anywhere. Its core objects are image, container, volume, network, and compose.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is Docker's object model?",
+      "a": "Image (read-only template), container (a running image), volume (persistent data), network (connectivity), and compose (multi-container orchestration locally).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which Dockerfile instructions build an image, add a file, expose a port, and run a command?",
+      "a": "FROM sets the base image, RUN runs a build step, COPY adds a file, EXPOSE declares a port, and CMD sets the runtime command.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the core Docker container lifecycle command chain?",
+      "a": "docker build (create image), docker pull/push (registry), docker run (start), docker ps (list running), docker exec (run inside), and docker stop/rm (manage).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the default network mode for Docker containers?",
+      "a": "Bridge with NAT is the default. Other modes are host (shared net), none (isolated), and custom (user-defined networks).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the docker run -p flag do?",
+      "a": "It publishes host-to-container ports, e.g. docker run -d -p 8080:80 maps host port 8080 to container port 80.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How is Docker different from a VM in virtualization?",
+      "a": "Docker is process-level virtualization: it shares the host kernel, runs a process per container, starts in milliseconds, and isolates via namespaces, whereas a VM runs a full OS.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How is Docker used in networking?",
+      "a": "To run containerized network functions (CNFs), build test topologies, and automate CI/CD. Kubernetes scales the containers Docker runs.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do you build, run, and inspect a Docker container?",
+      "a": "docker build -t myapp ., docker run -d -p 8080:80 myapp, docker ps, docker logs <id>, and docker exec -it <id> /bin/bash.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A container exits immediately or loses its data. What should you check?",
+      "a": "Check the command with docker logs for exit causes; data loss is because no volume was attached, so check and add volumes for persistence.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the difference between Docker and Kubernetes?",
+      "a": "Docker is a container runtime providing process isolation; Kubernetes is an orchestrator that scales and manages containers.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Match the quick review: image, container, volume, network, build, run, exec, scale.",
+      "a": "Image = template; container = running; volume = persist; network = bridge; build = docker build; run = docker run; exec = docker exec; scale = Kubernetes.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

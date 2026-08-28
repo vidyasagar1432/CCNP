@@ -1,0 +1,136 @@
+{
+  "title": "Collision Domains",
+  "level": 4,
+  "levelTitle": "Level 04 - Ethernet & Switching",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "09. Collision Domains.md",
+  "cards": [
+    {
+      "q": "What is a collision domain?",
+      "a": "A collision domain is a Layer 2 network segment in which devices share a transmission medium and, in half-duplex Ethernet, can interfere with one another by transmitting simultaneously. It was important with hubs, shared coaxial Ethernet, half-duplex links, and CSMA/CD; modern switched Ethernet normally operates full duplex where collisions do not occur.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Where do Ethernet collisions come from?",
+      "a": "Collisions occur when multiple devices share a common transmission medium and transmit at the same time, causing the frames to interfere. In traditional half-duplex Ethernet, CSMA/CD detects the collision and causes the stations to back off and retransmit.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How many collision domains does a hub create?",
+      "a": "A hub is a Layer 1 device that repeats received signals out its other ports without Layer 2 decisions, so all devices connected to a hub share one collision domain.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does a Layer 2 switch affect collision domains?",
+      "a": "A switch separates collision domains by port, with each switch port representing a separate Layer 2 segment and thus a separate collision domain (microsegmentation).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Can collisions occur on a full-duplex Ethernet link?",
+      "a": "No. In full duplex both devices transmit and receive simultaneously on separate paths, so a full-duplex Ethernet link cannot have a collision and CSMA/CD is not used. The physical segment still exists; it simply experiences no CSMA/CD collisions.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is saying full duplex creates zero collision domains imprecise?",
+      "a": "A better statement is that full-duplex operation eliminates the possibility of collisions on that Ethernet link. The physical/Layer 2 segment still exists; it just does not experience CSMA/CD collisions.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does CSMA/CD mean and how does it work?",
+      "a": "CSMA/CD = Carrier Sense Multiple Access with Collision Detection, used with traditional shared/half-duplex Ethernet. Stations listen (carrier sense) before transmitting on a shared medium (multiple access), and if two transmit simultaneously, they detect the collision (collision detection) and back off before retransmitting.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is binary exponential backoff?",
+      "a": "After a collision, stations wait a pseudo-random period before retransmitting; repeated collisions increase the possible backoff range.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do collision domains and broadcast domains compare?",
+      "a": "A collision domain concerns frame collisions on shared/half-duplex Ethernet and is bounded by switch/bridge ports (a hub means one domain). A broadcast domain concerns broadcast propagation bounded by Layer 2 VLANs and Layer 3 boundaries. Full duplex makes collisions impossible, but broadcasts still exist.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How many collision and broadcast domains do a hub and a switch create?",
+      "a": "A hub creates 1 collision domain and 1 broadcast domain. A switch creates one collision domain per port; with one VLAN it has 1 broadcast domain, and with multiple VLANs it has one broadcast domain per VLAN.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "Why are collision domains still relevant for the CCNP exam?",
+      "a": "The traditional rule is one switch port = one collision domain, but on a full-duplex port collisions are impossible. Collision domains are now primarily useful for understanding legacy Ethernet, hubs, half-duplex, duplex mismatches, and exam questions involving CSMA/CD.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is a duplex mismatch and what problems does it cause?",
+      "a": "A duplex mismatch occurs when one side of an Ethernet link runs full duplex while the other runs half duplex. It can cause collisions, late collisions, FCS errors, input/output errors, poor performance, and retransmissions.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Should you manually force full duplex on modern Ethernet links?",
+      "a": "No. Modern Ethernet links normally use auto-negotiation; manually forcing duplex full should only be done for a specific design/troubleshooting reason with both sides configured consistently.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands verify interface duplex and errors?",
+      "a": "show interfaces GigabitEthernet0/1 shows settings such as Full-duplex, 1000Mb/s or Half-duplex, 100Mb/s plus counters including input errors, CRC, frame errors, collisions, late collisions, and output errors. show interfaces status gives a quick overview of state and negotiated speed.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you count collision domains in a classic exam question?",
+      "a": "Each switch port separates its connected device/segment, so a 24-port switch with 24 connected devices has 24 collision domains. A switch with 12 host-facing ports and 2 uplink ports has 14 collision domains.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does EtherChannel relate to collision domains?",
+      "a": "EtherChannel combines multiple physical links into one logical port-channel, treated as a single logical Layer 2 interface for forwarding/control. On modern full-duplex Ethernet, collision counting for its member links is generally not meaningful since collisions are not expected.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Does collision-domain separation eliminate bandwidth bottlenecks?",
+      "a": "No. A host may have a dedicated full-duplex switch port without collisions, but uplinks can still become bandwidth bottlenecks, e.g. 10 x 1-Gbps access ports feeding a single 1-Gbps uplink. Collision-domain separation does not eliminate oversubscription.",
+      "tag": "Exam Trap",
+      "context": "Interview"
+    },
+    {
+      "q": "How many collision domains does a router create?",
+      "a": "A router does not create one collision domain for the whole router; each Ethernet interface connects to its own Layer 2 segment.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Are collisions expected on properly operating full-duplex switch ports?",
+      "a": "No. On properly operating full-duplex Ethernet, collisions are not expected; collision counters on healthy modern links should normally remain at zero.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What steps troubleshoot unexpected collisions or interface errors?",
+      "a": "Check interface status, speed and duplex, both sides of the link, look for duplex mismatch, check CRC/FCS errors, check collision and late-collision counters, check cabling/transceiver, and check for legacy hub or half-duplex equipment.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the one-minute exam summary for collision domains?",
+      "a": "Hub = one collision domain; switch = one collision domain per port; full duplex = collisions cannot occur. Collision domain concerns frame collisions and medium sharing, while broadcast domain concerns Layer 2 broadcast propagation and is normally defined by the VLAN.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

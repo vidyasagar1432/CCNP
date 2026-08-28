@@ -1,0 +1,88 @@
+{
+  "title": "TCP/IP Model",
+  "level": 3,
+  "levelTitle": "Level 03 - OSI & TCP IP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "02. TCP IP Model.md",
+  "cards": [
+    {
+      "q": "What is the TCP/IP model?",
+      "a": "The TCP/IP model (the DoD/Internet model) describes the protocol stack actually developed for the Internet. It has four layers that map onto OSI's seven, and it is what Cisco/IOS speaks natively.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "List the four TCP/IP layers and the OSI layers each covers.",
+      "a": "Application covers OSI 7+6+5; Transport covers OSI 4; Internet (Network) covers OSI 3; Network Access (Link) covers OSI 2+1.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What protocols are found at the TCP/IP Internet layer?",
+      "a": "IP (addressing and best-effort delivery), ICMP (errors/diagnosis), and IGMP (multicast group membership).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the TCP/IP Network Access layer do?",
+      "a": "It puts IP packets into Ethernet frames, resolves IP to MAC via ARP, and actually transmits the bits. It covers OSI layers 2 and 1.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the role of the TCP/IP Transport layer?",
+      "a": "It provides either TCP (reliable, connection-oriented, with flow and congestion control) or UDP (best-effort, connectionless), and it adds source and destination ports.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Give the OSI-to-TCP/IP correspondence rule.",
+      "a": "OSI 7,6,5 → TCP/IP Application; OSI 4 → Transport; OSI 3 → Internet; OSI 1,2 → Network Access.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why did TCP/IP win over pure OSI?",
+      "a": "OSI was reference-only, while TCP/IP shipped working software, and IP became the internetworking protocol everything was built upon.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How many layers does the TCP/IP model have, per Cisco?",
+      "a": "Cisco traditionally teaches 4 layers. Some texts split it into 5 by separating the link and physical layers, so answer per the model specified in the question.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Where does ARP live in the TCP/IP model?",
+      "a": "ARP lives at the Network Access (Link) layer, where it maps IP addresses to MAC addresses. Some exams place it at L3 or 'between layers', so know both contextual statements.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which layer does ICMP belong to?",
+      "a": "ICMP belongs to the Internet (Network) layer (L3) of the TCP/IP model, not to any other layer.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which protocols in the TCP/IP stack are unreliable and which adds reliability?",
+      "a": "IP, ICMP, and UDP are all unreliable (best-effort). Reliability is added by TCP or by applications.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you verify network-layer reachability in practice?",
+      "a": "If ping works the L3 (Internet) layer is up; to test an L4 port you telnet to the host and port. This is the practical troubleshooting Cisco operators actually use.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Give examples of Application-layer protocols in the TCP/IP model.",
+      "a": "HTTP, FTP, SMTP, DNS, DHCP, Telnet, SSH, and SNMP all sit at the TCP/IP Application layer.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    }
+  ]
+}

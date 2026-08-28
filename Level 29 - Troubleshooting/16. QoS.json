@@ -1,0 +1,82 @@
+{
+  "title": "QoS",
+  "level": 29,
+  "levelTitle": "Level 29 - Troubleshooting",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "16. QoS.md",
+  "cards": [
+    {
+      "q": "What does QoS troubleshooting check?",
+      "a": "Classification, marking, policy maps, and interface counters. Failures show as no marking, wrong queueing, or drops despite a policy.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What command shows the applied state and counters of a QoS policy?",
+      "a": "show policy-map interface, which shows the applied policy and its counters.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the QoS flow?",
+      "a": "Classify, mark, police/shape, queue, then monitor. Class to mark to enforce to queue to observe.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the top QoS traps?",
+      "a": "Direction (service-policy in/out) and the trust boundary, which determines whether markings are preserved.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does the trust boundary differ between L2 and L3?",
+      "a": "Trust COS is used on switches (Layer 2) and trust DSCP on routers (Layer 3). An untrusted port remarks markings.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does a zero counter on a class indicate?",
+      "a": "The class never matched any traffic, so the classification or the applied direction is wrong.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Queue drops behind a policy do not always mean what?",
+      "a": "They do not always indicate policy failure, but rather congestion. Drops behind a policy point to queueing/congestion.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What command shows the trust configuration on a switch?",
+      "a": "show mls qos.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you apply a QoS policy to an interface?",
+      "a": "With the service-policy output QOS command (direction matters: service-policy in or out) under the interface.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What do class-map and policy-map commands do?",
+      "a": "A class-map defines match rules (classification); a policy-map applies actions like priority or bandwidth to the matched classes.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What QoS mechanisms handle congestion-induced drops?",
+      "a": "Shaping and WRED. WRED drops packets under congestion, and shaping smooths traffic.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Priority percent 10 and bandwidth percent 20 in a policy represent what?",
+      "a": "A priority (strict/low-latency) queue of 10% and a bandwidth guarantee of 20% for the respective classes.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

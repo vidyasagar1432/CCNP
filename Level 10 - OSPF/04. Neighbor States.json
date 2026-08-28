@@ -1,0 +1,88 @@
+{
+  "title": "OSPF Neighbor States",
+  "level": 10,
+  "levelTitle": "Level 10 - OSPF",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "04. Neighbor States.md",
+  "cards": [
+    {
+      "q": "What is the OSPF neighbor state machine and what are its stable states?",
+      "a": "OSPF neighbors progress through a state machine as they discover, negotiate, and synchronize LSDBs. The stable states are 2-Way (multi-access non-DR) and Full (adjacency). Reading show ip ospf neighbor states is a core troubleshooting and exam skill.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "List the OSPF neighbor state progression in order.",
+      "a": "Down (no hellos), Attempt (NBMA only, actively contacting), Init (hello seen but I'm not in its hello), 2-Way (both see each other, neighbor not adjacency), ExStart (elect primary/secondary, start DBD), Exchange (exchanging DBDs), Loading (requesting and receiving LSAs), Full (LSDBs identical, adjacency formed).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the three key phases of OSPF neighbor formation?",
+      "a": "1. Discovery: Init to 2-Way via Hello exchange proving mutual visibility. 2. Synchronization: ExStart to Exchange to Loading, where DBDs compare LSDBs and LSA requests/updates fill gaps. 3. Established: Full with synchronized databases, allowing SPF to run.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What state do DROthers stay in with each other on a broadcast network?",
+      "a": "DROthers stay at 2-Way with each other, which is normal, not a fault. Only DR and BDR reach Full with all routers on broadcast/NBMA networks.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the default OSPF dead interval and what happens when it expires?",
+      "a": "Dead interval is 4 times the hello, so 40 seconds by default. If no hello is received within the dead interval, the neighbor drops to Down and routes are withdrawn.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the most likely cause of a neighbor stuck in ExStart?",
+      "a": "MTU mismatch - the classic OSPF issue. Compare mtu on both sides or use ip ospf mtu-ignore.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What states do INIT, 2-Way stuck, Exchange, and Loading each indicate?",
+      "a": "Init: one-way connectivity, ACL, or multicast blocked. 2-Way stuck: DR/BDR not being elected (misconfiguration). Exchange: DBD negotiation issues or MTU. Loading: an LSA request that is never fulfilled.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the difference between an OSPF neighbor and an adjacency?",
+      "a": "A neighbor is any OSPF router on the segment that reached 2-Way. An adjacency is a synchronized neighbor that reached Full; only then is SPF run and routes installed.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "On point-to-point networks, what state do neighbors reach?",
+      "a": "Full, directly. There is no DR/BDR on point-to-point links, so all neighbors form adjacencies and go straight to Full.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "In which state does the Attempt state exist?",
+      "a": "Attempt exists only on NBMA networks, where it indicates actively contacting the neighbor.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is 2-Way between DROthers a fault?",
+      "a": "No, it is completely normal. DROthers stay at 2-Way with each other on broadcast networks; only DR and BDR reach Full. Do not call it broken.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the memorized OSPF dead-timer multiple?",
+      "a": "Dead = 4 x hello, not 2 x. The default is 40 seconds for the 10-second hello.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Match each OSPF neighbor fault to its likely cause.",
+      "a": "MTU mismatch to ExStart, hello/dead mismatch to Down/Init, auth mismatch to Init, network type mismatch to neighbor issues, and a stuck 2-Way to DR/BDR election issues on broadcast networks.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "title": "Site-to-Site VPN",
+  "level": 18,
+  "levelTitle": "Level 18 - VPN Technologies",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "06. Site-to-Site VPN.md",
+  "cards": [
+    {
+      "q": "What is a site-to-site (L2L) VPN and what are the recipe choices?",
+      "a": "A site-to-site (L2L) VPN secures traffic between two fixed sites (branch to HQ) over a shared/Internet underlay. The choices are pure IPsec with an interesting-traffic ACL (no multicast/routing), GRE over IPsec for routing flexibility and multicast (GRE tunnel + IPsec), or FlexVPN/IKEv2 profiles as the modern simpler option. GRE over IPsec is best for fixed branches.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is interesting traffic in classic IPsec?",
+      "a": "Interesting traffic is defined by an access-list (such as access-list VPN-TRAFFIC permit ip 10.0.0.0 0.0.0.255 10.1.0.0 0.0.0.255) where the source is the local protected subnet and the destination is the remote protected subnet. Only traffic matching the ACL gets encrypted in tunnel mode, and both sides must define mirror-image ACLs.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the steps to build a GRE over IPsec site-to-site VPN?",
+      "a": "Create the tunnel interface (GRE), configure the IPsec profile/transform, attach tunnel protection ipsec profile, then run a routing protocol over the tunnel. The IPsec profile encrypts the GRE packets (protocol 47).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why is GRE over IPsec preferred over pure IPsec?",
+      "a": "GRE supports any payload including multicast and broadcast, allows dynamic routing protocols, simplifies ACLs by encrypting all GRE traffic, and scales to many tunnels.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do routing protocols behave over a GRE VPN tunnel?",
+      "a": "Because the GRE tunnel is a regular interface, routing protocols run over it: static routing is simple with no failover, EIGRP/OSPF converge over the tunnel, and BGP scales to many sites.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which commands verify a site-to-site VPN?",
+      "a": "show crypto ipsec sa for IPsec SA, show crypto ikev2 sa for IKE, show interface Tunnel0 for the tunnel, show crypto map for interesting traffic, show crypto session, and ping.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why might an IPsec SA never form even when IKE is up?",
+      "a": "There is no interesting traffic matching the crypto map ACL, so no IPsec SA forms. No interesting traffic equals no IPsec SA even if IKE is up; check the match address ACL and crypto map.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What causes a one-way-only site-to-site VPN?",
+      "a": "Asymmetric ACLs where the two ends do not define mirror-image interesting-traffic ACLs, so only one direction is protected.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the modern hook that attaches IPsec to a GRE tunnel?",
+      "a": "The command tunnel protection ipsec profile IPSEC-PROF attaches the IPsec profile to the tunnel interface, encrypting the GRE packets.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the site-to-site quick-review summary?",
+      "a": "The design is an L2L VPN; the best recipe is GRE over IPsec; interesting ACL uses source/dest subnets; routing runs over the tunnel with OSPF/BGP; IPsec is profile-based; failures result from no interesting traffic; BGP scales many sites; and verification uses show crypto session.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

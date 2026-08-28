@@ -1,0 +1,76 @@
+{
+  "title": "QoS Marking & Trust Boundaries",
+  "level": 21,
+  "levelTitle": "Level 21 - QoS",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "12. QoS Marking & Trust Boundaries.md",
+  "cards": [
+    {
+      "q": "What is QoS marking and the trust boundary?",
+      "a": "Marking writes a QoS value (DSCP, CoS, or IP precedence) into the packet so downstream devices apply consistent treatment, and the trust boundary is the edge point where the network decides to accept (trust) or re-mark incoming markings.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the QoS marking fields at each layer?",
+      "a": "At Layer 2, 802.1p CoS (3 bits); at Layer 3, IP precedence (3 bits) and DSCP (6 bits); and on MPLS, the EXP field (3 bits).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Where is the trust boundary placed and what does it do?",
+      "a": "The trust boundary is placed where traffic enters the network at the access edge; it decides whether to trust the incoming CoS/DSCP or re-mark/classify the traffic.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between trusting and re-marking?",
+      "a": "Trusting accepts the existing CoS/DSCP as-is, while re-marking overwrites it with a policy-derived value, typically done for untrusted access ports.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What command trusts CoS on an access port and what command sets DSCP?",
+      "a": "mls qos trust cos trusts the incoming CoS on a switchport, and set dscp within a policy-map writes the DSCP value; the policy is attached with service-policy input.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why do different layers need CoS to DSCP mapping?",
+      "a": "CoS is LAN-only at Layer 2 (3 bits) while DSCP crosses Layer 3 (6 bits), so a CoS-to-DSCP mapping table is required when traffic crosses from L2 to L3 so treatment stays consistent.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the recommended approach to marking across the network?",
+      "a": "Mark once at the edge or trust boundary, then trust the DSCP in the core so it applies the PHB without re-marking.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which commands verify marking and trust state?",
+      "a": "show mls qos, show mls qos interface, show mls qos maps cos-dscp, show policy-map, and show class-map.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Traffic from an access port is being re-marked in the core; what is likely wrong?",
+      "a": "The trust boundary is misplaced or the core is re-marking instead of trusting DSCP; set the access edge trust correctly (such as mls qos trust cos or dscp) and ensure the core trusts DSCP.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the key exam distinction between marking and classification?",
+      "a": "Marking writes a QoS value into the packet, while classification reads or identifies traffic; they are two different QoS acts.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the marking and trust quick-review summary?",
+      "a": "Marking stamps DSCP/CoS at the edge, the trust boundary decides whether to trust or re-mark at the access port, and the core then trusts the DSCP and applies the PHB, with CoS-to-DSCP mapping at the L2/L3 boundary.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "title": "VRF (Virtual Routing and Forwarding)",
+  "level": 25,
+  "levelTitle": "Level 25 - Virtualization & Cloud",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "06. VRF.md",
+  "cards": [
+    {
+      "q": "What is a VRF?",
+      "a": "A VRF (Virtual Routing and Forwarding) creates multiple isolated routing tables on one router, each with its own RIB, CEF/FIB, interfaces, and routing protocol. It is the core of L3VPN segmentation and VRF-lite.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What does a VRF isolate on a router?",
+      "a": "The RIB (routes), CEF/FIB (forwarding), interface membership, and per-VRF routing protocol processes are all fully isolated.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is VRF used for?",
+      "a": "L3VPNs (MPLS + MP-BGP), VRF-lite (no MPLS needed), per-customer multi-tenant separation, and management or out-of-band (OOB) VRFs.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are RD and RT in VRFs, and why do they matter?",
+      "a": "RD (route distinguisher) makes prefixes unique for MP-BGP, while RT (route target) controls membership and sharing. In VRF-lite the route targets are optional.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What command sequence creates a VRF and binds an interface to it?",
+      "a": "ip vrf CUST1 with rd 65000:100, then under the interface ip vrf forwarding CUST1 followed by ip address. Per-VRF BGP is configured under router bgp with address-family ipv4 vrf CUST1.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What happens when you run ip vrf forwarding on an interface?",
+      "a": "It binds the interface to the VRF and clears/removes the configured IP address, so you must reapply the IP address afterward.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How is VRF isolation expressed in the cloud?",
+      "a": "A cloud VPC or tenant network is the equivalent of a VRF: per-tenant routing tables and fully isolated per-network routing.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What commands verify a VRF?",
+      "a": "show ip vrf (list and detail), show ip route vrf CUST1, show ip cef vrf CUST1, show bgp vpnv4 vrf CUST1, and ping vrf CUST1 10.0.0.2.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "You configured a VRF but see no routes. What should you check?",
+      "a": "Check the routing protocol with show ip route vrf, verify the interface binding with show ip vrf, and ensure you ping with the right VRF using ping vrf.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do RD and RT differ in MPLS VPNs?",
+      "a": "RD provides identity/uniqueness in MP-BGP; RT defines membership and policy (who shares). Getting RT wrong causes wrong route sharing, and an RD overlap breaks uniqueness.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Match the quick review: isolates, use, RD, RT, bind, cloud, lite, ping.",
+      "a": "Isolates RIB/FIB; use = VPN/lite; RD = uniqueness; RT = membership; bind = ip vrf forwarding; cloud = VPC; lite = no MPLS; ping = ping vrf.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,142 @@
+{
+  "title": "SSH",
+  "level": 16,
+  "levelTitle": "Level 16 - Network Services",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "12. SSH.md",
+  "cards": [
+    {
+      "q": "What is SSH and what does it provide?",
+      "a": "SSH (Secure Shell) is a secure remote-management protocol that provides encrypted CLI access over TCP 22; it gives confidentiality, integrity, server authentication via host keys, user authentication, and secure file transfer via SCP.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the SSH versions and the preferred one?",
+      "a": "SSHv1 is legacy/insecure and SSHv2 is modern and preferred; on Cisco IOS configure ip ssh version 2 explicitly.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Are SSH version and cryptographic key type the same thing?",
+      "a": "No. SSHv2 is the protocol version, while RSA is one possible public-key algorithm used by Cisco IOS; SSH does not mean RSA only.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the stages of an SSH connection?",
+      "a": "TCP 3-way handshake, SSH version exchange, key exchange/cipher negotiation, server authentication using the host key, user authentication, then the encrypted SSH session.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is the difference between the SSH host key and user credentials?",
+      "a": "The host key authenticates the SSH server/device, while user credentials/keys authenticate the administrator/user.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does a changed SSH host key warning mean?",
+      "a": "It can indicate a possible man-in-the-middle attack, but it can also happen legitimately when a device is replaced, rebuilt, or its keys are regenerated.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the typical Cisco IOS SSH server configuration?",
+      "a": "hostname R1, ip domain-name ccnp.example, username admin privilege 15 secret password, crypto key generate rsa modulus 2048, ip ssh version 2, and on line vty 0 15: login local and transport input ssh.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What must exist before generating RSA keys on typical Cisco IOS?",
+      "a": "A hostname and an IP domain name, which together form the device's FQDN and are required before crypto key generate rsa.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does AAA relate to SSH?",
+      "a": "SSH provides the secure transport, while AAA (TACACS+ or RADIUS) determines how users are authenticated, authorized, and accounted; SSH can also use local authentication via login local.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does transport input ssh control?",
+      "a": "It permits SSH on the VTY lines and prevents Telnet on them; it controls incoming connections to the device, not the router's outbound SSH client.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the transport input options on VTY lines?",
+      "a": "transport input ssh allows SSH only, transport input telnet allows Telnet only, transport input ssh telnet allows both, transport input all permits all supported protocols, and transport input none disables incoming remote access.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How can a Cisco router act as an SSH client?",
+      "a": "It initiates connections to other devices, for example R1# ssh -l admin 10.0.0.2, using the same SSH server configuration for keys.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are SCP and SFTP?",
+      "a": "SCP (Secure Copy Protocol) is secure file copy over SSH on TCP 22, and SFTP (SSH File Transfer Protocol) is also SSH-based on TCP 22 but its availability depends on the Cisco platform and IOS/IOS XE release.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do SSH and Telnet compare?",
+      "a": "SSH is TCP 22 with encrypted sessions and protected credentials, while Telnet is TCP 23 with everything in cleartext; SSH is the recommended and secure remote-management option.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What do ip ssh time-out and ip ssh authentication-retries control?",
+      "a": "ip ssh time-out sets how long SSH authentication can remain incomplete before timing out, and ip ssh authentication-retries 3 limits the number of authentication attempts allowed.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands verify SSH on Cisco IOS?",
+      "a": "show ip ssh for server configuration/status, show crypto key mypubkey rsa for RSA keys, show ssh for active sessions, show users for connected users, and show running-config | section line vty for VTY config.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What should you check when SSH is unavailable?",
+      "a": "Verify IP connectivity, TCP 22 reachability, SSH enabled, RSA/crypto keys exist, SSH version, VTY transport input ssh, local/AAA authentication, and ACLs that might block TCP/22.",
+      "tag": "Quick Review",
+      "context": "Practical"
+    },
+    {
+      "q": "Why might Telnet work but SSH fail?",
+      "a": "SSH is not configured/enabled, RSA keys are missing, the SSH version is wrong, the VTY lines do not permit ssh, authentication is misconfigured, or an ACL blocks TCP 22.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the SSH security best practices?",
+      "a": "Use SSHv2, disable Telnet, use strong local secrets or centralized AAA, restrict VTY access with an access-class, use management networks, limit authentication retries, set a reasonable timeout, configure reasonable key sizes, and monitor active sessions.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How do the network-management and file-transfer protocols compare by port?",
+      "a": "SSH remote CLI = TCP 22, SCP = SSH/TCP 22, SFTP = SSH/TCP 22, Telnet = TCP 23, FTP control = TCP 21, TFTP = UDP 69.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does transport input ssh affect outbound SSH connections initiated by the device?",
+      "a": "No. It controls incoming VTY access to the device; the router's outbound SSH client is a separate role and is not governed by transport input.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the One-Minute SSH model?",
+      "a": "SSH = TCP 22 + encrypted remote management + SSHv2 + hostname/domain + generated RSA keys + VTY transport input ssh + local user or AAA authentication + SCP for secure file copy, replacing cleartext Telnet on TCP 23.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

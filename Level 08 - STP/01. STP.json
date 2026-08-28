@@ -1,0 +1,232 @@
+{
+  "title": "STP (Spanning Tree Protocol)",
+  "level": 8,
+  "levelTitle": "Level 08 - STP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "01. STP.md",
+  "cards": [
+    {
+      "q": "What is Spanning Tree Protocol (STP) and what is its primary purpose?",
+      "a": "STP (IEEE 802.1D) prevents Layer-2 loops in redundant switched networks by building a loop-free logical topology. It allows physical redundancy while placing selected redundant paths into a non-forwarding state.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Which Layer-2 problems does STP prevent?",
+      "a": "Broadcast storms, unknown-unicast flooding loops, MAC-table instability/flapping, and duplicate frames.",
+      "tag": "Overview",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is a Layer-2 loop catastrophic even though Ethernet appears resilient?",
+      "a": "Ethernet frames contain no Layer-2 TTL/hop limit, so a loop allows frames to circulate repeatedly, causing broadcast storms, MAC-table flapping, duplicate frames, and CPU/link saturation.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Is STP primarily a loop-prevention protocol or a link-redundancy protocol?",
+      "a": "STP is primarily a loop-prevention protocol, not a link-redundancy protocol. Redundancy exists physically; STP determines which links are allowed to forward at a given time.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the overall STP decision process?",
+      "a": "Elect the Root Bridge (lowest Bridge ID), select a Root Port on each non-root switch, select a Designated Port on each segment, and put redundant/non-designated paths into a non-forwarding state.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How is the Root Bridge elected?",
+      "a": "The switch with the lowest Bridge ID wins: lowest Bridge Priority first, then lowest Extended System ID (VLAN ID) when applicable, then lowest MAC Address. Simplest rule: lowest priority wins; if tied, lowest MAC wins.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "In PVST+/Rapid PVST+, how is the 16-bit Bridge Priority field divided?",
+      "a": "4 bits are the configurable priority and 12 bits are the Extended System ID (VLAN ID), which is why configurable priority values occur in increments of 4096.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the default configurable STP bridge priority?",
+      "a": "32768.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you compute the effective Bridge ID priority for a PVST+/Rapid PVST+ VLAN instance?",
+      "a": "Effective priority = Configured Priority + VLAN ID. Example: configured priority 4096 with VLAN 10 gives an effective priority of 4106.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the STP port roles in classic 802.1D STP?",
+      "a": "Root Port (RP), Designated Port (DP), and non-designated/blocking (redundant path that does not forward user traffic). The Root Bridge has no Root Port, and its participating ports are normally Designated Ports.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the five classic 802.1D STP port states and which ones forward data and learn MAC addresses?",
+      "a": "Blocking, Listening, Learning, Forwarding, and Disabled. Only Forwarding forwards data and learns MAC; Learning learns MAC but does not forward user data; Blocking, Listening, and Disabled do neither.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why are the Listening and Learning states considered transitional in classic STP?",
+      "a": "They are transitional timer-driven states that let a port participate in STP calculation (Listening) and build its MAC table (Learning) before safely reaching Forwarding.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is a BPDU and what information does a configuration BPDU carry?",
+      "a": "A bridge protocol data unit is STP's control message. A configuration BPDU carries the Root Bridge ID, Root Path Cost, Sender Bridge ID, Sender Port ID, Hello Time, Max Age, Forward Delay, and Topology Change information. Default Hello Time is 2 seconds.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do BPDUs move through the topology, and does a non-root switch simply relay the root's BPDU unchanged?",
+      "a": "No. Each bridge participates in STP, evaluates received information, selects its own port roles, and generates its own configuration BPDUs from its Designated Ports rather than blindly relaying the root's original BPDU.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Can a blocking/non-designated port still process STP information?",
+      "a": "Yes. A blocking port does not forward user traffic but can receive BPDUs and continues monitoring STP information so it can react if the topology changes.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the general BPDU comparison order used to select the best path?",
+      "a": "1. Lowest Root Bridge ID, 2. Lowest Root Path Cost, 3. Lowest Sender Bridge ID, 4. Lowest Sender Port ID.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does Root Path Cost represent?",
+      "a": "The cumulative cost of reaching the Root Bridge from the sending switch. A lower total Root Path Cost is preferred.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the classic short-method STP path costs for 10 Mbps, 100 Mbps, 1 Gbps, and 10 Gbps?",
+      "a": "10 Mbps = 100, 100 Mbps = 19, 1 Gbps = 4, 10 Gbps = 2. (40 Gbps and 100 Gbps = 1.)",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between the Cisco short and long STP cost methods?",
+      "a": "Short method uses small values (e.g. 100 Mbps = 19, 1 Gbps = 4). Long method uses much larger values with better granularity for high-speed links (e.g. 100 Mbps = 200,000, 1 Gbps = 20,000, 10 Gbps = 2,000, 100 Gbps = 200).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the default classic 802.1D STP timers?",
+      "a": "Hello Time = 2 seconds, Max Age = 20 seconds, Forward Delay = 15 seconds.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What do Forward Delay (15 s) and Max Age (20 s) actually govern in classic STP?",
+      "a": "Forward Delay is the time spent in Listening and Learning (15 s each). Max Age is the maximum time received BPDU information is considered valid before it can be aged out, not simply a fixed blocking timer.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Why is it incorrect to say STP always takes exactly 50 seconds to converge, and what does the theory represent?",
+      "a": "20 + 15 + 15 ≈ 50 s is a commonly cited worst-case timer sequence, not a universal fixed convergence time. Actual convergence depends on the failure and where it occurs in the topology.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does classic 802.1D STP handle a topology change (TCN)?",
+      "a": "A switch detecting a change generates a TCN BPDU that travels toward the Root. The Root acknowledges and sets the TC flag in Configuration BPDUs, causing switches to temporarily age MAC entries using Forward Delay (normally 15 s) so stale MACs are removed faster.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between TCN and TC in classic STP?",
+      "a": "TCN is the notification mechanism (a separate BPDU used to tell the Root a topology change occurred). TC is the topology-change indication set in Configuration BPDUs by the Root that causes temporary faster MAC aging.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What command sets a specific STP priority for a VLAN?",
+      "a": "spanning-tree vlan 10 priority 4096. A lower priority makes the switch more likely to become Root Bridge.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What do the Cisco root primary and root secondary macros do?",
+      "a": "spanning-tree vlan 10 root primary makes the switch the preferred Root Bridge by adjusting its priority based on current topology; root secondary makes it a predictable backup. They are convenience macros, not fixed values or STP roles.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What priority does root secondary commonly use under default conditions, and why is root primary not always 24576?",
+      "a": "root secondary commonly yields 28672 under default conditions. root primary is a macro that can choose a lower priority when required, so it is not always 24576.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which command shows Root Bridge information and which shows STP summary?",
+      "a": "show spanning-tree root shows Root Bridge information; show spanning-tree summary shows STP summary. show spanning-tree vlan 10 shows one VLAN, and show spanning-tree interface g0/1 detail shows interface STP detail.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is Cisco's default STP port priority and in what increments is it configured?",
+      "a": "Default is 128, configured in increments of 16. Port priority is used for Port ID tie-breaking, not Root Bridge election.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between Bridge Priority and Port Priority?",
+      "a": "Bridge Priority influences Root Bridge election; Port Priority influences port selection/tie-breaking (via the Port ID).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which command changes an interface's STP cost for a VLAN?",
+      "a": "interface GigabitEthernet0/1 then spanning-tree vlan 10 cost 19, which can influence Root Port selection.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does classic STP differ from RSTP in terms of standard, states, roles, and convergence?",
+      "a": "Classic STP is 802.1D with Blocking/Listening/Learning/Forwarding states and Root/Designated/Non-designated roles, using timer-driven slow convergence. RSTP is 802.1w with Discarding/Learning/Forwarding states and Root/Designated/Alternate/Backup roles, using Proposal/Agreement for rapid convergence.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the one-line sequence mental model for STP?",
+      "a": "Lowest BID → Root → best path → Root Port → Designated Port → block redundancy.",
+      "tag": "Quick Review",
+      "context": "Both"
+    },
+    {
+      "q": "What are the classic STP costs, roles, states, timers, and priority values in quick review?",
+      "a": "Classic 802.1D; lowest Bridge ID elects root; default priority 32768 in 4096 steps; Hello 2 s, Max Age 20 s, Forward Delay 15 s; classic states Blocking/Listening/Learning/Forwarding/Disabled; roles Root/Designated/Non-designated; short costs 10M=100, 100M=19, 1G=4, 10G=2; ~50 s worst-case convergence.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "Does STP remove physical redundancy?",
+      "a": "No. STP does not remove physical redundancy; it converts a redundant L2 topology into a loop-free one by forwarding on the best paths and blocking redundant paths.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "What is the distinction between a port role and a port state?",
+      "a": "A role describes what a port does in the topology (Root, Designated, Non-designated/Alternate/Backup); a state describes its operational behavior (Blocking, Listening, Learning, Forwarding, or Discarding). Blocking is a state, not a role.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "When two paths to the root have Root Path Costs of 4 and 19, which does STP prefer and why?",
+      "a": "STP prefers the path with cost 4 because a lower Root Path Cost wins.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    }
+  ]
+}

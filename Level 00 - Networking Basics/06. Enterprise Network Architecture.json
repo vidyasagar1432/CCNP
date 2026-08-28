@@ -1,0 +1,118 @@
+{
+  "title": "Enterprise Network Architecture",
+  "level": 0,
+  "levelTitle": "Level 00 - Networking Basics",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "06. Enterprise Network Architecture.md",
+  "cards": [
+    {
+      "q": "What is enterprise network architecture?",
+      "a": "It is the structured way of organizing network devices into functional modules so the network is predictable, scalable, secure, and manageable. Classic Cisco architecture splits the network into layers or modules, while modern variants like SD-Access fabric and Cisco DNA preserve the same design goals with automation on top.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the role and policy status of the core layer in the three-tier model?",
+      "a": "The core is the high-speed backbone providing fast convergence with no policy applied, built from routers or L3 spine switches with always-uplink links.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the role of the distribution layer?",
+      "a": "The distribution layer performs routing between VLANs, applies policy, and aggregates access, using L3 switches. QoS marking, ACLs, and first-hop redundancy protocols are handled here.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the role of the access layer?",
+      "a": "The access layer provides endpoint connectivity, ports, PoE, and VLAN assignment using L2/L3 switches and APs; it is kept simple with ports, VLANs, and optionally 802.1X or port security.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "When is a two-tier collapsed core used versus a three-tier design?",
+      "a": "A two-tier collapsed core merges the core and distribution layers for smaller sites, while three-tier is used for large sites, especially with a separate server block or WAN edge.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the functional modules in the Cisco modular model?",
+      "a": "Campus core/distribution/access, server farm (data center), WAN edge, branch office, remote access/VPN, Internet edge/DMZ, and teleworker/home office modules.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Where is the remote access VPN module placed and what does it terminate?",
+      "a": "The remote access/VPN module terminates user VPNs (SSL/IPsec) and is placed in the DMZ.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What redundancy and high-availability choices are made within modules?",
+      "a": "Two core switches, dual uplinks from every access switch (L2/L3 trunks), HSRP/VRRP for default gateways, and redundant supervisors (SUP).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is segmentation achieved in the campus?",
+      "a": "VLANs are used per functional area (users, servers, management, voice, guest), later replaced or expanded by VXLAN/VRF/SD-Access segmentation. Loop prevention uses spanning-tree on L2 and routed design where possible.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does the SD-Access (fabric) architecture consist of?",
+      "a": "A centralized DNA Center controller with a fabric underlay using IS-IS, an overlay using VXLAN over LISP, and per-group segmentation (SGT/SCA) instead of static VLANs. It keeps the same modules but moves to intent-based automation.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is north-south traffic?",
+      "a": "North-south traffic is client-to-server traffic, typically towards the data center or WAN, that crosses the network hierarchy.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is east-west traffic and what design does it shape?",
+      "a": "East-west traffic is server-to-server traffic within a data center, which is high volume and needs very low latency; it shapes the data center spine-leaf design.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why should policy not be applied in the core layer?",
+      "a": "The core should be fast and clean; policy and QoS belong in the distribution layer. Applying policy in the core would slow down the high-speed backbone.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is 'collapsed core' a mistake?",
+      "a": "No. Collapsed core merges the distribution and core layers and is a common, correct answer for small sites, not a mistake.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What should be true of a management VLAN?",
+      "a": "The management VLAN should be separated from user VLANs, often using one dedicated and untagged VLAN, while avoiding spanning-tree root changes.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is a DMZ just an extra VLAN?",
+      "a": "No. A DMZ is a security zone between the outside and inside, with its own firewall policy and one-arm or two-arm placement, not merely an additional VLAN.",
+      "tag": "Exam Trap",
+      "context": "Interview"
+    },
+    {
+      "q": "In the Quick Review, which modules apply policy and which do not?",
+      "a": "Campus core applies no policy; distribution, server farm, WAN edge, Internet edge/DMZ, and remote access apply policy; access applies only light policy.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "On an access switch, what commands place a port into access mode on VLAN 10 with portfast?",
+      "a": "On interface GigabitEthernet0/1: switchport mode access, switchport access vlan 10, and spanning-tree portfast.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    }
+  ]
+}

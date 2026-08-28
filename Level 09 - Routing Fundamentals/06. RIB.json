@@ -1,0 +1,130 @@
+{
+  "title": "RIB (Routing Information Base)",
+  "level": 9,
+  "levelTitle": "Level 09 - Routing Fundamentals",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "06. RIB.md",
+  "cards": [
+    {
+      "q": "What is the Routing Information Base (RIB)?",
+      "a": "The RIB is the router's control-plane routing database, commonly viewed through the Cisco routing table. It receives candidate routes from connected interfaces, static configuration, and dynamic routing protocols, and determines which route(s) should be installed per destination prefix based on Administrative Distance (AD) and the routing protocol's metric/path-selection rules. The resulting information is used by CEF to build the FIB.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the core relationship between the RIB and the FIB?",
+      "a": "RIB = route selection. FIB = packet forwarding. The RIB is the control-plane routing database; CEF/FIB provides the normal data-plane packet forwarding.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What route sources feed the RIB and what are their typical Cisco AD values?",
+      "a": "Connected C = 0, Local L = 0, Static S = 1, OSPF O = 110, EIGRP Internal D = 90, EIGRP External D EX = 170, BGP eBGP B = 20, and BGP iBGP B = 200. These are typical values that can be changed with configuration.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the two stages of route selection in the RIB?",
+      "a": "Stage 1 selects the routing source: if multiple protocols provide the same destination prefix, compare Administrative Distance, and lower AD wins. Stage 2 selects the best path within the protocol using that protocol's own metric/path-selection algorithm. AD chooses between routing sources; metric chooses the best path within a routing protocol.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "With OSPF route 10.10.10.0/24 at AD 110 and EIGRP at AD 90, which route wins?",
+      "a": "EIGRP wins because 90 < 110, so the OSPF route is not the active route for that prefix. This compares Administrative Distance between different routing sources.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is ECMP in the context of the RIB?",
+      "a": "ECMP (Equal-Cost Multi-Path) occurs when multiple paths are considered equal by the routing protocol, allowing the RIB to install multiple equal-cost paths for the same prefix. CEF/FIB then uses those paths for forwarding and load sharing. ECMP is not simply 'metric tie = always install everything'; the protocol and platform determine qualifying paths and the number installed.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Compare RIB vs FIB/CEF on plane, purpose, and command.",
+      "a": "RIB is the control plane whose main purpose is route selection, receiving information from routing protocols/connected/static, main question 'Which route should be used?', command show ip route. FIB/CEF is the data plane whose purpose is packet forwarding, receiving information from the RIB, main question 'How should the packet be forwarded?', command show ip cef.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does the RIB handle a route with a next-hop IP that is not directly connected?",
+      "a": "The router performs a recursive lookup: it looks up the next-hop address (e.g. 192.168.100.2), finds a route to that address via an outgoing interface, and confirms the next hop is reachable. The resulting forwarding information is used by CEF to construct the FIB/adjacency information rather than performing a complete recursive route lookup for every packet.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What triggers RIB updates and convergence?",
+      "a": "Triggers include interface up/down, routing-protocol neighbor failure, topology changes, route advertisements/withdrawals, static-route changes, administrative-distance changes, and metric/path-selection changes. The process is: routing change → protocol → new route info → RIB recalculation → new best route → CEF/FIB update → forwarding uses new path.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is route flapping and what can cause it?",
+      "a": "Route flapping is when a route repeatedly changes state between installed and withdrawn. Causes include unstable physical links, routing-protocol neighbor instability, interface errors, misconfiguration, unstable paths, and external routing changes. It can cause repeated RIB and FIB updates and increase control-plane processing.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What techniques control routing-table scale and mitigate route flapping?",
+      "a": "For scale: route filtering, route summarization, BGP communities and policy, prefix limits, appropriate redistribution, and careful use of default routes. For flapping: fix the underlying instability, use route filtering/policy, BGP route dampening where appropriate, and summarization to reduce instability propagation.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How do VRFs relate to the RIB?",
+      "a": "Each VRF maintains its own routing context and routing table. Routes in one VRF are normally isolated from another VRF unless explicit mechanisms are configured to exchange them.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands view the routing table, a specific destination, and the routing-table summary?",
+      "a": "show ip route displays the table; show ip route 10.1.1.0 views a specific destination; show ip route summary shows the routing-table summary. show ip protocols shows routing protocols and their configuration; show ip route vrf X views a VRF routing table.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why is 'RIBs and FIBs are the same' a trap?",
+      "a": "They are different: RIB is control plane (route selection), FIB is data plane (packet forwarding). Also, the RIB is primarily a control-plane route-selection database; CEF/FIB provides the normal forwarding path rather than the RIB forwarding every packet.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does the lowest AD always mean the lowest metric?",
+      "a": "No. AD compares different routing sources; the routing protocol's metric determines the best path within that protocol. Different protocols → AD; same protocol → protocol-specific metric/path selection.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does the RIB contain only one route for every prefix?",
+      "a": "Too simplistic. The active routing table installs the preferred route(s), but routing processes can maintain alternative candidate information, and ECMP can result in multiple installed paths. Alternative routes may exist in the protocol's own database but not be installed as the active route.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does show ip route show every route learned by every protocol?",
+      "a": "No. show ip route primarily shows the active routing table. Alternative routes may still exist in the routing protocol's own database (e.g. the EIGRP topology table or BGP table) but not be installed as the active route.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does BGP's AD determine BGP's best path?",
+      "a": "No. BGP first performs its own BGP path-selection process. Only after BGP selects its candidate route does that route compete with routes from other sources using Administrative Distance.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "If a prefix exists in a routing protocol but not in the RIB, what could be the cause?",
+      "a": "Another route may have a better AD, the route may be unusable, or policy/filtering may prevent installation. Check show ip route and protocol-specific route output.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Summarize the RIB quick review: plane, purpose, inputs, and data-plane counterpart.",
+      "a": "RIB = Routing Information Base, the control plane, commonly called the routing table, whose main purpose is route selection. Inputs are connected, static, and routing protocols. Different sources are compared using AD; within a protocol, protocol-specific path selection applies. ECMP may install multiple equal-cost paths; recursive resolution determines next-hop reachability; the data-plane counterpart is FIB/CEF; main command is show ip route; VRF means separate routing context/table; forwarding is normally performed by CEF/FIB.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

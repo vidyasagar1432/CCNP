@@ -1,0 +1,94 @@
+{
+  "title": "Administrative Distance in Redistribution",
+  "level": 13,
+  "levelTitle": "Level 13 - Route Redistribution",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "05. Administrative Distance.md",
+  "cards": [
+    {
+      "q": "How does Administrative Distance (AD) interact with redistribution when two protocols know the same prefix?", 
+      "a": "When two protocols know the same prefix with different metrics, the Administrative Distance picks the winner before metric comparison. Redistribution multiplies these interactions, and tuning distance per-source steers those conflicts.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the default administrative distances for connected, static, eBGP, EIGRP internal, and OSPF?", 
+      "a": "Connected 0, Static 1, eBGP 20, EIGRP internal 90, OSPF 110.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the default administrative distances for IS-IS, RIP, EIGRP external, and iBGP?", 
+      "a": "IS-IS 115, RIP 120, EIGRP external 170, iBGP 200. Lower AD wins, and metric is only compared when AD ties.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why does AD beat the metric when comparing redistributed routes?", 
+      "a": "AD selects the best route before metric comparison, so a route with a better metric can still lose if another source has a lower AD. A redistributed route may therefore lose despite a better metric.",
+      "tag": "Exam Trap",
+      "context": "Interview"
+    },
+    {
+      "q": "In a conflict between an OSPF route and an EIGRP internal route, who wins regardless of metric?", 
+      "a": "EIGRP internal (AD 90) wins over OSPF (AD 110), even if its metric is worse.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Between an EIGRP external route and an OSPF route for the same prefix, who wins?", 
+      "a": "OSPF (AD 110) wins because EIGRP external has AD 170, which comes last.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is a redistributed OSPF route ignored if the same prefix exists as an EIGRP internal route?", 
+      "a": "Redistribute ospf creates EIGRP external routes (AD 170). If the same prefix also exists as EIGRP internal (AD 90), the internal route wins because of its lower AD, so the redistributed copy is ignored.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you tune administrative distance per source?", 
+      "a": "Use 'distance N' globally for the protocol, 'distance N source wildcard acl' per-neighbor, or for EIGRP 'distance eigrp int ext' to set internal and external separately.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the priority order of existence, AD, and metric in route selection?", 
+      "a": "1) existence (filtering), 2) Administrative Distance, 3) metric (protocol cost). Redistribution design should align ADs deliberately rather than rely on defaults.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What happens with two boundary routers redistributing both ways plus different ADs?", 
+      "a": "It causes route flapping between protocols unless filtered, because routes bounce between the two protocols with different ADs.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands verify the AD and redistribution state?", 
+      "a": "'show ip route <prefix>' shows the source protocol AD; 'show ip protocols' shows distance and redistribution; 'show ip route | include \"via\"'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do eBGP and iBGP compare in AD, and what does this mean?", 
+      "a": "eBGP has AD 20 (very low, so eBGP typically wins a conflict) while iBGP has AD 200 (loses to everything), which is why iBGP needs the RIB next-hop resolvable.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why do EIGRP internal vs external AD values matter in redistribution?", 
+      "a": "EIGRP internal is AD 90 while EIGRP external is AD 170. Redistributed routes become external (170), so they lose to internal routes (90) and often to OSPF (110) for the same prefix — a classic redistribution trap.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "A correct path is not being used even though its metric is better. What is the likely cause?", 
+      "a": "AD is picking a different source protocol; check 'show ip route' AD and tune 'distance' per source so both protocols coexist with the desired winner.",
+      "tag": "Quick Review",
+      "context": "Practical"
+    }
+  ]
+}

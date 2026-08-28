@@ -1,0 +1,172 @@
+{
+  "title": "BPDU (Bridge Protocol Data Unit)",
+  "level": 8,
+  "levelTitle": "Level 08 - STP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "09. BPDU.md",
+  "cards": [
+    {
+      "q": "What is a BPDU and what plane does it operate in?",
+      "a": "A Bridge Protocol Data Unit (BPDU) is the STP control message exchanged between switches to build and maintain the Layer-2 spanning tree. It is control-plane traffic, not normal user-data traffic.",
+      "tag": "Overview",
+      "context": "Exam"
+    },
+    {
+      "q": "What categories of BPDUs exist in classic 802.1D and RSTP?",
+      "a": "Classic 802.1D uses Configuration BPDUs (root election/topology info) and a separate TCN BPDU (topology-change notification). RSTP uses a Version 2 BPDU that integrates role/state and proposal/agreement info.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is a TCN BPDU not the same as a Configuration BPDU?",
+      "a": "A TCN BPDU is a separate classic-802.1D message used to notify the Root that a topology change occurred, whereas a Configuration BPDU carries root/topology election information. RSTP integrates topology-change signaling into its normal BPDUs.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What important fields does a BPDU contain?",
+      "a": "Protocol Identifier, Protocol Version, BPDU Type, Flags, Root Bridge ID, Root Path Cost, Sender Bridge ID, Sender Port ID, Message Age, Max Age, Hello Time, and Forward Delay.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the Root Bridge ID and which root is elected?",
+      "a": "The Root Bridge ID identifies the bridge advertised as root, comprising Bridge Priority, Extended System ID, and MAC Address. The switch with the lowest Bridge ID becomes root.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does Root Path Cost in a BPDU represent, and how is it accumulated?",
+      "a": "It is the total STP path cost from the sending switch toward the Root. It accumulates link costs (e.g., cost 4 across two links gives Root Path Cost 8). A lower Root Path Cost is preferred.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are Sender Bridge ID and Sender Port ID used for?",
+      "a": "Sender Bridge ID identifies the switch that transmitted the BPDU and is used as a tie-break when Root ID and Root Path Cost are equal. Sender Port ID identifies the sending port (port priority + port number) and is a later tie-break; lower wins.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is Message Age and when is a BPDU considered stale?",
+      "a": "Message Age is the time elapsed since the Root originated the information; it increases as the BPDU moves through the topology. A BPDU is considered stale when it exceeds the configured Max Age.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the default classic STP timer values?",
+      "a": "Hello Time 2 seconds, Max Age 20 seconds, Forward Delay 15 seconds.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What extra information does the RSTP Version 2 BPDU Flags field carry?",
+      "a": "Topology Change, Topology Change Acknowledgment, Agreement, Forwarding, Learning, Port Role, and Proposal flags, enabling rapid proposal/agreement and role/state signaling.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Is RSTP simply classic STP plus a flag byte?",
+      "a": "No. RSTP changes the BPDU format/version and the entire operating model, including rapid role transitions and the proposal/agreement mechanism.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Can a blocking/non-forwarding port receive and process BPDUs?",
+      "a": "Yes. A non-forwarding STP port can still participate in STP control processing, receive/process BPDUs, and continue monitoring the topology.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How do the BPDU comparison rules differ for root election, Root Port selection, and Designated Port selection?",
+      "a": "Root election is primarily lowest Root/Bridge ID. Root Port selection compares lowest Root Path Cost then Sender Bridge ID, Sender Port ID, and Local Port ID. Designated Port selection chooses the switch advertising the superior BPDU on the segment. Do not treat it as one universal list.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does classic 802.1D signal a topology change via BPDUs?",
+      "a": "A switch detecting a change sends a TCN BPDU toward the Root; the Root receives it, sets the TC flag in Configuration BPDUs, causing switches to temporarily reduce MAC aging.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does a topology change affect MAC aging, and is Forward Delay the same as MAC aging time?",
+      "a": "A topology change causes switches to age MAC entries more aggressively so traffic relearns correct paths, using the Forward Delay value (normally 15 s) for temporary MAC aging. Forward Delay and MAC aging time are different concepts.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How do BPDUs relate to VLANs across PVST+, Rapid PVST+, and MST?",
+      "a": "PVST+ and Rapid PVST+ run a separate instance per VLAN (tagged/untagged handling on trunks), while MST maps many VLANs to fewer instances in a region. Do not assume every mode sends one independent BPDU per VLAN the same way.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What do BPDU Guard, BPDU Filter, Root Guard, and Loop Guard each trigger on?",
+      "a": "BPDU Guard triggers on a BPDU received on a PortFast/edge port (err-disables). BPDU Filter suppresses/ignores BPDUs (can prevent STP participation). Root Guard triggers on a superior BPDU (root-inconsistent). Loop Guard triggers when expected BPDUs stop arriving (loop-inconsistent).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the mental model for PortFast vs BPDU Guard?",
+      "a": "PortFast says this is an edge port; BPDU Guard says if a BPDU appears here, shut it down (err-disable).",
+      "tag": "Quick Review",
+      "context": "Both"
+    },
+    {
+      "q": "Why is BPDU Filter not a safer version of BPDU Guard?",
+      "a": "BPDU Guard err-disables a port on an unexpected BPDU, protecting the network. BPDU Filter suppresses/filters BPDUs, which can hide STP information and is potentially dangerous (may hide a Layer-2 loop).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does Root Guard do and what state does it create?",
+      "a": "Root Guard prevents a port from becoming a path toward an unexpected superior root; on a superior BPDU it puts the port in root-inconsistent state and stops forwarding. Typical use is on core/distribution facing downstream switches.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does Loop Guard do and what state does it create?",
+      "a": "Loop Guard protects against a non-designated port incorrectly transitioning to forwarding when expected BPDUs stop arriving (e.g., unidirectional failure), placing it in loop-inconsistent (discarding) state until valid BPDUs return.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the mental model for Root Guard vs Loop Guard?",
+      "a": "Root Guard protects root placement (superior BPDU → root-inconsistent). Loop Guard protects against unexpected forwarding when BPDUs disappear (loop-inconsistent).",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands verify inconsistent ports, interface status, and log messages?",
+      "a": "show spanning-tree inconsistentports shows inconsistent ports; show interfaces status and show logging check errdisabled/BPDU issues; show spanning-tree detail and debug spanning-tree events provide detail.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the key question to ask when reading a BPDU during troubleshooting?",
+      "a": "Who does it say is root (Root Bridge ID), what is the cost to the root (Root Path Cost), who sent it (Sender Bridge ID), which port sent it (Sender Port ID), and how old is it (Message Age/Max Age) — then, is this BPDU superior or inferior to the one currently known?",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Why is it wrong that the Root Path Cost is always 0 in every BPDU?",
+      "a": "The root itself has a path cost of 0 to itself, but a BPDU transmitted by another switch advertises that switch's accumulated Root Path Cost.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is STP election based on lowest MAC alone?",
+      "a": "No. STP first compares Bridge ID (priority/system ID + MAC); MAC is the tie-break only after the priority/system-ID portion is equal.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the BPDU field purposes in quick review?",
+      "a": "Root Bridge ID = advertised root; Root Path Cost = best path to root; Sender Bridge ID/Port ID = sender identity/tie-breaks; Message Age = age of root info; Max Age = BPDU expiration; Hello Time = generation interval; Forward Delay = Listening/Learning timing; BPDU Type/Version identifies protocol.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

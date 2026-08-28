@@ -1,0 +1,88 @@
+{
+  "title": "Multicast Routing",
+  "level": 19,
+  "levelTitle": "Level 19 - Multicast",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "05. Multicast Routing.md",
+  "cards": [
+    {
+      "q": "What is multicast routing and what is its core rule?",
+      "a": "Multicast routing forwards copies of a packet away from the source along a distribution tree. The core rule is RPF (Reverse Path Forwarding): a packet is forwarded only if it arrived on the interface the unicast table would use toward the source.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Why does the RPF check make the tree loop-free?",
+      "a": "Because only packets arriving on the interface the unicast route uses toward the source are forwarded, traffic always travels away from the source, which prevents loops.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How does multicast decision-making differ from unicast?",
+      "a": "Unicast forwards toward the destination address; multicast forwards away from the source using RPF, which is based on the source. PIM reuses the existing unicast RIB for RPF instead of building a separate multicast topology.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What do (*,G), (S,G), OIL, and flags mean in an mroute table?",
+      "a": "(*,G) is an any-source shared tree entry for the group, (S,G) is a source-specific shortest-path entry, OIL is the outgoing interface list, and the flags record the RPF check result. A correct (S,G) with a proper OIL means the tree is being built.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is MBGP and which SAFIs does it use?",
+      "a": "MBGP is BGP that carries NLRIs for multicast; SAFI 1 is unicast and SAFI 2 is multicast. It provides a separate multicast RPF path so the RPF path may differ from the unicast path.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which tools handle inter-domain multicast, and what is each for?",
+      "a": "MBGP provides multicast reachability, MSDP provides RP peering and source discovery, PIM forwards between domains, and SSM (IGMPv3 plus PIM-SM) simplifies inter-domain by removing RP and register complexity.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you mitigate RPF asymmetry and prevent loops in multicast design?",
+      "a": "Use MBGP or a default route to correct RPF asymmetry, peer PIM per link, scope with TTL or boundary, and always enforce RPF to avoid loops.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands verify multicast routing and RPF?",
+      "a": "show ip mroute and show ip mroute count show the tree, show ip rpf <IP> verifies the reverse path, and show ip pim interface plus debug ip mpacket help with diagnosis.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Multicast packets are being dropped by RPF; what do you check?",
+      "a": "Whether the inbound interface matches the source-facing RPF interface; verify with show ip rpf.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Multicast is not forwarding or takes the wrong path; what do you check?",
+      "a": "An empty OIL means no forwarding, check show ip mroute count; a wrong path usually means unicast asymmetry, fix with MBGP.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "State the RPF forwarding rule exactly.",
+      "a": "Forward a multicast packet only if it arrived on the interface the unicast table would use toward the source; otherwise it is an RPF failure and the packet is dropped.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "A packet for a source arrives on interface B, but the unicast route toward the source points out interface A; what happens?",
+      "a": "The packet fails the RPF check and is dropped; multicast is only accepted from the source-facing interface.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Summarize multicast routing at a glance.",
+      "a": "Core is RPF, based on the unicast RIB; entries are (*,G) and (S,G); PIM handles forwarding; MBGP carries multicast NLRIs (SAFI 2); MSDP handles RP discovery; SSM is source-driven; verify with show ip mroute.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

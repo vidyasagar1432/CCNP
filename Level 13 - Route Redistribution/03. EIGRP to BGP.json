@@ -1,0 +1,94 @@
+{
+  "title": "EIGRP to BGP Redistribution",
+  "level": 13,
+  "levelTitle": "Level 13 - Route Redistribution",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "03. EIGRP to BGP.md",
+  "cards": [
+    {
+      "q": "What is the purpose and best method of injecting EIGRP routes into BGP, and what is a key difference from EIGRP's own redistribution?",
+      "a": "It advertises internal EIGRP networks to the provider. The cleanest method is 'network' statements against EIGRP-present routes, with 'redistribute eigrp' as the bulk alternative. Unlike EIGRP's own redistribution, no special seed metric is needed — BGP uses MED / default metric.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How do the two EIGRP-to-BGP methods compare in origin and default MED?",
+      "a": "'network' gives origin 'i' with MED 0 (or OSPF-style cost via metric); 'redistribute eigrp' gives origin '?' with MED default from the EIGRP metric or 0. EIGRP internal and external routes become BGP routes at the boundary router.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the command 'redistribute eigrp 100 metric 200' set, and why is the default MED a risk?",
+      "a": "It sets the MED to 200 for the redistributed routes. The default MED without 'metric' is 0, which is often too attractive to providers.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does a route-map selectively redistribute EIGRP into BGP?",
+      "a": "A route-map matches with a prefix-list and sets MED and community (e.g., set metric 300, set community 65001:100), applied to redistribute eigrp. Matched routes get the MED and community; unmatched routes are filtered by the implicit deny.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which EIGRP-origin routes are safe to redistribute into BGP and which need filtering?",
+      "a": "Internal (successor) routes are redistributed normally. External routes (redistributed into EIGRP from another protocol) must be filtered to avoid feedback loops.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is the EIGRP composite metric treated by BGP?",
+      "a": "The EIGRP composite metric is not a bandwidth cost; BGP treats it as an opaque MED unless overridden. Prefer an explicit 'set metric'/'metric' to keep MEDs predictable.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is the recommended best practice for EIGRP-to-BGP advertisement?",
+      "a": "Use explicit 'network' statements for precise prefix control and origin 'i', and reserve 'redistribute' for bulk redistribution with route-map filtering.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands verify and troubleshoot EIGRP redistribution into BGP?",
+      "a": "'show ip bgp', 'show ip bgp neighbors <ip> advertised-routes', 'show route-map', 'show ip eigrp topology', and 'show ip bgp community'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why is no seed metric needed for EIGRP-to-BGP redistribution, unlike OSPF-to-EIGRP?",
+      "a": "Because BGP uses MED/default metric rather than an EIGRP-style composite seed; the source protocol's own metric mapping does not require seeding into BGP.",
+      "tag": "Exam Trap",
+      "context": "Interview"
+    },
+    {
+      "q": "What is the default BGP MED when redistributing EIGRP without a metric, and why is it a problem?",
+      "a": "It is 0, which is too attractive to providers; set a positive metric via 'metric' or a route-map set.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What should you do with EIGRP external routes before sending them to BGP?",
+      "a": "Filter them to avoid re-advertising routes that entered EIGRP from another protocol, which could create feedback loops.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "In EIGRP-to-BGP, what does MED inheritance from the EIGRP metric mean?",
+      "a": "BGP treats the EIGRP composite metric as an opaque MED unless you override it; the values are not semantically meaningful to BGP, so use explicit set metric overrides for predictability.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "A BGP table shows MED 0 and origin '?' for all redistributed EIGRP routes. What likely caused it?",
+      "a": "No metric was set on the redistribute command (giving MED default 0) and redistribute was used instead of network statements (giving origin '?').",
+      "tag": "Quick Review",
+      "context": "Practical"
+    },
+    {
+      "q": "In the EIGRP-to-BGP quick review, how do the key points compare?",
+      "a": "Seed metric not required; MED default 0; redistribute gives origin '?', network gives origin 'i'; filter with route-map; external routes must be filtered; metric override via set metric; verify with show ip bgp.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

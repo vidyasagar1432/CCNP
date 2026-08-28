@@ -1,0 +1,29 @@
+{
+  "title": "Automation Labs",
+  "level": 30,
+  "levelTitle": "Level 30 - Labs",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "15. Automation Labs.md",
+  "cards": [
+    { "q": "What do the Automation Labs practice?", "a": "Python, Ansible, and APIs (NETCONF/RESTCONF) against labs, building ENCOR automation objectives such as config via API, YANG data models, and repeatable idempotent playbooks.", "tag": "Overview", "context": "Both" },
+    { "q": "What are the main device interaction methods in network automation?", "a": "RESTCONF (HTTP + YANG), NETCONF (XML RPC), SSH for CLI, gNMI for streaming, and Python libraries.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "Which Python libraries are used for RESTCONF and NETCONF?", "a": "requests for RESTCONF and ncclient for NETCONF, along with json for parsing, os for environment, and argparse for CLI.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What is the RESTCONF lab workflow?", "a": "Enable RESTCONF, send an authenticated GET, parse the JSON, use PATCH to change config, then verify.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What is RESTCONF?", "a": "RESTCONF performs HTTP methods per YANG data path, using HTTP and typically JSON.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What is the NETCONF lab workflow?", "a": "Enable NETCONF, connect with ncclient, get config, use edit-config to change it, then verify.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What is NETCONF?", "a": "NETCONF is an XML RPC protocol run over SSH for network configuration.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "Which Ansible modules are used in network automation?", "a": "ios_command for CLI, ios_config for configuration, and netconf_config for NETCONF, with an inventory defining hosts and modules enabling repeatable idempotent changes.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "How do you enable automation APIs on IOS-XE?", "a": "Enable restconf and netconf-yang features on the device before connecting via the APIs.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What is the recommended automation lab workflow?", "a": "Enable the APIs, script a connection, change the config, verify, then roll back.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What HTTP header is required for RESTCONF data requests?", "a": "The Accept header set to application/yang-data+json for JSON responses.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "A RESTCONF request returns a 401 error. What is the likely cause and check?", "a": "An authentication problem with basic auth credentials, so check the username/password.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "A RESTCONF GET returns no data. What is the likely cause and check?", "a": "A missing or wrong Accept header, so verify it is set to application/yang-data+json.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "NETCONF connection fails on an IOS-XE device. What is the likely cause?", "a": "The netconf-yang feature is not enabled, so verify and enable it on the device.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "An Ansible playbook fails to run. What is the likely cause and check?", "a": "An inventory problem, so check the hosts defined in the inventory.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "RESTCONF and NETCONF both use JSON for their payloads.", "a": "False — RESTCONF uses HTTP with JSON, while NETCONF uses XML RPC.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "Which feature must be enabled before using RESTCONF or NETCONF on a device?", "a": "restconf and netconf-yang features must be enabled on IOS-XE before the APIs work.", "tag": "Exam Trap", "context": "Both" },
+    { "q": "What makes Ansible modules preferred for configuration?", "a": "Ansible modules, especially ios_config and netconf_config, are idempotent and repeatable, applying only the desired end state.", "tag": "Exam Trap", "context": "Both" },
+    { "q": "How does RESTCONF map to YANG data models?", "a": "RESTCONF applies HTTP methods to YANG data paths, for example GET and PATCH on a YANG path such as /restconf/data/Cisco-IOS-XE-native:native/interface.", "tag": "Quick Review", "context": "Practical" }
+  ]
+}

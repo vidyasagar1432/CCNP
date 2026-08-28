@@ -1,0 +1,136 @@
+{
+  "title": "EIGRP Troubleshooting",
+  "level": 11,
+  "levelTitle": "Level 11 - EIGRP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "11. Troubleshooting.md",
+  "cards": [
+    {
+      "q": "What is the layered EIGRP troubleshooting approach?",
+      "a": "Interface → Neighbor → Topology → RIB → Forwarding. The main problem areas are neighbor formation, DUAL state, successor/feasible-successor selection, metrics, filtering, and forwarding. Do not start with routing tables if the neighbor relationship is missing; troubleshoot from the lower layer upward.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the five troubleshooting flow steps and their commands?",
+      "a": "1. Interface operational? show ip interface brief. 2. EIGRP adjacency established? show ip eigrp neighbors. 3. Routes and feasible successors present? show ip eigrp topology. 4. Route installed in the RIB? show ip route eigrp. 5. Can the router forward traffic? show ip cef, ping, traceroute.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the likely causes when no EIGRP neighbor forms?",
+      "a": "AS mismatch, EIGRP packets blocked by an ACL/CoPP/interface filtering, authentication mismatch (key chain or algorithm), a passive interface, or a K-value mismatch. If a neighbor flaps, suspect packet loss or an unstable link and check interface counters and neighbor uptime.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which EIGRP neighbor parameters must match for adjacency, and which do not?",
+      "a": "EIGRP AS numbers and K-values must match. Hello and hold timers do not have to match, unlike OSPF. EIGRP uses multicast 224.0.0.10 for IPv4, passive-interface prevents hellos so a neighbor cannot normally form, and authentication must be compatible on both sides.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is SIA (Stuck in Active) in EIGRP and what causes it?",
+      "a": "A route enters Active when the successor is lost with no suitable feasible successor. SIA occurs when the router does not receive the required query response within the EIGRP active-timeout process. Causes include unidirectional or unreliable connectivity, packet loss, congestion, neighbor failure, large query scope, slow/overloaded routers, and poor topology design.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you mitigate SIA, and is changing the active timer the primary fix?",
+      "a": "Use EIGRP stub on spoke routers to limit query propagation, fix unstable or unidirectional links, reduce query scope with summarization and proper design, and investigate overloaded or slow routers. Timers active-time can be tuned, but increasing the active timer does not fix the underlying cause of SIA.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What should you verify when a feasible successor is not present or routes are not installed?",
+      "a": "Check the topology with show ip eigrp topology and show ip route eigrp and look at the successor, feasible distance, reported distance, feasible successors, and installed next hops. A route being present in the topology table does not automatically make it a feasible successor; it must satisfy RD < FD.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are common EIGRP metric problems and their causes?",
+      "a": "By default the classic EIGRP metric uses bandwidth and delay (K1 = 1, K3 = 1, K2 = K4 = K5 = 0). Problems: unexpected successor or very high metric from incorrect bandwidth/delay, no feasible successor because a backup path fails the feasibility condition, and unequal paths unused from no qualifying FS or no variance. Check the topology, show interfaces, and show running-config interface.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Does the bandwidth command change the physical interface speed?",
+      "a": "No. The bandwidth command changes the value EIGRP uses for metric calculation; it does not change the physical interface speed.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "When troubleshooting unequal-cost load balancing, what three conditions must be checked?",
+      "a": "1. Is the alternate path a feasible successor? 2. Is the path metric within the configured variance multiplier? 3. Is the route actually installed in the RIB? Variance alone does not make every alternate route eligible because it does not bypass the feasibility condition.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does a passive-interface do in EIGRP and what does it not do?",
+      "a": "A passive EIGRP interface does not send EIGRP hello packets and therefore does not normally form adjacencies. It can still advertise its connected network into EIGRP; it simply does not form a neighbor relationship on that interface. Restore neighbors with no passive-interface under the EIGRP process.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What metric do redistributed routes into EIGRP need and how is it provided?",
+      "a": "Redistributed routes need an appropriate EIGRP metric. Provide it with default-metric 10000 100 255 1 1500 under router eigrp, or directly with redistribute ospf 1 metric 10000 100 255 1 1500. The five classic EIGRP metric parameters are bandwidth, delay, reliability, load, and MTU. Do not assume redistributed routes automatically receive an appropriate metric.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "A destination is in the EIGRP topology table but not in show ip route eigrp. What should you check?",
+      "a": "Whether the route has a valid successor, satisfies EIGRP selection rules, another source has a better administrative distance, filtering or summarization affects it, or it is being suppressed/redistributed incorrectly. Use show ip eigrp topology, show ip route <prefix>, and show ip protocols. A route can exist in the topology table without being installed in the RIB.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What should you investigate when an EIGRP neighbor repeatedly flaps?",
+      "a": "Check show ip eigrp neighbors, show interfaces, and show logging for physical link instability, packet loss, interface errors, duplex/speed problems, congestion, ACL or security filtering, authentication problems, CPU overload, or an unstable transport path. Look at neighbor uptime, interface counters, and system logs rather than assuming the EIGRP process is the problem.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the key EIGRP troubleshooting command groups?",
+      "a": "Neighbor: show ip eigrp neighbors and show ip eigrp neighbors detail. Interfaces: show ip eigrp interfaces and show ip eigrp interfaces detail. Topology: show ip eigrp topology and show ip eigrp topology active. Routing table: show ip route eigrp and show ip route <prefix>. Protocol: show ip protocols and show running-config | section router eigrp. Forwarding: show ip cef, ping, traceroute. Events/debugging: show ip eigrp events, debug eigrp packets, debug eigrp fsm.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you map common EIGRP symptoms to their first checks?",
+      "a": "No neighbor: AS/K-values/auth/passive interface/filtering. Neighbor flapping: link quality and packet loss. SIA: active routes, neighbor responsiveness, query scope. No FS: RD vs FD in topology. Slow failover: availability of an FS. Unequal paths unused: FS plus variance. Silent interface: passive-interface. Wrong metric: bandwidth/delay. Missing route: topology → RIB → AD/filtering. Redistribution failure: EIGRP metric.",
+      "tag": "Quick Review",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the one-line EIGRP troubleshooting method?",
+      "a": "Interface → Neighbor → Topology → Successor/FS → RIB → CEF → Data Plane. Missing neighbor: troubleshoot adjacency. Route Active: troubleshoot DUAL/query behavior. No FS: check the feasibility condition and topology. Route in EIGRP but not RIB: check route selection, filtering, and administrative distance. Route in RIB but traffic fails: move to CEF, adjacency, and the data plane.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "In EIGRP, which parameters must match and which do not need to match between neighbors?",
+      "a": "K-values and (for classic EIGRP) the AS number must match for adjacency formation. Hello and hold timers do not have to match, unlike OSPF which requires matching hello/dead intervals.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Can a passive EIGRP interface still advertise its connected network?",
+      "a": "Yes. A passive interface does not send EIGRP hellos and so does not form a neighbor relationship, but it can still advertise its connected network into EIGRP.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is increasing the EIGRP active timer a valid way to fix SIA or slow convergence?",
+      "a": "No. The active timer should not be treated as the primary fix for a broken network; fix packet loss, unidirectional links, and query-scope/topology problems instead.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "In which order should EIGRP problems be investigated?",
+      "a": "Always troubleshoot neighbors before investigating route metrics; otherwise you can waste time debugging routing when the real problem is the adjacency.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,172 @@
+{
+  "title": "Dynamic NAT",
+  "level": 15,
+  "levelTitle": "Level 15 - NAT",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "02. Dynamic NAT.md",
+  "cards": [
+    {
+      "q": "What is Dynamic NAT?",
+      "a": "Dynamic NAT creates temporary one-to-one mappings between inside local addresses and addresses from a configured NAT pool. Unlike static NAT, the mapping is created when eligible traffic requires translation and is removed when the translation ages out.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Does Dynamic NAT translate TCP/UDP ports?",
+      "a": "No. Dynamic NAT is address translation only (1:1 while active) and does not translate ports. Translating both address and port is PAT.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Can an outside host initiate a connection to an inside host through Dynamic NAT?",
+      "a": "Not normally, because Dynamic NAT is designed for inside-initiated connections and creates no permanent mapping. Without an active translation there is no way to know which inside host should receive the traffic, so use Static NAT or Static PAT for predictable inbound access.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does a Dynamic NAT translation get created and released?",
+      "a": "When an inside host starts eligible traffic, the router allocates a free pool address and creates the mapping (10.0.0.10 ↔ 203.0.113.10). The translation stays active while traffic flows, then ages out according to NAT timers and the pool address becomes available to other inside hosts.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Without overload, what address relationship does Dynamic NAT produce?",
+      "a": "Dynamic NAT is 1:1 while active: many inside hosts map to many public addresses, one pool address per active host. Without overload, it is not many-inside-hosts-to-one-public-address; that behavior is PAT.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What configuration creates basic Dynamic NAT?",
+      "a": "access-list 10 permit 10.0.0.0 0.0.0.255, then ip nat pool PUBLIC 203.0.113.10 203.0.113.20 netmask 255.255.255.0, then ip nat inside source list 10 pool PUBLIC, with ip nat inside and ip nat outside on the correct interfaces.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the three component roles in a Dynamic NAT configuration?",
+      "a": "The ACL selects eligible inside source addresses, the NAT pool defines the available inside-global addresses, and the NAT rule (ip nat inside source list ... pool ...) associates the ACL with the pool.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Does the ACL used by Dynamic NAT act as a security ACL that permits traffic?",
+      "a": "No. The ACL used for NAT classification identifies which inside traffic should be considered for translation; it does not necessarily mean the packets are allowed through the router. NAT classification and security filtering are separate functions.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How many addresses are in the pool 203.0.113.10–203.0.113.20, and what does that imply?",
+      "a": "The pool contains 11 addresses, so without overload roughly 11 simultaneous address translations can consume the pool. Once all usable addresses are occupied, additional inside hosts cannot obtain an address from that pool.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens when a Dynamic NAT pool is exhausted?",
+      "a": "When no pool address is free, the translation cannot be created and the traffic starting a new connection is not translated with that pool. New translations fail until an address is released.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Does Dynamic NAT automatically fall back to PAT when the pool is exhausted?",
+      "a": "No. Dynamic NAT does not automatically fall back to PAT. To let many inside hosts share a smaller number of global addresses, configure PAT explicitly with ip nat inside source list 10 pool PUBLIC overload or an interface-based PAT configuration.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does adding overload to a pool-based Dynamic NAT rule do?",
+      "a": "Overload changes the behavior from ordinary pool-based Dynamic NAT to PAT using the pool addresses. The global address can then be reused for many simultaneous translations, distinguished by TCP/UDP ports.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Compare Dynamic NAT and PAT.",
+      "a": "Dynamic NAT uses multiple pool addresses with 1:1 mappings, does not translate ports, reuses addresses only after a translation expires, and is limited by pool size. PAT uses one or more global addresses with many:1 possible mappings, translates ports, allows simultaneous address reuse, and scales very high.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is inbound access unreliable with Dynamic NAT, and what is the fix?",
+      "a": "The pool address is not permanently assigned to an inside host; after the mapping expires it could be allocated to another inside host, so there is no predictable inbound mapping when idle. Use Static NAT or Static PAT (port forwarding) for predictable inbound access.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are typical IOS NAT aging timer defaults, and what command changes the general timeout?",
+      "a": "Common defaults are 24 hours for the general and TCP translation timeouts and 5 minutes for UDP. Configure the general timeout with ip nat translation timeout <seconds>, and check values with show running-config | include ip nat translation.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Should you memorize NAT timer values as universal constants?",
+      "a": "No. Defaults vary across IOS/IOS XE platforms, so check the device values. For CCNP the concept is what matters: dynamic translations are temporary and age out according to NAT timers.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you observe Dynamic NAT translations, and how do they differ from static entries?",
+      "a": "show ip nat translations shows active entries such as 203.0.113.10 → 10.0.0.10. Unlike static NAT, dynamic entries appear as traffic creates them and disappear after they age out.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does show ip nat statistics report for Dynamic NAT?",
+      "a": "It reports the number of active translations, static vs dynamic translations, NAT interfaces, pool information, translation hits/misses, and, depending on platform/output, pool utilization. It can help determine whether the pool is exhausted.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does clear ip nat translation * do, and what does it not do?",
+      "a": "It clears active dynamic translation entries, after which a host starting traffic again gets a new translation and possibly a new pool address. It does not remove the NAT configuration or any configured static mappings.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "In what order should you troubleshoot a failing Dynamic NAT setup?",
+      "a": "Verify interface roles (ip nat inside/outside), verify the NAT ACL, verify the NAT pool, verify the NAT rule, generate eligible traffic, check the translation table (show ip nat translations), check NAT statistics, check routing, check ACL/firewall policies, then check pool exhaustion.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A pool has only 3 addresses and 4 inside hosts; what happens to the 4th host's outbound traffic, and what are the fixes?",
+      "a": "The 4th host cannot get a translation because no pool address is free, so its new connection is not translated. Fixes are to increase the pool, reduce unnecessary translation lifetime, or use PAT (overload).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does basic Dynamic NAT require a pool, and what options does PAT have?",
+      "a": "Yes, basic Dynamic NAT requires a pool (ip nat pool ...). PAT can instead use the outside interface address or a pool with the overload keyword.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do NAT and routing interact in a Dynamic NAT deployment?",
+      "a": "Dynamic NAT does not replace routing. The router still needs a valid route toward the destination, commonly a default route (ip route 0.0.0.0 0.0.0.0 <next-hop>) on an Internet edge. If a translation is created but no route exists, NAT does not fix the routing problem.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is type rotary in an ip nat pool?",
+      "a": "Type rotary is associated with rotary NAT, a specialized behavior that distributes connections among a group of inside addresses. It is specifically about rotary address translation, not ordinary Dynamic NAT or 'Dynamic NAT load balancing.'",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Should you rely on NAT pool keywords such as add-route in CCNP Dynamic NAT?",
+      "a": "No. The availability and behavior of NAT pool route-installation keywords are platform/software dependent. For standard CCNP Enterprise Dynamic NAT, focus on ip nat pool, ip nat inside source list ... pool ..., and overload for PAT.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Summarize Dynamic NAT in one quick-review line.",
+      "a": "Dynamic NAT is a traffic-triggered, temporary 1:1 address mapping that requires a pool and commonly an ACL, does not translate ports, gives no predictable inbound mapping, reuses addresses after expiry, fails on pool exhaustion without falling back to PAT, and overload enables PAT sharing.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "State the exam takeaway for Dynamic NAT.",
+      "a": "Dynamic NAT = temporary 1:1 address translation using a pool. No overload = one active translation consumes one pool address; overload = PAT behavior allowing global-address sharing. Dynamic NAT does not provide a permanent inbound mapping; the ACL selects NAT-eligible traffic, while routing and security are separate functions.",
+      "tag": "Core Concept",
+      "context": "Both"
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "title": "CEF Basics",
+  "level": 4,
+  "levelTitle": "Level 04 - Ethernet & Switching",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "13. CEF Basics.md",
+  "cards": [
+    {
+      "q": "What is Cisco Express Forwarding (CEF)?",
+      "a": "CEF is Cisco's high-performance IP forwarding architecture. It separates control plane from data plane: routing protocols and static routes build the RIB, CEF derives the FIB from the RIB, and CEF maintains adjacency information for the Layer 2 rewrite, avoiding a full routing-table lookup for every packet.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the role of the control plane vs the data plane in CEF?",
+      "a": "The control plane determines where networks are reachable (via OSPF, EIGRP, BGP, static, and connected routes) and populates the RIB. The data plane determines how to forward each packet using the FIB plus adjacency information.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the CEF key structures: RIB, FIB, and Adjacency?",
+      "a": "RIB = routing knowledge (routes from connected, static, and routing protocols). FIB = optimized forwarding information derived from the RIB, used for longest-prefix-match forwarding. Adjacency = Layer 2 rewrite information (outgoing interface, next-hop MAC) for the next hop.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does CEF forward a packet?",
+      "a": "CEF performs a FIB lookup on the destination (longest-prefix match selects the route and next hop), then an adjacency lookup for the Layer 2 rewrite (next-hop MAC), then rewrites and forwards the frame out the outgoing interface.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What makes CEF faster than older forwarding mechanisms?",
+      "a": "Older process switching made the CPU perform the routing lookup and rewrite work for each packet individually. CEF precomputes the FIB and adjacency information before traffic arrives, so packets need only a fast FIB lookup plus adjacency rewrite rather than a complete routing decision from scratch.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How does CEF relate to ASICs and TCAM?",
+      "a": "On hardware platforms, CEF-derived forwarding information can be programmed into forwarding ASICs/TCAM tables for line-rate forwarding. But CEF is a forwarding architecture, while TCAM is a hardware implementation resource; they are not the same thing.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What routing rule does CEF follow for choosing a route?",
+      "a": "CEF follows Longest Prefix Match (LPM): for destination 10.10.10.50 matching 10.0.0.0/8, 10.10.0.0/16, and 10.10.10.0/24, the most specific /24 route wins.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does CEF perform load balancing?",
+      "a": "CEF can load balance across equal-cost paths (ECMP) using a hash-based per-flow/per-destination approach based on source IP, destination IP, and Layer 4 ports depending on platform. This keeps packets of the same flow on the same path. Per-packet load sharing can cause out-of-order delivery and is generally not preferred.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are common adjacency states in CEF?",
+      "a": "Complete adjacency (ready to forward), incomplete (Layer 2 resolution pending, e.g. ARP not completed), drop (drop the packet), punt (send to CPU/control processing), and null. Behavior can vary by platform.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What commands verify the RIB, FIB, adjacency, and next-hop resolution?",
+      "a": "show ip route checks the RIB, show ip cef / show ip cef 10.10.10.50 detail checks the FIB, show adjacency checks adjacency information, and show ip arp verifies underlying next-hop MAC resolution. show ip interface GigabitEthernet0/0 may show CEF-related interface forwarding info.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why compare show ip route and show ip cef when a route is not forwarding?",
+      "a": "A route present in the RIB does not prove forwarding works. Check whether the route is installed (RIB), whether the forwarding entry exists (FIB), whether the next-hop rewrite is available (adjacency), then the interface, before concluding packet forwarding will succeed.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the default CEF behavior and the classic CEF config command?",
+      "a": "On many modern Cisco platforms CEF is enabled by default. Historically it was explicitly enabled with ip cef and verified with show ip cef. Do not treat ip cef as a routine config command on every modern platform; support depends on IOS/IOS XE release.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Does CEF eliminate ARP and Neighbor Discovery?",
+      "a": "No. CEF still needs next-hop Layer 2 resolution: ARP provides IPv4 next-hop MAC information used to build Ethernet adjacency, and IPv6 uses Neighbor Discovery instead. If resolution is incomplete the adjacency may be incomplete.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Should clear ip cef be used as a first-line troubleshooting fix?",
+      "a": "No. Determine why the FIB or adjacency is incorrect before rebuilding forwarding state; clearing should not be a first-line fix.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "Which facts belong in the CEF quick review?",
+      "a": "RIB = routing knowledge/selected routes; FIB = optimized forwarding info; adjacency = Layer 2 rewrite info; CEF = Cisco forwarding architecture combining FIB + adjacency; TCAM = hardware resource, ASIC = hardware engine; LPM = most-specific route wins; ECMP = multiple equal-cost paths; load balancing = flow/per-destination hashing; ARP = IPv4 next-hop MAC resolution; ND = IPv6 resolution; show ip route = RIB; show ip cef = FIB; show adjacency = adjacency info.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the one-minute mental model for CEF?",
+      "a": "Control plane builds the RIB from routing protocols/static routes; CEF derives the FIB and adjacency information. Data plane: incoming packet -> FIB lookup (longest prefix match) -> next hop -> adjacency lookup -> Layer 2 rewrite -> forward. RIB = where do I know the network is; FIB = where should I forward this packet; adjacency = what Layer 2 information do I need for the outgoing frame.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

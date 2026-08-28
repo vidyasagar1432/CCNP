@@ -1,0 +1,70 @@
+{
+  "title": "Licensing",
+  "level": 28,
+  "levelTitle": "Level 28 - Cisco IOS and IOS XE",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "03. Licensing.md",
+  "cards": [
+    {
+      "q": "What is IOS XE licensing?",
+      "a": "Licensing controls which features are entitled on a device. Legacy EULA models (classic LICENSE) are being replaced by Smart Licensing; images carry a universalK9 package and licenses gate which features are enabled.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the classic license package tiers?",
+      "a": "ipbase provides base routing, ipservices provides advanced features, and network-advantage provides the full feature set in modern IOS XE. Advantage tiers bundle more features.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do licenses gate a feature on IOS XE?",
+      "a": "A license is an entitlement flag evaluated per product PID. Without a valid license the feature will not enable and configuration may be denied; eval licenses let you try features and permanent licenses are owned.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What license types exist on IOS XE?",
+      "a": "Eval (temporary, 60 days by default), an evaluation period (grace), Permanent (owned), Subscription (time-based), and RTU (right-to-use).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the universalK9 image mean?",
+      "a": "It is a single image containing all features, gated by license. Feature-specific images have a smaller footprint, while the universal image is future-proof.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands check and show the license state?",
+      "a": "show license shows installed licenses, show license summary shows status, and show license feature shows what is available. license install activates a license and license boot level sets the tier.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Compare classic licensing with Smart Licensing.",
+      "a": "Classic uses a PAK or a license file activated locally, with manual reporting and local enforcement. Smart Licensing uses the CSSM portal with automatic reporting and a subscription model.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do you install a license file and set the licensed tier?",
+      "a": "license install bootflash:license.lic activates the file, and license boot level network-advantage sets the tier; a reload is then required.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A licensed feature is denied during configuration. What do you check?",
+      "a": "Check show license feature and show license summary for a missing or expired entitlement, confirm the correct license for the device PID, and install it with license install.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Is a 60-day evaluation license permanent?",
+      "a": "No. An eval license is temporary (60 days by default) and used to try a feature, while a permanent license is owned and stays active. Install the purchased license to keep the feature long term.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "title": "Route Maps",
+  "level": 12,
+  "levelTitle": "Level 12 - BGP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "13. Route Maps.md",
+  "cards": [
+    { "q": "What are route maps?", "a": "The general-purpose policy engine: a sequence of match/set blocks used for BGP attribute manipulation, redistribution filtering, PBR, NAT, and route filtering. The exam focuses on sequence numbers, match/set pairs, the permit/deny action, first-match-wins order, and the difference from a simple ACL.", "tag": "Overview", "context": "Both" },
+    { "q": "What is the structure of a route-map entry?", "a": "route-map NAME permit|deny SEQ followed by match and set statements. Each entry is one match block (conditions) plus its set actions, lower sequence numbers run first, and first match wins so later entries are skipped for that route.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What are the permit/deny semantics in a route-map?", "a": "A permit entry with a match applies the set actions and lets the route pass; a permit with no match is a default pass with no set. A deny entry with a match blocks the route (filters); a deny with no match is a default pass that skips the entry. The route can pass through the map only once.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How does a deny entry behave in BGP filtering and redistribution?", "a": "In BGP filtering a matched deny rejects the route; in redistribution a matched deny stops redistribution of that prefix. An empty permit entry accepts everything, acting like an implicit permit in non-BGP contexts.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What are common match and set pairs in route maps?", "a": "match ip address prefix-list PC pairs with set local-preference; match ip address acl X pairs with set metric (MED); match as-path 10 pairs with set community; match ip next-hop pairs with set ip next-hop (PBR); and match interface pairs with set interface (PBR).", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How do you apply a route map to a BGP neighbor?", "a": "With neighbor 192.0.2.2 route-map INBOUND-AM in (routes received) and neighbor 192.0.2.2 route-map OUTBOUND-POLICY out (routes sent). Route-map direction is the single most common misconfiguration.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What does the continue keyword do in a route-map?", "a": "It allows a route that matched one entry to fall through to later sequence numbers for additional set actions, instead of stopping at the first match.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How do access lists, prefix lists, and route maps differ?", "a": "An access list asks whether something matches IP, protocol, or port; a prefix list matches routes by prefix and length; a route map matches AND modifies. Route maps wrap prefix-list, ACL, and as-path matches and add actions.", "tag": "Core Concept", "context": "Interview" },
+    { "q": "Command to see route map counters per sequence?", "a": "show route-map or show route-map NAME shows counters per sequence; show ip bgp neighbors <ip> routes shows post-inbound results and advertised-routes shows what was sent.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What is the effect of a matched deny in a route-map?", "a": "A matched deny filters the route, and in BGP that means the route is rejected. Only a matched permit applies the set actions.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "Why would a BGP policy appear to have no effect at all?", "a": "The route-map was likely applied in the wrong direction, in versus out, which is the most common misconfiguration. Verify with show route-map counters and the neighbors routes and advertised-routes outputs.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "Which route-map entry wins when several match?", "a": "The lowest sequence number that matches wins; it is first match wins by sequence order, so a deny at an early seq can block a route before a later permit is ever evaluated.", "tag": "Exam Trap", "context": "Exam" }
+  ]
+}

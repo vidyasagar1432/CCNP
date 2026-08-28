@@ -1,0 +1,124 @@
+{
+  "title": "Private IP (RFC 1918)",
+  "level": 5,
+  "levelTitle": "Level 05 - IPv4",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "06. Private IP.md",
+  "cards": [
+    {
+      "q": "What are private IPv4 addresses (RFC 1918)?",
+      "a": "Addresses defined by RFC 1918 for use inside private networks; they are not globally routable on the public Internet and may be reused by different organizations because uniqueness is required only within the relevant routing domain.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the three RFC 1918 ranges with their address counts and equivalent networks?",
+      "a": "10.0.0.0/8 = 16,777,216 addresses (one /8); 172.16.0.0/12 = 1,048,576 (sixteen /16s); 192.168.0.0/16 = 65,536 (256 /24s).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Is 172.32.x.x RFC 1918 private?",
+      "a": "No; the RFC 1918 range is 172.16.0.0–172.31.255.255 (172.16.0.0/12), so 172.16.x.x through 172.31.x.x are private while 172.32.x.x is not RFC 1918.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why can different organizations reuse the same private addresses?",
+      "a": "Because RFC 1918 space is normally isolated and uniqueness is only required within the relevant routing domain, so multiple companies can each independently use 10.0.0.0/8.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Do private addresses mean unroutable addresses?",
+      "a": "No; private IPs can be routed normally inside private networks, site-to-site VPNs, VRFs, MPLS/private WANs, overlays, and data centers. The restriction is specifically public Internet routing, not internal routing.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Does private addressing require NAT?",
+      "a": "No; private addresses work across internal routing, VPNs, MPLS WANs, VRFs, and overlays without NAT. NAT is primarily used when traffic must cross an addressing boundary where the private source address cannot be used directly.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Why do organizations use RFC 1918 addressing?",
+      "a": "To conserve the limited public IPv4 pool (only selected traffic needs public addressing at the edge), to allow address reuse, and to provide flexible internal address space for campuses, branches, data centers, management, IoT, and virtualized networks.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Is NAT itself a security control or a replacement for a firewall?",
+      "a": "No; NAT can hide internal addressing and may prevent direct inbound connectivity in some designs, but firewalls and security policies provide the security enforcement, so RFC 1918 plus NAT is not a complete security mechanism.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which special-purpose ranges are often confused with but are NOT RFC 1918?",
+      "a": "169.254.0.0/16 (link-local), 127.0.0.0/8 (loopback), 100.64.0.0/10 (CGNAT shared space), 198.18.0.0/15 (benchmarking), and documentation ranges 192.0.2.0/24, 198.51.100.0/24, 203.0.113.0/24.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Is 100.64.0.0/10 RFC 1918 private addressing?",
+      "a": "No; 100.64.0.0/10 (100.64.0.0–100.127.255.255) is Shared Address Space used by ISPs for Carrier-Grade NAT (CGNAT), not RFC 1918 private space.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are 169.254.0.0/16 and 127.0.0.0/8 used for?",
+      "a": "169.254.0.0/16 is IPv4 link-local, which a host may auto-configure when DHCP fails and is not routed normally; 127.0.0.0/8 is IPv4 loopback, which refers back to the local host, most commonly 127.0.0.1.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What design consideration applies to overlapping private address space?",
+      "a": "Since private space is reusable, two organizations may accidentally use the same subnet (e.g. both 10.10.10.0/24), which becomes a problem during mergers, acquisitions, partner connectivity, VPN integration, or migrations; solutions include renumbering, NAT, network segmentation, and VRFs.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How can private addressing make route summarization easier?",
+      "a": "Structured private blocks can be summarized; for example 10.10.0.0/24, 10.10.1.0/24, 10.10.2.0/24, and 10.10.3.0/24 summarize to 10.10.0.0/22 when boundaries and routing design permit, reducing routing-table entries.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How can VRFs use overlapping private address space?",
+      "a": "Different VRFs can run the same subnet, e.g. 10.10.10.0/24 in VRF-CUSTOMER-A and VRF-CUSTOMER-B, because each VRF maintains a separate routing table; this reuse becomes especially useful with VRF-based segmentation.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do you configure and verify a private VLAN interface on Cisco IOS?",
+      "a": "Use interface Vlan10 with ip address 10.1.10.1 255.255.255.0 and no shutdown; verify with show ip interface brief, show ip route, and show ip route 10.1.10.0. To filter RFC 1918 routes, use show ip route | include 10\\.|172\\..[0-9]\\.|192\\.168\\. patterns.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Should seeing an RFC 1918 address in the routing table be a concern?",
+      "a": "No; it is normal, because private addresses can be routed within an enterprise routing domain; they are simply not intended for public Internet routing.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "What is the easy mnemonic for the RFC 1918 ranges?",
+      "a": "10 (a single /8), 172.16–172.31 (/12), and 192.168 (/16).",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "Classify: 10.1.1.1, 172.32.1.1, 100.64.1.1, 169.254.1.1, 127.0.0.1, and 8.8.8.8.",
+      "a": "10.1.1.1 RFC 1918 private; 172.32.1.1 not RFC 1918; 100.64.1.1 CGNAT shared address space; 169.254.1.1 IPv4 link-local; 127.0.0.1 loopback; 8.8.8.8 public IPv4 address.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the five CCNP ENCOR takeaways for private addressing?",
+      "a": "RFC 1918 = 10/8, 172.16/12, 192.168/16; private addresses are reusable and routable internally; they are not intended for public Internet routing; 100.64.0.0/10 is CGNAT shared space, not RFC 1918; NAT is commonly used with private addressing but is not a replacement for firewall/security controls.",
+      "tag": "Core Concept",
+      "context": "Both"
+    }
+  ]
+}

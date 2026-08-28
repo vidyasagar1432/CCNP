@@ -1,0 +1,22 @@
+{
+  "title": "eBGP",
+  "level": 12,
+  "levelTitle": "Level 12 - BGP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "01. eBGP.md",
+  "cards": [
+    { "q": "What is eBGP?", "a": "External BGP; it runs between routers in different autonomous systems (ASes) and is the Internet's inter-domain routing protocol, carrying prefixes across provider and customer boundaries. Its defaults are conservative: AD of 20, TTL of 1 on peers, and next-hop set to the neighbor's own address when advertising.", "tag": "Overview", "context": "Both" },
+    { "q": "What are the default eBGP behaviors that differ from iBGP?", "a": "eBGP peers are in different ASes, AD is 20, TTL is 1, next-hop is changed to self on advertise, there is no split horizon, and loop prevention uses AS_PATH. Peering runs over TCP 179.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What next-hop does eBGP advertise?", "a": "When eBGP advertises a route it sets next-hop to its own update-source address, the interface IP facing the peer. For direct peers, the next hop is the directly connected peer address.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "Why is ebgp-multihop required for non-direct eBGP peers?", "a": "eBGP defaults to TTL of 1, so the neighbor must be directly connected or the keepalive packets die. Non-direct peers need ebgp-multihop (e.g. neighbor 10.1.1.1 ebgp-multihop 2).", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What does ebgp-multihop enable besides non-direct peering?", "a": "Loopback peering; peering between loopbacks survives a single link failure because it is independent of any one interface state.", "tag": "Core Concept", "context": "Both" },
+    { "q": "Basic eBGP configuration for an AS 65001 router?", "a": "router bgp 65001 with neighbor 192.168.1.2 remote-as 65002 and network 172.16.0.0 mask 255.255.0.0. Only the AS numbers differ on each side; everything else must match.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "Why use update-source Loopback0 on an eBGP peer group?", "a": "Combining update-source Loopback0 with ebgp-multihop gives stable peering independent of interface state, so a single interface or link failure does not tear down the session.", "tag": "Core Concept", "context": "Both" },
+    { "q": "Are eBGP-learned routes re-advertised to other eBGP peers?", "a": "No. eBGP-learned routes are advertised to iBGP peers but not re-advertised to other eBGP peers, as AS_PATH provides the loop prevention.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "Command to view BGP neighbor states, uptime, and prefix counts?", "a": "show ip bgp summary. show ip bgp shows the BGP table with paths, show ip bgp neighbors 192.168.1.2 shows session detail, and show ip route bgp shows RIB routes from BGP.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What port does BGP peering use?", "a": "TCP 179.", "tag": "Quick Review", "context": "Exam" },
+    { "q": "What are the BGP administrative distances for eBGP and iBGP?", "a": "eBGP is AD 20 and iBGP is AD 200. This is the classic BGP trap.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "What must be reachable for a BGP session to form over TCP 179?", "a": "The neighbor's update-source IP. If update-source is misconfigured or an ACL blocks TCP 179, the session cannot establish.", "tag": "Exam Trap", "context": "Exam" }
+  ]
+}

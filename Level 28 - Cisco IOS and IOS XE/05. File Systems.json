@@ -1,0 +1,64 @@
+{
+  "title": "File Systems",
+  "level": 28,
+  "levelTitle": "Level 28 - Cisco IOS and IOS XE",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "05. File Systems.md",
+  "cards": [
+    {
+      "q": "What is the IOS virtual file system?",
+      "a": "IOS addresses storage through prefixes such as flash:, bootflash:, system:, nvram:, and network prefixes tftp:, ftp:, scp:. The prefix tells which storage a command touches, and dir, copy, and show flash navigate it.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Map the file system prefixes flash:, bootflash:, nvram:, system:, and disk0: to their storage.",
+      "a": "flash: is the flash device, bootflash: is the boot flash used on IOS XE, nvram: holds the startup config, system: holds the running config, and disk0: is removable storage.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Where do the IOS image, running config, and startup config live?",
+      "a": "The IOS image is in flash or bootflash, the running config is in RAM as system:running-config, and the startup config is in NVRAM as nvram:startup-config; config files and crash info are stored on flash.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands list files, show flash usage, and list all file systems?",
+      "a": "dir lists files (dir flash: for the flash device), show flash: shows usage, cd and pwd navigate, and show file systems lists every available prefix.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What do copy run start, copy start run, copy tftp: flash:, and copy flash: tftp: do?",
+      "a": "copy running-config startup-config saves the config to NVRAM, copy startup-config running-config restores it, copy tftp: flash: downloads an image, and copy flash: tftp: backs a file up to a server.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do you verify image integrity?",
+      "a": "Use verify /md5 flash:image.bin (or bootflash:image.bin) and compare the MD5 checksum against the vendor-published value.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Compare NVRAM with flash.",
+      "a": "NVRAM holds the startup config, is non-volatile, small, and used at boot. Flash holds the image and other files, is also non-volatile, is large, and is used for images and backups.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens to the running-config if the device reboots without copy run start?",
+      "a": "It is lost. The running config lives in RAM, so on reboot the device loads the saved startup-config from NVRAM; unsaved changes disappear.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "A copy to flash fails with no space. What do you check?",
+      "a": "Run dir flash: to check free space and remove unneeded files, and confirm the copy path and permissions.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    }
+  ]
+}

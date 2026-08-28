@@ -1,0 +1,70 @@
+{
+  "title": "Smart Licensing",
+  "level": 28,
+  "levelTitle": "Level 28 - Cisco IOS and IOS XE",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "04. Smart Licensing.md",
+  "cards": [
+    {
+      "q": "What is Smart Licensing?",
+      "a": "A licensing model that replaces PAK and license files with a central portal (CSSM) that manages entitlements across devices. Devices register with a token and report usage; Smart Licensing Using Policy (SLUP) is the latest model.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How does a device use Smart Licensing?",
+      "a": "The device registers to CSSM with a token, entitlements are matched, usage is reported to the portal, call-home provides transport, and enforcement follows policy.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which transport channels can Smart Licensing use?",
+      "a": "Call-home from device to Cisco, HTTPS smart transport as the normal online path, offline via file, an HTTPS proxy, or direct internet.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is Smart Licensing Using Policy (SLUP)?",
+      "a": "SLUP is the policy-based model: devices enroll via CSSM, use license tags, run in a default 90-day evaluation period, and enforcement takes effect only after the evaluation ends.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the network license tiers in Smart Licensing?",
+      "a": "network-essentials is the base tier, network-advantage is the full tier, and dna-essentials and dna-advantage cover DNA features. The tier is purchased per device.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the steps to register a device to CSSM?",
+      "a": "Get a registration token from the portal, run license smart register idtoken TOKEN, the device registers, entitlements match, and usage is reported.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands verify a Smart Licensing registration?",
+      "a": "show license status diagnoses the registration state, show license summary shows entitlements, and show call-home checks the transport; license smart deregister removes the device.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you handle a device with no internet access to CSSM?",
+      "a": "Use offline transport with files, or request a local license reservation with license smart reservation request local and complete it through the portal.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How long is the default evaluation period in SLUP?",
+      "a": "90 days for Smart Licensing Using Policy, as opposed to the 60-day evaluation typical of classic Licensing.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "A device shows Not Registered and no entitlements. What do you check?",
+      "a": "Verify the registration token is valid, check show license status for the registration state, and confirm call-home transport reaches CSSM so usage is reported and entitlements appear.",
+      "tag": "Core Concept",
+      "context": "Both"
+    }
+  ]
+}

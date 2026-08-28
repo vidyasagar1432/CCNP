@@ -1,0 +1,100 @@
+{
+  "title": "Layer 1",
+  "level": 29,
+  "levelTitle": "Level 29 - Troubleshooting",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "01. Layer 1.md",
+  "cards": [
+    {
+      "q": "What is Layer 1 troubleshooting concerned with?",
+      "a": "The physical layer: cable, connector, power, and light. Every failure above starts here, so troubleshoot with show interfaces status, the link light, and loopback tests.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What does the interface state up/down mean?",
+      "a": "The interface is administratively up but has no physical link. The link light or cable/SFP is the issue.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the interface state up/up mean?",
+      "a": "Both the line (admin/line) and the physical link are up, so the interface is healthy.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the interface state down/down mean?",
+      "a": "The interface is shut down or has no physical link.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the interface state administratively down mean?",
+      "a": "The interface was placed into shutdown.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the interface state SFM indicate?",
+      "a": "No media is connected to the interface.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "In interface states, what do the first and second words represent?",
+      "a": "The first word is the admin/line state and the second word is the physical link state.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the classic symptom of a duplex mismatch?",
+      "a": "An error storm. A duplex mismatch causes errors, not a complete loss of link.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What command gives a quick summary of interface states?",
+      "a": "show interfaces status.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What command is used to check optics on a transceiver?",
+      "a": "show interface transceiver. show controllers can also be used for detailed physical checks.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What command diagnoses physical wire pairs?",
+      "a": "test cable-diagnostics tdr interface <if> (the cable-diag test).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the first thing to check as a Layer 1 step before routing?",
+      "a": "Cable and optics, and the link state. Always rule out Layer 1 before troubleshooting routing.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "A flapping interface is most likely caused by what Layer 1 issue?",
+      "a": "A bad connector or cable that intermittently loses link.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the escalation path for a Layer 1 failure?",
+      "a": "Verify config, reseat/replace the cable, swap the SFP or port, run a loopback test, then RMA. Config is step 1 only after the link is up.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What should you check before considering Layer 2 after a Layer 1 issue?",
+      "a": "The link must be up first. Layer 1 (physical) must be verified before moving up to Layer 2.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

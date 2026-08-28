@@ -1,0 +1,124 @@
+{
+  "title": "Static Routing",
+  "level": 9,
+  "levelTitle": "Level 09 - Routing Fundamentals",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "08. Static Routing.md",
+  "cards": [
+    {
+      "q": "What are static routes and what are their properties and common uses?",
+      "a": "Static routes are manually configured routes used to reach remote networks, with a default administrative distance (AD) of 1 while connected routes have AD 0. They provide predictability, low overhead, and precise control but do not automatically discover alternate paths or dynamically reconverge. Common uses include stub networks, default routing, backup paths, hub-and-spoke designs, and summary-route loop prevention.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the three forms of a static route and their key points?",
+      "a": "Next-hop: ip route PREFIX MASK <next-hop>, the router resolves the next hop recursively. Exit-interface: ip route PREFIX MASK <interface>, uses the specified outgoing interface. Fully specified: ip route PREFIX MASK <interface> <next-hop>, specifies both the outgoing interface and next hop.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens with a next-hop static route such as ip route 10.1.1.0 255.255.255.0 192.0.2.1?",
+      "a": "The router must determine how to reach 192.0.2.1. If that next hop is not directly connected, the router performs a recursive lookup to resolve the next hop through the routing table.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is an interface-only static route generally less desirable on Ethernet/broadcast interfaces?",
+      "a": "On Ethernet/broadcast interfaces, interface-only statics can cause unnecessary ARP resolution and are generally less desirable than specifying a next hop. A next-hop static or fully specified static is generally preferred for a typical Ethernet topology.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the default AD values for static, connected, and common dynamic routes?",
+      "a": "Connected 0, Static 1, EIGRP 90, OSPF 110, RIP 120. A static route normally wins over dynamic routes when competing routes have the same destination prefix.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Longest-prefix match is considered before AD. Give an example showing a more-specific route beating a less-specific static.",
+      "a": "With 10.10.0.0/16 Static at AD 1 and 10.10.10.0/24 OSPF at AD 110, traffic destined for 10.10.10.5 uses the /24 because it is more specific. A more-specific route can beat a static route with a lower AD.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a floating static route?",
+      "a": "A floating static route is a static route configured with a higher AD so that it acts as a backup. For example, a primary static to 192.0.2.1 plus a backup static to 198.51.100.1 with AD 200. The higher-AD route normally remains inactive; when the preferred route disappears from the RIB, the floating static can become active. Higher AD = lower preference.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is static route tracking and how does IP SLA combine with it?",
+      "a": "Static routes can be tied to a tracking object, e.g. track 1 ip sla 100 reachability and ip route 10.1.1.0 255.255.255.0 192.0.2.1 track 1. When the tracked condition goes down, the static route can be removed from the RIB. Tracking combined with IP SLA provides reachability detection beyond simply checking whether an interface is operational.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why is interface-up status not sufficient to confirm remote reachability?",
+      "a": "Interface-up status does not necessarily mean the remote destination is reachable. IP SLA + tracking can provide a more meaningful reachability test beyond just checking whether the interface is operational.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "How can multiple static routes to the same destination create ECMP?",
+      "a": "If multiple static routes to the same destination are eligible and have the same preference, Cisco can install multiple paths subject to the platform's maximum-paths configuration. Do not confuse ECMP with a floating static: equal AD/preference can provide multiple active paths, whereas a higher AD static is normally a backup.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is a Null0 static route and what are its uses?",
+      "a": "A Null0 static route points to the Null0 interface, e.g. ip route 10.1.1.0 255.255.255.0 Null0, and matching packets are discarded. Common uses are summary-route loop prevention, intentional traffic blackholing, and providing a discard path for an aggregate prefix. Null0 is a routing discard mechanism, not a replacement for a firewall or security policy.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is a static default route and where is it commonly used?",
+      "a": "A static default route is ip route 0.0.0.0 0.0.0.0 <next-hop>, matching destinations for which no more-specific route exists. It is commonly used on stub routers, branch routers, internet-edge routers, and routers with a single upstream path, and can become the router's gateway of last resort when installed.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What command verifies all static routes, a specific destination, and CEF forwarding information?",
+      "a": "show ip route static shows all static routes; show ip route 10.1.1.0 examines a specific destination; show ip cef 10.1.1.0 checks CEF forwarding information. show track checks tracking, and show running-config | include ^ip route shows configured statics.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Static AD is 1, so do static routes automatically beat every other route?",
+      "a": "Static routes normally beat dynamic routes for the same prefix because AD 1 is low, but the process is: 1. longest-prefix match, 2. route preference/AD among competing routes, 3. metric where applicable. A more-specific prefix can beat a less-specific static route even when the less-specific route has a lower AD.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Do static routes automatically discover alternate paths or participate in IGP exchange?",
+      "a": "No. Static routes are manually configured and do not participate in an IGP's automatic neighbor discovery or topology exchange. Failover requires mechanisms such as floating statics, object tracking, IP SLA, or multiple equal-cost static routes.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "Does a fully specified static route 'magically' guarantee forwarding?",
+      "a": "No. A fully specified static provides both exit interface and next hop, removing ambiguity, but the next hop still must be usable for forwarding.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Are static routes automatically advertised to other routers?",
+      "a": "No. A static route exists locally and is not automatically advertised. To make it part of a dynamic routing domain, it must be redistributed or otherwise introduced according to the routing protocol's configuration.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "Why would traffic unexpectedly disappear into Null0?",
+      "a": "The destination matches a discard route to Null0. Check show ip route <destination>. A Null0 route intentionally discards matching traffic and is commonly used with summarization to prevent traffic for nonexistent destinations from being forwarded incorrectly or causing loops.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Summarize the static routing quick review of key facts.",
+      "a": "Static AD 1; connected AD 0; primary forms next-hop / exit-interface / fully specified; default route 0.0.0.0/0; backup static is a floating static with higher AD; tracking can conditionally install/remove a route; recursive lookup resolves the next hop; ECMP installs multiple equal-cost paths; Null0 discards matching traffic; advertisement is not automatic; failover requires an additional mechanism; verification is show ip route static.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

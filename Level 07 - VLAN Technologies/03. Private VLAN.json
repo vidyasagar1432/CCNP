@@ -1,0 +1,166 @@
+{
+  "title": "Private VLAN (PVLAN)",
+  "level": 7,
+  "levelTitle": "Level 07 - VLAN Technologies",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "03. Private VLAN.md",
+  "cards": [
+    {
+      "q": "What is a Private VLAN (PVLAN)?",
+      "a": "A PVLAN divides a Layer 2 VLAN into smaller forwarding domains while allowing hosts to remain within the same primary VLAN/IP subnet. It provides Layer 2 isolation without requiring a separate VLAN and subnet for every isolated host or group.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are typical use cases for PVLANs?",
+      "a": "Service-provider or subscriber networks, hosting environments, data-center segments, DMZ designs, shared infrastructure networks, and multi-tenant environments.",
+      "tag": "Overview",
+      "context": "Interview"
+    },
+    {
+      "q": "What are the two types of secondary VLANs in a PVLAN architecture?",
+      "a": "Isolated VLANs and Community VLANs. The secondary VLANs are associated with the primary VLAN, which represents the overall PVLAN domain.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the three PVLAN port roles and what can each communicate with?",
+      "a": "Promiscuous (P) can communicate with all PVLAN hosts/secondary VLANs; Isolated (I) can communicate with promiscuous ports only; Community (C) can communicate with ports in the same community plus promiscuous ports.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a promiscuous port and what are typical examples?",
+      "a": "A promiscuous port can communicate with hosts belonging to all associated secondary VLANs. Typical examples are a default gateway, router, firewall, load balancer, or other shared service.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Can an isolated host communicate directly with another isolated host, and what can it reach?",
+      "a": "No. An isolated port cannot directly communicate with another isolated port; it can communicate only with promiscuous ports (such as the gateway).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What can a community port communicate with, and what can it not?",
+      "a": "A community port can communicate with other ports in the same community and with promiscuous ports. It cannot directly communicate with ports in another community or in an isolated VLAN.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the PVLAN communication matrix result?",
+      "a": "Promiscuous communicates with everyone; same-community ports communicate with each other and promiscuous; different communities cannot communicate; isolated can communicate only with promiscuous.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What IP subnet design is common in PVLANs?",
+      "a": "A common PVLAN design places hosts in the same IP subnet even though their Layer 2 communication is restricted, so hosts share a subnet but PVLAN forwarding rules prevent host-to-host Layer 2 communication while still allowing access to the gateway.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "In the traditional PVLAN design, which VLAN is the Layer 3 gateway associated with?",
+      "a": "The Layer 3 gateway is associated with the primary VLAN. The gateway is not configured as an SVI for each secondary VLAN in the normal single-subnet PVLAN design.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the commands to create a PVLAN primary and an isolated secondary VLAN and associate them?",
+      "a": "'vlan 100' with 'private-vlan primary'; 'vlan 200' with 'private-vlan isolated'; then 'vlan 100' with 'private-vlan association 200'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How is an isolated host port configured?",
+      "a": "interface GigabitEthernet0/1: 'switchport mode private-vlan host' and 'switchport private-vlan host-association 100 200', associating the port with primary VLAN 100 and isolated secondary VLAN 200.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How is a promiscuous port configured?",
+      "a": "interface GigabitEthernet0/24: 'switchport mode private-vlan promiscuous' and 'switchport private-vlan mapping 100 200,300', mapping primary VLAN 100 with its isolated (200) and community (300) secondary VLANs to the promiscuous port.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What command displays PVLAN information?",
+      "a": "'show vlan private-vlan', along with 'show vlan brief', 'show interfaces GigabitEthernet0/1 switchport', 'show mac address-table', and 'show interfaces status'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What must be verified when troubleshooting a multi-switch PVLAN?",
+      "a": "PVLAN configuration on every switch, primary/secondary VLAN associations, required VLANs across trunks, promiscuous mappings, host associations, and platform support.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do PVLANs compare to normal VLANs plus routing/ACLs?",
+      "a": "PVLANs provide Layer 2 host-to-host isolation built into forwarding rules while hosts commonly remain in the same IP subnet; normal VLANs plus routing/ACLs typically use one subnet per VLAN and require ACLs for host isolation. PVLANs use secondary VLANs, promiscuous, isolated, and community ports.",
+      "tag": "Quick Review",
+      "context": "Interview"
+    },
+    {
+      "q": "What is 'switchport protected' and how does it compare to PVLANs?",
+      "a": "'switchport protected' provides simple per-port Layer 2 isolation between protected ports on the same switch, without creating PVLAN secondary VLANs. It is useful for local isolation but is limited compared with the full PVLAN primary/secondary architecture. It is not a one-for-one replacement for PVLANs.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Do PVLANs replace ACLs and firewalls?",
+      "a": "No. PVLANs provide Layer 2 forwarding isolation but do not replace Layer 3 or firewall security policy. Additional controls such as ACLs, firewalls, and routing policy may still be required.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Does a PVLAN create separate IP subnets in the common design?",
+      "a": "No. In the common PVLAN design, hosts can remain in the same IP subnet while PVLAN rules restrict their Layer 2 communication.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "In PVLAN terminology, does 'promiscuous' mean the port is untrusted?",
+      "a": "No. In PVLAN terminology, promiscuous describes the port's communication permissions; a promiscuous port can communicate with all associated PVLAN hosts.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is a PVLAN promiscuous port the same as an 802.1Q trunk?",
+      "a": "No. A PVLAN promiscuous port is a PVLAN role that permits communication with all associated secondary VLANs; it should not be confused with an 802.1Q trunk.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does the SVI belong to the isolated VLAN in the common PVLAN design?",
+      "a": "Normally no. In the common PVLAN design, Layer 3 gateway connectivity is associated with the primary VLAN.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Do PVLANs eliminate the need for VLAN IDs?",
+      "a": "No. PVLANs still use VLAN IDs; they use a primary VLAN plus secondary VLANs.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is PVLAN supported on every Cisco switch?",
+      "a": "No. PVLAN support and configuration syntax depend on the Cisco platform and software version; always verify platform support before deploying or labbing PVLANs.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the memory shortcut for PVLAN port roles?",
+      "a": "Promiscuous = Everyone; Isolated = Gateway only; Community = Group + Gateway. The three words to memorize are Promiscuous, Isolated, and Community.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Summarize the PVLAN quick review key points.",
+      "a": "PVLAN is Layer 2 VLAN subdivision providing host isolation; primary VLAN is the main domain; secondary VLANs are isolated or community; isolated hosts cannot talk to each other; community members talk within the community; promiscuous talks to all; gateway is associated with the primary VLAN; VLAN IDs are still required; it does not replace ACLs/firewalls.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

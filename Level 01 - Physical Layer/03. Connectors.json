@@ -1,0 +1,82 @@
+{
+  "title": "Connectors",
+  "level": 1,
+  "levelTitle": "Level 01 - Physical Layer",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "03. Connectors.md",
+  "cards": [
+    {
+      "q": "What role do connectors play in the physical layer, and what failure results from choosing the wrong one?",
+      "a": "Connectors attach the cable or transceiver to the device and are part of the PMD (physical medium dependent) layer. Choosing the wrong connector, or mixing multimode and single-mode pigtails, produces no-light or no-link failures that are fast to spot once you recognize faces and polarity.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the common copper connectors RJ-45, RJ-48, GG45, and TERA used for?",
+      "a": "RJ-45 (8P8C) is used for UTP/STP Ethernet from 10/100/1000 to 10GBASE-T. RJ-48 has an identical face but is keyed for T1/E1 copper WAN circuits. GG45 and TERA are Cat 7 connectors that are rarely seen and backward-compatible with RJ-45.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Match the fiber connectors LC, SC, ST, FC, MPO/MTP, and E2000 to their characteristics.",
+      "a": "LC is duplex small form factor used on nearly all SFP/SFP+ fiber runs. SC is duplex push-pull used in patch panels and older OSA, larger. ST is a bayonet with a 2.5 mm ferrule for legacy LAN. FC is threaded for legacy telecom. MPO/MTP is multi-fiber (8/12/24F) used for 40/100/400GBASE-SR4, breakout, and AOC. E2000 is shielded latching used in data centers.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What connectors do SFP, QSFP, and 100/400G CFP/OSFP/QSFP-DD modules use?",
+      "a": "SFP (1G) and SFP+ (10G) use LC duplex. QSFP+/QSFP28 use MPO for parallel (SR4) or LC-based CWDM4/LR4 (4-lambda duplex over a pair of LCs); Quad means 4 lanes. CFP/OSFP/QSFP-DD for 100/400G use 8 lanes with dense MPO or LC.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Match 1G, 10G, 40G SR4, 40G LR4, 100G SR4/LR4, and 25G SR to their module and connector.",
+      "a": "1G SX/LX uses SFP with LC duplex; 10G SR/LR uses SFP+ with LC duplex; 40G SR4 uses QSFP+ with MPO-12; 40G LR4 uses QSFP+ with LC duplex (4 waves in 1 pair); 100G SR4/LR4 uses QSFP28 with MPO-12 or LC duplex; 25G SR uses SFP28 with LC duplex.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is polarity important across patch panels, and what are the rules of thumb for connectors?",
+      "a": "Two devices need TX to RX, and even through two patch panels they must cross (A to B, B to A). Never bend beyond limits because macrobending of SMF creates loss, and keep connectors clean because dust produces high loss; check and clean connectors is the first fix in optical fault isolation.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What commands identify the module type installed in a port?",
+      "a": "Use 'show interface tend1/1 transceiver | include connector', 'show inventory | include SFP', and 'show controllers gigabitethernet 0/1 phys'. An example output concept is TRANSCEIVER: SFP+ 10GBASE-SR, LC duplex, DOM.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Are SFP and SFP+ connectors the same size, and what happens if you install a 1G SFP in a 10G port?",
+      "a": "Yes, SFP and SFP+ have the same connector size and footprint, differing only in speed, so a 1G SFP in a 10G port yields 1G operation.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between MPO and LC connectors for 40G?",
+      "a": "40G SR4 uses MPO (parallel fiber), while 40G LR4 uses LC (WDM over one duplex pair). Do not mix the two connector types.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why can single-mode and multimode connectors look identical yet cause a problem?",
+      "a": "Single-mode and multimode connectors look identical because the key difference is the ferrule diameter (for example 2.5 mm SM versus MM adapters), and using the wrong pigtail causes huge optical loss.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What distinguishes RJ-45 from RJ-48?",
+      "a": "RJ-45 and RJ-48 share the same face but RJ-48 has different keying and is used for T1/E1 WAN circuits.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What connector should be matched with SFP and what with QSFP modules?",
+      "a": "In connector map questions, put LC on SFP modules and MPO on QSFP modules.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

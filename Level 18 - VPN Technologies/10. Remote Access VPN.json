@@ -1,0 +1,76 @@
+{
+  "title": "Remote Access VPN (client-based)",
+  "level": 18,
+  "levelTitle": "Level 18 - VPN Technologies",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "10. Remote Access VPN.md",
+  "cards": [
+    {
+      "q": "What is a client-based Remote Access VPN?",
+      "a": "It is a per-user VPN where a software client such as Cisco AnyConnect builds an encrypted tunnel into the enterprise from anywhere over the Internet, giving the user full network access and strong corporate control.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between client-based and clientless remote access?",
+      "a": "Client-based requires a software client and gives full network access with strong control, while clientless uses only a browser portal to reach specific internal applications with no install.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the two client-based transport options and their ports?",
+      "a": "IPsec RA uses IKE over UDP 500/4500 and provides strong control, while SSL/AnyConnect rides TLS on TCP 443 (with DTLS on UDP 443) and is firewall-friendly.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between full-tunnel and split-tunnel?",
+      "a": "Full-tunnel sends all client traffic through the headend for security and filtering but increases load, while split-tunnel sends only corporate subnets through the VPN and lets local Internet traffic go direct for better performance.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What authentication and security mechanisms are used for remote access VPN?",
+      "a": "User authentication via AAA (RADIUS/LDAP), multi-factor authentication with tokens or certificates, AnyConnect endpoint posture assessment, and group policies that define per-user access and split/full tunneling.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the role of DTLS in AnyConnect?",
+      "a": "DTLS runs on UDP 443 and provides lower latency than TLS for real-time, latency-sensitive applications such as voice and video over the AnyConnect tunnel.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which devices typically act as the remote access VPN headend?",
+      "a": "The headend is usually an ASA, ASAv, ISR router, or FTD firewall terminating the AnyConnect or IPsec client sessions.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands verify remote access VPN sessions?",
+      "a": "show vpn-sessiondb anyconnect, show vpn-sessiondb ikev2, show vpn-sessiondb summary, show tunnel-group, and show crypto ikev2 sa.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A client can establish an IPsec RA tunnel but has no full access to the network; what is likely wrong?",
+      "a": "The group policy is probably set for split-tunnel, so only corporate subnets are routed through the VPN; check split-tunnel-policy and the split-tunnel ACL in the group policy.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the key exam distinction between client-based and clientless remote access?",
+      "a": "Client-based uses a software client such as AnyConnect with full network access and strong control, while clientless is browser-only app access with no install.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the remote access VPN quick-review summary?",
+      "a": "Client-based RA VPN uses a software client (AnyConnect) to build an IPsec (UDP 500/4500) or SSL/DTLS (TCP/UDP 443) tunnel to an ASA/ISR headend, supports full or split tunneling, and is secured with AAA, MFA, certificates, posture, and group policies.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

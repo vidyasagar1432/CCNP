@@ -1,0 +1,82 @@
+{
+  "title": "FEC (Forwarding Equivalence Class)",
+  "level": 20,
+  "levelTitle": "Level 20 - MPLS",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "06. FEC.md",
+  "cards": [
+    {
+      "q": "What is a FEC in MPLS?",
+      "a": "A FEC (Forwarding Equivalence Class) is a class of packets that share the same forwarding treatment, meaning the same next hop, same path, and same label. MPLS assigns one label per FEC, so the core only needs to recognize the label rather than reclassify every packet.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What criteria define a FEC?",
+      "a": "A FEC can be defined by prefix (such as a /24 destination), next hop (same egress), QoS (same class), or VPN (same VRF). Packets in one FEC are indistinguishable for forwarding.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How are FEC, label, LSP, and binding related?",
+      "a": "The FEC is the packet class, the label is the per-FEC binding, the LSP is the per-FEC path, and the binding is the label-to-FEC relationship. LDP announces these bindings to build LSPs.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the FEC granularity options and their trade-offs?",
+      "a": "Host (per /32, fine, more labels), aggregate (coarse, fewer labels), per-VRF (VPN separation), and per-prefix (standard IGP). More granular FECs mean more labels, more control, and more overhead.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does the ingress LER classify packets into FECs?",
+      "a": "The ingress LER maps each IP packet to a FEC (for example, to 10.0.0.0/24 becomes FEC A and a VPN prefix becomes a per-VRF FEC), then maps the FEC to a label stack.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the FEC and LDP creation and advertisement process?",
+      "a": "Step 1, IGP installs the prefix; step 2, the FEC is created; step 3, a label is bound in the LIB; step 4, the binding is advertised via LDP; step 5, an LFIB entry is built. LDP bindings are the FEC's label plumbing.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How do FECs work in VPNs?",
+      "a": "VPN routes are their own FECs per VRF plus RD, so the label separates customers.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is the likely cause and check when there is no FEC label?",
+      "a": "LDP is not bound, so check show mpls ldp bindings.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the likely cause and check when there are too many labels?",
+      "a": "The FEC granularity is too fine, so adjust the prefix/aggregation config.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do FEC and label relate in MPLS?",
+      "a": "A FEC is packets with the same forwarding treatment and thus the same label, with one label per FEC.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does LDP advertise for FECs, and how do VPNs use FECs?",
+      "a": "LDP advertises label-to-FEC bindings, and VPNs create per-VRF FECs (with RD) so each customer's forwarding class is separate.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does the FEC map to the quick review table?",
+      "a": "A FEC means same forwarding treatment, has one label per FEC, is based on prefix/next-hop, is bound by LDP, uses a per-FEC LSP, can be granular /32 or aggregate, uses per-VRF FECs for VPN, and in the core only the label matters.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

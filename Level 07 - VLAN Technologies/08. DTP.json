@@ -1,0 +1,142 @@
+{
+  "title": "DTP (Dynamic Trunking Protocol)",
+  "level": 7,
+  "levelTitle": "Level 07 - VLAN Technologies",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "08. DTP.md",
+  "cards": [
+    {
+      "q": "What is DTP (Dynamic Trunking Protocol)?",
+      "a": "DTP is a Cisco-proprietary Layer 2 protocol used to dynamically negotiate whether a switch-to-switch Ethernet link should operate as a trunk or remain a non-trunk/access link. It supports dynamic desirable, dynamic auto, trunk, and access modes.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What does DTP negotiate and what does it not negotiate?",
+      "a": "DTP negotiates whether the link becomes a trunk. It does NOT negotiate which VLANs are allowed on the trunk, which VLANs exist, the native VLAN, or VLAN membership - those are configured separately.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the DTP modes and their behavior?",
+      "a": "dynamic desirable actively attempts to negotiate a trunk; dynamic auto passively waits for the peer to initiate; trunk forces the port into trunk mode; access forces the port into access mode; nonegotiate stops DTP frames from being sent.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the DTP negotiation matrix result?",
+      "a": "Trunk forms for desirable+desirable, desirable+auto, desirable+trunk, auto+trunk, and trunk+trunk. No trunk for auto+auto, or access with anything.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the DTP exam rule for trunk formation?",
+      "a": "desirable = actively wants a trunk; auto = passively waits; trunk = statically forces trunk; access = statically forces access. desirable+desirable, desirable+auto, desirable+trunk, and auto+trunk all form trunks; auto+auto = no trunk; access+anything = no trunk.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What multicast MAC address do DTP frames use?",
+      "a": "DTP frames use the Cisco multicast MAC 01:00:0C:CC:CC:CC.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between DTP and 802.1Q?",
+      "a": "DTP negotiates whether trunking should occur, while 802.1Q tags Ethernet frames with VLAN information (how VLAN info is carried). Do not confuse them.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What security risk does dynamic trunk negotiation create on user-facing ports?",
+      "a": "An attacker may connect a device capable of generating DTP frames and attempt to make the switch negotiate a trunk, which is switch spoofing and can expose traffic from VLANs that should not be available to the attacker.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the recommended user-port DTP security configuration?",
+      "a": "'switchport mode access' (prevents the port from becoming a trunk) plus 'switchport nonegotiate' (stops DTP negotiation frames being sent). Additional controls such as port security may also be used.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the recommended static trunk DTP configuration?",
+      "a": "'switchport mode trunk' plus 'switchport nonegotiate'. The trunk remains a trunk because its mode is statically configured; nonegotiate only disables DTP negotiation.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Does 'switchport nonegotiate' convert a port to access mode?",
+      "a": "No. It only disables DTP negotiation. The port's configured mode still determines whether it operates as access or trunk.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How do DTP, VTP, and LLDP differ?",
+      "a": "DTP negotiates trunking (Cisco proprietary); VTP distributes/synchronizes VLAN database information (Cisco proprietary); LLDP advertises neighbor/device information (IEEE standard); 802.1Q carries VLAN tags across trunks (IEEE standard).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does DTP decide which VLAN is assigned to a PC or which VLANs are allowed on a trunk?",
+      "a": "No. DTP does not decide VLAN membership, the VLAN allowed list, or the native VLAN - those are separate configuration functions.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is DTP interoperable with non-Cisco devices?",
+      "a": "No. DTP is Cisco proprietary, so a non-Cisco device generally should not be expected to participate in Cisco DTP negotiation. For interoperability, configure trunking explicitly rather than relying on dynamic negotiation.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands verify DTP/switchport configuration?",
+      "a": "'show interfaces GigabitEthernet0/1 switchport' (Administrative Mode, Operational Mode, negotiation of trunking), 'show interfaces trunk', and 'show dtp interface GigabitEthernet0/1' on platforms that support it.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What was the historical default DTP switchport mode on many Cisco Catalyst switches?",
+      "a": "dynamic auto was the historical default administrative switchport mode on many Cisco Catalyst switches, but this should not be treated as a universal default for every modern platform or release.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does 'dynamic auto' + 'dynamic auto' form a trunk?",
+      "a": "No. Both sides are passive, so Auto + Auto = NO trunk.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does 'dynamic desirable' + 'dynamic auto' form a trunk?",
+      "a": "Yes. The desirable side initiates negotiation, so Desirable + Auto = trunk.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does 'switchport mode trunk' with 'switchport nonegotiate' keep the link as a trunk?",
+      "a": "Yes. mode trunk forces trunk operation, and nonegotiate disables DTP; the link remains a trunk.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the best-practice configuration principle for user ports versus switch uplinks regarding DTP?",
+      "a": "User ports should be static access with DTP disabled and additional edge security as appropriate; switch uplinks should be static trunks with DTP disabled, explicit allowed VLANs, and explicit native VLAN.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Summarize the DTP quick review key points.",
+      "a": "DTP is a Cisco-proprietary trunk negotiation protocol; desirable actively attempts trunk; auto passively waits; trunk forces trunk mode; access forces access mode; auto+auto no trunk; desirable+auto trunk; desirable+desirable trunk; access+anything no trunk; nonegotiate stops DTP; DTP is distinct from 802.1Q, VTP, LLDP, allowed VLANs, and native VLAN.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the one-minute DTP summary?",
+      "a": "DTP = Cisco proprietary trunk negotiation. desirable = ACTIVE, auto = PASSIVE, trunk = FORCE TRUNK, access = FORCE ACCESS, nonegotiate = DISABLE DTP. DTP is not 802.1Q, VTP, VLAN membership, or the allowed VLAN list.",
+      "tag": "Core Concept",
+      "context": "Both"
+    }
+  ]
+}

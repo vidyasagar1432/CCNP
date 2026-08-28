@@ -1,0 +1,148 @@
+{
+  "title": "EIGRP Successor",
+  "level": 11,
+  "levelTitle": "Level 11 - EIGRP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "03. Successor.md",
+  "cards": [
+    {
+      "q": "What is an EIGRP successor?",
+      "a": "The successor is the EIGRP path selected as the best path to a destination, chosen by the lowest total EIGRP metric among eligible paths. Its route is installed in the routing table, and its total metric becomes the router's Feasible Distance (FD).",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How is the total EIGRP metric and Feasible Distance calculated?",
+      "a": "FD is the local router's total EIGRP metric to the destination through a path, conceptually local cost to the neighbor plus the neighbor's Reported Distance (RD), also called Advertised Distance (AD). So FD = local cost + RD/AD.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "If R1 learns paths with total EIGRP metrics 20, 25, and 35, which is the successor and what does the routing table show?",
+      "a": "The path with metric 20 is the successor with FD 20. The route appears as D 10.10.10.0/24 [90/20] via A, where 90 is the administrative distance and 20 is the EIGRP metric.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do the Successor and Feasible Successor compare?",
+      "a": "Successor: best path, selected by best eligible total metric, installed in the routing table and used for forwarding. Feasible Successor: loop-free backup path satisfying RD < FD, present in the topology table but not installed in the routing table while only an FS. On successor failure, a valid FS becomes successor with no diffusing computation.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which paths appear in the EIGRP topology table versus the routing table?",
+      "a": "The topology table can contain the successor, feasible successors, and other EIGRP-learned paths. Only the currently selected successor path or paths are installed in the routing table.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does EIGRP handle equal-cost paths to a destination?",
+      "a": "EIGRP can install multiple equal-cost successors when their metrics are equal, providing ECMP (Equal-Cost Multi-Path) forwarding. The number of paths is not unlimited; it is subject to EIGRP configuration and platform limits, including the maximum-paths setting.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What route code and administrative distance does an internal EIGRP route use?",
+      "a": "Internal EIGRP routes use the code D with a default administrative distance of 90, for example D 10.10.10.0/24 [90/20].",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What route code and administrative distance do external EIGRP routes use?",
+      "a": "External EIGRP routes use the code D EX with a default administrative distance of 170. An external route is learned by EIGRP through redistribution from another routing source.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between administrative distance and the EIGRP metric?",
+      "a": "Administrative distance determines which routing protocol or route source is preferred when multiple sources provide the same destination (internal EIGRP 90, external EIGRP 170). The EIGRP metric determines the best path within EIGRP, where a lower metric means a better path.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Walk through EIGRP's successor selection process.",
+      "a": "Receive path information → calculate the total EIGRP metric → identify the best eligible path → select the successor → calculate and store FD → evaluate other paths against the feasibility condition RD < FD → if yes the path is an FS, if no it is not. Memory trick: Successor = Best Path, FS = Qualified Backup, DUAL = Decides, RTP = Delivers.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "With neighbor A total metric 20 (RD 10), B total 25 (RD 15), and C total 35 (RD 30), who is successor, FS, and neither?",
+      "a": "A is the successor with FD 20. B is a feasible successor because 15 < 20. C is not a feasible successor because 30 < 20 is false.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What can cause a wrong EIGRP successor and which commands verify the topology?",
+      "a": "Interface bandwidth or delay changes, EIGRP metric changes, K-value configuration, different path characteristics, or route filtering/topology changes. Use show ip eigrp topology, show ip route eigrp, and show ip eigrp neighbors.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What can cause an EIGRP successor to be missing?",
+      "a": "The EIGRP neighbor is down, the route is no longer being advertised, interface failure, filtering, or a topology change. Check show ip eigrp neighbors, show ip eigrp topology, and show ip route eigrp.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why might an EIGRP feasible successor not be used?",
+      "a": "The path does not satisfy the feasibility condition (RD >= FD). A path is only usable as an FS when RD < FD.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "When there is no fast failover because no FS exists, how does EIGRP recover?",
+      "a": "The route goes Active, queries are sent, replies return, and a new route is selected. Investigate the route using show ip eigrp topology active.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What do the EIGRP commands show ip eigrp topology, show ip eigrp topology with a prefix, show ip route eigrp, and show ip eigrp neighbors display?",
+      "a": "show ip eigrp topology shows successors, feasible successors, FD, RD, and route state. Adding a prefix (for example show ip eigrp topology 10.1.1.0 255.255.255.0) shows the EIGRP paths to that specific destination. show ip route eigrp verifies which successor paths are installed in the routing table. show ip eigrp neighbors verifies EIGRP adjacency.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Is the second-best path automatically the EIGRP feasible successor?",
+      "a": "No. A path does not become a feasible successor merely because it has the second-best metric; it must satisfy RD < FD.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How is an FS selected versus a successor?",
+      "a": "The successor is selected based on the best total EIGRP metric, while an FS is selected based on the feasibility condition RD < FD. These are different criteria.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Can a feasible successor have a higher total metric than the successor's FD?",
+      "a": "Yes. If the FS has RD 15 and the successor FD is 20, then 15 < 20 qualifies it as an FS even though its total metric (for example 25) is higher than the FD of 20.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "When RD equals FD, does the path satisfy the feasibility condition?",
+      "a": "No. The feasibility condition is strictly RD < FD, so RD = FD does not make the path a feasible successor.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "In the route output D 10.10.10.0/24 [90/20], what do the two values mean?",
+      "a": "[90/20] shows the administrative distance (90) followed by the EIGRP metric (20). The AD 90 does not mean the EIGRP metric is 90.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between D and D EX EIGRP routes?",
+      "a": "D is an internal EIGRP route with AD 90; D EX is an external EIGRP route (learned through redistribution) with AD 170. Do not confuse the two codes or their distances.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does a successor failure always mean EIGRP must send queries?",
+      "a": "No. If a valid feasible successor exists when the successor fails, the FS is promoted with fast convergence and no diffusing computation or queries. Queries are required only when no FS exists.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "title": "Hybrid Cloud",
+  "level": 25,
+  "levelTitle": "Level 25 - Virtualization & Cloud",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "10. Hybrid Cloud.md",
+  "cards": [
+    {
+      "q": "What is a hybrid cloud?",
+      "a": "A model that combines on-premises (private) and public cloud into one operational unit, with shared networking, security, and management between them. Workloads and data move between both.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Why would an organization choose a hybrid model?",
+      "a": "To burst into public cloud for spikes, keep sensitive workloads local for compliance, use it as a glide path to the cloud, and for cloud-based DR.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What connectivity methods connect on-prem to public cloud in a hybrid model?",
+      "a": "VPN/IPsec (internet tunnel), Direct Connect (private link), Azure ExpressRoute (Azure), and SD-WAN (intelligent overlay). A secured, low-latency path is the foundation.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What must stay consistent between private and public in a hybrid model?",
+      "a": "Identity (same IdP/SSO), routing (extended subnets), firewall policies (consistent), and management (single control plane).",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the top challenges of hybrid cloud networking?",
+      "a": "Latency from distance, data gravity (transfer cost), security must be consistent across both, and the overall complexity of operating two platforms.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What commands verify hybrid cloud connectivity?",
+      "a": "show ip route for extended routes, ping and traceroute to cloud subnets, show crypto ipsec sa for VPN tunnels, and monitoring via the cloud console.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "There is no path to the cloud and high latency. What do you check?",
+      "a": "Check VPN/link state with show crypto ipsec sa, run traceroute to find latency/distance, verify IdP for authentication failures, and review firewall rules for policy gaps.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "In hybrid cloud, where do sensitive data and bursts go?",
+      "a": "Sensitive data stays on-prem; bursts and DR go to the public cloud.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which VPN command verifies the IPsec tunnel in hybrid cloud?",
+      "a": "show crypto ipsec sa shows the active IPsec security associations for the VPN tunnel.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Match the quick review: private, public, connect, burst, compliance, identity, security, goal.",
+      "a": "Private = on-prem; public = elastic; connect = VPN/Direct; burst = cloud; compliance = local; identity = shared; security = consistent; goal = best of both.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

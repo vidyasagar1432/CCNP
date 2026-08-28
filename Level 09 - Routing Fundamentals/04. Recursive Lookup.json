@@ -1,0 +1,136 @@
+{
+  "title": "Recursive Lookup",
+  "level": 9,
+  "levelTitle": "Level 09 - Routing Fundamentals",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "04. Recursive Lookup.md",
+  "cards": [
+    {
+      "q": "What is recursive lookup (recursive next-hop resolution) and why is it needed?",
+      "a": "Recursive lookup is the process of resolving a route's next-hop address when that next hop is not directly connected. The router first finds the route to the destination prefix, then looks up that next-hop address in the routing table to determine how to reach it, continuing through multiple lookups until it resolves to a usable egress interface and adjacency.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What key idea distinguishes what recursive lookup resolves versus the original destination?",
+      "a": "Recursive lookup resolves where the next hop is reachable, not the original destination itself. The initial routing lookup selects the destination route; recursive lookup resolves that route's next hop when necessary.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How does recursive lookup work for a packet destined to 192.168.100.10 when the route is 192.168.100.0/24 via 10.0.0.1?",
+      "a": "The router performs a routing lookup and finds 192.168.100.0/24 via 10.0.0.1. Because 10.0.0.1 is not directly connected, it performs another lookup for 10.0.0.1 and finds 10.0.0.0/24 directly connected on GigabitEthernet0/1. The router now has the destination, next hop, and egress interface, and CEF/FIB can use the resolved information for forwarding.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Can recursive next-hop resolution involve multiple levels of recursion?",
+      "a": "Yes. The next-hop route does not have to be directly connected. A destination can resolve via a next hop, which resolves through another route to another next hop, and so on, until it reaches a directly connected network and an egress interface. In practical routing systems, the forwarding architecture resolves this into usable forwarding state rather than repeating the recursive chain for every packet.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "When is recursive lookup commonly used?",
+      "a": "It is commonly required for iBGP routes (BGP next hop is often several hops away), eBGP with loopbacks or ebgp-multihop, next-hop static routes, and dynamic routing routes where the protocol provides a next hop that is not directly connected. iBGP commonly requires recursive next-hop resolution because the BGP next hop can be reachable through an IGP.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does normal eBGP inherently require recursive lookup?",
+      "a": "No. Normal eBGP peers are commonly directly connected, so eBGP does not inherently require recursive lookup. Recursion can be required when using loopback-based peering, ebgp-multihop, or non-directly-connected next hops.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a next-hop-only static route and how is it resolved?",
+      "a": "A next-hop-only static route is configured as ip route <prefix> <mask> <next-hop>, for example ip route 192.168.100.0 255.255.255.0 10.0.0.1. The router must determine how to reach the next-hop address, so that next hop must itself be resolvable through the routing table; the first route depends on the second route for next-hop resolution.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is an exit-interface static route and what behavior differs depending on interface type?",
+      "a": "An exit-interface static route specifies only the outgoing interface, e.g. ip route 192.168.100.0 255.255.255.0 GigabitEthernet0/1. There is no separate next-hop IP to recursively resolve. On a point-to-point interface this is straightforward, but on a multiaccess Ethernet interface the router may treat the destination as directly reachable and potentially ARP for the destination itself.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a fully specified static route and what does it provide?",
+      "a": "A fully specified static route specifies both the outgoing interface and the next hop, e.g. ip route 192.168.100.0 255.255.255.0 GigabitEthernet0/1 10.0.0.1. It removes ambiguity by explicitly providing both pieces of forwarding information.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What design rule applies to interface-only static routes on Ethernet/multiaccess networks?",
+      "a": "On Ethernet/multiaccess networks, specifying a next-hop address (a next-hop or fully specified static route) is generally preferable to an interface-only static route, because an interface-only route can cause the router to treat the destination as directly reachable and ARP for it unnecessarily.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How do recursive lookup and the RIB/FIB/CEF relate in terms of planes?",
+      "a": "Recursive next-hop resolution is primarily a control-plane process used to build usable forwarding information. The RIB stores routing information, resolves the next hop to produce resolved forwarding information, which populates the FIB, which CEF/ASIC uses for packet forwarding. The data plane does not repeat the entire recursive chain for every packet; it uses the resolved FIB/CEF information.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between longest-prefix match and recursive lookup?",
+      "a": "Longest-prefix match answers 'Which route best matches the packet's destination?' and selects the most specific destination route. Recursive lookup answers 'How do I reach the next-hop address of the selected route?' and resolves that route's next hop. Longest-prefix match selects the destination route; recursive lookup resolves the selected route's next hop.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens when a route's next hop cannot be resolved?",
+      "a": "The route cannot be properly resolved for forwarding and may not be installed in the usable forwarding table, depending on platform and route type. Traffic may then follow another available route, match a default route, or be dropped if no usable route exists. A configured route and an installed/usable route are not always the same thing.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is a circular or recursive routing problem and how do you troubleshoot it?",
+      "a": "A circular/recursive routing problem occurs when the resolution chain is invalid or circular, for example route A's next hop is resolved by route B, while route B's next hop is resolved by route A. This prevents a valid forwarding resolution. When troubleshooting, verify the entire next-hop resolution chain.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What commands verify a static route and its next-hop resolution?",
+      "a": "show ip route 192.168.100.0 checks the selected route and next hop; show ip route 10.0.0.1 answers how the router reaches the next-hop address; show ip cef 192.168.100.0 and show ip cef 192.168.100.0 detail show the forwarding/detail entries for recursive resolution investigation.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands verify interface state and configured static routes?",
+      "a": "show ip interface brief verifies the expected interface is operational; show running-config | include ^ip route checks configured static routes.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "If a static route is configured but not usable, what is the likely cause and check?",
+      "a": "A common cause is that the next hop cannot be resolved. Check with show ip route <next-hop>. Other causes include AD, tracking, interface, or protocol issues, and the promised route may also be missing from the RIB.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does the trap 'recursive lookup finds the best destination route' get corrected?",
+      "a": "Recursive lookup does not find the best destination route. The initial routing lookup selects the destination route; recursive lookup resolves that route's next-hop address when necessary.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does an iBGP route (e.g. B 10.10.10.0/24 [200/0] via 192.0.2.1) get forwarded?",
+      "a": "If 192.0.2.1 is reachable through the IGP, the BGP next hop is resolved via an OSPF/IS-IS/EIGRP route to an egress interface. The IGP provides reachability to the BGP next hop.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does the router perform a full recursive next-hop lookup for every packet?",
+      "a": "No. The control plane resolves the forwarding information ahead of time, and the data plane uses the FIB/CEF. The router does not normally perform destination lookup → next-hop lookup → next-hop lookup for every packet.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "Summarize the recursive lookup quick review: what does it resolve, what is the initial lookup, and what is the final result?",
+      "a": "Recursive lookup resolves a route's next-hop address; the initial lookup finds the best route to the destination; the next lookup finds the route to the next-hop address; it may repeat; the final result is a usable egress interface/adjacency. It is common with iBGP and next-hop static routes, is a control-plane resolution role, and the data plane uses the FIB/CEF result.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

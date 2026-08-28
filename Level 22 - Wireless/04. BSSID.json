@@ -1,0 +1,82 @@
+{
+  "title": "BSSID (Basic Service Set Identifier)",
+  "level": 22,
+  "levelTitle": "Level 22 - Wireless",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "04. BSSID.md",
+  "cards": [
+    {
+      "q": "What is a BSSID?",
+      "a": "The BSSID (Basic Service Set Identifier) is the MAC address of an AP's radio, the real unique identity behind every SSID. It is a 48-bit MAC unique per radio and band, and it is the source of beacons.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How many BSSIDs can one SSID advertise?",
+      "a": "One SSID can span many BSSIDs. Each AP radio advertises its own BSSID even when it carries the same SSID, so same SSID/different BSSIDs is normal in an ESS.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a BSS (Basic Service Set)?",
+      "a": "A BSS is the basic cell: one AP radio plus its associated clients, identified by the BSSID. It is an isolated cell.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is an ESS (Extended Service Set)?",
+      "a": "An ESS is many BSSes under one SSID, forming one logical network across many APs. Clients roam between BSSes seamlessly on the same SSID and authentication, connected through a wired distribution system.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do SSID, BSSID, BSS, and ESS relate?",
+      "a": "SSID is the name clients see (e.g. CorpNet), BSSID is the AP radio MAC, BSS is one cell (one AP radio plus clients), and ESS is all cells across many APs sharing one SSID.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which frames use the BSSID?",
+      "a": "Beacons and probe responses use the BSSID as their source; data frames to an AP use the BSSID as the destination address. Clients address frames to the BSSID of their AP.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why does each radio having its own BSSID matter for operations?",
+      "a": "For troubleshooting it gives unique per-AP/per-band statistics; for security the BSSID identifies a specific AP rather than just the SSID.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What commands show BSSID and radio information?",
+      "a": "show ap radio summary, show ap dot11 5ghz summary, show wireless client summary, show ap config general, and show ap bssid.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A client associates to the wrong AP or sticks to a weak one. What is happening and how do you check?",
+      "a": "The client may have joined a far AP that shares the same SSID, or a sticky client stays on a weak RSSI. Check the AP radio summary and load to verify association and RSSI.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Clients cannot roam and coverage gaps appear. What should you check?",
+      "a": "Coverage gaps usually mean too few APs (check RF coverage); roaming failures usually mean the ESS is split, so APs are not under the same SSID/authenticated network. Check mobility configuration.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Is it an error for two APs to broadcast the same SSID with different BSSIDs?",
+      "a": "No. Same SSID with many BSSIDs is normal in an ESS and is exactly what enables roaming between BSSes.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which BSSID quick review facts should you remember?",
+      "a": "BSSID is the AP radio MAC; BSS is one cell; ESS is many BSSes under one SSID; SSID is the name; beacons are sent from the BSSID; client frames are addressed to the BSSID; roaming happens between BSSes.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

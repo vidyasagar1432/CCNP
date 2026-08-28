@@ -1,0 +1,142 @@
+{
+  "title": "Flooding",
+  "level": 4,
+  "levelTitle": "Level 04 - Ethernet & Switching",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "05. Flooding.md",
+  "cards": [
+    {
+      "q": "What is flooding in Ethernet switching?",
+      "a": "Flooding is a Layer 2 switch forwarding behavior in which a frame is sent out multiple ports within the same VLAN when the switch has no specific forwarding entry for the destination, or when the frame is a broadcast or otherwise treated as flooded multicast.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Why is flooding a normal part of Ethernet switching but dangerous in a loop?",
+      "a": "Flooding is normal when a destination is not yet learned or for broadcast traffic. But excessive flooding, especially during a Layer 2 loop, can contribute to a broadcast storm and severe network instability.",
+      "tag": "Overview",
+      "context": "Interview"
+    },
+    {
+      "q": "When does a switch flood frames?",
+      "a": "For unknown unicast (destination MAC not in the table), broadcast (FF:FF:FF:FF:FF:FF, flooded throughout the VLAN), multicast when there is no forwarding state or IGMP snooping varies forwarding, after a MAC entry ages out, and on initial communication before the destination is learned.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the scope of flooding?",
+      "a": "Flooding is limited to the Layer 2 broadcast domain, normally a VLAN. The frame is not sent back out the ingress port, non-member and STP-blocked ports do not receive it, and it can cross a trunk only if the VLAN is allowed and the port is forwarding for it.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do broadcast and unknown-unicast flooding compare?",
+      "a": "Broadcast has destination FF:FF:FF:FF:FF:FF, needs no MAC table entry, and remains a broadcast even after the destination is learned. Unknown unicast has a specific unicast MAC that is missing from the table and stops being flooded once learned. Both stay within the VLAN.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "Why does a DHCP client initially use broadcast, and what does DHCP relay do?",
+      "a": "A DHCP client uses a Layer 2 broadcast because it does not yet know its DHCP server. With a DHCP relay configured, the router/L3 switch receives the broadcast and forwards the DHCP request toward the server as a routed/unicast transaction.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does MAC learning interact with flooding?",
+      "a": "The switch learns the source MAC on the ingress interface and associates it with the VLAN. When the destination is missing, it floods; once the destination device replies, the switch learns it and forwards subsequent traffic directly between the two ports.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between normal and excessive flooding?",
+      "a": "A small amount of flooding is expected for first communications, ARP requests, DHCP broadcasts, and some multicast. Excessive flooding consumes switch forwarding resources, link bandwidth, CPU, and host processing; a large broadcast domain makes more devices receive broadcast traffic.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What causes a broadcast storm and what are its effects?",
+      "a": "A Layer 2 loop causes broadcast and flooded traffic to circulate repeatedly because flooded frames traverse the topology endlessly without loop prevention. Effects include rapidly increasing traffic, MAC-table instability, high switch CPU, packet loss, and network-wide connectivity problems.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does STP/RSTP/MST prevent Layer 2 loops?",
+      "a": "Stable Spanning Tree protocols prevent normal Layer 2 loops by placing redundant (non-active) paths into a non-forwarding state.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does multicast traffic behave on a Layer 2 switch?",
+      "a": "Without multicast-aware forwarding state, a switch may treat multicast like flooded traffic and send it to many ports. IGMP snooping lets the switch learn which ports have interested receivers and constrain multicast forwarding to those ports.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which commands verify MAC learning and flooding behavior?",
+      "a": "show mac address-table (primary), show mac address-table vlan 10, show mac address-table address 001b.21aa.bbcc, and show interfaces counters for investigating abnormal traffic or errors.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What mechanisms reduce unnecessary flooding?",
+      "a": "VLAN segmentation (smaller broadcast domains), normal dynamic MAC learning, deliberate static MAC entries, IGMP snooping to constrain multicast, and platform-specific unknown-unicast suppression mechanisms.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do you compare flooding vs forwarding behavior by traffic type?",
+      "a": "Known unicast is forwarded toward the destination port; unknown unicast is flooded within the VLAN; broadcast is flooded within the VLAN; multicast may be flooded or constrained depending on multicast state.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "Does flooding only apply to broadcast traffic?",
+      "a": "No. Unknown unicast can also be flooded, and multicast may be flooded depending on multicast forwarding state/features.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does flooding go out every switch port?",
+      "a": "No. Flooding is constrained by VLAN membership, exclusion of the ingress port, STP forwarding state, trunk VLAN allowance, and other forwarding controls or features.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does flooding ever cross VLANs?",
+      "a": "No. A Layer 2 flooded frame remains within its VLAN; to communicate between VLANs traffic must cross a Layer 3 boundary.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does a MAC entry aging out break connectivity?",
+      "a": "Not necessarily. When the destination is no longer known the switch can initially flood the frame; once the destination MAC is learned again, normal known-unicast forwarding resumes.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does faster MAC aging reduce flooding?",
+      "a": "Generally no. A shorter aging time makes MAC entries disappear sooner, which can actually increase unknown-unicast flooding.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does STP block all flooded traffic?",
+      "a": "No. STP prevents Layer 2 loops by controlling which ports forward; flooding still occurs over the active forwarding topology.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you troubleshoot excessive flooding?",
+      "a": "Check the MAC address table, identify unknown/unstable MACs, verify VLAN membership and trunk config, check STP topology and port states, check for Layer 2 loops, measure broadcast/multicast levels, check interface counters/errors, and investigate MAC flapping or topology changes.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the one-minute exam summary of flooding behavior?",
+      "a": "Known unicast is forwarded to the destination port; unknown unicast and broadcast are flooded within the VLAN; multicast may flood unless multicast-aware forwarding constrains it. Flooding is a Layer 2 behavior confined to a VLAN, excludes the ingress port, and uses only eligible forwarding paths.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

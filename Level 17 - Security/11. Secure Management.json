@@ -1,0 +1,136 @@
+{
+  "title": "Secure Management",
+  "level": 17,
+  "levelTitle": "Level 17 - Security",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "11. Secure Management.md",
+  "cards": [
+    {
+      "q": "What is secure management?",
+      "a": "Secure management protects the interfaces and protocols used to administer network devices, ensuring management traffic is encrypted, authenticated, authorized, restricted to trusted sources, and audited/logged, separated from user traffic where appropriate.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the preferred secure management choices?",
+      "a": "SSH instead of Telnet, HTTPS instead of HTTP, SNMPv3 instead of SNMPv1/v2c, and SCP instead of TFTP/FTP.",
+      "tag": "Overview",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the three device planes and their typical protections?",
+      "a": "Data plane (forwards user traffic; ACLs/infrastructure security), control plane (routing/control protocols; CoPP), and management plane (device administration; SSH, HTTPS, AAA, ACLs, SNMPv3).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the key distinction between CoPP and secure management?",
+      "a": "CoPP protects the control plane from excessive traffic destined for the device CPU; secure management protects administrative access to the device.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Why is SSH preferred over Telnet for CLI management?",
+      "a": "SSH (port 22) encrypts the management session and protects credentials/commands from clear-text transmission; Telnet (port 23) is unencrypted.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What command enables HTTPS, and does it automatically disable HTTP?",
+      "a": "'ip http secure-server' enables HTTPS; it does not automatically disable plain HTTP, which must be disabled with 'no ip http server' separately.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How do SNMPv1, SNMPv2c, and SNMPv3 differ in security?",
+      "a": "SNMPv1 and SNMPv2c use community strings with no encryption; SNMPv3 provides authentication and optional privacy/encryption.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the three SNMPv3 security levels?",
+      "a": "noAuthNoPriv (no auth, no encryption), authNoPriv (authentication, no encryption), and authPriv (authentication and encryption).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which SNMPv3 security level is the strongest?",
+      "a": "authPriv, which provides both authentication and privacy/encryption.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the preferred Cisco secure file transfer, and why?",
+      "a": "SCP, because it is SSH-based encrypted transfer; it is preferred over TFTP/FTP for transferring IOS images and configuration files.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What per-line settings secure a VTY configuration?",
+      "a": "transport input ssh (prevents Telnet), access-class 99 in (restricts source addresses), login local (uses local username database), and exec-timeout 5 0 (disconnects idle sessions).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does 'access-class' on a VTY line control?",
+      "a": "It controls which source addresses can access the management line; it is different from an interface ACL used to filter normal transit traffic.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What AAA functions support secure management?",
+      "a": "Authentication (who are you?), authorization (what can you do?), and accounting (what management activity was recorded); configuring authentication alone does not automatically provide command accounting.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the purpose of a local fallback authentication account?",
+      "a": "Centralized AAA servers may become unavailable, so a local fallback account with 'aaa authentication login DEFAULT group tacacs+ local' attempts TACACS+ first and uses local if the configured AAA method permits fallback.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is a dedicated management VLAN?",
+      "a": "A management VLAN separates device-management traffic from normal user VLANs, reducing exposure, simplifying management ACLs, and providing centralized management policy; it is logical isolation, not complete physical isolation.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is out-of-band (OOB) management and its advantages?",
+      "a": "OOB management uses a separate management network from the production/data network, remaining reachable even when the production network has problems and providing stronger isolation than a management VLAN.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How do management ACLs restrict access?",
+      "a": "They allow only trusted administrative networks (e.g., 'ip access-list standard MGMT permit 10.10.10.0 0.0.0.255 deny any'), applied to VTY with 'access-class MGMT in' and to HTTP/HTTPS with 'ip http access-class MGMT in'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does secure management differ from device hardening?",
+      "a": "Device hardening reduces the overall attack surface of the device (disable services, secure console/AUX, passwords); secure management protects how administrators manage the device (SSH/HTTPS/SNMPv3, AAA, management ACLs, management VLAN/OOB).",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What verification commands are used for secure management?",
+      "a": "show ip ssh, show ssh, show line, show running-config | section line vty, show ip http server status, show access-lists, show running-config | section aaa, and show running-config | section snmp.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the difference between a management VLAN and OOB management?",
+      "a": "A management VLAN provides logical separation within the network; OOB management uses a separate management path/network and generally provides stronger isolation, remaining available when the production network is unavailable.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "If HTTP is still available after enabling HTTPS, what is the cause and fix?",
+      "a": "Enabling 'ip http secure-server' does not disable the plain HTTP server; fix by also configuring 'no ip http server'.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    }
+  ]
+}

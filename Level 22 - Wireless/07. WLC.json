@@ -1,0 +1,88 @@
+{
+  "title": "WLC (Wireless LAN Controller)",
+  "level": 22,
+  "levelTitle": "Level 22 - Wireless",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "07. WLC.md",
+  "cards": [
+    {
+      "q": "What is a Wireless LAN Controller (WLC)?",
+      "a": "The WLC is the brain of a centralized WLAN: it configures APs, runs RRM, handles client authentication and roaming, and anchors the control plane via CAPWAP. APs are lite devices — the WLC pushes config and management/control traffic flows through it.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What functions does a WLC perform?",
+      "a": "It pushes AP config profiles, runs RRM for channels/power, handles authentication (RADIUS/802.1X), manages client roaming handoff, and provides monitoring. Central admin means one place to configure the whole AP fleet.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Where do the control, management, and data planes live in a centralized WLAN?",
+      "a": "Control (CAPWAP control) and management live on the WLC; data goes from AP to WLC, or stays local with FlexConnect. The split means the AP handles RF while the WLC handles policy.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the WLC AP modes and their data paths?",
+      "a": "Local sends client data to the WLC; FlexConnect keeps data local to the AP for remote branches; Monitor only senses; Sniffer captures traffic.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the AP join process to a WLC?",
+      "a": "The AP discovers the controller via DNS/L3, performs CAPWAP discovery, establishes the DTLS secure tunnel, and receives its config and software push.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the WLC management ports used for?",
+      "a": "The Management port handles admin/dashboard, the AP manager port handles AP traffic, and the Service port handles guest traffic. Separate subinterfaces/VRFs keep the planes isolated.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What WLC platform types exist and which is the modern controller?",
+      "a": "Appliance (9800 series), embedded (Catalyst/AIRE), virtual (vWLC), and cloud (Catalyst Center). The 9800 series is the modern IOS-XE controller.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands verify WLC, AP, and WLAN status?",
+      "a": "show ap summary, show ap join stats summary, show wlan summary, show wireless stats, and show ap config general.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "An AP is not joining the WLC. What are the likely causes and the check?",
+      "a": "Likely CAPWAP or DNS problems. Check with show ap join stats summary and verify CAPWAP discovery and DNS resolution.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "No WLANs, failing auth, broken roaming, and wrong data path appear. What should you check?",
+      "a": "No WLANs means WLANs are not enabled (show wlan summary); auth failures point to RADIUS (show wireless stats); roaming failures point to mobility config; and wrong data path points to the AP mode (Local vs FlexConnect).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which plane is NOT always on the WLC?",
+      "a": "The data plane is not always on the WLC — in FlexConnect mode client data stays local at the AP, while control and management always remain on the WLC.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "In which WLC AP mode does client data stay local at the AP?",
+      "a": "FlexConnect mode keeps client data local to the AP (intended for remote branches), unlike Local mode which tunnels it to the WLC.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which WLC quick review facts should you remember?",
+      "a": "The WLC is the central brain using CAPWAP; control and management are on the WLC; data is on the WLC or FlexConnect; RRM and auth (RADIUS) run on the WLC; modes are local/flex/monitor/sniffer; the 9800 is the modern platform.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

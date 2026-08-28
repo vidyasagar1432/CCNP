@@ -1,0 +1,112 @@
+{
+  "title": "CoPP (Control Plane Policing)",
+  "level": 17,
+  "levelTitle": "Level 17 - Security",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "09. CoPP.md",
+  "cards": [
+    {
+      "q": "What is CoPP (Control Plane Policing)?",
+      "a": "CoPP protects the device CPU by rate-limiting traffic destined for the control plane (routing protocols, management protocols, and other packets the device itself must process).",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Why is CoPP needed on a device?",
+      "a": "Without it, a high-rate flood directed at the device can consume CPU resources and interfere with routing, management, and other control-plane functions.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is the data plane, control plane, and management plane?",
+      "a": "Data plane forwards transit traffic (CEF-switched packets); control plane runs protocols and processes traffic destined to the device (OSPF, BGP, EIGRP, STP, ICMP); management plane handles administration (SSH, SNMP, HTTPS, Syslog).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What QoS framework components does CoPP use?",
+      "a": "ACL (identifies traffic), class-map (groups matching traffic), policy-map (defines policing actions), and the 'control-plane' attachment to apply the policy to CPU-bound traffic.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What ACL should a CoPP policy classify?",
+      "a": "Traffic destined to the device's own control plane, such as SSH, SNMP, BGP, OSPF, and ICMP to the device.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What do 'conform-action transmit' and 'exceed-action drop' mean?",
+      "a": "Traffic within the allowed rate is forwarded (conform transmit); traffic above the rate is discarded (exceed drop).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is it important not to police routing protocols too aggressively in CoPP?",
+      "a": "Routing protocols (BGP, OSPF, EIGRP) require sufficient control-plane bandwidth; excessive policing can affect adjacency or routing stability.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the 'class-default' class do in a CoPP policy?",
+      "a": "It catches traffic that does not match another class; a restrictive default class protects the CPU from unexpected traffic but must be high enough for legitimate unmatched control-plane traffic.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is a CoPP policy attached, and is it configured on individual interfaces?",
+      "a": "CoPP is not configured on individual interfaces; it is attached globally to the control plane with 'service-policy input COPP-POLICY' under the 'control-plane' configuration.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the most important CoPP verification command?",
+      "a": "show policy-map control-plane; other useful commands include show control-plane, show class-map, and show policy-map.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does CoPP differ from an interface ACL?",
+      "a": "An interface ACL can block unwanted traffic before it reaches the device's processing path; CoPP specifically controls traffic that is destined for and must be handled by the control plane/CPU.",
+      "tag": "Exam Trap",
+      "context": "Interview"
+    },
+    {
+      "q": "What happens if SSH is not properly classified and the default CoPP class is restrictive?",
+      "a": "Legitimate management traffic can be dropped, potentially causing a management lockout.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the CoPP troubleshooting process?",
+      "a": "Check the CoPP policy, check class counters, identify which class is dropping traffic, verify the ACL/classification, verify the policing rate, adjust the policy, then recheck counters and CPU utilization.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is a common configuration mistake regarding incorrect classification in CoPP?",
+      "a": "An ACL must accurately identify the traffic you intend to police; incorrect source/destination/protocol/port matching can drop important traffic, allow attack traffic, or route traffic into the wrong class.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What data should a good CoPP design consider protecting?",
+      "a": "BGP, OSPF, EIGRP, IS-IS, HSRP/VRRP, SSH, SNMP, ICMP, and network-management traffic, separated into logical classes so one type cannot consume the entire control-plane allowance.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the major risk when deploying CoPP?",
+      "a": "Self-inflicted management or routing disruption from policing legitimate control/management traffic too aggressively or misclassifying it.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Which planes does CoPP protect versus other mechanisms like Storm Control and ACLs?",
+      "a": "ACLs filter traffic entering/leaving an interface, Storm Control limits L2 broadcast/multicast/unknown-unicast storms at the switchport, and CoPP protects the device control plane/CPU via QoS policing.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    }
+  ]
+}

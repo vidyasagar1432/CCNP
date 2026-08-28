@@ -1,0 +1,82 @@
+{
+  "title": "vBond",
+  "level": 23,
+  "levelTitle": "Level 23 - Enterprise WAN",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "10. vBond.md",
+  "cards": [
+    {
+      "q": "What is vBond in Cisco SD-WAN?",
+      "a": "The orchestration plane of Cisco SD-WAN and the first contact point for new devices. It authenticates and onboards edges and controllers, assigns them to vSmart/vManage, and establishes a public DTLS/TLS identity.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are vBond's main functions?",
+      "a": "Orchestration as the first contact, authentication of device identity, discovery/handing devices to vSmart and vManage, and bootstrap services like NTP and keys.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the device onboarding flow through vBond?",
+      "a": "A new edge contacts vBond, vBond verifies its identity, assigns the controllers (vSmart/vManage), then the edge builds secure sessions — edges start at vBond first.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Why must vBond be publicly reachable?",
+      "a": "Because edges contact vBond first for onboarding, so it needs a public IP or DNS reachability, secure DTLS, with firewall ports such as 12346 or 443 open.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does vBond establish device identity and security?",
+      "a": "It uses the device serial/chassis number plus certificates for mutual authentication and bootstrap keys, producing a trusted fabric.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do you make vBond reliable and scalable?",
+      "a": "Run multiple vBond nodes for redundancy, use DNS round-robin for load, and optionally out-of-band placement for reliability.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands verify vBond and device onboarding?",
+      "a": "show sdwan vbond list, show sdwan hardware-status, show sdwan running-config, show sdwan identity, and debug sdwan.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "An edge is not onboarding. What is the likely cause and check?",
+      "a": "vBond being unreachable is likely; check show sdwan vbond list.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "vBond authentication is failing. What is the likely cause and check?",
+      "a": "A certificate or serial mismatch is likely; check show sdwan identity.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Edges cannot reach vBond during onboarding. What is a likely cause and check?",
+      "a": "Time skew or DTLS being blocked by the firewall is likely; check NTP status and firewall port 12346.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do the three SD-WAN controllers differ?",
+      "a": "vBond is the orchestration plane that lets devices in, vSmart is the control plane, and vManage is the management plane.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What identifies an edge to vBond for authentication?",
+      "a": "The device serial/chassis number plus certificates provide mutual authentication and prove identity to vBond.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "title": "LFIB (Label Forwarding Information Base)",
+  "level": 20,
+  "levelTitle": "Level 20 - MPLS",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "05. LFIB.md",
+  "cards": [
+    {
+      "q": "What is the LFIB and what does it map?",
+      "a": "The LFIB is the MPLS forwarding table on each router that maps incoming label to swap/pop plus outgoing interface. LSRs forward exclusively from the LFIB; LERs also consult CEF to push on ingress.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What columns does an LFIB entry hold?",
+      "a": "In label (what arrives), Out label (what leaves), Prefix (the FEC it serves), Interface (next hop), and Operation (swap/pop/push). Each entry is one in-label to out-label forwarding decision.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do CEF, LFIB, and LIB relate in MPLS forwarding?",
+      "a": "CEF maps IP prefix to next hop, LFIB maps in-label to out-label, and the LIB (from LDP) holds label bindings. CEF feeds the FEC, LDP feeds the LIB, and the LFIB is the working table.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "In 'show mpls forwarding-table', what does a Pop out-label entry indicate?",
+      "a": "A Pop entry indicates PHP toward the egress, where the label is removed before delivery.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the LFIB operations and where do they occur?",
+      "a": "Swap on core LSRs (change top label), Pop on the penultimate router (remove label), Pop + push on the ingress/VPN edge (VPN service swap), and Push on egress with PHP (re-add for service).",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the 'pop + push' operation used for?",
+      "a": "Pop + push is the VPN edge pattern that swaps the service label.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What sources build the LFIB?",
+      "a": "CEF (FEC/next hop), LDP (core bindings), MP-BGP (VPN label), and interface state (adjacency). Failures show up as missing or wrong LFIB entries.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What command shows the LFIB and how do you inspect a VRF's forwarding?",
+      "a": "show mpls forwarding-table shows the LFIB; show mpls forwarding vrf CUST1 (or show mpls forwarding-table vrf CUST1) inspects a VRF.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the likely cause when there is no LFIB entry?",
+      "a": "The FEC or LDP is missing, so check show mpls forwarding-table.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "In MPLS, what table does the core use to forward and what does the ingress use to push?",
+      "a": "The core forwards using the LFIB only, while the ingress push is driven by CEF.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does the LFIB map to the quick review table?",
+      "a": "The LFIB takes an in label as input, outputs an out label plus prefix and interface, performs swap in the core, push/pop at the edge, and pop + push for VPN, is sourced from CEF plus LDP, and is shown with show mpls forwarding-table.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

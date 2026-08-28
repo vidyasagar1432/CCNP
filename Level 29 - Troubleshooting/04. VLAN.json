@@ -1,0 +1,22 @@
+{
+  "title": "VLAN",
+  "level": 29,
+  "levelTitle": "Level 29 - Troubleshooting",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "04. VLAN.md",
+  "cards": [
+    { "q": "What does VLAN troubleshooting cover?", "a": "Missing VLANs, wrong port assignment, trunk filtering, and native VLAN mismatch. Symptoms are no reachability within a subnet or traffic crossing the wrong VLANs.", "tag": "Overview", "context": "Both" },
+    { "q": "What is the VLAN verification chain?", "a": "show vlan, show interfaces status, show interfaces trunk, then show mac address-table. The VLAN must exist and carry the port.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What are the usual suspects for VLAN failures?", "a": "The trunk allowed VLAN list and native VLAN mismatch.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What must be true before a port assignment takes effect?", "a": "The VLAN must exist. A VLAN must be created before switchport access vlan works.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "How do you force an access port to a VLAN?", "a": "Use switchport mode access and switchport access vlan 10.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What does a trunk carry across the link?", "a": "Only the allowed VLANs listed in the trunk configuration (switchport trunk allowed vlan).", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What is the impact of a native VLAN mismatch between trunk ends?", "a": "It causes silent breakage, including control-plane and cross-VLAN traffic issues because the untagged native VLAN must match on both ends.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What is the default native VLAN on a trunk?", "a": "VLAN 1.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What proves which VLAN a host lives in?", "a": "The MAC address table (show mac address-table vlan 10), which is ground truth of VLAN membership.", "tag": "Exam Trap", "context": "Practical" },
+    { "q": "Why is show vlan not the same as what a trunk passes?", "a": "show vlan lists VLANs on the switch, while the trunk allowed list gates which VLANs actually cross the trunk link.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "What command shows detailed port-to-VLAN assignment?", "a": "show interfaces <if> switchport. The no switchport command turns a port into a Layer 3 (routed) port.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "No DHCP across VLANs is most likely caused by what?", "a": "A missing IP helper (ip helper-address) on the interface", "tag": "Core Concept", "context": "Exam" }
+  ]
+}

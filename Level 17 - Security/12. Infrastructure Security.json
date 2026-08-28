@@ -1,0 +1,178 @@
+{
+  "title": "Infrastructure Security",
+  "level": 17,
+  "levelTitle": "Level 17 - Security",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "12. Infrastructure Security.md",
+  "cards": [
+    {
+      "q": "What is infrastructure security?",
+      "a": "Infrastructure security protects the network infrastructure itself (routers, switches, routing protocols, control-plane resources, Layer-2 infrastructure, and management interfaces) against source spoofing, ARP/DHCP attacks, rogue routing, MAC abuse, STP attacks, and control-plane exhaustion.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is Unicast Reverse Path Forwarding (uRPF)?",
+      "a": "uRPF validates the source address of an incoming packet against the routing information available on the device, asking 'can the device reach the packet's source address through an acceptable path?'.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does strict uRPF require, and what is its main concern?",
+      "a": "Strict uRPF ('ip verify unicast source reachable-via rx') requires the best reverse path to the source to point out the same interface the packet arrived on; it can drop legitimate traffic when routing is asymmetric.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does loose uRPF require, and when is it best used?",
+      "a": "Loose uRPF ('reachable-via any') only requires the source address to be reachable through some interface; it is best for asymmetric routing and multihomed environments where strict validation would drop legitimate traffic.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the classic strict uRPF exam trap?",
+      "a": "Strict uRPF can cause legitimate traffic drops when routing is asymmetric.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What do anti-spoofing ACLs at the Internet edge typically block?",
+      "a": "RFC1918 private source addresses, bogon/unallocated ranges where appropriate, the organization's own prefixes appearing as Internet source addresses, and other sources that should never legitimately arrive from that interface; they are applied inbound.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does 'no ip directed-broadcast' protect against?",
+      "a": "Directed broadcasts, which can be abused in amplification attacks; modern IOS/XE generally disables them by default.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What authentication mechanisms protect routing protocols?",
+      "a": "OSPF authentication, EIGRP authentication, BGP (TCP MD5, TTL Security), and IS-IS authentication, helping ensure routing messages originate from an authorized peer.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What OSPF commands enable message-digest authentication?",
+      "a": "'ip ospf authentication message-digest' and 'ip ospf message-digest-key 1 md5 <secret>' on the interface.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How is EIGRP authentication configured, and what can it include?",
+      "a": "Using key chains (e.g., 'key chain EIGRP-KEYS' then 'ip authentication key-chain eigrp 100 EIGRP-KEYS'); authentication can include MD5 or HMAC-SHA-256 depending on IOS/XE and mode.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the two BGP session protection mechanisms?",
+      "a": "TCP MD5 authentication (neighbor password) and TTL Security/GTSM (ttl-security hops).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does BGP TCP MD5 provide, and what does it not provide?",
+      "a": "It authenticates and helps prevent unauthorized injection of TCP segments into the BGP session (authentication/integrity), but it does not provide confidentiality; it should not be described as encrypting BGP.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is BGP TTL Security (GTSM)?",
+      "a": "It uses the IP TTL value to ensure BGP packets originate within the expected hop distance, protecting directly connected eBGP sessions from spoofed packets arriving from farther away; it is not an authentication mechanism.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between BGP TCP MD5 and TTL Security?",
+      "a": "TCP MD5 authenticates/protects TCP session segments; TTL Security restricts acceptable hop distance. Neither should be described as general-purpose encryption.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is DHCP Snooping?",
+      "a": "It builds a binding database (MAC, IP, VLAN, interface, lease info) by inspecting DHCP traffic, with trusted ports for the DHCP server/uplink path and untrusted ports for client access, helping prevent rogue DHCP servers.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which access-layer features depend on DHCP Snooping, and which do not?",
+      "a": "DAI and IPSG commonly use DHCP Snooping bindings, but Port Security, Storm Control, BPDU Guard, and Root Guard do not depend on DHCP Snooping.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the relationship between DHCP Snooping, DAI, and IPSG?",
+      "a": "DHCP Snooping builds the binding database, which DAI uses for ARP validation and IPSG uses for IP validation.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the main purpose of DAI?",
+      "a": "DAI protects against ARP spoofing by validating ARP packets against trusted information, commonly the DHCP Snooping binding database.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the main purpose of IPSG?",
+      "a": "IPSG helps prevent IP source-address spoofing at the access layer by restricting the source IP/MAC information an access port can use (e.g., 'ip verify source').",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the main purpose of Port Security, and why is it more than MAC-flood protection?",
+      "a": "Port Security controls unauthorized MAC addresses on an access port, so it is more accurately described as MAC-address access control rather than simply MAC-flood protection.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What STP infrastructure protection mechanisms exist?",
+      "a": "BPDU Guard (protects edge/PortFast ports from unexpected BPDUs), Root Guard (prevents a port from becoming an unexpected STP root), PortFast (quickly transitions edge ports), and Loop Guard (helps prevent STP loops from unidirectional failures).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does BPDU Guard do?",
+      "a": "Used on edge/access ports; if an unexpected BPDU is received, the port can be placed into an error-disabled state.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does Root Guard do?",
+      "a": "It prevents an interface from accepting superior BPDUs that could cause an unexpected device to become the STP root.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does CoPP protect, and how does it differ from an ACL?",
+      "a": "CoPP protects the device CPU/control plane by policing traffic destined for it; an ACL filters traffic based on match criteria, whereas CoPP specifically polices control-plane-bound traffic.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What IPv6 infrastructure protections are important?",
+      "a": "RA Guard (rogue Router Advertisements), DHCPv6 Guard (rogue DHCPv6 server), IPv6 ACL/source validation, and Neighbor Discovery protection; IPv4-only security does not automatically secure IPv6.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How do edge ACL, uRPF, CoPP, DAI, IPSG, and DHCP Snooping differ?",
+      "a": "Edge ACL decides whether a traffic/source is allowed; uRPF checks whether the source is reachable through an acceptable path; CoPP limits traffic to the control plane/CPU; DAI validates ARP; IPSG validates source IP/MAC on access ports; DHCP Snooping validates legitimate DHCP behavior.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between the management plane and control plane in infrastructure security?",
+      "a": "The management plane handles SSH, HTTPS, SNMP, and administration; the control plane handles routing protocols and CPU processing. CoPP protects the control plane, while secure management protects administrative access.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What verification commands are used for infrastructure security?",
+      "a": "show ip verify source (uRPF), show ip dhcp snooping and binding (DHCP Snooping), show ip arp inspection and interfaces (DAI), show port-security, show ip bgp neighbors (BGP), show policy-map control-plane (CoPP), and show access-lists.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    }
+  ]
+}

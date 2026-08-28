@@ -1,0 +1,148 @@
+{
+  "title": "Forwarding",
+  "level": 4,
+  "levelTitle": "Level 04 - Ethernet & Switching",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "06. Forwarding.md",
+  "cards": [
+    {
+      "q": "What is Layer 2 forwarding on a switch?",
+      "a": "Forwarding is the Layer 2 switch operation of deciding where a received Ethernet frame should be sent, based primarily on its destination MAC address and VLAN context.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the Layer 2 forwarding pipeline?",
+      "a": "Receive the frame, learn the source MAC on the ingress interface within the VLAN, look up the destination MAC + VLAN, then take one of the outcomes: known on another port -> forward, known on the ingress port -> filter/drop, unknown -> flood within the VLAN. Broadcast and multicast follow their own flooding/constraint behavior.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the three outcomes of a destination MAC lookup?",
+      "a": "Known on another forwarding port -> forward out that port; known on the ingress port -> filter/drop; unknown -> flood within the VLAN.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is same-port filtering and why does a switch do it?",
+      "a": "If the destination MAC is known on the same interface the frame arrived on, the switch filters/drops rather than sending it back onto the ingress segment. The destination is already reachable through that segment, so sending the frame back out would be unnecessary.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How is Layer 2 forwarding implemented in hardware?",
+      "a": "Modern enterprise switches perform normal Layer 2 forwarding using dedicated switching hardware, primarily ASICs. The main CPU is not normally involved in forwarding every data frame; it handles control-plane protocols, management traffic, exceptional packets, and punted traffic.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do CAM and TCAM differ for forwarding lookups?",
+      "a": "CAM is commonly associated with exact-match lookups such as MAC addresses. TCAM supports ternary matching (0, 1, and don't care) and is used for ACLs, QoS classification, routing-related lookups, and other policy-based functions.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are store-and-forward and cut-through switching?",
+      "a": "Store-and-forward receives the complete frame, validates FCS, and then forwards, allowing corrupted frames to be discarded at the cost of latency. Cut-through begins forwarding before the complete frame is received, lowering latency but possibly forwarding frames before FCS can be validated. Fragment-free is an older variation that waits for the initial portion of the frame.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which forwarding mode do modern Cisco enterprise switches generally use?",
+      "a": "Store-and-forward switching, which validates FCS before transmitting valid frames.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does Layer 2 forwarding differ from Layer 3 routing?",
+      "a": "Forwarding decides which Layer 2 port based on destination MAC and the MAC address table, processing Ethernet frames and staying within the VLAN. Routing decides the next hop/interface based on destination IP and the routing table/FIB, processing IP packets and creating a new Ethernet frame for each Layer 2 segment.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Can a Layer 2 switch forward a frame directly between VLANs?",
+      "a": "No. A Layer 2 switch does not forward a VLAN 10 frame into VLAN 20; inter-VLAN communication requires a Layer 3 routing function such as a router or Layer 3 gateway.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How do forwarding, flooding, and filtering relate?",
+      "a": "Forwarding sends a known destination toward a specific egress port; flooding sends unknown unicast or broadcast/multicast frames to multiple eligible ports within the VLAN; filtering prevents unnecessary forwarding, such as when the destination MAC is learned on the ingress port.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What happens when a destination MAC entry is missing?",
+      "a": "The frame is flooded as unknown unicast; once the destination responds, its MAC is learned and known-unicast forwarding resumes. A missing MAC entry is therefore not necessarily a connectivity failure.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens when a dynamic MAC entry ages out?",
+      "a": "The destination becomes unknown, the next traffic may be flooded, and once the MAC is relearned known-unicast forwarding resumes. The default dynamic MAC aging timer on many Cisco IOS platforms is 300 seconds (5 minutes) but is configurable and platform-dependent.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is MAC flapping and how does it differ from a MAC-table miss?",
+      "a": "MAC flapping is the same MAC repeatedly moving between different ports, possibly reported by the switch; causes include Layer 2 loops, redundant connections, incorrect EtherChannel configuration, bridging problems, and topology changes. It is different from a simple CAM/MAC-table miss.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Why is an STP-blocked port not used for normal data forwarding?",
+      "a": "STP places redundant paths into a non-forwarding state to prevent Layer 2 loops, so a blocked path is intentionally not used even if another path is busy. A topology change or STP recalculation is required for a blocked path to become active.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands verify forwarding and STP behavior?",
+      "a": "show mac address-table, show mac address-table dynamic, show mac address-table vlan 10, show mac address-table interface GigabitEthernet0/10, show spanning-tree interface GigabitEthernet0/10, show interfaces status, and show interfaces counters.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Does a switch rewrite the destination MAC when it forwards a frame?",
+      "a": "No. A normal Layer 2 switch forwards the frame based on its destination MAC without rewriting it. Layer 3 routing is different: the original Ethernet frame is removed and a new Layer 2 frame is created for the next hop.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is an unknown-unicast frame dropped because the destination is unknown?",
+      "a": "No. For normal Ethernet switching, an unknown unicast is flooded within the VLAN, not dropped.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does a known MAC always mean the switch forwards the frame?",
+      "a": "Not necessarily. If the destination MAC is learned on the same ingress port, the switch filters the frame instead of sending it back out that port.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does forwarding happen only after MAC learning completes?",
+      "a": "No. The switch can learn the source MAC and independently make a forwarding decision for the destination; if the destination is unknown, it floods.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Are store-and-forward and cut-through routing methods?",
+      "a": "No. They describe Layer 2 switching/forwarding architectures, specifically when a switch begins transmitting a received frame.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the steps in the Layer 2 forwarding quick review?",
+      "a": "Receive on ingress interface; learn Source MAC -> ingress port + VLAN; lookup destination MAC + VLAN; known on another port -> forward; known on ingress port -> filter/drop; unknown unicast -> flood within VLAN; broadcast -> flood within VLAN; multicast -> flood or constrain; normal forwarding handled primarily by ASICs; transmit with appropriate Layer 2 encapsulation.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the four words to remember for Layer 2 forwarding?",
+      "a": "Learn -> Lookup -> Forward -> Flood/Filter. Forwarding sends a known destination toward a specific egress port, flooding sends traffic to multiple eligible ports within the VLAN, and filtering prevents unnecessary forwarding.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

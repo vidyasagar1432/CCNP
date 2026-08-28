@@ -1,0 +1,22 @@
+{
+  "title": "NAT",
+  "level": 29,
+  "levelTitle": "Level 29 - Troubleshooting",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "10. NAT.md",
+  "cards": [
+    { "q": "What does NAT troubleshooting check?", "a": "Translations, inside/outside interfaces, ACLs, and pools. Verify with show ip nat translations and debug ip nat.", "tag": "Overview", "context": "Both" },
+    { "q": "What is the first look for NAT verification?", "a": "The translation table with show ip nat translations.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What are the essential NAT configuration requirements?", "a": "An inside interface (ip nat inside), an outside interface (ip nat outside), an ACL matching the source, a pool, and overload for PAT.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What is the classic cause of no-translation in NAT?", "a": "Wrong inside/outside interface assignment, so traffic is not recognized as NAT traffic.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "What does NAT overload mean?", "a": "PAT (port address translation), which maps many inside addresses to one outside address by multiplexing on port numbers.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What do the different NAT translation types mean?", "a": "Static is a fixed 1:1 mapping, dynamic uses a pool, overload is PAT (many:1), and inside/outside plus outside types distinguish translation direction.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "Why is NAT described as stateful?", "a": "Because return traffic must match an entry in the translation table; the return path must route back to the translated NAT IP.", "tag": "Core Concept", "context": "Both" },
+    { "q": "What does an ACL in NAT define?", "a": "Which source traffic gets translated. The ACL match determines what is translated.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What does debug ip nat reveal?", "a": "Why translation failed, including ACL misses, no available pool, interface not inside, and port conflicts.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "A pool exhausted error in NAT indicates what?", "a": "The pool ran out of addresses, typically because overload (PAT) is missing.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "One-way NAT traffic is most likely caused by what?", "a": "A broken return path, where there is no route back to the NAT IP or the return traffic does not match the translation table.", "tag": "Quick Review", "context": "Exam" },
+    { "q": "What command shows NAT counters and statistics?", "a": "show ip nat statistics.", "tag": "Core Concept", "context": "Practical" }
+  ]
+}

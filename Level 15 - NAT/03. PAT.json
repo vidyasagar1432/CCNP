@@ -1,0 +1,136 @@
+{
+  "title": "PAT (Port Address Translation / NAT Overload)",
+  "level": 15,
+  "levelTitle": "Level 15 - NAT",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "03. PAT.md",
+  "cards": [
+    {
+      "q": "What is PAT (Port Address Translation)?",
+      "a": "PAT, also called NAT overload, allows multiple inside hosts to share one or more public IP addresses. Unlike traditional dynamic NAT, it uses Layer-4 identifiers such as TCP/UDP source ports to keep simultaneous translations unique.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How does a PAT router keep simultaneous flows from multiple inside hosts unique?",
+      "a": "It translates each inside host's source to the shared inside-global address plus a Layer-4 identifier (source port), e.g. 10.0.0.6:12345 becomes 203.0.113.1:20001. The router maintains a translation table so return traffic is mapped to the correct inside host.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Define the four NAT address terms in a PAT context.",
+      "a": "Inside Local is the inside host's normally private address, Inside Global represents the inside host to the outside network, Outside Global is the external destination's address as known outside, and Outside Local is of the external destination as represented to the inside network.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Walk through PAT outbound and return traffic.",
+      "a": "Outbound, the inside source 10.0.0.5:12345 is translated to the global address, e.g. 203.0.113.1:12345, or to a newly allocated port like 203.0.113.1:23456 if needed. The server replies to the global address and port, and the router looks up the translation (203.0.113.1:23456 → 10.0.0.5:12345) to forward the packet to the original inside host.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What Layer-4/per-protocol identifiers does PAT use to distinguish flows?",
+      "a": "TCP uses the TCP source port, UDP uses the UDP source port, ICMP Echo uses the ICMP identifier, and other protocols depend on the protocol and IOS NAT support.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Can the same numeric port be used simultaneously by TCP and UDP in PAT?",
+      "a": "Yes. TCP and UDP have separate port spaces, so the same numeric port number can exist at the same time for both protocols without conflicting.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does PAT always change an inside host's source port number?",
+      "a": "No. IOS may preserve the original source port when the resulting translation is still unique; a different port is allocated only when required. PAT means using Layer-4 identifiers to allow multiple translations, not that every packet must have its port numerically changed.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands configure PAT using an address pool?",
+      "a": "access-list 1 permit 10.0.0.0 0.0.255.255, then ip nat pool PUBLIC 203.0.113.1 203.0.113.10 netmask 255.255.255.0, then ip nat inside source list 1 pool PUBLIC overload. The overload keyword lets multiple inside hosts share the pool addresses via PAT.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the commands for the most common PAT configuration, and where does the global address come from?",
+      "a": "access-list 1 permit 10.0.0.0 0.0.255.255, then ip nat inside source list 1 interface GigabitEthernet0/1 overload. The inside-global address is taken from the specified outside interface's IP address (e.g. 203.0.113.1 on Gi0/1).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What interface configuration is required for PAT to work?",
+      "a": "The router must identify the NAT boundary: interface GigabitEthernet0/0 gets ip nat inside (e.g. 10.0.0.1/24) and interface GigabitEthernet0/1 gets ip nat outside (e.g. 203.0.113.1/24). The NAT rule and these interface roles work together.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Compare Dynamic NAT and PAT.",
+      "a": "Dynamic NAT maps IP to IP, usually consumes multiple public addresses, does not translate ports, and is limited by pool size. PAT maps IP:port to IP:port, uses one or a few public addresses, uses ports to distinguish flows, and scales much higher; the Cisco keyword for PAT is overload.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "Does PAT provide unsolicited inbound access to an inside host?",
+      "a": "No, not normally. PAT return traffic for an existing outbound translation is allowed, but an unsolicited inbound connection has no existing translation telling the router which inside host should receive it; a static NAT or static PAT mapping is required.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What command creates a static PAT (port-forwarding) mapping using the outside interface address?",
+      "a": "ip nat inside source static tcp 10.0.0.10 8080 interface GigabitEthernet0/1 80, which maps 203.0.113.1:80 to 10.0.0.10:8080 so an Internet client connecting to the interface's address on port 80 reaches the inside service.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How can multiple internal services share one public IP with Static PAT?",
+      "a": "By mapping different external ports to different internal servers, e.g. 203.0.113.1:80 → 10.0.0.10:80, 203.0.113.1:443 → 10.0.0.20:443, and 203.0.113.1:25 → 10.0.0.30:25.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How much PAT capacity does one public IP really provide?",
+      "a": "A public IP has a finite Layer-4 port space (0-65535 for TCP and UDP), but not all values are necessarily usable because some are reserved or in use, and implementations impose limits. PAT capacity should not be reduced to simply '64,000 sessions per IP'; it depends on the platform and configuration.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does the PAT translation table distinguish two inside hosts that use the same source port?",
+      "a": "Two inside hosts can both use port 12345 (10.0.0.5:12345 and 10.0.0.6:12345), but the NAT table gives them different inside-global port mappings (203.0.113.1:23456 and 203.0.113.1:23457), so return traffic is correctly separated.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands verify, clear, and debug PAT?",
+      "a": "show ip nat translations, show ip nat translations verbose, and show ip nat statistics verify translations; clear ip nat translation * clears dynamic entries; debug ip nat traces translation events and must be disabled afterward with undebug all. Debugging consumes CPU and produces much output.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "In what order should you troubleshoot PAT?",
+      "a": "Verify interfaces (show ip interface brief, ip nat inside/outside), verify the NAT config (show running-config | include ip nat), verify the ACL (show access-lists), verify routing (show ip route), generate traffic from an inside host, check translations (show ip nat translations), check statistics (show ip nat statistics), and debug only if necessary.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why might FTP and VPN traffic fail through traditional NAT/PAT?",
+      "a": "FTP can fail due to its separate data connections and mode-dependent NAT inspection handling, and many VPN protocols/traffic are not compatible with traditional NAT, requiring NAT traversal or a redesigned deployment. Also, PAT resource exhaustion can occur with too many simultaneous translations.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Summarize PAT in one quick-review line.",
+      "a": "PAT (NAT overload) lets many inside hosts share public addresses by translating inside-local IP + Layer-4 identifier to an inside-global IP + Layer-4 identifier; overload is the Cisco keyword, interface and pool variants exist, TCP/UDP use source ports and ICMP uses its identifier, return traffic follows existing translations, and unsolicited inbound requires static NAT/PAT.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "State the one-minute mental model for NAT and PAT.",
+      "a": "Dynamic NAT = address translation; PAT = address translation plus Layer-4 flow identification; overload = the Cisco command keyword for PAT; existing outbound translations allow return traffic; unsolicited inbound access requires static NAT or static PAT.",
+      "tag": "Core Concept",
+      "context": "Both"
+    }
+  ]
+}

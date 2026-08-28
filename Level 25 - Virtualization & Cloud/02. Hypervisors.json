@@ -1,0 +1,88 @@
+{
+  "title": "Hypervisors",
+  "level": 25,
+  "levelTitle": "Level 25 - Virtualization & Cloud",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "02. Hypervisors.md",
+  "cards": [
+    {
+      "q": "What is a hypervisor (VMM)?",
+      "a": "A software layer that creates and runs VMs by abstracting the underlying hardware. It schedules and isolates workloads running on it.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the two hypervisor types and their examples?",
+      "a": "Type 1 (bare-metal) runs directly on hardware, e.g. ESXi, Hyper-V, KVM. Type 2 (hosted) runs on top of a host OS, e.g. VirtualBox, VMware Workstation.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which hypervisor type is the datacenter/cloud standard and why?",
+      "a": "Type 1 (bare-metal, e.g. ESXi and KVM), because it has near-native performance, minimal overhead, a smaller security surface, and direct hardware access.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "When is a Type 2 (hosted) hypervisor appropriate?",
+      "a": "For desktop use, testing, and labs, where simple installation and dependence on a host OS are acceptable despite lower performance.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does a hypervisor do?",
+      "a": "It schedules vCPUs, allocates memory, emulates or passes through I/O, isolates VMs from one another, and handles VM lifecycle management.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What are the three virtualization models?",
+      "a": "Full virtualization (emulates hardware), paravirtualization (guest-aware), and hardware-assisted virtualization (uses CPU features like Intel VT-x). Modern hypervisors use hardware-assisted.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which tools manage which hypervisors?",
+      "a": "vCenter manages ESXi clusters, libvirt manages KVM, SCVMM manages Hyper-V, and cloud platforms orchestrate them via APIs.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What command lists running VMs on an ESXi host?",
+      "a": "esxcli vm process list. Network views use esxcli network vswitch standard list.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A VM won't start or I/O is slow on a hypervisor. What do you check?",
+      "a": "For a VM that won't start, check resource capacity; for slow I/O, check storage and the datastore. No vNIC points to the virtual switch and its network.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which hypervisor type is bare-metal and which is hosted?",
+      "a": "Type 1 is bare-metal (ESXi, Hyper-V, KVM); Type 2 is hosted on an OS (VirtualBox, VMware Workstation).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which virtualization model is the norm on modern hypervisors?",
+      "a": "Hardware-assisted virtualization (e.g., CPU VT-x), not full emulation or paravirtualization.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How are vNICs connected to a hypervisor's network?",
+      "a": "Virtual switches (vSwitches) connect vNICs on the hypervisor; they are managed with platform-specific CLIs like esxcli network vswitch standard list.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Match the quick review: Type 1, Type 2, ESXi, VirtualBox, job, model, management, use.",
+      "a": "Type 1 = bare-metal; Type 2 = hosted; ESXi = Type 1; VirtualBox = Type 2; job = schedule + isolate; model = hardware-assisted; management = vCenter; use = cloud/datacenter.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

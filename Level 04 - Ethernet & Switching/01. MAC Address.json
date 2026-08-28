@@ -1,0 +1,196 @@
+{
+  "title": "MAC Address",
+  "level": 4,
+  "levelTitle": "Level 04 - Ethernet & Switching",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "01. MAC Address.md",
+  "cards": [
+    {
+      "q": "What is a MAC address and what does it do?",
+      "a": "A MAC (Media Access Control) address is a Layer 2 identifier used by Ethernet network interfaces for local-frame delivery. It is 48 bits (6 bytes) long, and switches use it to build their MAC address table and decide where Ethernet frames are forwarded.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Why can MAC addresses be software-assigned rather than burned-in?",
+      "a": "A physical NIC commonly has a burned-in address (BIA), but MAC addresses can also be locally administered or software-assigned, especially on virtual machines, hypervisors, and virtual interfaces.",
+      "tag": "Overview",
+      "context": "Interview"
+    },
+    {
+      "q": "How long is a standard Ethernet MAC address and how is it written?",
+      "a": "A standard Ethernet MAC address is 48 bits / 6 bytes, written in 12 hexadecimal digits. Formats include AA:BB:CC:DD:EE:FF, AA-BB-CC-DD-EE-FF, and the Cisco style AABB.CCDD.EEFF.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the OUI of a MAC address?",
+      "a": "The OUI (Organizationally Unique Identifier) is the first 24 bits / 3 bytes of a universally administered MAC address and identifies the organization/vendor that owns that address space.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What should the remaining 24 bits of a MAC address NOT be described as?",
+      "a": "The remaining 24 bits should not be described strictly as a serial number; they identify the interface within the address space assigned by the organization.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What do the I/G and U/L bits mean, and where are they located?",
+      "a": "They are the two least-significant bits of the first octet. I/G (least-significant bit) is 0 for individual/unicast and 1 for group (multicast/broadcast); U/L (second-from-right) is 0 for universally administered and 1 for locally administered.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the exam shortcut for reading the I/G and U/L bits?",
+      "a": "Look at the first octet counting from the right: the rightmost bit is I/G and the second-from-right bit is U/L.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What identifies a unicast MAC address and how does a switch forward to it?",
+      "a": "A unicast MAC address has I/G = 0 and identifies an individual destination. A switch normally forwards a known unicast frame toward the port associated with the destination MAC address.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are examples of multicast and broadcast MAC addresses?",
+      "a": "A multicast MAC (I/G = 1) represents a group of receivers, e.g. the IPv4 multicast MAC 01:00:5E:xx:xx:xx. The broadcast address is FF:FF:FF:FF:FF:FF with all bits set to 1.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is FF:FF:FF:FF:FF:FF a group address and not a unicast address?",
+      "a": "All bits of the broadcast address are 1, so FF:FF:FF:FF:FF:FF is a special form of group address and must never be described as a unicast MAC address.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What makes a MAC address locally administered?",
+      "a": "A locally administered MAC address (LAA) has U/L = 1 and is assigned by software, an administrator, a hypervisor, or another local mechanism rather than through the vendor's OUI space. Examples include VMs, hypervisor virtual NICs, some virtual interfaces, and certain high-availability virtual MACs.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Does U/L = 1 simply mean the MAC address is virtual?",
+      "a": "No. U/L = 1 means locally administered, not merely virtual. The U/L and I/G bits are independent properties of the address.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the virtual MAC formats for HSRP and VRRP?",
+      "a": "HSRP v1 uses 0000.0C07.ACxx, HSRP v2 uses 0000.0C9F.Fxxx, VRRP for IPv4 uses 0000.5E00.01xx, and VRRP for IPv6 uses 0000.5E00.02xx. These let hosts use a virtual default gateway while different physical routers provide redundancy.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do MAC addresses and IP addresses compare?",
+      "a": "MAC is Layer 2, 48-bit, hexadecimal, for local segment delivery, assigned via BIA/administrator/software, and used by Ethernet switching. IP is Layer 3 (IPv4 32-bit / IPv6 128-bit) for host/network identification and routing across Layer 3 networks.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the relationship between IP addresses and MAC addresses across Layer 2 segments?",
+      "a": "An IP address can remain logically associated with the same endpoint while the Ethernet MAC addresses used to carry the packet change from one Layer 2 segment to another.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What happens to MAC addresses as a frame crosses multiple switches?",
+      "a": "Switches forward an Ethernet frame without rewriting its source or destination MAC addresses, so the same MAC addresses remain in the frame across the Layer 2 switching domain.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens to the MAC addresses when a frame crosses a router?",
+      "a": "A router operates at Layer 3 and creates a new Ethernet frame on the outgoing interface, replacing the source and destination MAC addresses (e.g. Dst MAC becomes the next hop) while the IP packet is routed unchanged.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the CCNP rule for switches vs routers regarding Ethernet frames?",
+      "a": "Switches forward the existing Ethernet frame. Routers remove the incoming Layer 2 header and create a new Layer 2 header for the next segment.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does a MAC address table contain?",
+      "a": "A switch's MAC address table maps source MAC addresses to VLANs and switch ports with an entry type, e.g. VLAN 10, 0011.2233.4455, DYNAMIC, Gi0/1.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What steps does a switch take when a frame arrives?",
+      "a": "It learns the source MAC address, looks up the destination MAC address, forwards the frame if the destination is known, and floods it within the appropriate VLAN if the destination is unknown, multicast, or broadcast.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What command displays the MAC address table?",
+      "a": "show mac address-table",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands show a specific MAC address, dynamic entries, or a VLAN's MACs?",
+      "a": "show mac address-table address 001B.21AA.BBCC, show mac address-table dynamic, and show mac address-table vlan 10 respectively.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you configure a static MAC address table entry?",
+      "a": "mac address-table static 001B.21AA.BBCC vlan 10 interface GigabitEthernet0/1. Static entries force a specific forwarding behavior while normal switch learning is dynamic.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you view a switch interface's hardware/BIA MAC information?",
+      "a": "Use show interfaces GigabitEthernet0/1; Cisco IOS output displays the interface's hardware MAC/BIA information.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does a switch learn MAC addresses?",
+      "a": "A switch learns MAC addresses from the source MAC address of incoming frames. If a host moves to another port, the switch updates the table when frames with that source MAC arrive on the new port.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "When does a host send an ARP request?",
+      "a": "For IPv4 communication on Ethernet, a host ARPs for the MAC address of the next-hop IPv4 address: the destination host on the same subnet, or its default gateway for a destination on another IP network.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which MAC does a host ARP for when the destination is on a different subnet?",
+      "a": "The host does not ARP for the remote host's MAC. It resolves the MAC address of its default gateway/next hop, sends the Ethernet frame to the router's MAC, and keeps the IP destination as the remote IP.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does IPv6 resolve a neighbor's MAC address?",
+      "a": "IPv6 uses Neighbor Discovery (ND) rather than ARP to resolve a neighbor IP address to a MAC address.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "In the MAC type comparison, what are the four combinations of I/G and U/L?",
+      "a": "Universal unicast (I/G 0, U/L 0) e.g. 00:1B:21:AA:BB:CC; local unicast (0, 1) e.g. software/VM-assigned MAC; multicast (I/G 1, U/L usually varies by allocation) e.g. 01:00:5E:xx:xx:xx; broadcast (1, 1) e.g. FF:FF:FF:FF:FF:FF.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "Which key facts belong in the MAC Address quick review?",
+      "a": "Length 48 bits / 6 bytes; Layer 2; OUI first 24 bits; I/G 0 = individual, 1 = group; U/L 0 = universal, 1 = local; broadcast FF:FF:FF:FF:FF:FF; switch learning via source MAC, forwarding via destination MAC lookup; HSRP v1 0000.0C07.ACxx, HSRP v2 0000.0C9F.Fxxx, VRRP IPv4 0000.5E00.01xx, VRRP IPv6 0000.5E00.02xx.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the one-minute mental model for MAC addressing?",
+      "a": "MAC is Layer 2 local delivery, IP is Layer 3 internetwork delivery. Switches learn source MACs, look up destination MACs, and forward or flood frames; routers remove the incoming Layer 2 header and create a new outgoing frame. IPv4 IP-to-MAC resolution uses ARP; IPv6 uses Neighbor Discovery.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

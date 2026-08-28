@@ -1,0 +1,118 @@
+{
+  "title": "End-to-End Enterprise Scenarios",
+  "level": 30,
+  "levelTitle": "Level 30 - Labs",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "16. End-to-End Enterprise Scenarios.md",
+  "cards": [
+    {
+      "q": "What do the End-to-End Enterprise Scenarios practice?",
+      "a": "They stitch campus, WAN, data center, security, and automation into one integrated lab, practicing full data-path troubleshooting and the ENCOR big-picture design using a top-down verify chain.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What domains are combined in an end-to-end scenario?",
+      "a": "Campus (L2/L3 + FHRP), WAN (DMVPN/SD-WAN), data center (VXLAN/vPC), security (ACL/firewall), and automation (APIs) — one topology with all domains connected.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you trace the data path in an end-to-end scenario?",
+      "a": "Follow one packet end-to-end: host to access, access to distribution, routing to the WAN, tunnel/crypto, then the remote site and server.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the configuration order for an integrated enterprise lab?",
+      "a": "Build L2 base, then L3 base, redundancy, WAN/tunnels, security, automation, then verify — building in layers and cross-checking domains.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What scenarios are tested in an end-to-end lab?",
+      "a": "Dual-homed failover, application performance with QoS, cloud extension, security segmentation, and monitoring with telemetry.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is verification performed in a cross-domain lab?",
+      "a": "Use ping/traceroute for reachability, show commands for state, IP SLA for SLA, NetFlow for flows, and syslog for events — probe, state, flow, then logs across sites.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the recommended troubleshooting playbook?",
+      "a": "Establish a baseline, run a failure test, find the root cause, fix it, re-verify, then automate the fix.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands are used across branch, campus, and DC in an end-to-end scenario?",
+      "a": "show ip route, show sdwan control connections, show ip nhrp brief, show crypto session, ping/traceroute across sites, and show switching paths.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Cross-site connectivity fails. What is the likely cause and check?",
+      "a": "A tunnel or crypto issue, so check NHRP and crypto state with show ip nhrp brief and show crypto session.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Campus connectivity fails in an end-to-end lab. What is the likely cause and check?",
+      "a": "A VLAN or FHRP problem, so check the standby state with show standby.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Data center traffic fails. What is the likely cause and check?",
+      "a": "A VXLAN issue, so check the NVE state with show nve peers.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "The lab is slow or drops traffic unpredictably. What is the likely cause and check?",
+      "a": "A QoS problem, so check the policy with show policy-map.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Traffic is blocked unexpectedly across a segment. What is the likely cause and check?",
+      "a": "An ACL or firewall rule, so check the security rules.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "You should verify each layer independently even in an integrated scenario.",
+      "a": "True — verify each layer before cross-checking between domains so issues are isolated correctly.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "When troubleshooting, the most efficient first step is to test from one end to the other without touching intermediate layers.",
+      "a": "False — follow one packet end-to-end and verify each layer in order before cross-domain checks, which isolates the failing layer.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "QoS, security, and automation are configured separately and do not interact in an integrated lab.",
+      "a": "False — QoS, security, and automation are integrated, not silos, in an end-to-end enterprise scenario.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What ensures a lab fix actually works and is repeatable?",
+      "a": "Simulate failures and re-verify after fixes, then encode the fix in a repeatable playbook so it can be automated.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "How do you validate a full-stack enterprise scenario?",
+      "a": "Follow one packet end-to-end across all domains, test failover, and check monitoring/telemetry to confirm the full stack works together.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

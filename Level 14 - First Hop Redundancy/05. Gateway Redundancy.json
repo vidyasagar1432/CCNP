@@ -1,0 +1,166 @@
+{
+  "title": "Gateway (First Hop) Redundancy — Comparing FHRPs",
+  "level": 14,
+  "levelTitle": "Level 14 - First Hop Redundancy",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "05. Gateway Redundancy.md",
+  "cards": [
+    {
+      "q": "What is a First Hop Redundancy Protocol (FHRP)?",
+      "a": "FHRPs provide hosts with a redundant default gateway by using a virtual IP address (VIP) and virtual MAC address shared by multiple routers or Layer 3 switches, so hosts configure one gateway while the protocol determines which device forwards traffic.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the three major FHRPs for CCNP Enterprise?",
+      "a": "HSRP (Cisco proprietary), VRRP (open standard), and GLBP (Cisco proprietary with built-in gateway load balancing).",
+      "tag": "Overview",
+      "context": "Exam"
+    },
+    {
+      "q": "What problem do FHRPs solve for hosts?",
+      "a": "Without an FHRP, if the single default-gateway router fails, hosts lose connectivity; with an FHRP, multiple devices share a VIP and virtual MAC, and hosts continue using the same default gateway when the forwarding device changes.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the main FHRP roles and priority defaults?",
+      "a": "HSRP uses Active/Standby, VRRP uses Master/Backup, and GLBP uses AVG/AVF; all three have a default priority of 100.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the FHRP preemption defaults?",
+      "a": "HSRP preemption is disabled by default, VRRP preemption is enabled by default, and GLBP preemption is disabled by default.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which FHRPs have built-in single-VIP load balancing?",
+      "a": "Only GLBP has built-in gateway load balancing enabling multiple active forwarders for one virtual IP. HSRP and VRRP do not provide built-in single-VIP load sharing.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does HSRP perform load sharing?",
+      "a": "HSRP does not load-balance multiple routers for one VIP; traffic is distributed using multiple HSRP groups, often across VLANs, which is load sharing across groups rather than per-host or per-packet load balancing within one group.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the HSRPv1 and HSRPv2 multicast addresses and virtual MACs?",
+      "a": "HSRPv1 uses multicast 224.0.0.2 and virtual MAC 0000.0c07.acXX; HSRPv2 uses multicast 224.0.0.102 and virtual MAC 0000.0c9f.fXXX.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the VRRP IPv4 multicast, protocol, and virtual MAC?",
+      "a": "VRRP IPv4 uses multicast 224.0.0.18, IP protocol 112, and virtual MAC 0000.5e00.01XX where XX represents the VRID.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the VRRP address owner?",
+      "a": "The VRRP address owner is the router whose real interface IP equals the virtual IP; it uses priority 255, while other routers normally use priorities from 1-254.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the GLBP roles and virtual MAC range?",
+      "a": "GLBP has one AVG that responds to ARP, assigns virtual MACs, and coordinates AVFs, plus up to four active AVFs that forward traffic; the virtual MAC range is 0007.b400.XX01 through 0007.b400.XX04.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does GLBP load-balance a single virtual IP?",
+      "a": "All hosts use one virtual IP, but ARP responses cause different hosts to learn different virtual MACs (e.g., 0007.b400.0a01 to R1, .0a02 to R2), so multiple routers forward traffic for the same VIP.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the HSRP, VRRP, and GLBP default failure-detection timers?",
+      "a": "HSRP defaults are hello 3s and hold 10s; VRRP default is a 1-second advertisement with a Master-down interval calculated from the advertisement interval and priority; GLBP defaults are hello 3s and hold 10s.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How should the VRRP Master-down interval be remembered?",
+      "a": "The VRRP failover calculation should not simply be memorized as 3 x advertisement interval; the Master-down interval includes a calculated skew component based on priority.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the FHRP memorization table for multicast and virtual MAC?",
+      "a": "HSRPv1 uses 224.0.0.2 / 0000.0c07.acXX; HSRPv2 uses 224.0.0.102 / 0000.0c9f.fXXX; VRRP uses 224.0.0.18 / 0000.5e00.01XX; GLBP uses 224.0.0.102 / 0007.b400.XX01-XX04.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What is notable about HSRPv2 and GLBP both using 224.0.0.102?",
+      "a": "HSRPv2 and GLBP both use the multicast 224.0.0.102, but their virtual MAC formats and protocols are different, so they must not be confused.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does object tracking integrate with FHRPs?",
+      "a": "Object tracking lets an FHRP react to the health of something beyond the local interface, such as interface state, IP SLA reachability, or route existence; when a tracked upstream failure occurs, FHRP priority/weight changes so a backup gateway becomes preferred.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Is object tracking itself an FHRP?",
+      "a": "No. Object tracking is not an FHRP; it is a mechanism that can be integrated with FHRP behavior.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which FHRP would you choose for multi-vendor interoperability and why?",
+      "a": "VRRP is the preferred choice for multi-vendor interoperability because it is an open standard, whereas HSRP and GLBP are Cisco proprietary.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Which FHRP provides one VIP with multiple forwarding routers?",
+      "a": "GLBP provides one virtual IP with multiple active forwarding routers (up to four AVFs), which is its distinguishing built-in load-balancing feature.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Do hosts need to change their default gateway during FHRP failover?",
+      "a": "No. During FHRP failover the host continues using the same virtual IP; the FHRP changes which physical device provides that gateway.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "Is FHRP simply a Layer 2 protocol?",
+      "a": "No. FHRPs provide a redundant Layer 3 gateway function while using Layer 2 virtual MAC addressing and control-plane communication, so describing them as simply a Layer 2 protocol is inaccurate.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Which FHRP uses the Active/Standby terminology?",
+      "a": "HSRP uses Active and Standby roles; VRRP uses Master and Backup, and GLBP uses AVG and AVF.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the correct interpretation of GLBP roles: one Active router and several Standbys?",
+      "a": "That is incorrect terminology. GLBP uses one AVG plus AVFs: the AVG performs the gateway-control role, while AVFs forward traffic.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the core idea distinguishing the three FHRPs?",
+      "a": "HSRP is Cisco-developed with Active/Standby redundancy, VRRP is the open standard with Master/Backup and preemption on by default, and GLBP is Cisco proprietary that adds built-in gateway load balancing across up to four AVFs for one virtual IP.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the three facts to remember first about FHRP roles and load balancing?",
+      "a": "HSRP uses Active/Standby, VRRP uses Master/Backup, and GLBP uses AVG/AVF with load balancing; HSRPv1 uses 224.0.0.2, HSRPv2 uses 224.0.0.102, VRRP uses 224.0.0.18, and GLBP uses 224.0.0.102.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

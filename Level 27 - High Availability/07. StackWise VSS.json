@@ -1,0 +1,76 @@
+{
+  "title": "StackWise / VSS",
+  "level": 27,
+  "levelTitle": "Level 27 - High Availability",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "07. StackWise VSS.md",
+  "cards": [
+    {
+      "q": "What are StackWise and VSS?",
+      "a": "StackWise links stackable Catalyst switches such as a 3750/3850 into one logical switch with an active/standby/member model, while VSS virtualizes two 6500/4500 chassis into one logical switch using a VSL and active/standby roles.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What benefits do stacking and VSS provide?",
+      "a": "They provide a single control plane and management domain, shared configuration, higher port density, supervisor failover, and allow EtherChannels to span members so STP does not block redundant links.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the physical link used by StackWise?",
+      "a": "StackWise uses the proprietary StackWise stacking cable to connect stackable switches into a single logical switch.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the VSL in a VSS?",
+      "a": "The VSL (Virtual Switch Link) is the high-bandwidth link, usually 40G or 10G, that connects the two chassis in a VSS to synchronize state and exchange control traffic.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the roles in a StackWise stack?",
+      "a": "The stack elects one active (master) switch that holds the control plane, one standby that takes over on failure, and the remaining switches are stack members.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why does a VSS need dual-active detection?",
+      "a": "If the VSL fails, both chassis could think they are the active virtual switch (split-brain); dual-active detection using VSSP/PAgP or BFD makes one side shut down switching to prevent a loop.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is a Multichassis EtherChannel (MEC) in VSS?",
+      "a": "MEC is an EtherChannel whose members span both chassis of the VSS, providing redundancy and full utilization because both halves are one logical switch.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which commands verify a StackWise stack versus a VSS?",
+      "a": "StackWise uses show switch, show switch stack-ports, and show switch neighbors, while VSS uses show vss, show switch virtual role, and show etherchannel summary.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A stack of switches split into two; what is the likely cause?",
+      "a": "A stack split is usually caused by a faulty or removed StackWise stacking cable or missing switch provisioning, detected with show switch stack-ports.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the key exam distinction between StackWise and VSS?",
+      "a": "StackWise connects stackable switches (such as 3750/3850) with a StackWise cable in an active/standby/member model, while VSS fuses two 6500/4500 chassis over a VSL into active/standby virtual switches with dual-active detection.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the StackWise/VSS quick-review summary?",
+      "a": "StackWise and VSS both create one logical switch, StackWise linking stackables over a StackWise cable into active/standby/member, and VSS fusing two chassis over a VSL with dual-active detection, both allowing EtherChannels across members.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

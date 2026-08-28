@@ -1,0 +1,130 @@
+{
+  "title": "EtherChannel — PAgP",
+  "level": 8,
+  "levelTitle": "Level 08 - STP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "02. PAgP.md",
+  "cards": [
+    {
+      "q": "What is PAgP and what are its negotiation modes?",
+      "a": "PAgP (Port Aggregation Protocol) is Cisco's proprietary EtherChannel negotiation protocol that dynamically negotiates multiple physical interfaces into one logical Port-Channel. Its modes are desirable and auto.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What do the PAgP modes desirable and auto do?",
+      "a": "desirable: actively attempts to negotiate PAgP and can form with desirable or auto. auto: passively waits for PAgP negotiation and forms with desirable only. At least one side must be desirable.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which PAgP mode combinations form a bundle?",
+      "a": "desirable + desirable = Yes; desirable + auto = Yes; auto + desirable = Yes; auto + auto = No. At least one side must be desirable.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why does auto + auto fail to form a PAgP bundle?",
+      "a": "Because neither side actively initiates PAgP negotiation.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which EtherChannel protocol is Cisco proprietary and which is the IEEE standard?",
+      "a": "PAgP is Cisco proprietary; LACP is the IEEE standard (802.3ad/802.1AX).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which EtherChannel protocol should be preferred for multi-vendor EtherChannel?",
+      "a": "LACP, because it is an IEEE standard with multi-vendor interoperability. PAgP is limited to the Cisco ecosystem.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What command configures PAgP?",
+      "a": "channel-group 1 mode desirable on each physical interface, which associates the interface with EtherChannel 1 and enables PAgP desirable mode. The resulting logical interface is Port-channel1.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Is `on` a PAgP mode?",
+      "a": "No. on is not a PAgP mode; channel-group 1 mode on creates a static EtherChannel without negotiation.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the static-`on` compatibility combinations?",
+      "a": "on ↔ on = YES (static EtherChannel); on ↔ desirable = NO; on ↔ auto = NO. Do not mix PAgP/LACP negotiation modes with on.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Can PAgP form an EtherChannel with a non-Cisco switch?",
+      "a": "No. PAgP is Cisco proprietary, so it cannot negotiate with a non-Cisco switch; use LACP or static EtherChannel instead.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does PAgP remove the requirement for compatible member interfaces?",
+      "a": "No. PAgP still requires compatible speed, duplex, switchport mode, access/native VLAN, allowed VLANs, trunk configuration, Layer-3 configuration, and EtherChannel protocol/mode. Exact checks are platform and configuration dependent.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does PAgP determine the EtherChannel load-balancing algorithm?",
+      "a": "No. Load balancing is configured at the EtherChannel/platform level (e.g., port-channel load-balance src-dst-ip) and is not determined by PAgP.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does STP view a successfully formed PAgP EtherChannel?",
+      "a": "STP sees the bundle as one logical bridge port rather than treating the member links as separate parallel STP paths.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "In `show etherchannel summary`, what does the P flag mean?",
+      "a": "P means the port is bundled in the port-channel. It does not mean 'PAgP negotiated'; the P flag alone does not identify whether the bundle uses PAgP, LACP, or static.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands verify a PAgP EtherChannel?",
+      "a": "show etherchannel summary; show etherchannel 1 detail or show etherchannel 1 port-channel; show pagp neighbor; show pagp counters; show etherchannel load-balance.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Does creating a 4-link PAgP EtherChannel give one flow all 4-Gbps bandwidth?",
+      "a": "No. It provides about 4-Gbps aggregate capacity across flows, but a single flow typically uses one member; multiple flows are distributed by hash.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the troubleshooting order for a PAgP bundle that will not form?",
+      "a": "Check physical interfaces → verify PAgP mode (desirable↔desirable/auto) → show etherchannel summary → check member consistency → show pagp neighbor → show etherchannel 1 detail → check load balancing.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Can PAgP desirable negotiate with LACP active?",
+      "a": "No. PAgP and LACP are different negotiation protocols; PAgP desirable ↔ LACP active does not negotiate a channel.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the most important CCNP PAgP rule?",
+      "a": "DESIRABLE + DESIRABLE = BUNDLE; DESIRABLE + AUTO = BUNDLE; AUTO + AUTO = NO BUNDLE; ON + ON = STATIC BUNDLE; PAgP + LACP = NO NEGOTIATION.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the key PAgP quick-review facts?",
+      "a": "Cisco proprietary EtherChannel; modes desirable/auto; forms desirable↔desirable/auto, not auto↔auto; legacy (LACP is modern preferred); STP sees one logical port; verification show etherchannel summary, show pagp neighbor, show pagp counters.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

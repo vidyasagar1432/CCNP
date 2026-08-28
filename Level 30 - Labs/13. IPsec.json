@@ -1,0 +1,118 @@
+{
+  "title": "IPsec",
+  "level": 30,
+  "levelTitle": "Level 30 - Labs",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "13. IPsec.md",
+  "cards": [
+    {
+      "q": "What does the IPsec lab configure?",
+      "a": "It configures site-to-site VPN with IKEv1/v2, transform sets, crypto maps, and interesting traffic, serving as the base VPN skill for DMVPN, FlexVPN, and remote access.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the IPsec configuration sequence?",
+      "a": "Configure an isakmp policy, a transform set, an interesting-traffic ACL, a crypto map, then apply it to the interface.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the differences between IKEv1 and IKEv2?",
+      "a": "IKEv1 uses two phases and optional aggressive mode; IKEv2 uses a single exchange, no aggressive mode, supports PSK or cert auth, and is simpler and more secure.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does an IPsec transform set specify?",
+      "a": "Encryption such as esp-aes, integrity such as esp-sha256, the DH group (e.g. 14 or 19), tunnel mode, and optional PFS.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the classic IPsec transform set combination?",
+      "a": "esp-aes (encryption) combined with esp-sha (integrity), a common pair used for site-to-site VPNs.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does an ACL define interesting traffic in IPsec?",
+      "a": "The ACL matches the traffic that the tunnel carries: permitted traffic is protected, denied traffic goes clear text, and the ACL must mirror symmetrically on both sides.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does a crypto map bind together?",
+      "a": "The crypto map binds the peer, the interesting-traffic ACL, and the transform set, then is applied to an interface.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands verify IPsec phase 1 and phase 2?",
+      "a": "show crypto isakmp sa for phase 1, show crypto ipsec sa for phase 2, plus show crypto map and show crypto errors.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What indicates a working IPsec VPN?",
+      "a": "Both phase 1 and phase 2 SAs are up and the packet/byte counters in show crypto ipsec sa are incrementing for protected traffic.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What configuration creates an isakmp policy and transform set?",
+      "a": "crypto isakmp policy 10 with encr aes, authentication pre-share, group 14, and crypto ipsec transform-set TS esp-aes esp-sha256.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What configuration defines a crypto map and applies it to an interface?",
+      "a": "crypto map CM 1 ipsec-isakmp with set peer 1.1.1.1, transform-set TS, and match address 100, then apply crypto map CM under interface Gi0/1.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "No phase 1 SA forms. What is the likely cause and check?",
+      "a": "An isakmp policy mismatch, so check show crypto isakmp sa.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Phase 1 is up but phase 2 fails. What is the likely cause and check?",
+      "a": "An interesting-traffic ACL mismatch, so check with show crypto ipsec sa.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A site-to-site VPN carries no traffic despite both SAs being up. What should you check?",
+      "a": "The interesting-traffic ACL and the packet counters, since no traffic matched means the ACL is wrong or not mirrored on both sides.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "The IPsec SA flaps repeatedly. What is the likely cause and check?",
+      "a": "A lifetime setting mismatch, so check the lifetime configuration.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "IKEv1 and IKEv2 both require two phases to establish a site-to-site VPN.",
+      "a": "False — IKEv1 uses two phases, but IKEv2 establishes the VPN in a single exchange.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which element defines what traffic an IPsec tunnel protects?",
+      "a": "The interesting-traffic ACL, which must be mirrored/symmetric on both sides of the tunnel.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What summarizes a healthy site-to-site IPsec VPN?",
+      "a": "Both ISAKMP (phase 1) and IPsec (phase 2) SAs are up with protected-traffic byte counters increasing.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

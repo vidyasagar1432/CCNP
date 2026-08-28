@@ -1,0 +1,88 @@
+{
+  "title": "OSPF Authentication",
+  "level": 10,
+  "levelTitle": "Level 10 - OSPF",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "13. Authentication.md",
+  "cards": [
+    {
+      "q": "What is the purpose of OSPF authentication?",
+      "a": "OSPF authentication validates the origin of Hello/LSA packets to stop rogue routers or injected LSAs from poisoning the domain. OSPFv2 supports null (none), plaintext, and MD5/SHA message-digest authentication carried in the header. OSPFv3 has no OSPF-level auth and relies on IPv6 AH/ESP (IPsec). Adjacencies fail if the auth method or key mismatches.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the OSPFv2 authentication types and their values?",
+      "a": "Null (type 0, none, default), Plaintext/Simple (type 1, weak, sent in clear), MD5/HMAC-SHA (type 2, strong digest, key not in packet, recommended), and Cryptographic SHA-256+ (type 2+, strongest, newer IOS/XE). Type 2 message-digest is the correct security answer on the exam.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "At what levels can OSPFv2 authentication be configured?",
+      "a": "Per-interface with ip ospf authentication message-digest plus a key, per-area with area N authentication message-digest (applies to all interfaces in the area), and per-virtual-link with area N virtual-link X authentication message-digest.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Describe the OSPF MD5 digest process.",
+      "a": "1. Each OSPF packet gets a key ID and cryptographic sequence number in its header. 2. A digest is computed over the packet with the shared key. 3. The receiver verifies the digest and sequence, rejecting replay or reforged packets.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How does OSPFv3 authentication differ from OSPFv2?",
+      "a": "OSPFv2 uses MD5/SHA in the header for in-band authentication. OSPFv3 has no native authentication and relies on IPv6 AH/ESP or IPsec. On the exam, OSPFv3 authentication answers point to IPsec/AH, not OSPF keys.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens when OSPF authentication fails?",
+      "a": "On an auth mismatch, the neighbor gets stuck in INIT (hellos dropped) and never reaches 2-Way. A key or type mismatch on both ends causes silence, no adjacency, and logged errors.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you rotate OSPF authentication keys without breaking adjacency?",
+      "a": "Use the key ID and sequence number, keeping multiple keys valid during the transition. Add the new key first and keep both briefly before removing the old one.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What command shows the OSPF authentication type on an interface?",
+      "a": "show ip ospf interface Gi0/1 shows the auth type. Also show ip ospf neighbor and show ip ospf with the Authentication filter are useful.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which OSPFv2 authentication type is the strong/recommended one?",
+      "a": "Type 2 (message-digest / MD5/HMAC-SHA) is the strong authentication. Plaintext Type 1 is legacy and weak because it is sent in clear.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What neighbor state indicates an OSPF authentication mismatch?",
+      "a": "The neighbor is stuck in INIT, because authenticated Hellos are dropped and never reach 2-Way.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does a virtual link need its own OSPF authentication configuration?",
+      "a": "Yes. Virtual links need their own authentication on the virtual-link line, e.g. area 2 virtual-link 2.2.2.2 authentication message-digest with a message-digest-key.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does OSPFv3 authenticate?",
+      "a": "OSPFv3 has no native authentication and relies on IPv6 AH/ESP or IPsec. It does not use OSPFv2-style keys.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Summarize the OSPF authentication quick-review facts.",
+      "a": "Null is type 0 (default), plaintext type 1 (weak), MD5/HMAC-SHA type 2 (recommended), OSPFv3 uses IPsec AH/ESP, config levels are interface/area/virtual-link, mismatch causes neighbor stuck in INIT, rotation uses key ID and sequence, show with show ip ospf interface, and virtual links need auth on the virtual-link line.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,142 @@
+{
+  "title": "Decimal (IPv4)",
+  "level": 5,
+  "levelTitle": "Level 05 - IPv4",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "03. Decimal.md",
+  "cards": [
+    {
+      "q": "What is the decimal representation of an IPv4 address?",
+      "a": "It is the human-readable form made of four decimal octets separated by dots, each octet in 0–255; fluency in decimal ↔ binary conversion is essential for subnetting, VLSM, route summarization, subnet-mask and wildcard calculation, and troubleshooting.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How many octets does an IPv4 address have and how is IPv6 written instead?",
+      "a": "IPv4 has 32 bits in four 8-bit octets, e.g. 172.16.50.100 (A.B.C.D), using dotted decimal, while IPv6 normally uses colon-separated hexadecimal such as 2001:db8::1.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Give the binary forms of 128, 192, 224, 240, 248, 252, 254, and 255.",
+      "a": "128 = 10000000, 192 = 11000000, 224 = 11100000, 240 = 11110000, 248 = 11111000, 252 = 11111100, 254 = 11111110, 255 = 11111111; these are especially important when converting subnet masks.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What values can a valid subnet-mask octet take and why?",
+      "a": "Only 0, 128, 192, 224, 240, 248, 252, 254, and 255, because a standard mask has contiguous 1 bits followed by contiguous 0 bits; for example 207 = 11001111 is invalid.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Give the mask, total addresses, and traditional usable hosts for /24 through /30.",
+      "a": "/24 255.255.255.0 → 256/254; /25 255.255.255.128 → 128/126; /26 255.255.255.192 → 64/62; /27 255.255.255.224 → 32/30; /28 255.255.255.240 → 16/14; /29 255.255.255.248 → 8/6; /30 255.255.255.252 → 4/2.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the block size formula and what results does it give for /25 through /31?",
+      "a": "Block size = 256 − mask value: /25 → 128, /26 → 64, /27 → 32, /28 → 16, /29 → 8, /30 → 4, /31 → 2.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "For a /28 subnet, is the block size the number of usable hosts?",
+      "a": "No; a /28 (255.255.255.240) has block size 16 total addresses but only 14 usable host addresses after subtracting network and broadcast, so do not call 16 the host count.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the /28 subnet boundaries starting from 192.168.1.0?",
+      "a": "Block size 256 − 240 = 16, so the subnets are 192.168.1.0/28, .16/28, .32/28, .48/28, and so on; each contains 16 total and 14 usable addresses.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the /24-equivalent column mean for larger prefixes?",
+      "a": "It shows how many /24 blocks a prefix represents: /16 = 256 × /24 with 65,536 addresses (65,534 usable), /20 = 16 × /24 with 4,096 (4,094 usable), /22 = 4 × /24 with 1,024 (1,022 usable), /24 = 1 × /24 with 256 (254 usable).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does Cisco IOS display IPv4 addresses, and what does show ip interface brief show?",
+      "a": "IOS displays dotted-decimal or prefix-length form depending on command/platform; show ip interface brief lists Interface, IP-Address, OK?, Method, Status (e.g. GigabitEthernet0/1 10.10.0.1 YES manual up), and show ip interface Gi0/1 shows Internet address is 10.10.0.1/24.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is a wildcard mask and how do you compute it?",
+      "a": "It is the inverse of the subnet mask: wildcard = 255.255.255.255 − subnet mask, so 255.255.255.0 → 0.0.0.255 and 255.255.255.240 → 0.0.0.15; it is commonly used with IPv4 ACLs, OSPF network statements, and other wildcard-matching Cisco features.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does 0.0.0.0/0 represent?",
+      "a": "Any IPv4 destination; it is most commonly seen as the default route, for example S* 0.0.0.0/0 in a routing table.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does 0.0.0.0 always mean the default route?",
+      "a": "No; 0.0.0.0/0 commonly means default route/any destination, but a bare 0.0.0.0 can have different meanings in different protocols or commands, so always interpret it according to the command/output context.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the IPv4 limited broadcast address?",
+      "a": "255.255.255.255; it is used to reach all hosts on the local network segment, subject to the relevant forwarding rules.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What range is reserved for IPv4 loopback and what is the common address?",
+      "a": "127.0.0.0/8 is reserved for IPv4 loopback; the commonly used loopback address is 127.0.0.1.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Why are 300.1.1.1, 192.168.1.256, and 10.-1.1.1 invalid IPv4 addresses?",
+      "a": "Every IPv4 octet must be within 0–255; 256, 300, and −1 fall outside that range, so these are not valid addresses.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is 255.255.255.207 an invalid subnet mask?",
+      "a": "Because 207 = 11001111; subnet-mask bits must be contiguous 1s followed by contiguous 0s, so only 0, 128, 192, 224, 240, 248, 252, 254, and 255 are valid mask octets.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "In 192.168.10.0/24, is the .0 address a usable host?",
+      "a": "No; 192.168.10.0 is the network address, not a normal host address, whereas 192.168.10.5/24 is a valid host address.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why should IPv4 addresses always be written with four octets?",
+      "a": "Always use the four-octet form such as host 10.0.0.1 or network 10.0.0.0/24; ambiguous shorthand like 10.0.0/24 should be avoided.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "State the quick mental-math block sizes for 256 minus each mask octet.",
+      "a": "256 − 128 = 128 (/25), −192 = 64 (/26), −224 = 32 (/27), −240 = 16 (/28), −248 = 8 (/29), −252 = 4 (/30), −254 = 2 (/31).",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "Work out the total addresses and traditional usable hosts for a /27.",
+      "a": "Host bits = 32 − 27 = 5; total addresses = 2^5 = 32; traditional usable hosts = 32 − 2 = 30, using hosts = 2^host_bits − 2.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What conversions must you do fluently for ENCOR subnetting questions?",
+      "a": "Convert quickly between prefix length, decimal mask, binary mask, block size, and network/host ranges without a calculator — do not merely memorize decimal masks.",
+      "tag": "Core Concept",
+      "context": "Both"
+    }
+  ]
+}

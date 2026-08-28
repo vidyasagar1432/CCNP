@@ -1,0 +1,64 @@
+{
+  "title": "SSO",
+  "level": 27,
+  "levelTitle": "Level 27 - High Availability",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "01. SSO.md",
+  "cards": [
+    {
+      "q": "What is SSO (Stateful Switchover)?",
+      "a": "SSO keeps control-plane state synchronized between active and standby supervisors so a supervisor switchover causes no forwarding interruption. Cisco IOS-XE uses mode sso, and the two RPs stay synchronized via bulk sync plus incremental SYNC.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What state does SSO synchronize between supervisors?",
+      "a": "Control-plane state, synchronized from the active to the standby supervisor, so switchover causes zero control loss and forwarding is unaffected.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is state kept current between the active and standby supervisors?",
+      "a": "Through bulk sync (full state at start), incremental SYNC (ongoing updates), and periodic refresh, so the standby holds a hot copy and can take over on fault.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What commands enable SSO?",
+      "a": "Enter redundancy mode, then use mode sso, main-cpu, and state processor 1 standby supervisor to synchronize commands to the standby.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands verify and test SSO?",
+      "a": "show redundancy states shows active/standby status, show redundancy sso shows SSO mode, show redundancy switchover shows history, and redundancy force-switchover runs a manual test.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does SSO compare to RPR?",
+      "a": "RPR is a cold standby where the standby initializes with no synchronized state, causing slow switchover and forwarding drop. SSO is true stateful with state synchronized, fast switchover, and no forwarding impact.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does SSO require and what does it synchronize?",
+      "a": "It requires dual supervisors configured with mode sso, synchronizes control-plane state using bulk and incremental sync, keeps forwarding unaffected, and pairs with NSF for zero-loss routing continuity.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are common SSO failure symptoms and their checks?",
+      "a": "Not-sso state points to config (check show redundancy sso), no standby points to supervisors (check states), sync stalls point to CPU (check incremental), and unexpected failover points to hardware/state (check logs).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the state, pair, and sync used by SSO?",
+      "a": "SSO synchronizes control-plane state across an active/standby pair using bulk plus incremental sync, providing seamless failover via mode sso; verify with show redundancy.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

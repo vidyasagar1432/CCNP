@@ -1,0 +1,100 @@
+{
+  "title": "TFTP (Trivial File Transfer Protocol)",
+  "level": 16,
+  "levelTitle": "Level 16 - Network Services",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "09. TFTP.md",
+  "cards": [
+    {
+      "q": "What is TFTP and what are its limitations?",
+      "a": "TFTP (Trivial File Transfer Protocol) is a simple, connectionless file-transfer protocol over UDP commonly used to transfer IOS images, configuration files, and IP-phone firmware; it has no built-in authentication, encryption, or directory listing.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the well-known TFTP port, and is it used for the whole transfer?",
+      "a": "UDP 69 is the well-known port used for the initial TFTP request (RRQ/WRQ); the actual transfer normally uses dynamically selected UDP transfer ports.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the two TFTP request types?",
+      "a": "RRQ (Read Request) requests a file from the server, and WRQ (Write Request) sends a file to the server.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does a classic TFTP transfer operate?",
+      "a": "The client sends RRQ/WRQ, the server sends numbered DATA blocks, the receiver acknowledges each block, lost packets can be retransmitted after a timeout, and the transfer ends when the final DATA packet contains less than the negotiated block size.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does TFTP signal end-of-file when the file is an exact multiple of the block size?",
+      "a": "A DATA packet smaller than the negotiated block size indicates the final block; if the file size is an exact multiple, a zero-length final DATA packet is required to signal EOF.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Is TFTP reliable because UDP is reliable?",
+      "a": "No. UDP itself provides no reliability; TFTP adds its own acknowledgments and retransmission mechanism on top of UDP using a lock-step DATA → ACK → DATA → ACK pattern.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the classic TFTP block size, and can it change?",
+      "a": "512 bytes is the classic/default DATA block size, but options such as blksize, tsize, and windowsize can negotiate different behavior, so 512 is not an absolute maximum.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do TFTP, FTP, and SCP/SFTP compare?",
+      "a": "TFTP is UDP 69, unauthenticated, unencrypted, and simple; FTP is TCP 21 control with authentication but traditionally plaintext; SCP/SFTP run over SSH/TCP 22 with authentication and encryption.",
+      "tag": "Quick Review",
+      "context": "Both"
+    },
+    {
+      "q": "Which protocol should you choose when confidentiality and authentication are required?",
+      "a": "SCP/SFTP rather than TFTP, subject to platform support.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the common Cisco TFTP copy commands?",
+      "a": "copy tftp://10.0.0.5/ios.bin flash: copies an IOS image, copy tftp://10.0.0.5/config.txt startup-config restores a config, and copy flash:ios.bin tftp://10.0.0.5/ backs up a file.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How is TFTP related to Cisco IP phones?",
+      "a": "DHCP Option 150 provides Cisco IP phones the address of a TFTP server for configuration and firmware; Option 66 is more generically used to provide a TFTP/boot-server hostname or address.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the TFTP security risks and mitigations?",
+      "a": "No authentication and no encryption, plus risks of unauthorized file access, file modification, DoS, and no credential protection; mitigate by restricting access with ACLs, firewalls, or an isolated/OOB management network and using SCP/SFTP for sensitive transfers.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "A TFTP transfer fails after the request succeeds — what is a likely cause?",
+      "a": "Traffic on the dynamically selected UDP transfer ports is blocked by a firewall/ACL; also check UDP reachability, server permissions, and MTU.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Does 512 bytes represent the absolute TFTP maximum block size?",
+      "a": "No. 512 bytes is the classic/default value, but the block size can be negotiated using TFTP options such as blksize.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the One-Minute TFTP exam summary?",
+      "a": "TFTP = UDP 69 initial port + RRQ/WRQ + lock-step DATA/ACK + retransmission + no authentication + no encryption + classic 512-byte blocks + final short block = EOF + zero-length DATA for exact multiples; Cisco IP phones use DHCP Option 150 to find the TFTP server.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

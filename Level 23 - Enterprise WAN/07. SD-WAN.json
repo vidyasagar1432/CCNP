@@ -1,0 +1,88 @@
+{
+  "title": "SD-WAN",
+  "level": 23,
+  "levelTitle": "Level 23 - Enterprise WAN",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "07. SD-WAN.md",
+  "cards": [
+    {
+      "q": "What is Cisco SD-WAN (Viptela)?",
+      "a": "An overlay network built over any transport (MPLS, broadband, LTE) with secure DTLS/IPsec tunnels between vEdge/cEdge routers, managed centrally by a controller cluster (vManage, vSmart, vBond) for policies and routing.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between underlay and overlay in SD-WAN?",
+      "a": "The underlay is the physical transport (MPLS/broadband/LTE); the overlay is the secure tunnels on top, with OMP as the control protocol and centralized policy, decoupling services from the physical WAN.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the four SD-WAN components and their roles?",
+      "a": "vEdge/cEdge are the WAN edge routers, vSmart handles control and policy, vManage does management, and vBond performs orchestration.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the four SD-WAN planes and where do they run?",
+      "a": "Data plane runs on the WAN edges, control plane on vSmart (OMP), management plane on vManage, and orchestration plane on vBond.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is OMP in SD-WAN?",
+      "a": "OMP (overlay management protocol) is the control protocol that runs between the edge and vSmart, carrying routes, TLOCs, and policies to produce overlay routing, replacing BGP/IGP in the overlay.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the killer SD-WAN feature for path selection?",
+      "a": "App-aware routing, which selects paths based on SLA, giving transport independence and allowing cheap links while maintaining reliability.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the main benefits of SD-WAN?",
+      "a": "Lower cost by using cheap broadband, agility in quickly adding sites, reliability through multi-link failover, and visibility via vManage dashboards.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which commands verify SD-WAN control and routing?",
+      "a": "show omp peers and show omp routes for OMP; show sdwan control connections for tunnels; show sdwan interface and show sdwan running-config for the edge.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "An SD-WAN edge is offline. What is the likely cause and check?",
+      "a": "No vBond/vSmart contact is likely; check show sdwan control connections.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "No routes are propagating in SD-WAN. What is the likely cause and check?",
+      "a": "OMP being down is likely; check show omp peers.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "SD-WAN tunnels are failing. What is the likely cause and check?",
+      "a": "A DTLS/IPsec tunnel problem is likely; check show sdwan control connections.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do the roles of vBond, vSmart, and vManage map to SD-WAN planes?",
+      "a": "vBond orchestrates, vSmart provides control/policy, and vManage handles management; the data plane lives on the vEdge/cEdge WAN edges.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does SD-WAN replace traditional routing in the overlay?",
+      "a": "OMP replaces BGP/IGP within the overlay, carrying routes and TLOCs, while app-aware routing chooses paths by SLA.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

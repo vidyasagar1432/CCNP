@@ -1,0 +1,94 @@
+{
+  "title": "MPLS Labels",
+  "level": 20,
+  "levelTitle": "Level 20 - MPLS",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "02. Labels.md",
+  "cards": [
+    {
+      "q": "What is an MPLS label and where is it carried?",
+      "a": "MPLS forwarding is driven by labels, which are 20-bit values carried in a 32-bit shim header between L2 and L3. Each router swaps the top label and forwards, and a packet can carry a label stack of multiple shims for VPNs and TE tunnels.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the four fields of the 32-bit MPLS shim header and their bit sizes?",
+      "a": "Label (20 bits, forwarding value), Exp (3 bits, QoS/class), S (1 bit, bottom-of-stack), and TTL (8 bits, hop limit).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which field of the shim header drives the swap and which marks the bottom of the stack?",
+      "a": "The Label field drives the swap; the S (bottom-of-stack) bit marks the last label. Exp marks class and TTL limits loops.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the reserved MPLS label value ranges?",
+      "a": "0-15 are reserved (special), 16-1023 are explicit null and others, and 16-1,048,575 are normal labels.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is a label stack structured for VPN traffic?",
+      "a": "The top label forwards in the core (transport), the inner label is the service (VPN) label, and the bottom (S=1) is the deepest. VPN uses two labels: transport plus service.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What do push, swap, and pop operations do to a label stack?",
+      "a": "Push adds a label, swap changes the top label, and pop removes it.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Where does each label operation occur: push, swap, pop?",
+      "a": "Push occurs on the ingress LER (adds shim), swap on the core LSR (replaces top), and pop on penultimate or egress (removes).",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is PHP (penultimate hop popping)?",
+      "a": "PHP removes the label one hop early, at the penultimate router, improving egress performance.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What are the implicit null, explicit null, and router alert label values and their uses?",
+      "a": "Implicit null is label 3, used for PHP (pop before egress); explicit null is label 0, used to keep QoS (Exp) at egress; router alert is label 1, used for control traffic.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why would the egress use an explicit null label rather than implicit null?",
+      "a": "Explicit null (label 0) lets the egress still read the Exp field for QoS, whereas implicit null pops the label before the egress.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between pipe mode and uniform mode TTL handling?",
+      "a": "In pipe mode, the TTL is not decremented, hiding the core hops; in uniform mode, the TTL decrements normally. Pipe mode is used in SP networks.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What command shows the range of labels a router can allocate?",
+      "a": "show mpls label range.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How many bits are in each field of the shim header?",
+      "a": "Label 20 bits, Exp 3 bits, S 1 bit, and TTL 8 bits, totalling 32 bits.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the values of implicit null, explicit null, and how many labels does VPN carry?",
+      "a": "Implicit null is 3, explicit null is 0, and VPN uses a two-label stack (transport + service). PHP pops early.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "title": "OSPF SPF Algorithm (Dijkstra)",
+  "level": 10,
+  "levelTitle": "Level 10 - OSPF",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "07. SPF Algorithm.md",
+  "cards": [
+    {
+      "q": "What is the OSPF SPF algorithm and how does it work?",
+      "a": "OSPF uses Dijkstra's shortest-path-first (SPF) algorithm: each router runs SPF over its LSDB to find the shortest path tree to every destination rooted at itself. Because every router has the identical LSDB, each builds the same view and derives loop-free shortest paths deterministically.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "List the conceptual steps of Dijkstra's SPF algorithm in OSPF.",
+      "a": "1. Root the tree at self. 2. Pick the node with the smallest known cost not yet finalized. 3. Relax its neighbors: if cost[neighbor] > cost[current] + link_cost, update. 4. Mark the node finalized and repeat until all nodes reached. 5. Result is the shortest path tree and best routes tagged O (intra-area).",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What inputs does SPF use from the LSDB?",
+      "a": "Nodes are routers (Type 1) and segments (Type 2); link costs come from interface costs in Type 1/2 LSAs; inter-area reach from Type 3/4 ABR summaries; and external routes from Type 5/7 attached to the tree via the ASBR.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the scope of SPF computation in OSPF?",
+      "a": "SPF is computed once per area a router belongs to. A flap inside one area does not force SPF recalculation for other areas - only the affected area re-runs, plus ABR updates Type 3 as needed. This is the scalability argument for areas.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is flooding different from SPF in OSPF?",
+      "a": "Flooding shares topology facts (Type 1/2 within an area) by distributing LSAs, while SPF computes best paths per router independently. Flooding only distributes facts; every router computes its own tree - there is no hop-by-hop distance vector.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What are the OSPF SPF throttle timers and their default values?",
+      "a": "timers throttle spf controls how fast SPF is recalculated after a topology change using initial delay / hold time / max wait. Default IOS values are 10 ms initial, 5 s hold, 10 s max. Incremental SPF (ISPF) recalculates only affected subtrees for faster, lower-CPU convergence.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you tune SPF timers and view SPF statistics?",
+      "a": "Use router ospf, timers throttle spf 50 1000 5000 (initial/hold/max in ms) and timers lsa-interval 5. Verify with show ip ospf (SPF algorithm executed X times), show ip ospf spf, and show ip ospf statistics.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the likely cause of high CPU during a flap and how is it fixed?",
+      "a": "SPF re-running for the whole area. Fix with ISPF and throttle timers. Slow convergence can also be caused by throttles that are too long or full SPF runs.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does OSPF SPF minimize as its metric?",
+      "a": "SPF minimizes the sum of link costs (cost sum), not hop count. The cost of a path is the sum of the outgoing interface costs.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the 'fast convergence' answers in OSPF?",
+      "a": "timers throttle spf and Incremental SPF (ISPF) are the fast-convergence mechanisms. ISPF recalculates only affected subtrees, while throttling bounds the frequency of full SPF runs.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What route codes does SPF produce and where do inter-area routes come from?",
+      "a": "SPF output produces routes tagged O (intra-area). Inter-area O IA routes come from Type 3 LSAs at the tree's edge. SPF itself computes the intra-area tree from Type 1/2 LSAs.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Summarize the SPF quick-review facts.",
+      "a": "Algorithm is Dijkstra shortest path; input is the LSDB (Types 1/2 plus inter-area); runs per area; output is best routes O; recalculation triggers on topology change in the area; ISPF plus throttling make it fast; it is loop-free by construction; flooding is a separate function; show it with show ip ospf spf.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

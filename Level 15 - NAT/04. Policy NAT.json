@@ -1,0 +1,148 @@
+{
+  "title": "Policy-Based NAT",
+  "level": 15,
+  "levelTitle": "Level 15 - NAT",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "04. Policy NAT.md",
+  "cards": [
+    {
+      "q": "What is Policy-Based NAT?",
+      "a": "Policy NAT applies NAT conditionally instead of translating all traffic that matches only a source address. The NAT decision can be based on source IP, destination IP, source/destination protocol and ports, or a route-map and its match conditions, so different flows can use different NAT policies.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the core idea of Policy NAT?",
+      "a": "Policy NAT answers 'Which traffic should be translated, and how?' rather than simply translating every matching inside source.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does regular source NAT differ from Policy NAT?",
+      "a": "Regular source NAT matches only the inside source (e.g. access-list 1 permit 10.0.0.0 0.0.0.255) and treats every destination the same. Policy NAT adds further conditions, so source plus destination/protocol/port must match before the selected NAT policy is applied.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Give an example use case for Policy NAT.",
+      "a": "With two ISPs, 10.0.0.0/24 traffic toward ISP-A destinations is NAT'd using an ISP-A address, while traffic toward ISP-B destinations is NAT'd using an ISP-B address, so different flows get different translations.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "In what scenarios is Policy NAT used?",
+      "a": "Multi-ISP environments, destination-specific NAT, service-specific NAT based on TCP/UDP ports, overlapping address spaces, selective NAT for VPN/special paths, and assigning different traffic classes to different public address pools.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How can an extended ACL make a NAT rule destination-aware?",
+      "a": "A policy like access-list 101 permit ip 10.0.0.0 0.0.0.255 198.51.100.0 0.0.0.255 used with ip nat inside source list 101 pool ISP-A overload translates only traffic whose source is 10.0.0.0/24 and destination is 198.51.100.0/24; other destinations use no translation or another rule.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How is NAT made service/port-specific?",
+      "a": "Use an extended ACL that matches protocol and layer-4 ports, e.g. access-list 102 permit tcp 10.0.0.0 0.0.0.255 198.51.100.0 0.0.0.255 eq 443, referenced by the NAT rule so only TCP traffic to destination port 443 is translated. Extended ACLs give Policy NAT more granular matching than a standard source-only ACL.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is route-map-based NAT configured?",
+      "a": "Define a route-map that matches the traffic (route-map NAT-POLICY permit 10, match ip address 101), then reference it in the NAT rule: ip nat inside source route-map NAT-POLICY interface GigabitEthernet0/1 overload. If the packet matches, NAT applies; if not, the rule does not apply.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "When a route-map is referenced by a NAT rule, what is its role?",
+      "a": "It controls NAT classification: the route-map and its match conditions decide whether the NAT rule applies. A route-map used for NAT is not simply a routing policy.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "In a multi-ISP Policy NAT design, what must be considered besides the NAT rule?",
+      "a": "NAT alone does not determine the complete forwarding path. Routing and NAT must be designed together, and in multi-ISP designs the return path must also be considered so replies can come back correctly.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How can Policy NAT implement NAT exemption for VPN traffic?",
+      "a": "Policy NAT makes NAT conditional, for example Internet traffic gets NAT while traffic to VPN destinations gets no NAT. Do not assume every VPN requires Policy NAT; NAT exemption/identity NAT and platform-specific NAT behavior should be evaluated per VPN design.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is outside source NAT and when is it used?",
+      "a": "It modifies the representation of an address belonging to the outside network, e.g. ip nat outside source static 203.0.113.99 198.51.100.99. It is useful for overlapping address spaces, merging networks with duplicate addressing, and certain VPN/partner connectivity designs.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Is outside source NAT the same as Policy NAT?",
+      "a": "No. Outside source NAT is a NAT direction/type that translates the outside host/source address; it should not be treated as synonymous with Policy NAT, even though both relate to conditional or overlapping-address designs.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Compare inside source NAT and outside source NAT.",
+      "a": "Inside source NAT translates the inside host/source address (10.0.0.10 → 203.0.113.10 using ip nat inside source ...), while outside source NAT translates the outside host/source address (203.0.113.99 → 198.51.100.99 using ip nat outside source ...).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Compare regular source NAT and Policy NAT in a table.",
+      "a": "Regular source NAT matches primarily on source address, is not destination-aware, has limited port awareness, lower selectivity, and less granular multiple policies. Policy NAT matches source plus additional conditions, is destination-aware when configured, port-aware with extended matching, higher selectivity, and is designed for conditional policies.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the best practice when multiple NAT rules could match the same packet?",
+      "a": "Make Policy NAT conditions sufficiently specific because overlapping NAT policies interact according to Cisco NAT processing rules; a broad rule (10.0.0.0/24 to any) can interfere with a more selective rule. Verify the actual translation table and configuration.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What do ip nat inside source and ip nat outside source describe?",
+      "a": "They describe which side's source address is being translated, not simply where the packet physically enters the router. The four NAT addresses (inside local, inside global, outside local, outside global) must be understood to troubleshoot these rules.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands verify a Policy NAT setup, including route-maps?",
+      "a": "show ip nat translations, show ip nat translations verbose, show ip nat statistics, show route-map, show access-lists, show running-config | include ip nat, and debug ip nat (disabled afterward with undebug all). Debugging can consume CPU on production devices.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What common symptoms indicate a wrong or too-broad Policy NAT policy?",
+      "a": "Traffic not translated (ACL does not match), wrong public address (incorrect policy/pool), VPN traffic unexpectedly translated (policy too broad), overlapping addresses still conflicting (wrong outside/inside NAT design), and return traffic failing (routing/asymmetric path problem).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "In what order should you troubleshoot Policy NAT?",
+      "a": "Verify interfaces (show ip interface brief), verify NAT config (show running-config | include ip nat), verify the policy ACL and its hit counters (show access-lists), verify the route-map sequence (show route-map), generate matching traffic, check show ip nat translations, then verify routing with show ip route. NAT translation and packet forwarding are separate functions.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Is match-in-vrf the definition of Policy NAT?",
+      "a": "No. match-in-vrf is associated with specific NAT/VRF behavior and should not be used as a generic explanation of Policy NAT.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Summarize the Policy NAT mental model.",
+      "a": "Policy NAT = conditional NAT: 'IF traffic matches these conditions (source, destination, protocol/port, route-map) THEN apply this NAT behavior.' Standard source NAT matches primarily on source; Policy NAT uses more specific matching, is not the same as PBR, and still requires correct routing and return paths.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Summarize Policy NAT in one quick-review line.",
+      "a": "Policy NAT is conditional NAT that translates selected traffic based on source + destination and/or protocol/port conditions using extended ACLs or route-maps; it is used for multi-ISP and application-specific designs, is distinct from PBR and outside source NAT, and is verified with show ip nat translations, show access-lists, and show route-map.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

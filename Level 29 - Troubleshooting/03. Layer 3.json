@@ -1,0 +1,22 @@
+{
+  "title": "Layer 3",
+  "level": 29,
+  "levelTitle": "Level 29 - Troubleshooting",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "03. Layer 3.md",
+  "cards": [
+    { "q": "What is Layer 3 troubleshooting concerned with?", "a": "Routing: interfaces up, routes present, adjacency healthy, and packets forwarded. Use ping, traceroute, show ip route, and show ip interface in that order.", "tag": "Overview", "context": "Both" },
+    { "q": "What is the Layer 3 verification order?", "a": "L1/L2 up, IP on the interface, neighbor/adjacency, route in the table, path reaches, then policy (ACL/NAT). Interface to adjacency to route to reachability.", "tag": "Core Concept", "context": "Both" },
+    { "q": "What command proves a route exists in the routing table?", "a": "show ip route (or show ip route <network> for a specific route).", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What is the difference between show ip route and show ip cef?", "a": "show ip route shows the control plane (RIB), while show ip cef shows hardware forwarding (FIB).", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "A route exists but ping fails. What should you check?", "a": "Policy (ACL/NAT) and the return path. Route exists does not mean the path is reachable.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "Why must you check both directions of a path?", "a": "The return path often breaks, causing partial or failed connectivity even when the forward path is fine.", "tag": "Core Concept", "context": "Both" },
+    { "q": "What tool pinpoints the failing hop in a path?", "a": "traceroute, which reveals hop-by-hop latency and where the path dies.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What should you verify before looking at routing table entries?", "a": "Adjacency/neighbor state, because adjacency is protocol health before routes.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What does show ip arp give you?", "a": "The L3 to L2 mapping, showing how Layer 3 addresses resolve to Layer 2.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What does show ip protocols confirm?", "a": "That routing is running (the routing protocol process).", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What is the methodical Layer 3 escalation order?", "a": "Verify routes, ping/traceroute, check ACL/NAT, debug the control plane, then perform traffic capture. Route to path to policy to packet.", "tag": "Core Concept", "context": "Both" },
+    { "q": "A blackhole where traffic disappears despite a default route indicates what?", "a": "A summary or default route issue, checked via route lookup. Traffic may be routed to a null or wrong next hop.", "tag": "Quick Review", "context": "Exam" }
+  ]
+}

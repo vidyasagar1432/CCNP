@@ -1,0 +1,94 @@
+{
+  "title": "Proxy ARP",
+  "level": 4,
+  "levelTitle": "Level 04 - Ethernet & Switching",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "12. Proxy ARP.md",
+  "cards": [
+    {
+      "q": "What is Proxy ARP?",
+      "a": "Proxy ARP is a router behavior in which the router answers an ARP request on behalf of another IPv4 destination reachable through it. Instead of giving the destination's real MAC, it replies with its own MAC, so the host sends the Ethernet frame to the router and the router routes the IP packet onward.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What MAC address does the router return in a Proxy ARP reply?",
+      "a": "The router returns its own MAC address, never the remote destination's real MAC. The host then sends frames for that remote IP to the router, which performs normal Layer 3 routing toward the actual destination.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "When does Proxy ARP apply?",
+      "a": "It applies when a host sends an ARP request for an address that is not considered local to the requesting interface's subnet and the router has a valid path to the destination, so the router answers using the MAC of its receiving interface.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Why does Proxy ARP exist?",
+      "a": "It was historically useful when hosts lacked a properly configured default gateway, had incorrect subnet masks, or needed communication across routed networks without awareness of the routing boundary. Modern networks normally have correct masks and gateways, making Proxy ARP unnecessary in many designs.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How does Proxy ARP differ from normal ARP?",
+      "a": "With normal ARP the device owning the target IP answers with its MAC, used to resolve IPv4 -> MAC for a local destination or next hop. With Proxy ARP, a router answers for a remote reachable destination and returns its own MAC; the target is remote, not local to the segment.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does Proxy ARP differ from using a default gateway?",
+      "a": "With normal routing, the host ARPs for the default gateway when the destination is remote. With Proxy ARP, the host can ARP for the remote destination itself, and the router answers with its own MAC; the host sends the frame to the router, which routes to the destination.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the default Proxy ARP behavior on traditional Cisco IOS routed interfaces?",
+      "a": "Proxy ARP is enabled by default on traditional Cisco IOS routed interfaces unless disabled or platform-specific behavior differs. Disable with no ip proxy-arp and enable explicitly with ip proxy-arp on the interface.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does the router create an ARP entry for the remote destination when answering Proxy ARP?",
+      "a": "No. Proxy ARP changes what the host believes about the Layer 2 destination: the host's ARP cache learns Remote-IP -> Router's MAC. The router itself still uses its normal routing process and resolves the actual next-hop MAC out its outgoing interface.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does the switch perform Proxy ARP?",
+      "a": "No. Proxy ARP is a router/Layer 3 function. The switch only needs to know Router MAC -> Router's switch port in its MAC table and forwards the Ethernet frame to the router, which then performs Layer 3 routing.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the security and operational concerns with Proxy ARP?",
+      "a": "Proxy ARP can create unexpected Layer 2 adjacencies, difficult troubleshooting, excessive ARP traffic, interaction issues with security controls, and increased exposure to ARP-related attacks. It can be disabled with no ip proxy-arp as interface hardening where unnecessary, but this is not the primary defense against ARP poisoning.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do Proxy ARP and Gratuitous ARP differ?",
+      "a": "Proxy ARP answers for someone else's IP, returning the router's MAC: I can answer for 10.2.2.2, use my MAC. GARP announces the sender's own IP-to-MAC mapping: 10.1.1.10 is associated with my MAC. Proxy ARP's IP belongs to another device; GARP's IP is usually the sender's own.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you verify and troubleshoot Proxy ARP?",
+      "a": "Check the interface config (show running-config interface GigabitEthernet0/1 for ip proxy-arp), check the routing table (show ip route 10.2.2.2), check the router ARP cache (show ip arp, which is the router's cache, not the host's), check the host's ARP cache for Remote-IP -> Router MAC, and capture ARP traffic to prove the exchange.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which facts belong in the Proxy ARP quick review?",
+      "a": "Function: router answers ARP for a reachable remote IPv4 destination; who answers: router/L3 device; MAC returned: router's own MAC; target IP: remote/nonlocal; host sends frame to router; router routes the packet; default on Cisco IOS routed interfaces: enabled; disable command: no ip proxy-arp; verification: show run interface or packet capture; ARP poisoning defense: DAI, not simply disabling Proxy ARP.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the one-minute mental model of Proxy ARP?",
+      "a": "Normal routing: destination is remote, so the host ARPs for its gateway's MAC and sends the frame to the router MAC. Proxy ARP: the host ARPs for the remote IP, the router answers use my MAC, the host sends the frame to the router, and the router routes the packet. The router does not pretend to be the remote host at Layer 3; it only supplies its own Layer 2 MAC so it can receive and route the packet.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

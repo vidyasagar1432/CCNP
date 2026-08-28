@@ -1,0 +1,82 @@
+{
+  "title": "Channels",
+  "level": 22,
+  "levelTitle": "Level 22 - Wireless",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "05. Channels.md",
+  "cards": [
+    {
+      "q": "What are channels in 802.11?",
+      "a": "Channels are the RF sub-bands APs transmit on. Non-overlapping channels let nearby APs share spectrum without colliding; DFS adds radar-aware channels in 5 GHz; and RRM automatically tunes channel and power.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Which 2.4 GHz channels are non-overlapping?",
+      "a": "In the 2.4 GHz band the non-overlapping channels are 1, 6, and 11 in the US. The band has channels 1-13 (US 1-11) at 20 MHz width with 5 MHz spacing.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the characteristics of 5 GHz channels?",
+      "a": "5 GHz offers many wider channels across the UNII bands (36-165). DFS channels 52-144 require radar detection with no radar requirement on non-DFS channels like 36, 40, 44, 48, and 149+. More channels mean less interference, but DFS needs radar detection.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do 20/40/80/160 MHz channel widths behave across bands?",
+      "a": "20 MHz is the standard width in both 2.4 and 5 GHz; 40 MHz bonds channels in both; 80/160 MHz are not used in 2.4 but give high speeds in 5 GHz. Wider channels mean more throughput but leave less spectrum available.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is DFS and what does it do?",
+      "a": "Dynamic Frequency Selection (DFS) avoids radar. An AP must listen before using a DFS channel, change channel if radar is detected (with brief downtime), and some regions limit DFS channel use.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is RRM and what does it automate?",
+      "a": "Radio Resource Management (RRM), run by the WLC, automatically assigns non-overlapping channels, adjusts transmit power via TPC, monitors client coverage, and detects interference.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does TPC control?",
+      "a": "TPC (Transmit Power Control) adjusts AP transmit power automatically, one of the RRM functions.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands enable RRM channel and power assignment?",
+      "a": "ap dot11 5ghz rrm channel global and ap dot11 24ghz rrm channel global let RRM pick channels; ap dot11 5ghz rrm tx-power global enables automatic power; ch-width sets the channel width.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands verify channel and radio settings?",
+      "a": "show ap radio summary, show ap dot11 5ghz summary, show ap dot11 24ghz summary, show ap config general, and show ap monitor channel.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Clients see interference and slow performance. What are the likely causes and checks?",
+      "a": "Interference usually means overlapping channels, so check RRM channel assignment; slow performance often means co-channel APs, so check the radio summary.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "DFS stalls, low power, and busy air appear. What should you check?",
+      "a": "DFS stalls point to radar on the channel (check DFS status), low power points to TPC (check tx-power), and busy air points to noise (check with show ap monitor).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which Channels quick review facts should you remember?",
+      "a": "2.4 GHz non-overlap is 1, 6, 11; 5 GHz has many channels with DFS 52-144; widths are 20/40/80/160; RRM auto-assigns channels; TPC auto-adjusts power; overlapping channels are avoided; monitor scans the air.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

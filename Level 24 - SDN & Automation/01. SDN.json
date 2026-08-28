@@ -1,0 +1,24 @@
+{
+  "title": "SDN",
+  "level": 24,
+  "levelTitle": "Level 24 - SDN & Automation",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "01. SDN.md",
+  "cards": [
+    { "q": "What is Software-Defined Networking (SDN)?", "a": "SDN separates the control plane from the data plane, centralizing the network brain in a controller. Northbound APIs talk to apps and southbound protocols (NETCONF, RESTCONF, OpenFlow) program devices, making network services programmable and centrally managed.", "tag": "Overview", "context": "Both" },
+    { "q": "Why does SDN matter for modern networks?", "a": "It is the foundation of DNA Center, SD-Access, and VXLAN/LISP, turning the network into an API-managed service with programmability, rapid change, template-based automation, consistency, analytics visibility, and policy-driven security.", "tag": "Overview", "context": "Both" },
+    { "q": "Where does the control plane live in SDN compared to the data plane?", "a": "The control plane is centralized in the controller, while the data plane stays on the switches/routers. Management sits at the orchestration layer and service/application logic rides on apps and APIs.", "tag": "Core Concept", "context": "Interview" },
+    { "q": "What are the five layers of the SDN architecture?", "a": "Application (business apps), Northbound API (app to controller), Controller (control logic), Southbound API (controller to device), and Infrastructure (hardware).", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What is the difference between the northbound and southbound API?", "a": "Northbound = up to applications; southbound = down to devices. The controller sits between them in the SDN stack.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "Which southbound protocols does modern SDN favor?", "a": "NETCONF (YANG + XML), RESTCONF (YANG + REST), and OpenFlow (flow table), while CLI/SNMP are the legacy options. Modern SDN favors NETCONF/RESTCONF over YANG.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What is the difference between controller-based and model-based SDN?", "a": "Controller-based SDN centralizes control logic in a controller; model-based SDN uses YANG data models. Overlays (VXLAN/LISP) are a third approach, and Cisco's enterprise version combines controller (DNA Center) with SD-Access.", "tag": "Core Concept", "context": "Interview" },
+    { "q": "What are the main benefits of SDN?", "a": "Agility (rapid change), automation (template-based), consistency (single source of truth), visibility (analytics), and security (policy-driven).", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What are the trade-offs or concerns with SDN?", "a": "The controller is a single point of failure unless made highly available (HA), devices must support the protocols, new skills are required, and migration is best done through a hybrid path with gateways for legacy devices.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "Which commands enable and verify YANG/NETCONF support on a device?", "a": "Configure netconf-yang or restconf globally, then verify with show platform software yang, show netconf-yang sessions, and show running-config.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "How do you troubleshoot a config that fails over the API?", "a": "If no config applies, check whether the protocol is enabled (netconf-yang). Authentication failure points to credentials/API, session drops to transport (check netconf sessions), a missing model to YANG, and a down controller to HA failover.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What is the modern southbound replacement for CLI/SNMP?", "a": "NETCONF/RESTCONF combined with YANG data models are the modern southbound protocols; CLI/SNMP are considered legacy.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "Why must an SDN controller never be a single point of failure?", "a": "Because the controller is the centralized brain; if it goes down without HA, the whole network loses central control, so controllers must be deployed with high availability (failover).", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "What is Cisco's enterprise implementation of SDN?", "a": "Cisco SDN = DNA Center + SD-Access, which uses an overlay of VXLAN and LISP on top of the fabric.", "tag": "Exam Trap", "context": "Exam" }
+  ]
+}

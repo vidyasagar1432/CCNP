@@ -1,0 +1,76 @@
+{
+  "title": "Source-Specific Multicast (SSM)",
+  "level": 19,
+  "levelTitle": "Level 19 - Multicast",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "07. Source-Specific Multicast.md",
+  "cards": [
+    {
+      "q": "What is Source-Specific Multicast (SSM)?",
+      "a": "SSM builds distribution trees rooted directly at a specific source (S,G) with no RP, no shared tree, and no register process; receivers use IGMPv3 to join (S,G) and PIM builds a shortest-path tree from the source.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What group address range does SSM use?",
+      "a": "SSM operates in the 232.0.0.0/8 range per RFC 4607; receivers join specific (S,G) pairs in this range, while groups outside 232/8 use standard ASM behavior.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the differences between ASM (PIM-SM) and SSM?",
+      "a": "ASM uses any-source (*,G) with a required RP, a shared tree, and a register process, while SSM is source-specific (S,G) with no RP, no shared tree, no register, and only a shortest-path tree.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Why does SSM require IGMPv3?",
+      "a": "IGMPv3 is required because it supports include/exclude source lists and lets a host report a specific (S,G) pair, whereas IGMPv1/v2 only support any-source (*,G) joins.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does an SSM join and tree build work?",
+      "a": "A receiver sends an IGMPv3 (S,G) report to the DR, the DR sends a PIM (S,G) join toward the source, and the source builds a shortest-path tree directly to the receiver with no shared-tree phase.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the benefits of SSM?",
+      "a": "No RP, no shared tree, no register overhead, immediate shortest path with lower latency, simpler inter-domain multicast without MSDP, and source authentication since only the specified source is joined.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which command enables SSM for the default group range?",
+      "a": "The command is ip pim ssm default, which enables SSM for the 232.0.0.0/8 range; ip pim ssm range can be used to specify a custom range.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands verify SSM operation?",
+      "a": "show ip mroute, show ip mroute ssm, show ip pim interface, show ip igmp groups, and show ip ssm; because there is no RP, show ip pim rp mapping is typically empty.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A host cannot create an (S,G) join in an SSM deployment; what is the likely cause?",
+      "a": "The host is running IGMPv2 instead of IGMPv3, so it cannot report a specific (S,G); set the access interface to ip igmp version 3.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the key exam distinction between SSM and PIM-SM?",
+      "a": "SSM is source-specific (S,G) with no RP, shared tree, or register process, operating in 232/8, while PIM-SM builds (*,G) shared trees through an RP with a register and SPT switchover.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the SSM quick-review summary?",
+      "a": "SSM is the no-RP model using source-specific (S,G) joins in the 232.0.0.0/8 range, requires IGMPv3, builds only shortest-path trees, and simplifies inter-domain multicast by eliminating the shared tree and register.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

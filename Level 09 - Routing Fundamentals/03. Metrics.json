@@ -1,0 +1,118 @@
+{
+  "title": "Routing Metrics",
+  "level": 9,
+  "levelTitle": "Level 09 - Routing Fundamentals",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "03. Metrics.md",
+  "cards": [
+    {
+      "q": "What is a routing metric and what question does it answer?",
+      "a": "A routing metric is a value used by a routing protocol to measure the relative cost or preference of a path to a destination. It answers: which path from that source is best? AD answers which routing source to trust; metrics from different protocols cannot be directly compared.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the metric used by OSPF, EIGRP, RIP, and IS-IS, and what does each primarily measure?",
+      "a": "OSPF uses cost (reference bandwidth divided by interface bandwidth); EIGRP uses a composite metric primarily based on bandwidth + delay by default; RIP uses hop count (number of routers/hops); IS-IS uses cost (configured per-interface/path cost). Lower is better for all.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the OSPF cost calculation and why can modern high-speed interfaces have the same cost with the classic reference bandwidth?",
+      "a": "OSPF cost = Reference bandwidth / Interface bandwidth. With the 100-Mbps reference, 100 Mbps, 1 Gbps, and 10 Gbps all yield cost 1, so OSPF may treat them as equal-cost unless the reference bandwidth is increased or costs are manually configured.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you change the OSPF reference bandwidth and in what unit is the value specified?",
+      "a": "Use the router ospf configuration and the 'auto-cost reference-bandwidth' command, for example 'auto-cost reference-bandwidth 1000'. The value is specified in Mbps, so 1000 Mbps = 1 Gbps. It must be configured consistently across the OSPF domain for predictable cost calculations.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How is OSPF path cost calculated and which path is preferred?",
+      "a": "OSPF path cost is the sum of the OSPF interface costs along the path toward the destination. For R1--10--R2--20--R3, the total path cost is 10 + 20 = 30. Lower OSPF cost is preferred.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you manually configure OSPF cost on an interface?",
+      "a": "Enter the interface configuration and use 'ip ospf cost 25'. A manually configured OSPF cost takes precedence over the automatically calculated interface cost.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the EIGRP composite metric formula with the default K values?",
+      "a": "The general EIGRP formula is Metric = 256 × [K1×BW + (K2×BW)/(256-Load) + K3×Delay] × [K5/(Reliability+K4)]. With default K values K1=1, K2=0, K3=1, K4=0, K5=0, the effective default calculation is 256 × (10^7 / minimum bandwidth + cumulative delay / 10).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "In EIGRP, what bandwidth value is used in the metric calculation and how is delay expressed in IOS?",
+      "a": "EIGRP's bandwidth component uses the minimum bandwidth along the path, not average or total. The IOS delay value is expressed in tens of microseconds; delay 100 represents 1000 microseconds = 1 millisecond.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does the 'bandwidth' command in EIGRP change the physical link speed?",
+      "a": "No. The bandwidth command changes the interface's routing metric attribute only; it does not change the physical link speed.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What happens if neighboring EIGRP routers have incompatible K values?",
+      "a": "EIGRP adjacency formation can fail. EIGRP neighbors must agree on the K values used for metric calculation. Default values are K1=1, K2=0, K3=1, K4=0, K5=0, meaning load and reliability are not included in the default metric.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the RIP hop count limit and what does RIP not consider in path selection?",
+      "a": "RIP uses hop count as its metric. 1-15 hops are reachable; 16 hops equal infinity/unreachable, so 15 is the maximum reachable. RIP does not consider bandwidth, delay, link speed, or congestion. This can cause RIP to choose a slow path with fewer hops over a fast path with more hops.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the OSPF cost with a 1-Gbps reference bandwidth for 10 Mbps, 100 Mbps, 1 Gbps, and 10 Gbps interfaces?",
+      "a": "With reference-bandwidth 1000 (1 Gbps): 10 Mbps = 100, 100 Mbps = 10, 1 Gbps = 1, 10 Gbps = 1.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the 'maximum-paths' command do?",
+      "a": "The maximum-paths command controls how many equal-cost RIP paths can be installed (ECMP). It does not change the underlying routing metric.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "When routes to the same prefix come from different protocols like OSPF AD 110 metric 10 and EIGRP AD 90 metric 1000, how is the comparison made?",
+      "a": "EIGRP wins because 90 < 110. AD determines the preferred routing source when sources differ. The OSPF metric 10 and EIGRP metric 1000 are not compared because metrics are protocol-specific.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is ECMP in the context of routing metrics?",
+      "a": "If a routing protocol finds multiple paths with the same qualifying metric to the same prefix, it may install multiple paths using ECMP (Equal-Cost Multipath). The exact number supported depends on routing protocol, platform, software, and configuration.",
+      "tag": "Quick Review",
+      "context": "Both"
+    },
+    {
+      "q": "How is IS-IS cost calculated for a path and what is the Cisco default interface metric?",
+      "a": "The cost is associated with interfaces/links and contributes to the total path cost. For R1--10--R2--20--R3, total path cost is 10+20=30, and lower total cost is preferred. Cisco implementations commonly use a default interface metric of 10.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Compare the metrics by protocol: OSPF, EIGRP, RIP, IS-IS, Static, and Connected.",
+      "a": "OSPF: cost, lowest, Reference BW ÷ Interface BW. EIGRP: composite metric, lowest, primarily BW + Delay by default. RIP: hop count, lowest, number of hops. IS-IS: cost, lowest, sum of link/interface costs. Static: no protocol metric, uses AD. Connected: no protocol metric, directly connected.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands would you use to verify EIGRP topology and neighbors?",
+      "a": "show ip eigrp topology views EIGRP topology and successor/feasible-successor information; show ip eigrp neighbors verifies EIGRP neighbor relationships.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    }
+  ]
+}

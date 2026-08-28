@@ -1,0 +1,88 @@
+{
+  "title": "DNS",
+  "level": 29,
+  "levelTitle": "Level 29 - Troubleshooting",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "13. DNS.md",
+  "cards": [
+    {
+      "q": "What does DNS troubleshooting resolve?",
+      "a": "Name resolution failures: server unreachable, wrong records, TTL/negative cache, or search-domain issues. Verify with nslookup, dig, ping name, and show hosts.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the DNS resolution flow?",
+      "a": "Local hosts file, then DNS cache, then query the configured server, then the authoritative server, then the response/cache.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What tools isolate DNS resolution from general connectivity?",
+      "a": "nslookup and dig, which query DNS directly and separate DNS from ping.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does an NXDOMAIN response mean?",
+      "a": "The name does not exist (no record). It is not the same as the server being down; check the name and record type.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What do the A and PTR DNS records map?",
+      "a": "A maps a name to an IPv4 address (AAAA maps to IPv6). PTR maps an IP address to a name for reverse lookups.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What purpose do CNAME, MX, and NS records serve?",
+      "a": "CNAME is an alias for a name, MX identifies mail servers, and NS identifies nameservers for a domain.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does TTL explain in DNS troubleshooting?",
+      "a": "Why a stale/old IP persists after a record change, because the TTL is the record lifetime held in caches.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is negative caching in DNS?",
+      "a": "NXDOMAIN (no record) responses are cached, so a failed lookup can persist even after the record is added.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What port does DNS use for queries?",
+      "a": "UDP 53 for queries, with TCP for large answers.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What IOS commands configure the DNS resolver?",
+      "a": "ip name-server <ip> to set the server, ip domain-lookup to enable resolution, and ip domain-name <suffix> to set the search suffix.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A DNS timeout is most likely caused by what?",
+      "a": "The server being unreachable, often due to a firewall blocking UDP 53.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What command shows the IOS DNS cache?",
+      "a": "show hosts.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Resolving the wrong host for a name is most likely caused by what?",
+      "a": "A wrong search domain (ip domain-name) or stale cache/TTL.",
+      "tag": "Quick Review",
+      "context": "Practical"
+    }
+  ]
+}

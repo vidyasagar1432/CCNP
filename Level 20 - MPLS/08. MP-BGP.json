@@ -1,0 +1,100 @@
+{
+  "title": "MP-BGP (Multiprotocol BGP)",
+  "level": 20,
+  "levelTitle": "Level 20 - MPLS",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "08. MP-BGP.md",
+  "cards": [
+    {
+      "q": "What is MP-BGP and what does it do in an MPLS network?",
+      "a": "MP-BGP carries VPN routes between PE routers using address families and the RD + RT model. It makes overlapping customer prefixes unique and filters who receives them; the VPNv4 address family is 64 bytes (8-byte RD + 32-byte IPv4) and is how the control plane builds L3VPNs.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What address families can MP-BGP carry and what does each carry?",
+      "a": "ipv4 unicast (normal BGP), ipv4 multicast (multicast NLRI), vpnv4 (VRF routes plus label), ipv6 unicast (IPv6), and vpnv6 (IPv6 VPN routes). Each address family has its own NLRI and policy.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What fields make up a VPNv4 route?",
+      "a": "The RD (makes the prefix unique), the IPv4 prefix (customer route), the label (VPN service label), the next-hop (egress PE), and the RT (membership).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why does RD plus prefix become globally unique?",
+      "a": "The RD plus the IPv4 prefix makes the route globally unique, and the label identifies the VPN FEC, so overlapping customer address space is disambiguated.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What are the RD formats and why must they be unique?",
+      "a": "RD formats are ASN:NN (for example 65000:100) or IP:NN (for example 10.0.0.1:100). The RD must be unique per VRF on the PE so two customers can use the same IPv4 space.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What do export RT and import RT mean?",
+      "a": "Export RT tags routes leaving the VRF, import RT decides which routes enter the VRF, and the RT policy controls VPN membership. A PE imports only routes whose RT matches its import list.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does the RT create in terms of VPN topology?",
+      "a": "The RT creates the VPN topology, such as full-mesh, extranet, or hub-spoke.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What commands establish a VPNv4 MP-BGP session between PEs?",
+      "a": "Under router bgp, use 'address-family vpnv4', then 'neighbor ... activate', and 'neighbor ... send-community extended' so the RTs are carried. The VRF needs matching rd and route-target.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why must extended communities be sent between PEs?",
+      "a": "Because the RTs (VPN membership policy) are carried as extended communities, so they must be sent between PEs using 'send-community extended'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What command shows all or per-VRF VPNv4 routes?",
+      "a": "show bgp vpnv4 unicast all shows all VPNv4 routes, and show bgp vpnv4 unicast vrf CUST1 shows the per-VRF routes.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the likely cause and check when there are no VPN routes?",
+      "a": "The address family is not activated, so check show bgp vpnv4 / activation on the neighbor.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the likely cause and check when RTs are missing?",
+      "a": "Extended communities are off, so check 'send-community extended'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does the VPNv4 NLRI relate to RD, prefix, and label?",
+      "a": "The VPNv4 NLRI is RD (8 bytes) + IPv4 (32 bytes) + label, where RD provides uniqueness and the label carries the VPN service.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "In MP-BGP, what do RD and RT each represent?",
+      "a": "RD represents uniqueness while RT represents the membership policy, and the RTs ride as extended communities.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does MP-BGP map to the quick review table?",
+      "a": "MP-BGP uses the vpnv4 address family, carries NLRI of RD + prefix + label, uses RD for uniqueness and RT for membership, carries RTs as extended communities, runs between PEs, is enabled with 'activate', and is checked with show bgp vpnv4.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

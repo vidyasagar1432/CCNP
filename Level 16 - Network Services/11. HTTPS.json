@@ -1,0 +1,82 @@
+{
+  "title": "HTTPS",
+  "level": 16,
+  "levelTitle": "Level 16 - Network Services",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "11. HTTPS.md",
+  "cards": [
+    {
+      "q": "What is HTTPS and why is it recommended on Cisco devices?",
+      "a": "HTTPS is HTTP over TLS on TCP 443 that encrypts web-management sessions; on Cisco devices it is the recommended embedded web server, enabled with a trustpoint/certificate.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What does TLS add over plain HTTP?",
+      "a": "Port 443 instead of 80, TLS record encryption of the payload, server authentication via certificate, and integrity via the TLS MAC/records.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What happens in a simplified TLS handshake?",
+      "a": "The client sends ClientHello, the server replies ServerHello plus its certificate, the client verifies the cert and exchanges keys, then both sides send Finished and the encrypted channel is live.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What are the key commands to enable the Cisco secure web server?",
+      "a": "crypto key generate rsa modulus 2048 for the device keypair, ip http secure-server to enable HTTPS, ip http secure-port 443, ip http authentication local, and ip http access-class to restrict access.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What happens if no RSA keypair is generated on the device?",
+      "a": "The secure (HTTPS) server cannot start, because the RSA keypair is required for the TLS server key exchange.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the certificate options on Cisco devices?",
+      "a": "Self-signed certificates are generated locally for labs and quick setups, while CA-signed certificates from a trusted CA are used in production; modern browsers warn on self-signed unless a fingerprint is trusted.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do HTTPS and SSH compare as management protocols?",
+      "a": "HTTPS provides web GUI/REST access on TCP 443 with local or token authentication, while SSH provides CLI exec sessions on TCP 22; both are encrypted management channels.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the recommended HTTPS security practices on network devices?",
+      "a": "Disable plain HTTP to avoid cleartext, apply an ACL to the management port, rotate certificates to maintain trust, and use AAA to centralize authentication.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Why would HTTPS fail to load or show TLS errors?",
+      "a": "A missing RSA key (generate one), self-signed certificate warnings (use a CA trustpoint), TCP 443 blocked (ACL), an authentication loop (AAA config), or time/cert mismatch fixed by NTP plus valid certs.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the relationship between NTP and certificate validity?",
+      "a": "A clock mismatch makes certificates appear invalid, so NTP keeps device time correct and avoids certificate-validity issues in TLS.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which command enables HTTPS versus the insecure plain HTTP server?",
+      "a": "ip http secure-server enables HTTPS, while ip http server is its insecure plain-HTTP twin; HTTPS uses port 443 and HTTP uses port 80.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What should be the expected answer for web GUI or REST management of a device?",
+      "a": "HTTPS (TCP 443), which encrypts management sessions; plain HTTP on 80 is discouraged.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    }
+  ]
+}

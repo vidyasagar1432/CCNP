@@ -1,0 +1,70 @@
+{
+  "title": "Git",
+  "level": 24,
+  "levelTitle": "Level 24 - SDN & Automation",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "16. Git.md",
+  "cards": [
+    {
+      "q": "What is Git and why do network engineers use it?",
+      "a": "Git is a distributed version control system that tracks configs, scripts, and playbooks and enables branches, commits, and rollback. It is the backbone of Infrastructure as Code and config-as-code workflows, giving a safety net for network config changes.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the benefits of using Git?",
+      "a": "Versioning (track changes), rollback (revert errors), branching (parallel work), collaboration (team/PR), and audit (history).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the three states of a Git file?",
+      "a": "working (your files), staged (in the index), and committed (in the repository). Files flow from modified to staged to committed.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What do the core Git commands do?",
+      "a": "git init starts a repo, git add stages, git commit saves a snapshot, git status shows state, git log shows history, git checkout switches/restores, and git push/pull sync with remotes. add then commit records a change; push/pull syncs.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between git add and git commit?",
+      "a": "git add stages file changes into the index; git commit saves a permanent snapshot of the staged changes in the repository. git diff shows the changes and git log shows history.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does Git support networking config-as-code?",
+      "a": "Config files and Ansible/Terraform playbooks are versioned in Git, which gives audit and rollback, and collaboration happens through PR review. Storing configs/playbooks in Git makes them reproducible.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do remote workflows and branch/PR collaboration work?",
+      "a": "Remotes like GitHub/GitLab hold cloned repositories; you create a feature branch, commit, then merge via a pull request. Branch plus PR keeps changes reviewable.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you troubleshoot common Git problems?",
+      "a": "Nothing to commit = files not staged (git add); merge conflict = check git status; wrong branch = git checkout/branch; remote failures = auth (git remote); lost changes = uncommitted work (git stash).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the order of file states in Git?",
+      "a": "A file moves from working (modified) to staged (in the index) to committed (snapshot in the repository); git add stages it and git commit saves it.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands show change history and the diff of changes?",
+      "a": "git log shows commit history and git diff shows the exact changes; git status shows the current state of the working tree and index.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

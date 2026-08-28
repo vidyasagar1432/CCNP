@@ -1,0 +1,88 @@
+{
+  "title": "CAPWAP",
+  "level": 22,
+  "levelTitle": "Level 22 - Wireless",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "08. CAPWAP.md",
+  "cards": [
+    {
+      "q": "What is CAPWAP?",
+      "a": "CAPWAP (Control And Provisioning of Wireless Access Points) is the standard tunnel between AP and WLC. It carries control traffic (config, stats) and, in Local mode, data (client traffic). Control is DTLS-encrypted over UDP 5246 and data rides UDP 5247.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What two tunnels does CAPWAP build and which ports do they use?",
+      "a": "The CAPWAP control tunnel uses UDP 5246 for config and monitoring, and the CAPWAP data tunnel uses UDP 5247 for client traffic.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is CAPWAP secured?",
+      "a": "DTLS encrypts the control channel; data-plane DTLS is optional. The join process validates AP authenticity, resulting in a secure WLC-to-AP relationship.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does an AP discover and join a WLC?",
+      "a": "The AP looks for the WLC via broadcast, multicast, DNS, or hostname; then discovery request/response, join request/response, and finally the AP receives its config push. This is the discover to join to config sequence.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which CAPWAP mode sends client data to the WLC?",
+      "a": "Local mode sends client data over CAPWAP to the WLC. FlexConnect switches data locally at the AP, and Monitor mode carries control only.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Why is the WLC a potential chokepoint in Local mode?",
+      "a": "In Local mode client data tunnels AP to WLC to LAN (hairpin), so all data passes through the WLC. That makes the WLC a chokepoint, which is why FlexConnect is used as an alternative.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What protocol did CAPWAP replace?",
+      "a": "CAPWAP is the modern replacement for the older LWAPP protocol.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands verify CAPWAP and AP join state?",
+      "a": "show ap join stats summary, show ap capwap ip, show ap summary, show wireless ap config, show ap uptime, and show ap config general.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you debug the CAPWAP join process?",
+      "a": "Enable debug capwap event to see CAPWAP discovery/join events while the AP tries to reach the WLC.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "An AP never joins the controller. What is the likely cause and check?",
+      "a": "Discovery or DNS failure. Check with show ap join stats summary and confirm the AP can resolve and reach the WLC.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "The control channel is down and data fails on an AP. What should you check?",
+      "a": "Control down usually means UDP 5246 is blocked (check show ap capwap ip); data failure means UDP 5247 or the mode (Local vs FlexConnect) is wrong. DTLS errors indicate certificate mismatches; slow data indicates WLC overload/capacity.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the CAPWAP control and data ports?",
+      "a": "CAPWAP control uses UDP 5246 and is DTLS-encrypted; CAPWAP data uses UDP 5247.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which CAPWAP quick review facts should you remember?",
+      "a": "Control runs over UDP 5246, data over UDP 5247; security is DTLS; Local sends data to the WLC; FlexConnect keeps data at the AP; discovery uses DNS/multicast; join leads to config; the legacy protocol is LWAPP.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "title": "Ethernet Standards",
+  "level": 1,
+  "levelTitle": "Level 01 - Physical Layer",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "01. Standards.md",
+  "cards": [
+    {
+      "q": "What is Ethernet and how does the 802.3 naming scheme communicate its properties?",
+      "a": "Ethernet (IEEE 802.3) is the de facto LAN standard, ranging from 10 Mbps shared hubs to 400 Gbps switched fabrics. The naming scheme is <speed><BASE or 10GBASE><media/modifier>, which translates the physical encoding, media, and reach at a glance.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What does BASE mean in an Ethernet standard name, and what do the media letters T, S, L, E, C, K, and F represent?",
+      "a": "BASE means baseband, a single carrier channel. T is twisted pair copper, S is short-range multimode (SX, SR), L is long-range (LX, LR), E is extended reach, C is copper twinax, K is backplane (KR), and F is fiber variants such as FX.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What do the X and R modifiers and descriptors in Ethernet names indicate?",
+      "a": "X indicates 4B/5B, 8B/10B, or a physical coding variant, while R indicates 64B/66B encoding. Some names use a descriptor such as -T or -S. These encode the physical layer line code.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Match 10BASE5, 10BASE2, 10BASE-T, 100BASE-TX, 1000BASE-T, and 10GBASE-T to their media and typical segment length.",
+      "a": "10BASE5 uses coax to 500 m; 10BASE2 uses coax to 185 m; 10BASE-T uses Cat 3+ UTP to 100 m; 100BASE-TX uses Cat 5 UTP (2 pair) to 100 m; 1000BASE-T uses Cat 5e (4 pair) to 100 m; 10GBASE-T uses Cat 6a to 100 m.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do 1000BASE-SX, 1000BASE-LX, and 1000BASE-LH differ in media and reach?",
+      "a": "1000BASE-SX uses multimode (850 nm) for 220-550 m. 1000BASE-LX uses multimode (1300 nm) at 550 m or single-mode at 5 km. 1000BASE-LH uses single-mode fiber for 10 km and is proprietary but common.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the media and reach of 10GBASE-T, 10GBASE-SR, 10GBASE-LR, and 10GBASE-ER?",
+      "a": "10GBASE-T uses Cat 6a to 100 m. 10GBASE-SR uses multimode short-range to 300 m (OM3). 10GBASE-LR uses single-mode long-range to 10 km. 10GBASE-ER uses single-mode extended reach to 40 km.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What do 40GBASE-LR4, 40GBASE-SR4, and 100GBASE-CR4 each use for media?",
+      "a": "40GBASE-LR4 uses single-mode with 4 channels of CWDM for 10 km. 40GBASE-SR4 uses multimode parallel fiber with MPO connectors for 100 m (OM3). 100GBASE-CR4 uses copper twinax DAC for up to about 5 m.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the PCS, PMA, PMD, and MDI sublayers of the physical layer?",
+      "a": "The PCS (physical coding sublayer) encodes and decodes bits using line codes such as 8B/10B, 64B/66B, and 4B/5B. The PMA (physical medium attachment) serializes and deserializes onto the wire. The PMD (physical medium dependent) defines the optics and electronic signals, modulation, power levels, and cable. The MDI is the actual connector such as RJ45 or LC.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How are 40G and 100G Ethernet standards classified by their -R suffix?",
+      "a": "10G uses -R (64B/66B) classifications such as SR, LR, ER, and ZR. 40G and 100G use parallel variants like SR4, CR4, and LR4 WDM. Backplane uses -KR, and copper twinax DAC uses -CR.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands set or verify negotiated link speeds?",
+      "a": "Use 'speed nonegotiate' on 1G-fiber (SX/LX, since there is no autoneg for 1G-fiber) and 'duplex full' on 10G and above, which are never half-duplex. Verify with 'show interfaces status', 'show interfaces counters rate', and 'show etherchannel summary'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What do BASE-T speeds versus -S and -L suffixes map to?",
+      "a": "BASE-T speeds map to copper, while -S and -L suffixes map to optics. For example, 1000BASE-T is copper while 1000BASE-SX is multimode fiber, so they must not be confused.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is the distance limit always 100 m for Ethernet standards?",
+      "a": "No. Distance limits depend on the standard: 1000BASE-T is 100 m, but 1000BASE-LX over SMF is 5 km and 10GBASE-LR is 10 km.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which Ethernet speeds support half-duplex, and which are full-duplex only?",
+      "a": "Half-duplex exists only for 10/100 Mbps variants. 1000BASE-* and above are full-duplex only, with no CSMA/CD in practice.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What design detail is required when using multimode fiber with a 1300 nm LX transceiver?",
+      "a": "Running 1300 nm LX on multimode fiber requires a mode-conditioning patch cable to avoid launch condition issues. This is a classic design detail.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

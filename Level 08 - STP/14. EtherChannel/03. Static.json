@@ -1,0 +1,118 @@
+{
+  "title": "EtherChannel — Static (ON)",
+  "level": 8,
+  "levelTitle": "Level 08 - STP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "03. Static.md",
+  "cards": [
+    {
+      "q": "What is a static EtherChannel (`mode on`)?",
+      "a": "A static EtherChannel bundles multiple physical interfaces into one logical Port-channel without using LACP or PAgP negotiation. Both ends must be configured consistently because there is no negotiation.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What happens when a port is configured with channel-group 1 mode on?",
+      "a": "It creates/uses EtherChannel 1, does NOT negotiate, and treats the configured member ports as one bundle. There is no active/passive/desirable/auto state.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which EtherChannel mode combinations form a static on bundle?",
+      "a": "ON + ON = static EtherChannel. ON + LACP = no negotiated bundle; ON + PAgP = no negotiated bundle.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why must both ends of a static EtherChannel be configured as on?",
+      "a": "Because a static EtherChannel has no protocol (no LACP/PAgP PDUs) with which to negotiate compatibility; the switch relies entirely on the administrator's configuration, so one side on and the other LACP/PAgP does not form a bundle.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does static EtherChannel send LACP or PAgP PDUs?",
+      "a": "No. Static on sends no LACP PDUs, no PAgP PDUs, and performs no negotiation.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "When is static on a reasonable choice?",
+      "a": "When the peer device does not support LACP/PAgP, when a no-negotiation bundle is explicitly required, or in lab/learning environments. For normal modern switch-to-switch deployments, prefer LACP.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why should LACP be preferred over static on for modern switch-to-switch deployments?",
+      "a": "LACP is an IEEE standard with multi-vendor support, performs negotiation, and provides better operational safety through negotiation than a static non-negotiated bundle.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Does static on bypass EtherChannel member-compatibility requirements?",
+      "a": "No. You still need compatible speed, duplex, switchport mode, access/native VLAN, allowed VLANs, trunk configuration, Layer-3 configuration, and same EtherChannel grouping where applicable.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does STP view a correctly formed static EtherChannel?",
+      "a": "STP sees one logical port rather than treating the individual member links as separate parallel STP paths.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does STP always see one port just because `mode on` is configured?",
+      "a": "No. The one-STP-port behavior depends on the EtherChannel being correctly formed. An incorrectly configured bundle can cause blocked links, connectivity problems, or, in a bad topology, a Layer-2 loop. Never assume mode on makes an unsafe topology safe.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does static EtherChannel do load balancing?",
+      "a": "It uses the same general EtherChannel load-balancing mechanism as LACP and PAgP: a hash (e.g., port-channel load-balance src-dst-ip) selects a physical member per flow.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does a static 4×1-Gbps EtherChannel give a single flow 4 Gbps?",
+      "a": "No. It provides about 4-Gbps aggregate capacity across multiple flows, but a single flow typically uses one member.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "In `show etherchannel summary`, what do SU and P mean?",
+      "a": "S = Layer-2 EtherChannel; U = in use; P = port is bundled in the port-channel. P does not mean PAgP.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands verify a static EtherChannel?",
+      "a": "show etherchannel summary; show etherchannel 1 detail or show etherchannel 1 port-channel; show interfaces port-channel 1; show interfaces status; show etherchannel load-balance.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the troubleshooting workflow for a static EtherChannel?",
+      "a": "Check physical interfaces → verify both sides use static on → show etherchannel summary → check member consistency → show interfaces port-channel 1 → check STP → check load balancing.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the main risk of a static EtherChannel?",
+      "a": "There is no protocol negotiation to detect an incompatible peer configuration, so configuration mismatch is the main risk. Both ends must be manually consistent.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is the most important CCNP static-on rule?",
+      "a": "ON + ON = STATIC ETHERCHANNEL; ON + LACP = NO NEGOTIATED BUNDLE; ON + PAgP = NO NEGOTIATED BUNDLE; LACP = MODERN IEEE STANDARD; PAgP = CISCO PROPRIETARY; ON = STATIC / NO NEGOTIATION.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the key static-`on` quick-review facts?",
+      "a": "mode on = no LACP/no PAgP/no negotiation; both ends must be on; members must be compatible; no negotiation means less protection against config errors; correctly formed bundle appears as one STP port; LACP preferred for modern deployments.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

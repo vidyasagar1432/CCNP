@@ -1,0 +1,112 @@
+{
+  "title": "Administrative Distance",
+  "level": 9,
+  "levelTitle": "Level 09 - Routing Fundamentals",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "02. Administrative Distance.md",
+  "cards": [
+    {
+      "q": "What is Administrative Distance (AD) and what question does it answer?",
+      "a": "AD is a Cisco value from 0-255 that represents the relative trustworthiness of a routing source. It answers: which routing source should I trust? Lower AD means more preferred routing source.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How do AD and metric differ in route selection?",
+      "a": "AD is used for source selection between different routing sources; it answers which routing source should I trust. The protocol metric is used for path selection within a routing protocol; it answers which path is best.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the default AD values for connected, static, EIGRP summary, eBGP, EIGRP internal, IGRP, OSPF, IS-IS, RIP, EIGRP external, iBGP, and unknown?",
+      "a": "Connected=0, Static=1, EIGRP summary=5, eBGP=20, EIGRP internal=90, IGRP=100, OSPF=110, IS-IS=115, RIP=120, EIGRP external=170, iBGP=200, Unknown/unusable=255.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "In 'O 10.1.1.0/24 [110/20]', what do the two values inside the brackets mean?",
+      "a": "110 is the administrative distance (OSPF), and 20 is the metric (OSPF cost). The format is [AD/metric]. Do not reverse them.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "If a router learns 10.1.1.0/24 from OSPF [110/20] and EIGRP [90/100], which route wins and why?",
+      "a": "EIGRP wins because its AD of 90 is lower than OSPF's AD of 110. The metrics 20 and 100 are not compared because they belong to different routing protocols.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens to a route that loses the AD comparison in the RIB?",
+      "a": "The losing route can still exist as a candidate route in its routing-protocol database, but it is not selected as the active RIB route while the lower-AD route is available.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Why does AD not get carried inside a route when it is redistributed between routing protocols?",
+      "a": "AD is a local route-selection value, not an attribute of the route. When a route is redistributed, the receiving router applies its own local AD rules for the receiving protocol. Metric can be translated/set during redistribution, but AD is not redistributed with the route.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is a floating static route and how is it configured?",
+      "a": "A floating static route is a static route configured with a higher AD than the primary route, serving as a backup. Example: ip route 10.1.1.0 255.255.255.0 192.0.2.5 200. It only becomes active when the lower-AD primary route disappears.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do you change the AD for OSPF on a router?",
+      "a": "Enter router ospf 1 configuration and use the distance command, for example: distance 150. This changes the AD used for OSPF routes on that router.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the AD values for eBGP vs iBGP, and EIGRP internal vs external?",
+      "a": "eBGP=20, iBGP=200. EIGRP internal=90, EIGRP external=170. These are significantly different values that are commonly confused.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why does a normal static route beat dynamic routing protocol routes for the same prefix?",
+      "a": "The default AD for a static route is 1, which is lower than EIGRP (90), OSPF (110), and RIP (120). Therefore the static route is preferred unless its AD is manually increased.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the AD range and what does 255 mean?",
+      "a": "AD ranges from 0-255. The value 255 represents an unknown/unusable routing source.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which routing source always wins for the same prefix and why?",
+      "a": "Connected routes with AD 0 win because 0 is the lowest possible AD. They are preferred over static and dynamic routes for the same prefix.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is changing AD on one router going to change the AD value used by another router?",
+      "a": "No. AD is local. Changing AD on one router changes that router's local route-source preference only; it does not change the AD value used by another router. AD is not advertised as a route attribute.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "What is the memory order for default AD values from lowest to highest?",
+      "a": "0 Connected, 1 Static, 5 EIGRP Summary, 20 eBGP, 90 EIGRP Internal, 100 IGRP, 110 OSPF, 115 IS-IS, 120 RIP, 170 EIGRP External, 200 iBGP, 255 Unknown.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What command would you use to verify which routing source won for a specific prefix?",
+      "a": "show ip route 10.1.1.0 is useful for seeing the selected route, next hop, source, AD, and metric.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "If an expected backup route is absent, what are the likely causes?",
+      "a": "The primary route still exists, or the backup route's next hop is unreachable. Also check that the backup route has a higher AD than the primary route.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    }
+  ]
+}

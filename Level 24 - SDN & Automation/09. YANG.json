@@ -1,0 +1,20 @@
+{
+  "title": "YANG",
+  "level": 24,
+  "levelTitle": "Level 24 - SDN & Automation",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "09. YANG.md",
+  "cards": [
+    { "q": "What is YANG?", "a": "YANG (RFC 6020/7950) is a data modeling language that describes network configuration and state as a tree of containers, lists, and leafs. Both NETCONF and RESTCONF operate on YANG models, making it the shared schema of modern network automation.", "tag": "Overview", "context": "Both" },
+    { "q": "What does a YANG model describe?", "a": "It describes both configuration and state as a tree of containers and lists holding leafs, organized into reusable modules, and accessed through NETCONF or RESTCONF. YANG gives devices a structured, machine-readable interface.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What are the key YANG statements and their meanings?", "a": "module (model namespace), container (group of nodes), list (repeated entries), leaf (single value), leaf-list (array of values), and type (data type). A YANG module is the schema for a device's config.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What data types does YANG support?", "a": "string (e.g., \"uplink\"), int/uint (e.g., 100), boolean (true/false), enumeration (up/down), and ip-address (e.g., 10.0.0.1). Typed leaves make validation automatic.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What are the standard YANG models and their purposes?", "a": "ietf-interfaces (interfaces), ietf-ip (IP addressing), Cisco-IOS-XE-native (IOS-XE native config), and ietf-yang-types (common types). Cisco ships Cisco-IOS-XE-* models for its devices.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How does JSON/YAML config map to YANG?", "a": "A structure like an interface list with name, type (ethernetCsmacd), and enabled true maps directly to the ietf-interfaces YANG tree, so instance data is just the model instantiated with values.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "Why is YANG the common language for NETCONF and RESTCONF?", "a": "It is vendor-neutral and standard, provides automatic typed validation, enables programmatic automation, and is self-describing for introspection.", "tag": "Core Concept", "context": "Interview" },
+    { "q": "Which commands display YANG schemas and datastores?", "a": "show netconf-yang schemas, show yang view, show netconf-yang datastore, and show running-config.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What are the building blocks of a YANG model?", "a": "module, container, list, and leaf (plus leaf-list and type). A container groups nodes, a list holds repeated entries, and a leaf holds a single typed value.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "What happens automatically when you send the wrong data type to a YANG leaf?", "a": "The typed leaf rejects it during validation, so type errors are caught automatically rather than silently misconfigured.", "tag": "Exam Trap", "context": "Exam" }
+  ]
+}

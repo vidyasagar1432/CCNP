@@ -1,0 +1,58 @@
+{
+  "title": "Software Upgrade",
+  "level": 28,
+  "levelTitle": "Level 28 - Cisco IOS and IOS XE",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "06. Software Upgrade.md",
+  "cards": [
+    {
+      "q": "What does upgrading IOS XE involve?",
+      "a": "Copying the new image to flash, setting it as the boot image, reloading, and verifying. Because the image is not run in place, you must point boot system at the new file for it to load.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Give the correct order for upgrading an IOS XE device.",
+      "a": "Check space, copy the image, verify the checksum, set boot system flash:, save the config, reload, then verify the version.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands copy a new image from a server or USB to flash?",
+      "a": "copy tftp: flash: for TFTP, copy ftp: flash: for FTP, copy scp: flash: for SCP, and copy usb0: flash: from a USB drive.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does boot system flash:ios-xe.bin do, and how do you confirm boot settings?",
+      "a": "It tells the device which image to load at boot; no boot system clears the setting, show boot verifies the configured boot file, and show version shows the running image.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you verify a copied image before installing it?",
+      "a": "Compare the checksum with verify /md5 flash:img.bin and check the file size with dir flash: or show flash: before trusting the copy.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you roll back a failed upgrade?",
+      "a": "Keep the previous image, restore the old boot system statement, save the config, and reload; validate with show version afterward.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between a full image upgrade and an SMU?",
+      "a": "A full image upgrade loads a new complete OS, typically a major version jump, while an SMU is a targeted patch applied to the running image that does not require a full reload.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why might a device reboot into the old image after you copied a new one?",
+      "a": "The boot system statement was missing or still points at the old file. The device only boots what boot system specifies, so set boot system flash: to the new image, save, and reload.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "title": "Wireshark",
+  "level": 26,
+  "levelTitle": "Level 26 - Monitoring & Telemetry",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "09. Wireshark.md",
+  "cards": [
+    {
+      "q": "What is Wireshark and what does it do?",
+      "a": "Wireshark is the industry-standard packet analyzer used to capture, decode, and filter traffic for troubleshooting; it reads pcap/pcapng, uses capture and display filters, and visualizes conversations, flows, and handshakes.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the main capabilities of Wireshark?",
+      "a": "It captures from a live interface, decodes into a protocol tree, filters via BPF and display filters, follows TCP streams, exports pcap/pcapng, and analyzes using experts/statistics.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between a capture filter and a display filter?",
+      "a": "A capture (BPF) filter applies before capture with pcap syntax (e.g. tcp port 443) and limits what is stored, while a display filter applies after capture using rich decoded fields (e.g. tcp.stream eq 0, http.request) to refine the view.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are common Wireshark display filters and their meaning?",
+      "a": "ip.addr == X shows host traffic, tcp.port == 443 a specific port, http.request requests, tcp.stream eq 0 one TCP session, icmp ping traffic, and dns.qry.name DNS queries.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does the protocol decode tree in Wireshark show?",
+      "a": "The decode tree shows each header and its flags at L2 (ARP/MAC), L3 (ICMP/fragmentation), L4 (TCP handshake/retransmissions), and L7 (HTTP/TLS/DNS), plus an expert layer flagging malformed or failed traffic.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do you diagnose common problems in Wireshark?",
+      "a": "For slowness look for retransmissions, unreachable for ICMP errors, auth failures for 401/403, DNS issues for NXDOMAIN, and latency via the RTT graph; Follow Stream plus statistics accelerate diagnosis.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the common capture vantage points and why choose them?",
+      "a": "Source host gives an egress view, server gives an ingress view, SPAN/ERSPAN a mixed view, and a tap a full view; choose the vantage point that matches the question being answered.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you capture packets on-box on Cisco IOS-XE?",
+      "a": "Use monitor capture CAP interface Gi0/1 both, set limits and buffer size (e.g. monitor capture CAP buffer size 10240), start with monitor capture CAP start, and verify with show monitor capture CAP.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you capture packets from the command line with Wireshark?",
+      "a": "Use tshark with a BPF filter, e.g. tshark -i eth0 -f \"tcp port 443\".",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A Wireshark capture shows nothing; what is the likely cause and check?",
+      "a": "Likely the capture interface/vantage point; check the capture point. Too much data suggests no BPF filter, wrong view needs a display filter, truncated data relates to buffer limit size, and parse failures relate to capture/tool version.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the difference between BPF and display filters in Wireshark?",
+      "a": "BPF is the capture filter syntax applied before/at capture, while display filters use a different rich field syntax applied after capture.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What tool/method is used to analyze a full conversation in Wireshark?",
+      "a": "Follow TCP Stream for conversation analysis and the statistics views for conversations/protocol hierarchy.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the on-box capture command on Cisco IOS-XE?",
+      "a": "monitor capture (e.g. monitor capture CAP on IOS-XE), checked with show monitor capture.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What file formats does Wireshark read, and why does it matter?",
+      "a": "Wireshark reads/writes pcap and pcapng; portability of these capture formats matters for sharing and analysis.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

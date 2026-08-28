@@ -1,0 +1,142 @@
+{
+  "title": "Dynamic ARP Inspection (DAI)",
+  "level": 17,
+  "levelTitle": "Level 17 - Security",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "06. Dynamic ARP Inspection.md",
+  "cards": [
+    {
+      "q": "What is Dynamic ARP Inspection (DAI)?",
+      "a": "DAI is a Layer 2 security feature that protects against ARP spoofing and ARP poisoning by intercepting ARP packets on untrusted switchports and validating their contents before allowing them through.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Where does DAI get the trusted IP-to-MAC information?",
+      "a": "Most commonly from the DHCP Snooping binding database, but DAI can also use ARP ACLs for devices with statically configured IP addresses.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What attack does DAI prevent, and how does ARP allow it?",
+      "a": "It prevents ARP spoofing/poisoning and man-in-the-middle attacks; ARP has no built-in authentication, so an attacker can forge a message claiming a gateway IP is at an attacker MAC.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is the default DAI trust state of interfaces, and what do trusted vs untrusted ports do?",
+      "a": "Interfaces are untrusted by default. Untrusted ports have ARP inspected (end-user/device ports); trusted ports bypass ARP inspection (uplinks and infrastructure/gateway-facing ports).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What command marks an interface trusted for DAI?",
+      "a": "ip arp inspection trust",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why should you not blindly trust user-facing ports or every trunk?",
+      "a": "A trusted interface bypasses DAI inspection, so it should face legitimate infrastructure (router, L3 switch, trusted distribution switch). Trust only interfaces where ARP traffic is expected and controlled.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How is DAI enabled and is it per interface or per VLAN?",
+      "a": "DAI is enabled per VLAN with 'ip arp inspection vlan <vlan>'.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the DHCP Snooping binding table contain?",
+      "a": "MAC address, IP address, VLAN, interface, and lease information.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What command views DHCP Snooping bindings?",
+      "a": "show ip dhcp snooping binding",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the common DAI validation checks?",
+      "a": "src-mac (Ethernet source MAC vs ARP sender MAC), dst-mac (destination MAC validation), and ip (ARP IP validation); they can be combined like 'ip arp inspection validate src-mac dst-mac ip'.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does 'ip arp inspection validate src-mac' check?",
+      "a": "Whether the source MAC in the Ethernet frame matches the sender MAC address in the ARP packet; a mismatch can indicate a forged ARP packet.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How are static-IP devices handled by DAI?",
+      "a": "Devices like servers, printers, cameras, and management devices may not have a DHCP Snooping binding, so DAI uses an ARP ACL to define legitimate IP-to-MAC mappings.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What command creates and applies an ARP ACL for DAI?",
+      "a": "'arp access-list STATIC-ARP' with 'permit ip host <IP> mac host <MAC>', then 'ip arp inspection filter STATIC-ARP vlan <vlan>'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What happens if a statically addressed device has no DHCP binding and no ARP ACL?",
+      "a": "Its legitimate ARP packets can be rejected by DAI.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "What is DAI rate limiting?",
+      "a": "It limits the rate of ARP packets received on an interface (e.g., 'ip arp inspection limit rate 15 burst interval 1') to protect against excessive ARP traffic floods.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What can happen when the DAI ARP rate limit is exceeded?",
+      "a": "Depending on platform/configuration, the interface can be placed into an err-disabled state; automatic recovery can be configured with 'errdisable recovery cause arp-inspection'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What verification commands are used for DAI?",
+      "a": "show ip arp inspection, show ip arp inspection interfaces, show ip arp inspection statistics vlan 10, show ip dhcp snooping binding, and show interfaces status err-disabled.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does DAI differ from DHCP Snooping and IP Source Guard?",
+      "a": "DHCP Snooping protects DHCP and builds trusted IP/MAC bindings; DAI validates ARP using that trusted information; IPSG restricts source IP/MAC traffic using bindings.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does DAI differ from port security?",
+      "a": "Port security protects against unauthorized source MAC addresses; DAI protects against ARP spoofing/poisoning.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does DAI protect against every Layer 2 or Layer 3 attack?",
+      "a": "No. DAI is specifically designed to protect ARP and should be viewed as one component of a broader access-layer security strategy (with port security, DHCP Snooping, IPSG, 802.1X, and storm control).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does DAI inspect: ARP requests, replies, or both?",
+      "a": "Both ARP requests and replies, not merely replies.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What debug command is used for DAI?",
+      "a": "debug ip arp inspection.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    }
+  ]
+}

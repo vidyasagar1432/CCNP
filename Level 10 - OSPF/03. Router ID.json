@@ -1,0 +1,94 @@
+{
+  "title": "OSPF Router ID",
+  "level": 10,
+  "levelTitle": "Level 10 - OSPF",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "03. Router ID.md",
+  "cards": [
+    {
+      "q": "What is the OSPF Router ID and why is it important?",
+      "a": "The Router ID (RID) is a 32-bit number that uniquely identifies an OSPF router in the LSDB. It appears in LSA headers, Hellos, and DR/BDR election. A stable RID prevents duplicate-router confusion, stabilizes DR elections, and keeps LSAs meaningful.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the exact OSPF Router ID election order?",
+      "a": "1. Explicitly configured router-id (highest precedence), 2. highest IPv4 loopback address, 3. highest IPv4 physical interface address. If there is no IPv4 at all, OSPF may refuse to start (especially OSPFv3).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why do loopbacks win the OSPF Router ID election?",
+      "a": "Loopbacks are always up, unlike physical interfaces, so they provide a stable RID. The highest loopback address is chosen, which is opposite of most elections.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What happens when you change the OSPF router-id while OSPF is running?",
+      "a": "The change does not take effect until the OSPF process is restarted with clear ip ospf process or a reload; until then the old RID persists. Restarting reconverges everything, causing a brief outage.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "In show ip ospf neighbor, how are neighbors identified?",
+      "a": "Neighbors are identified by their Router ID (RID), not their IP address. The neighbor column shows RIDs.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How is the Router ID used in DR/BDR election and what must be unique?",
+      "a": "The RID is used as the tie-breaker in DR/BDR election, with the highest RID winning when priorities are tied. The RID must be unique domain-wide per area (and for backbone/domain scope); duplicate RIDs cause neighbors to flap or never form.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the best-practice Router ID recommendation?",
+      "a": "Use a planned loopback-like number, not a physical interface, so the RID stays constant across interface changes and reboots. For example router-id 10.255.255.1.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What command forces the Router ID change to take effect immediately?",
+      "a": "clear ip ospf process (or reload). Without it, the old RID persists even after changing the router-id configuration.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What command shows the Router ID and where else do RIDs appear?",
+      "a": "show ip ospf with the Router ID line. RIDs also appear in show ip ospf neighbor (neighbor column) and show ip ospf database router (LSAs authored by each RID).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "If neighbors flap, what could be the cause and how do you confirm?",
+      "a": "A duplicate Router ID somewhere in the network. Confirm by checking the RIDs in show ip ospf neighbor to see if two routers share the same RID.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which wins the OSPF Router ID election: the highest or lowest address?",
+      "a": "The highest. Election order is explicit router-id, then highest loopback, then highest physical IPv4. This reverses the 'lowest wins' instinct used in many other elections.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the classic 'router-id didn't take' trap?",
+      "a": "Changing router-id while OSPF is running does nothing until you run clear ip ospf process or reload. The classic mistake is expecting the new RID to apply immediately.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does the RID affect DR/BDR election even if priorities differ?",
+      "a": "Yes, the RID is the tie-breaker: the highest RID wins when priorities are tied. Priority is considered first, and the RID breaks the tie.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the size and election rule of the OSPF Router ID?",
+      "a": "RID is 32-bit. Election rule: explicit router-id, then highest loopback IPv4, then highest physical IPv4, with highest winning. Change requires process restart, RID still required in OSPFv3, and it serves as the DR tie-break.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

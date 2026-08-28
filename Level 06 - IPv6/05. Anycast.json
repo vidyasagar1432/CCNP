@@ -1,0 +1,82 @@
+{
+  "title": "Anycast",
+  "level": 6,
+  "levelTitle": "Level 06 - IPv6",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "05. Anycast.md",
+  "cards": [
+    {
+      "q": "What is anycast?",
+      "a": "Anycast assigns the same unicast address to multiple nodes, and a packet is delivered to the nearest one as determined by routing metric. It existed in IPv4 but is first-class in IPv6, where it is addressed as an ordinary global unicast, and it powers DNS, cloud, and CDNs.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How does anycast routing work?",
+      "a": "Many distinct hosts hold the same IPv6 address (typically a GUA /32 or within), advertise the same prefix, and routing selects the topologically closest or best path. The address itself is not distinguishable from unicast.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Compare unicast, anycast, and multicast delivery.",
+      "a": "A unicast destination identifies one unique host and one receiver; anycast has multiple identical addresses but only the nearest node receives; multicast is a group where all members receive the packet. Anycast and unicast use GUA while multicast uses ff00::/8.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does a subnet-router anycast address work in IPv6?",
+      "a": "RFC 2526 reserves a subnet-anycast field: the last 128 bits follow a specific pattern, with ...:0:0 identifying the subnet router anycast. In practice anycast is deployed as /128 addresses on loopbacks or as /64+ subnet anycast, and no special prefix is needed.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Where is anycast used in the real world and in ENCOR?",
+      "a": "DNS root servers (13 logical roots with hundreds of nodes), DNS resolvers, cloud load balancing where anycast reroutes to the active PoP on failure, and anycast gateway/VTEP in VXLAN fabrics where the same gateway IP and MAC sit on every leaf and traffic lands on the nearest.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the caveats of using anycast?",
+      "a": "An anycast address cannot be used as the source, only as the destination; session state is per-interface so failover to another anycast member breaks stateful flows unless the session is shared (BGP keepalives drop, HTTP is stateless and fine); and mixing anycast and unicast needs explicit routing policy.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do you configure IPv6 anycast on Cisco IOS?",
+      "a": "Assign the same /128 address to multiple routers' loopbacks (for example ipv6 address 2001:db8:100::10/128 on R1, R2, R3) and advertise it in the IGP such as OSPFv3 so the closest router wins.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "When a packet is sent to an anycast address, who receives it?",
+      "a": "The nearest member, by routing metric, not all members (that is multicast) and not a single unique host (that is unicast).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Can you tell an anycast address from a unicast address by looking at it?",
+      "a": "No. An anycast address is indistinguishable from unicast; anycasting is a deployment choice, not something encoded in the address.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Can an anycast address be used as a source address?",
+      "a": "No. Per RFC 4291, nodes must not use an anycast address as the source of a packet; it can only be a destination.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is a TCP flow to an anycast node transparently taken over if the node fails?",
+      "a": "No. Because session state is per-interface, a stateful flow is broken when failover moves to a different anycast member unless the session is shared.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the mnemonic for distinguishing anycast from multicast in DNS/topology questions?",
+      "a": "Nearest server receives the packet = anycast; everyone in the group receives it = multicast.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,130 @@
+{
+  "title": "Port Security",
+  "level": 17,
+  "levelTitle": "Level 17 - Security",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "05. Port Security.md",
+  "cards": [
+    {
+      "q": "What does port security do?",
+      "a": "It restricts which source MAC addresses are allowed on a switchport and limits the number of secure MAC addresses that can be learned, operating on Layer 2 source MAC addresses primarily at the access layer.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the three types of secure MAC addresses in port security?",
+      "a": "Static secure MAC (manually configured with 'mac-address', survives reload), dynamic secure MAC (learned automatically, normally lost after reload), and sticky secure MAC (learned and added to running-config, survives if saved).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Do sticky secure MACs survive a reload automatically?",
+      "a": "No. Sticky MACs are written to running-config when learned, but they survive a reload only when the configuration is saved to startup-config (copy running-config startup-config or write memory).",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "What is the default maximum number of secure MAC addresses when port security is enabled?",
+      "a": "1.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does 'switchport port-security maximum N' control?",
+      "a": "It limits the total number of secure MAC addresses allowed on the port, including statically configured and learned secure addresses.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the three port-security violation modes?",
+      "a": "shutdown (err-disables the port with notification), restrict (drops violating frames and records/counters/notifies), and protect (drops violating frames silently with minimal visibility).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the default port-security violation mode?",
+      "a": "shutdown, which places the port into an err-disabled state after a violation.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How can an err-disabled port from a port-security violation be recovered?",
+      "a": "Manually with 'shutdown' then 'no shutdown', or automatically with 'errdisable recovery cause psecure-violation' and 'errdisable recovery interval 60'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the difference between restrict and protect violation modes?",
+      "a": "Both drop violating frames, but restrict records the violation and can generate logging/SNMP notifications and counters, while protect drops frames silently with minimal visibility.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "In terms of disruption, how do the violation modes rank?",
+      "a": "shutdown (most disruptive) → restrict → protect (least disruptive).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is port-security aging, and what are the two aging types?",
+      "a": "Aging removes secure MAC addresses according to a timer; absolute aging removes the MAC after the period regardless of activity, and inactivity aging removes it if no traffic is received during the period.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do static, dynamic, and sticky secure MACs differ in running-config and reload survival?",
+      "a": "Static is configured and present in running-config (survives); dynamic is learned and not in running-config (does not survive); sticky is learned and written to running-config (survives if saved).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What command views port-security status and secure MAC addresses?",
+      "a": "'show port-security' for status, 'show port-security interface Gi0/1' for details, and 'show port-security address' for secure MAC addresses.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you clear dynamic secure MAC addresses?",
+      "a": "With 'clear port-security dynamic'; be careful with sticky secure MACs because they are represented in the configuration.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Port security limits what exactly?",
+      "a": "Source MAC addresses, not IP addresses.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is port security a complete defense against CAM-table attacks or a replacement for 802.1X?",
+      "a": "No. It primarily controls how many and which source MAC addresses can exist on a port and what happens on violation; it is not a replacement for 802.1X and should be combined with DHCP Snooping, DAI, IPSG, and Storm Control.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Where is port security typically deployed, and what is notable about trunks?",
+      "a": "It is commonly deployed on access ports; support and behavior on trunks is platform/IOS dependent.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does port security compare to DHCP Snooping, DAI, and IPSG?",
+      "a": "Port security restricts source MAC addresses, DHCP Snooping builds trusted DHCP bindings and blocks rogue servers, DAI validates ARP using bindings, and IPSG restricts source IP/MAC combinations using bindings.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does 'switchport port-security mac-address sticky' do?",
+      "a": "It enables sticky learning: the switch dynamically learns source MAC addresses and places them into the running configuration as sticky secure MAC entries.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "You configure 'switchport port-security maximum 2' and three devices connect; what happens?",
+      "a": "The first two MACs are learned as secure, and the third device's frame exceeds the maximum and triggers the configured violation action (e.g., shutdown, restrict, or protect).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    }
+  ]
+}

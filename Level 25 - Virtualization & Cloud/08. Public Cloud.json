@@ -1,0 +1,76 @@
+{
+  "title": "Public Cloud",
+  "level": 25,
+  "levelTitle": "Level 25 - Virtualization & Cloud",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "08. Public Cloud.md",
+  "cards": [
+    {
+      "q": "What is a public cloud?",
+      "a": "Shared, on-demand infrastructure run by a provider (AWS, Azure, GCP) and delivered as IaaS/PaaS/SaaS. You rent capacity for elasticity and capex-to-opex conversion.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the defining characteristics of public cloud tenancy?",
+      "a": "Provider-owned, accessed over the internet/shared, pay-as-you-go, and multi-tenant: shared, metered, elastic compute.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which service models does a public cloud offer, with examples?",
+      "a": "All three: IaaS (EC2/VMs), PaaS (managed databases), and SaaS (Office 365).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the networking model inside a public cloud?",
+      "a": "VPC/VNet provides an isolated space, subnets segment it, security groups apply L3/L4 rules, load balancers balance traffic, and a NAT gateway provides outbound access.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Why is a VPC called the cloud's VRF?",
+      "a": "Because it gives each tenant an isolated virtual network with per-tenant routing tables, mirroring VRF isolation on a router.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What options connect a campus network to a public cloud?",
+      "a": "Internet VPN (IPsec), Direct Connect (private link), managed cloud VPN, and SD-WAN overlays. Hybrid or backup connectivity uses VPN or direct links.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Compare public versus private cloud on tenancy, control, location, and cost.",
+      "a": "Public is shared tenant, provider-controlled, in the provider's DC, with opex cost; private is dedicated, fully controlled by you, on-prem, with capex cost.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the benefits and trade-offs of public cloud?",
+      "a": "Pros: elasticity, global reach, fast provisioning, managed services. Cons: shared tenancy, cost management, compliance concerns, and vendor lock-in.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "There is no access to a public cloud VM. What do you check?",
+      "a": "Check the security group rules first; also check region/distance for slowness, the IPsec tunnel if the VPN is down, and billing for cost spikes.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What role do security groups play in public cloud networking?",
+      "a": "They are L3/L4 rule sets that filter traffic in front of instances, separate from VPC segmentation.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Match the quick review: owner, tenancy, IaaS, PaaS, SaaS, VPC, connect, cost.",
+      "a": "Owner = provider; tenancy = shared; IaaS = VMs; PaaS = managed; SaaS = apps; VPC = isolation; connect = VPN/Direct; cost = opex.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

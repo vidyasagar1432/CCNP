@@ -1,0 +1,70 @@
+{
+  "title": "Hybrid Topology",
+  "level": 2,
+  "levelTitle": "Level 02 - Network Topologies",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "05. Hybrid.md",
+  "cards": [
+    {
+      "q": "What is a hybrid topology?",
+      "a": "A network that combines two or more base topologies (bus, star, ring, mesh, tree). Real networks are almost always hybrids; the term describes how a deployment mixes topologies rather than being a topology in itself.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Name the common hybrid combinations and where each appears.",
+      "a": "Star-bus/tree (endpoint stars to hubs daisy-chained on a backbone) in classic campus; star-ring (star wiring, logical ring via MAU/token) in legacy token-ring; star-mesh (access stars, backbone/DC mesh) in modern enterprise and spine-leaf; bus-drop (backbone bus with star subnets) in older thicknet campuses; and wireless mesh plus star for mixed wireless designs.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is hybrid topology the norm in real networks?",
+      "a": "Functional blocks use what fits best: access is star (cheap/simple), core is mesh (redundant paths), WAN is partial mesh, wireless is mesh where needed. Modularity lets each module choose its own topology and mate at the core/distribution, and fault isolation improves when stars provide hierarchy and mesh provides core redundancy.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What are the exam-friendly design rules for a hybrid network?",
+      "a": "Keep complex parts (mesh/ring) at the core/backbone only; keep access star-hierarchical and predictable; let each block isolate failures (a bus-like backbone is an anti-pattern, replace it with redundant star/mesh); and always include redundant links plus STP/ECMP control in any mesh-flavored area.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you configure a star access port and a mesh-ish core link in a hybrid campus?",
+      "a": "Configure each interface type normally: a star access port uses 'switchport access vlan 10' plus 'spanning-tree portfast', while a core interface such as TenGigabitEthernet1/1 is a routed 'ip address 10.0.1.1 255.255.255.252' link with a description.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Is 'hybrid' a single fixed wiring pattern?",
+      "a": "No. It is a description of a deployment that mixes base topologies; you must identify which base topologies are combined in the scenario.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "If a scenario has access as star and the core as mesh, what is the topology called?",
+      "a": "It is a hybrid of star and mesh — 'hybrid (star + mesh)'.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does STP/loop control apply only to pure mesh designs?",
+      "a": "No. Any L2 loop needs loop control, regardless of whether the design is pure mesh or hybrid, so do not restrict STP thinking to pure mesh.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "In a hybrid, do terminator and ring-monitor concepts apply everywhere?",
+      "a": "No. Terminator/ring-monitor talk applies only to the respective legacy component (bus and ring respectively); each piece keeps its own failure properties.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "In the hybrid Quick Review, summarize the key combinations and the design rule.",
+      "a": "Star-bus/tree is the classic campus; star-ring is token ring; star-mesh is the modern enterprise; partial-mesh WAN balances cost; wireless mesh extends coverage. The rule is that modular blocks pick their own topologies, putting complexity at the core rather than the access.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

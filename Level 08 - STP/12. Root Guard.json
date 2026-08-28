@@ -1,0 +1,112 @@
+{
+  "title": "Root Guard",
+  "level": 8,
+  "levelTitle": "Level 08 - STP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "12. Root Guard.md",
+  "cards": [
+    {
+      "q": "What problem does Root Guard solve?",
+      "a": "Root Guard prevents a port from becoming a path toward an unexpected, superior Root Bridge (such as a rogue/lower-priority switch), protecting intentional root placement and the spanning-tree topology.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How does Root Guard behave when a superior BPDU is received, and what state does it create?",
+      "a": "If a superior BPDU is received on a Root Guard-enabled port, the switch places the port in a root-inconsistent state, which blocks the port, preventing the unexpected root from taking over until the condition clears.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the relationship between Root Guard and designated ports?",
+      "a": "Root Guard is normally used on ports expected to be Designated ports, where a downstream switch must never become the root.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Does Root Guard shut down or err-disable the port?",
+      "a": "No. Root Guard puts the port into a root-inconsistent (blocking) state and can automatically recover; it does not permanently err-disable.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which Cisco STP protection puts a port in the root-inconsistent state?",
+      "a": "Root Guard.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What command enables Root Guard and what global command form exists?",
+      "a": "spanning-tree guard root per interface. The global global-spanning-tree protection form (spanning-tree rootguard default) can be used to apply by default.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does Root Guard differ from BPDU Guard?",
+      "a": "Root Guard blocks a port that receives a superior BPDU (root-inconsistent). BPDU Guard err-disables a PortFast/edge port that receives any BPDU. Different condition, different behavior.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does Root Guard differ from Loop Guard?",
+      "a": "Root Guard reacts to a superior BPDU. Loop Guard reacts to a loss of expected BPDUs on a non-designated port, placing it in loop-inconsistent (blocking) state.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "On what type of port is Root Guard typically and incorrectly configured?",
+      "a": "Typically configured on ports facing downstream switches or the edge of a distribution/core, protecting against an inferior switch becoming root. It is not intended for ordinary access-port BPDU issues (that is BPDU Guard).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why is it wrong to assume Root Guard applies the same as BPDU Guard?",
+      "a": "They protect different things in different ways; stating 'Root Guard err-disables the port' or 'Root Guard is for access ports' is incorrect.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is the root-inconsistent state considered a blocking/temporary state rather than a hard failure?",
+      "a": "Because it blocks only the specific problematic condition and can recover automatically once the superior BPDU disappears.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Where is Root Guard most appropriately positioned in a topology?",
+      "a": "On designated ports facing downstream distribution/access switches, preventing an unexpected root below from being preferred even if it is technically superior.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which command verifies a root-inconsistent port and what should you check?",
+      "a": "show spanning-tree inconsistentports shows ports in inconsistent states, and show spanning-tree vlan 10 / show spanning-tree interface Gi0/1 shows roles; also check show logging for superior-BPDU messages.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the mental model for Root Guard?",
+      "a": "If a superior BPDU tries to claim root on this segment, block it (root-inconsistent).",
+      "tag": "Quick Review",
+      "context": "Both"
+    },
+    {
+      "q": "What are the key Root Guard facts in quick review?",
+      "a": "Prevents root takeover; port with superior BPDU goes root-inconsistent (blocking); auto-recovers; enable spanning-tree guard root; distinct from BPDU Guard (err-disable) and Loop Guard (loop-inconsistent).",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "Can Root Guard be configured on the same port as Loop Guard or BPDU Guard?",
+      "a": "They protect different conditions, but the feature that triggers first based on its condition takes effect; do not assume you can simply combine them blindly for all cases.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is 'a superior BPDU causes err-disable' a trap?",
+      "a": "The superior BPDU causes a root-inconsistent (blocking) state, not an err-disable.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

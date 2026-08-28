@@ -1,0 +1,100 @@
+{
+  "title": "GRE",
+  "level": 18,
+  "levelTitle": "Level 18 - VPN Technologies",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "01. GRE.md",
+  "cards": [
+    {
+      "q": "What is GRE and what IP protocol number does it use?",
+      "a": "GRE (Generic Routing Encapsulation) is IP protocol 47 that encapsulates arbitrary payloads (IPv4/IPv6/multicast) inside an IP tunnel between routers. It provides no encryption, no reliability, and adds a 4-byte header plus a 20-byte outer IP.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How is a GRE tunnel treated by the router for routing?",
+      "a": "The router treats the tunnel as a normal virtual L3 interface, so routing and multicast work over it. There is a virtual tunnel interface with an outer IP (physical/transport), an inner IP (original packet), and a GRE header.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the key differences between GRE and IPsec?",
+      "a": "GRE has no encryption while IPsec encrypts; GRE carries any L3 payload including multicast, while IPsec is typically unicast; routing protocols (OSPF/EIGRP/BGP) run directly over GRE but not directly over IPsec; GRE adds a 4+20 byte header while ESP varies. GRE is used for transport and dynamic routing, IPsec for confidentiality.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the standard site-to-site recipe combining the two technologies?",
+      "a": "GRE plus IPsec is the standard site-to-site recipe, using GRE for transport and dynamic routing and IPsec for confidentiality.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What do the commands tunnel source and tunnel destination do in a GRE configuration?",
+      "a": "Tunnel source specifies the physical interface or loopback of the underlay endpoint, and tunnel destination specifies the far tunnel endpoint. Together they define the underlay endpoints.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the GRE/MTU overhead and how is it handled?",
+      "a": "The overhead is the 4-byte GRE header plus 20-byte outer IP, for about 24 bytes (more when IPsec ESP is added). Reduce the tunnel ip mtu and shrink TCP MSS so packets fit without fragmentation; PMTUD and tcp adjust-mss keep the tunnel clean.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What do the GRE keepalive commands do?",
+      "a": "The tunnel keepalive command (for example keepalive 10 3) lets tunnel endpoints send keepalives to detect one-way or black-hole tunnels. Caveat: keepalives only make sense between direct GRE peers.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why does GRE enable multicast-capable VPN overlays like DMVPN?",
+      "a": "GRE carries multicast as well as IPv4, IPv6, and any L3 payload, so it is the carrier that makes multicast-capable VPN overlays such as DMVPN and dynamic routing possible.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Tunnel is up but ping fails over a GRE tunnel; what is a likely cause?",
+      "a": "A routing problem or firewall on the path (underlay reachability). Check underlay reachability with ping and routing that both ends have tunnel IPs and routes.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What should you check when GRE causes fragmentation?",
+      "a": "MTU is too high; check ip mtu and tcp adjust-mss on the tunnel interface to reduce the MTU overhead.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What protocol number is GRE, and why does this matter on firewalls?",
+      "a": "GRE is IP protocol 47, not TCP or UDP. If a firewall blocks protocol 47, the GRE tunnel cannot pass; check that ACL 47 is permitted.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does GRE provide encryption by itself?",
+      "a": "No. GRE provides no encryption by itself; it must be paired with IPsec for confidentiality.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands verify a GRE tunnel?",
+      "a": "show ip interface brief with the Tunnel filter, show interface Tunnel0, show ip route, ping, and debug tunnel.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is a black-hole GRE tunnel and how is it addressed?",
+      "a": "A black-hole tunnel is one with no routing inside the tunnel (no tunnel IP configured on both ends). Both tunnel ends need tunnel IPs and routing for traffic to flow.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the full GRE quick-review summary?",
+      "a": "GRE uses IP protocol 47, provides no encryption, carries any L3/multicast payload, has a 4-byte header plus 20-byte outer IP (~24 bytes overhead), uses ip mtu plus adjust-mss for MTU fix, supports tunnel keepalive, pairs with IPsec, and allows routing over the tunnel.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

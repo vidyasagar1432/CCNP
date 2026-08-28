@@ -1,0 +1,70 @@
+{
+  "title": "Python",
+  "level": 24,
+  "levelTitle": "Level 24 - SDN & Automation",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "13. Python.md",
+  "cards": [
+    {
+      "q": "Why is Python the de-facto language for network automation?",
+      "a": "Python scripts talk to devices via REST, Netmiko, and NAPALM, parse JSON and YAML, and drive controllers. It is the glue for SDN automation with readable syntax, a rich ecosystem, and native JSON/YAML data handling.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are Python's core syntax elements that exams expect?",
+      "a": "Variables (host = \"192.0.2.1\"), lists (devices = [\"R1\",\"R2\"]), dicts ({\"name\": \"R1\"}), conditionals (if x > 5:), loops (for d in devices:), and functions (def get(ip):). Dicts and lists mirror JSON, the bridge to APIs.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which Python libraries cover network automation?",
+      "a": "requests (HTTP/REST), json (parse/serialize), netmiko (SSH CLI), napalm (multi-vendor API), ncclient (NETCONF), and yaml (YAML config). requests + netmiko + ncclient cover most automation needs.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you make a REST call in Python?",
+      "a": "Use requests.get/post/put/delete with headers like X-Auth-Token, then r.json() parses the JSON response, and verify=False skips TLS verification for testing.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the difference between requests.get and requests.post?",
+      "a": "get reads data, post creates/changes data; the same GET/POST/PUT/DELETE verb mapping as REST. Use .json() to parse the response payload.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the common Python automation patterns?",
+      "a": "Read config with GET, change config with POST/PATCH, SSH with netmiko, loop over devices with for + list, and handle errors with try/except so one bad device does not kill the script.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why do f-strings and loops make multi-device automation easy?",
+      "a": "A for host in devices loop runs the same REST call against each host and f-strings build per-host URLs, e.g., requests.get(f\"https://{host}/api\"), then print the status code for each.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you install and run Python network automation code?",
+      "a": "Install libraries with pip install requests netmiko napalm, test imports with python3 -c \"import requests, json; print('ok')\", and run scripts with python3 script.py.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you troubleshoot common Python automation failures?",
+      "a": "Import error = library not installed (pip install); auth failure = bad token in headers; JSON error = bad API response when calling r.json(); timeout = reachability (use timeout=); SSL issues = verify=False.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which library should you pick for REST, SSH, and NETCONF in Python?",
+      "a": "requests for REST, netmiko for SSH CLI, and ncclient for NETCONF; json and yaml handle the data formats.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

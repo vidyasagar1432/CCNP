@@ -1,0 +1,130 @@
+{
+  "title": "IP Source Guard (IPSG)",
+  "level": 17,
+  "levelTitle": "Level 17 - Security",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "07. IP Source Guard.md",
+  "cards": [
+    {
+      "q": "What is IP Source Guard (IPSG)?",
+      "a": "IPSG is a Layer 2 security feature that prevents hosts from using unauthorized source IP addresses on an access port by creating a source-address allowlist based on trusted IP/MAC/VLAN/interface bindings.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the most common source of IPSG bindings?",
+      "a": "The DHCP Snooping binding table.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What threatens does IPSG help prevent?",
+      "a": "Source IP spoofing, unauthorized use of another host's IP address, and some forms of Layer 3 impersonation on the access layer.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does 'ip verify source' do?",
+      "a": "It enables source IP filtering on an interface, filtering traffic based on the authorized source IP information.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does 'ip verify source port-security' do?",
+      "a": "It adds source MAC validation to the source IP filtering, checking both source IP and source MAC against the authorized binding.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Is the 'port-security' keyword in 'ip verify source port-security' the same as enabling switchport port-security?",
+      "a": "No. The port-security keyword here is part of the IPSG command and should not be confused with the separate 'switchport port-security' feature.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does a DHCP Snooping binding contain?",
+      "a": "IP address, MAC address, VLAN, and interface.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How are static-IP devices handled by IPSG?",
+      "a": "Devices like servers, printers, cameras, and management devices may not appear in the DHCP Snooping binding table, so a static source binding must be configured with 'ip source binding <MAC> vlan <vlan> <IP> interface <port>'.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between a dynamic and static IPSG binding?",
+      "a": "Dynamic bindings are created by DHCP Snooping for DHCP clients; static bindings are created manually with 'ip source binding' for static-IP devices.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Where is IPSG normally deployed?",
+      "a": "On host-facing Layer 2 access interfaces; do not blindly apply source verification to infrastructure links.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do IPSG and port security differ, and how do they combine?",
+      "a": "Port security controls source MAC addresses; IPSG controls source IP (and optionally source IP+MAC). They can be combined (e.g., switchport port-security plus ip verify source port-security) for defense in depth.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does IPSG differ from DAI?",
+      "a": "IPSG prevents source IP/MAC spoofing by validating source traffic; DAI prevents ARP spoofing/poisoning by validating ARP. Both commonly use DHCP Snooping bindings.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the IPv6 counterpart to IPv4 IPSG?",
+      "a": "'ipv6 verify source'; IPv4 IPSG and IPv6 Source Guard are related but separate features.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What verification commands are used for IPSG?",
+      "a": "show ip verify source, show ip source binding, show ip dhcp snooping binding, show running-config interface Gi0/2, and show mac address-table interface.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What command clears IPSG source verification information?",
+      "a": "clear ip verify source interface Gi0/2.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A device with 'ip verify source port-security' has the correct IP but a changed source MAC; what happens?",
+      "a": "The source MAC does not match the authorized binding and the traffic can be rejected.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What can happen when a device with a DHCP Snooping/IPSG binding is physically moved to another port?",
+      "a": "The binding may still identify the old interface, so IPSG can reject traffic on the new interface until the binding is updated or renewed appropriately.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Is IPSG a complete network security solution?",
+      "a": "No. It primarily protects against source address spoofing on the access layer and does not replace port security, DHCP Snooping, DAI, 802.1X, ACLs, authentication, or firewall policies.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What debug command is used for IPSG?",
+      "a": "debug ip verify source (where supported); disable with undebug all.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the key relationship between DHCP Snooping, DAI, and IPSG?",
+      "a": "DHCP Snooping creates trusted bindings, DAI uses them to validate ARP, and IPSG uses them to validate source traffic.",
+      "tag": "Core Concept",
+      "context": "Both"
+    }
+  ]
+}

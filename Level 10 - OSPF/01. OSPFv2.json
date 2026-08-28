@@ -1,0 +1,94 @@
+{
+  "title": "OSPFv2",
+  "level": 10,
+  "levelTitle": "Level 10 - OSPF",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "01. OSPFv2.md",
+  "cards": [
+    {
+      "q": "What is OSPFv2 and what is its administrative distance?",
+      "a": "OSPF (Open Shortest Path First, RFC 2328) is an open-standard link-state IGP for IPv4. Routers exchange LSAs to build a shared LSDB, then each router independently runs Dijkstra's SPF to compute the shortest-path tree. Its AD is 110.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How does link-state routing differ from distance-vector routing?",
+      "a": "Link-state (OSPF) routers hold a full topology map (LSDB) and run SPF to compute a guaranteed acyclic loop-free tree with fast deterministic convergence. Distance-vector (RIP/EIGRP-ish) routers only know neighbor distance vectors and rely on split-horizon/holddown tricks for loop safety with slower, potentially unstable convergence.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What are the three OSPF tables and their show commands?",
+      "a": "Neighbor table (adjacent routers and state, show ip ospf neighbor), LSDB (all LSAs, show ip ospf database), and routing table (best SPF routes, show ip route ospf).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the OSPF hello and dead interval on broadcast and point-to-point networks?",
+      "a": "Hello is sent every 10 seconds. Dead interval is 4 times the hello, so 40 seconds by default. On NBMA networks hello is 30 seconds and dead is 120 seconds.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What multicast addresses does OSPF use?",
+      "a": "224.0.0.5 for all OSPF routers, and 224.0.0.6 for DR/BDR on broadcast networks. On NBMA networks OSPF uses unicast. The protocol number is 89.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is OSPF cost calculated?",
+      "a": "Cost = reference-bandwidth / interface-bandwidth, with a default reference bandwidth of 100 Mbps. Path cost is the sum of outgoing interface costs. On fast links both 100 Mbps and 1 Gbps cost 1, so auto-cost reference-bandwidth 1000 is often set to keep fast links distinct.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Write the basic OSPFv2 configuration in both network mode and interface mode.",
+      "a": "Network mode: router ospf 1, router-id 1.1.1.1, network 10.0.0.0 0.0.0.255 area 0. Interface mode: interface Gi0/1, ip ospf 1 area 0.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does the passive-interface command do in OSPF?",
+      "a": "It suppresses hello packets on the specified segment, so no neighbor adjacency forms there, while the network is still advertised.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A neighbor is stuck in INIT/2WAY, what is the likely cause and check?",
+      "a": "Likely a mismatch in hello/dead timers, area ID, or network type. Check with show ip ospf interface to verify these parameters match on both sides.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the classic cause of flapping OSPF neighbors?",
+      "a": "MTU mismatch between the two sides - this is a major exam topic. Verify MTU is equal on both interfaces.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the OSPF NBMA hello/dead timer pair?",
+      "a": "Hello 30 seconds, dead 120 seconds (4x hello), on NBMA frame-relay style networks, compared to the 10/40 broadcast and point-to-point pair.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does the OSPF network command use a subnet mask or a wildcard mask?",
+      "a": "It uses a wildcard (inverted) mask, not a subnet mask. For example network 10.0.0.0 0.0.0.255 area 0 uses the wildcard 0.0.0.255.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the default cost reference bandwidth in OSPF and why does it matter?",
+      "a": "The default reference is 100 Mbps, so 100 Mbps, 1 Gbps, and 10 Gbps links all compute a cost of 1 and are indistinguishable. Set auto-cost reference-bandwidth 1000 to keep fast links distinct.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "What is OSPF's RFC, type, and default reference bandwidth?",
+      "a": "RFC 2328, a link-state IGP, with default reference bandwidth of 100 Mbps, AD 110, port 89, and multicast 224.0.0.5/.6.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

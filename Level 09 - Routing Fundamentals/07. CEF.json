@@ -1,0 +1,124 @@
+{
+  "title": "CEF (Cisco Express Forwarding)",
+  "level": 9,
+  "levelTitle": "Level 09 - Routing Fundamentals",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "07. CEF.md",
+  "cards": [
+    {
+      "q": "What is Cisco Express Forwarding (CEF)?",
+      "a": "CEF is Cisco's high-performance IP forwarding architecture. It uses a Forwarding Information Base (FIB) and an adjacency table to make packet-forwarding decisions efficiently without requiring a full routing-table lookup for every packet. The model is RIB → CEF → FIB + Adjacency → Packet Forwarding.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are CEF's two main forwarding structures and what does each contain?",
+      "a": "The FIB maps destination prefix → forwarding information, built/resolved from the RIB, and contains the Layer-3 forwarding decision. The Adjacency Table maps next-hop/interface → Layer-2 rewrite information, resolved from ARP/IPv6 ND and interface information. FIB = Layer-3 forwarding decision; adjacency = Layer-2 rewrite information.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How is a packet forwarded with CEF?",
+      "a": "Incoming packet → destination IP → FIB lookup → longest-prefix match → forwarding entry → adjacency lookup → L2 rewrite → outgoing interface → forwarded. The router does not normally perform a complete RIB route-selection process for every packet; the RIB determines the active route, CEF builds the FIB, CEF resolves adjacency, and packets use that info.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What CEF adjacency type is 'glean' and when does it appear?",
+      "a": "A glean adjacency appears when the host is on a connected subnet but the specific host adjacency is not resolved; ARP for IPv4 or ND for IPv6 can resolve the host. For example, 10.10.10.0/24 → Gi0/1 with an unresolved 10.10.10.50 host shows a glean entry. Glean = connected subnet known, specific host adjacency unresolved.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the CEF adjacency types: normal, glean, receive, drop, null?",
+      "a": "Normal: next hop resolved, perform L2 rewrite and forward. Glean: host on connected subnet but adjacency unresolved, use ARP/ND. Receive: destination address belongs to the router, handled locally. Drop: packet should be discarded. Null: forward toward a null interface, intentionally discard.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does CEF handle a recursive next hop?",
+      "a": "If a next hop is not directly connected (e.g. 10.20.20.0/24 via 192.168.100.2), the router recursively determines how to reach it through another route (192.168.100.0/24 → Gi0/1), and CEF uses the resulting forwarding information to build the FIB/adjacency relationship. Recursive resolution is performed when forwarding information is built or updated, not as a lookup for every packet.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does CEF load-balance over ECMP paths?",
+      "a": "CEF uses a hash-based load-sharing algorithm to select a path among equal-cost paths. The hash can use fields such as source IP, destination IP, source port, destination port, and protocol. Exact hash inputs and behavior are platform-dependent.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Is CEF load balancing per-packet or per-flow?",
+      "a": "CEF commonly performs per-flow/per-destination load sharing rather than blindly alternating every packet between paths. This keeps packets of the same flow on a consistent path and reduces packet reordering.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is hash polarization and why does it matter?",
+      "a": "Hash polarization can occur in a multi-stage ECMP topology when different devices use similar hashing inputs and repeatedly select corresponding paths, concentrating traffic on particular links instead of distributing it evenly. It is a multi-stage ECMP load-balancing issue, not a routing-table selection problem. Mitigation may include different hashing inputs, platform-specific options, or topology changes.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How does the RIB, CEF, FIB, and adjacency table relate across planes?",
+      "a": "Routing Protocol: control, learns routes and selects paths. RIB: control, determines active routing information. CEF: forwarding architecture, builds/uses forwarding structures. FIB: data, destination-prefix forwarding lookup. Adjacency Table: data, Layer-2 rewrite information. Hardware Forwarding: data, platform-dependent packet forwarding.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What events trigger CEF/FIB updates?",
+      "a": "A new route learned, a better route selected, a route withdrawn, interface state change, next-hop reachability change, ARP/ND adjacency change, and ECMP path change. The general process is: routing change → RIB changes → CEF/FIB update → adjacency update if required → new forwarding behavior.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Is it accurate to say 'unresolved adjacency always means the packet is punted to the CPU'?",
+      "a": "No. The exact behavior for unresolved adjacency is platform- and software-dependent. Similarly, do not assume 'TCAM full always means all new routes immediately drop'; hardware forwarding-resource behavior varies by Cisco platform and feature set.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands view CEF/FIB information, a specific entry, and adjacency?",
+      "a": "show ip cef displays CEF/FIB info; show ip cef 10.1.1.0 shows a specific entry; show ip cef detail shows detailed info; show ip cef summary shows a summary; show adjacency displays adjacency information; show ip arp checks ARP resolution.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the difference between CEF, RIB, and FIB?",
+      "a": "RIB → control plane → route selection. CEF → forwarding architecture. FIB → data-plane forwarding information. CEF is not the same as the RIB and is not just the FIB; CEF uses the FIB and adjacency information together to perform efficient forwarding.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does CEF always mean ASIC/TCAM forwarding?",
+      "a": "No. CEF is a forwarding architecture; the exact hardware/software implementation is platform-dependent. Also, CEF performs FIB and adjacency lookups rather than invoking the full routing process for every packet.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the 'receive' adjacency mean and does it mean normal forwarding?",
+      "a": "A receive entry represents traffic destined for an address owned by the router and is handled locally. It does not mean normal forwarding through an interface.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is per-packet load balancing the default CEF behavior, and are all CEF hash inputs universal?",
+      "a": "No. CEF commonly uses hash-based load sharing that typically keeps packets of a flow on a consistent path (per-flow/per-destination). The exact fields used by the hashing algorithm vary by Cisco platform, software, and configuration, so they are not universal.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "If the RIB has a route but traffic fails, what else should you check?",
+      "a": "The problem may be in the FIB/adjacency or another forwarding issue. Check show ip route and show ip cef, and for unresolved next hops use show ip arp and show adjacency. Unexpected drops may relate to drop/null entries, and uneven ECMP links may relate to hashing behavior or polarization.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Summarize the CEF quick review: structures, source, lookup, and load sharing.",
+      "a": "CEF = Cisco Express Forwarding, Cisco's forwarding architecture, main purpose efficient packet forwarding, main structures FIB + adjacency information. FIB source is the RIB; FIB lookup is longest-prefix match; L2 rewrite comes from adjacency information. ECMP uses hash-based load sharing, commonly per-flow/per-destination, hash behavior platform-dependent; polarization is possible in multi-stage ECMP; recursive lookup is resolved before normal forwarding; main command is show ip cef.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

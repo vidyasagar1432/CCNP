@@ -1,0 +1,118 @@
+{
+  "title": "Network Types (LAN, WAN, MAN, PAN, WLAN, SAN, VPN)",
+  "level": 0,
+  "levelTitle": "Level 00 - Networking Basics",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "02. Network Types (LAN, WAN, MAN, PAN, WLAN, SAN, VPN).md",
+  "cards": [
+    {
+      "q": "How are networks classified?",
+      "a": "By geographic scope (PAN, LAN, MAN, WAN), by transmission medium (WLAN, SAN), or by who controls them and how connectivity is provided (VPN). A single enterprise typically uses all of these at once.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is a PAN and what are examples?",
+      "a": "A Personal Area Network, spanning about 1 to 10 meters for one person. Examples include Bluetooth, USB, Infrared, and UWB.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a LAN and what technology dominates it?",
+      "a": "A Local Area Network spanning a building or campus with high speed and low latency. Switched Ethernet is the dominant LAN technology, and it uses owner-operated, high-bandwidth (Gbps) equipment.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is a MAN and what are typical technologies?",
+      "a": "A Metropolitan Area Network spanning a city (kilometers to tens of kilometers). Typical technologies include city fiber rings and Metro Ethernet, placing it between LAN and WAN.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a WAN and what technologies are used?",
+      "a": "A Wide Area Network spanning intercity or global distances, typically carrier-provided. Technologies include MPLS, dedicated circuits (T1/E1, dark fiber), broadband (DSL/cable), cellular (LTE/5G), and modern SD-WAN overlays.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the characteristics of a WAN compared to a LAN?",
+      "a": "A WAN is leased from service providers, with lower per-unit bandwidth, higher latency, and more cost, and its operation is governed by an SLA covering availability, delay, jitter, and loss.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a WLAN and what standard does it use?",
+      "a": "A Wireless LAN that uses radio waves (RF) instead of cabling, based on the IEEE 802.11 family with standard Wi-Fi on 2.4, 5, and 6 GHz bands. It is managed by access points and Wireless LAN Controllers (WLC).",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does a WLAN compare to a wired LAN?",
+      "a": "A WLAN offers more convenience and mobility but suffers more RF interference, uses a shared medium, and has greater security exposure compared to wired LAN.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is a SAN and what technologies does it use?",
+      "a": "A Storage Area Network, a dedicated high-speed network connecting servers to block-level storage arrays. It often uses Fibre Channel (a dedicated fabric) or iSCSI/FCoE over Ethernet, and is optimized for throughput, low latency, and reliability.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between SAN and NAS?",
+      "a": "SAN is block-level storage over a dedicated network (Fibre Channel or iSCSI), while NAS is file-level storage over the regular LAN/IP. NAS is a related concept to SAN.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a VPN and what does it provide?",
+      "a": "A VPN is a logical, encrypted tunnel over an existing network (often the Internet or MPLS). It provides confidentiality (encryption), integrity, authentication, and a private addressing overlay without owning physical links.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the two types of VPN and examples of each?",
+      "a": "Site-to-site, which connects two branch/office networks (using IPsec or DMVPN), and remote access, which connects an individual user or device to the enterprise (using SSL/IPsec VPN).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does cost and control change as network geographic scope grows?",
+      "a": "Cost increases in the order PAN, LAN, MAN, WAN; speed and latency degrade as scope grows; and control decreases as scope grows because the carrier owns the WAN.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is 'the Internet is a WAN' an incorrect statement?",
+      "a": "The Internet is a network of networks; a WAN is one type of network. The Internet is not itself a WAN, though an ISP's backbone is a WAN example.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is a VPN for two buildings in the same city still a VPN regardless of distance?",
+      "a": "Yes. Scope and ownership are separate axes, so a VPN connecting two buildings in the same city is still a VPN regardless of distance.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is a WLAN not considered a separate topology?",
+      "a": "The WLAN is not a separate topology; it is a transmission classification based on using radio waves (RF) rather than cabling.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "On a Cisco switch, what commands create VLAN 10 named Users?",
+      "a": "Enter vlan 10 under global config, then name Users: switch(config)# vlan 10, switch(config-vlan)# name Users.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the trade-off a VPN makes compared to dedicated WAN circuits?",
+      "a": "A VPN trades some performance for privacy and lower cost compared to dedicated WAN circuits.",
+      "tag": "Quick Review",
+      "context": "Interview"
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "title": "Loopback (127.0.0.0/8 & Loopback Interfaces)",
+  "level": 5,
+  "levelTitle": "Level 05 - IPv4",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "08. Loopback.md",
+  "cards": [
+    {
+      "q": "What are the two distinct loopback concepts in IPv4 networking?",
+      "a": "IP loopback, the block 127.0.0.0/8 reserved for communication with the local host itself (127.0.0.1), and the loopback interface, a virtual router interface like Loopback0 used for stable addressing, router IDs, management, peering, and other control-plane functions; 127.0.0.1 and a Cisco Loopback0 are not the same thing.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is 127.0.0.1 and what does ping 127.0.0.1 actually test?",
+      "a": "127.0.0.1 refers to the local host; traffic is processed internally by the host's IP stack and is not sent onto the physical network, so ping 127.0.0.1 tests only the local IPv4/TCP/IP stack and not the LAN, gateway, DNS, or Internet connectivity.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is a Cisco loopback interface and when does it stay up/up?",
+      "a": "It is a logical/virtual Layer 3 interface (e.g. interface Loopback0 with ip address 10.255.255.1 255.255.255.255) that does not depend on a physical link being connected; it normally remains up/up as long as the device is operational and it is not administratively disabled with shutdown.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why do routers use loopback interfaces?",
+      "a": "They provide a stable logical identity: a stable router ID for routing protocols, a stable BGP peering source, a management address (SSH, SNMP, NTP), a stable tunnel source, and a Layer 3 endpoint for reachability tests; assigning a /32 host address is a common design convention, not a requirement.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does Cisco OSPF select the router ID?",
+      "a": "In order: a manually configured router-id, then the highest IP address on a loopback interface, then the highest IP address on an active non-loopback interface; that is why loopbacks are commonly used to provide a stable OSPF router ID.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens if the OSPF router ID changes while the process is running?",
+      "a": "OSPF router-ID selection happens when the process starts, so after a configuration/address change the process may need to be reset with clear ip ospf process to take effect; use it carefully in production because it temporarily affects OSPF adjacencies and routes.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Is 127.0.0.1 the same as a Cisco Loopback0 interface?",
+      "a": "No; 127.0.0.1 is IP loopback on the local host — never transmitted onto the physical network and used for stack testing — while Loopback0 is a logical Layer 3 router interface with an appropriately assigned address that can be reached through the network and serves as stable device identity.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "How do you configure a router loopback, an OSPF router ID, and reset the OSPF process?",
+      "a": "interface Loopback0, ip address 10.255.255.1 255.255.255.255 (normally enabled by default); router ospf 1, router-id 10.255.255.1; if the process is already running, apply the router ID with clear ip ospf process.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you verify a loopback interface and the OSPF router ID?",
+      "a": "show ip interface brief shows Loopback0 up/up with its IP; show ip interface Loopback0 gives detailed information; show ip protocols or show ip ospf shows the OSPF router ID.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Compare IP loopback with a router loopback interface.",
+      "a": "IP loopback uses 127.0.0.0/8 (typically 127.0.0.1), scope is the local host only, never physically transmitted, built into the host IP stack, and exists for local stack testing; a router loopback interface uses any suitable address (typically 10.255.255.x/32), is reachable from other devices if routed, is configured as interface Loopback0, and exists for stable device identity, router IDs, BGP peering, and management.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the memory shortcut for the two kinds of loopback?",
+      "a": "127.0.0.1 = me, this host: test my own IP stack; Loopback0 = this router's stable network identity: a stable address for routing, management, and peering.",
+      "tag": "Core Concept",
+      "context": "Both"
+    }
+  ]
+}

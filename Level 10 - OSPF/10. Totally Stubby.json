@@ -1,0 +1,82 @@
+{
+  "title": "Totally Stubby Area",
+  "level": 10,
+  "levelTitle": "Level 10 - OSPF",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "10. Totally Stubby.md",
+  "cards": [
+    {
+      "q": "What is a totally stubby OSPF area?",
+      "a": "A totally stubby area (Cisco stub no-summary) is a stub area that also blocks Type 3 (inter-area summary) LSAs, leaving only intra-area Type 1/2 and the ABR's injected default route. It is the most restrictive practical area type with the smallest possible LSDB inside an area, and inherits all stub restrictions.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What does a totally stubby area block versus a plain stub area?",
+      "a": "Both allow Type 1 Router and Type 2 Network. A stub area allows Type 3 Summary, while a totally stubby area blocks Type 3. Both block Type 4 ASBR-Summary and Type 5 External, and both inject a default (Type 3 - the only Type 3 present in a totally stubby area). Only intra-area routes plus the default exist in the totally stubby area's table.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is a totally stubby area configured differently on the ABR vs internal routers?",
+      "a": "Internal routers use plain area 3 stub. The ABR adds the no-summary keyword: area 3 stub no-summary. The no-summary keyword is what makes it totally stubby and is configured only on the ABR.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the advantages of a totally stubby area over a plain stub area?",
+      "a": "A totally stubby area blocks Type 3 summaries into the area, giving the smallest LSDB and lowest SPF CPU. It still injects a default route. It is best for the most remote branches that only need the default to leave.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What route codes appear inside a totally stubby area?",
+      "a": "Internal routes are O (intra-area). The injected default appears as O*IA (inter-area default flagged * = default candidate). No specific O IA inter-area routes appear.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What constraints does a totally stubby area inherit from a stub area?",
+      "a": "It cannot be Area 0, cannot contain an ASBR, all routers in the area must run stub (with the ABR adding no-summary), and no virtual link can traverse through the area.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you verify a totally stubby area?",
+      "a": "show ip ospf for area config, show ip route ospf should show O intra plus O*IA default only, and show ip ospf database summary should show only the default Type 3.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "If inter-area routes appear inside a supposedly totally stubby area, what is wrong?",
+      "a": "The no-summary keyword is missing on the ABR. Verify the ABR config has area 3 stub no-summary. Internal routers use plain stub.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Where is the no-summary keyword configured in a totally stubby area?",
+      "a": "Only on the ABR. Internal routers inside the area use plain stub; the ABR adds stub no-summary to make the area totally stubby.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the smallest-LSDB OSPF area type?",
+      "a": "The totally stubby area. It blocks Type 3, 4, and 5, keeping only Type 1/2 and the injected default, giving the smallest possible LSDB inside an area.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What route code does the injected default use in a totally stubby area?",
+      "a": "O*IA - an inter-area default flagged with * (default candidate).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Summarize the totally stubby area quick-review facts.",
+      "a": "Blocks Type 3, 4, 5; keeps Type 1, 2; injects a default (only Type 3 present); ABR uses stub no-summary; internal routers use stub; no ASBR; not Area 0; route codes O plus O*IA; minimal LSDB/CPU.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

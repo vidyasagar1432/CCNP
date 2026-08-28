@@ -1,0 +1,106 @@
+{
+  "title": "Routing Table",
+  "level": 9,
+  "levelTitle": "Level 09 - Routing Fundamentals",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "01. Routing Table.md",
+  "cards": [
+    {
+      "q": "What is the routing table (RIB) and what is its main purpose?",
+      "a": "The routing table, also called the RIB (Routing Information Base), is the control-plane database containing the best routes to known destination prefixes. It decides where traffic should go; the FIB/CEF is used to forward traffic.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the possible sources of routes in the routing table, and what is the key idea of the RIB vs FIB distinction?",
+      "a": "Routes can come from directly connected networks, static configuration, or dynamic routing protocols. The router evaluates candidate routes and installs the best route(s) into the RIB. The RIB decides where traffic should go; the FIB/CEF forwards traffic.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the route codes for directly connected, local, static, OSPF, EIGRP, and BGP routes in show ip route?",
+      "a": "C for directly connected, L for local address, S for static, O for OSPF, D for EIGRP, and B for BGP. OSPF subtypes include O IA, O E1, O E2, O N1, O N2; EIGRP has D EX.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does each field in the route entry 'O 10.1.1.0/24 [110/20] via 192.0.2.1, 00:12:34, GigabitEthernet0/1' represent?",
+      "a": "O is the routing protocol/source code (OSPF); 10.1.1.0/24 is the destination prefix and prefix length; [110/20] is Administrative Distance / protocol metric; 110 is OSPF's AD; 20 is the OSPF path metric (cost); via 192.0.2.1 is the next-hop IP; 00:12:34 is the route age; GigabitEthernet0/1 is the outgoing interface.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "When multiple routing sources provide a route to the same destination prefix, how is the best route chosen?",
+      "a": "Compare Administrative Distance (AD) first. The route with the lowest AD wins between different routing sources. Once the routing protocol is selected, that protocol uses its own metric to choose the best path. AD compares routing sources; metric compares paths within a routing protocol.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "In the example 'OSPF route: 10.1.1.0/24 [110/20]' and 'EIGRP route: 10.1.1.0/24 [90/30]', which route wins and why are the metric values not compared?",
+      "a": "EIGRP wins because 90 < 110. The metric values 20 and 30 are not compared because the routes came from different routing protocols; AD compares routing sources, metric compares paths within a protocol.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is ECMP (Equal-Cost Multipath) and how does a router normally handle multiple equal-cost paths?",
+      "a": "ECMP occurs when multiple paths to the same prefix have the same qualifying cost, so the router can install multiple equal-cost paths. The exact number of supported ECMP paths depends on platform, routing protocol, software version, and configuration. With CEF, traffic is normally load-balanced using a hash-based method, typically keeping packets from the same flow on the same path to avoid packet reordering.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between the 'C' (connected) and 'L' (local) routes installed when an IPv4 interface is configured?",
+      "a": "C represents the directly connected subnet (e.g. 192.168.1.0/24). L represents the router's own interface address as a host route (e.g. 192.168.1.1/32). The local /32 is primarily used by the router to recognize traffic destined for its own interface address and is not itself what routing protocols advertise.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "If an interface is not operational, what happens to its connected and local routes?",
+      "a": "The corresponding connected and local routes may disappear from the routing table when the interface is not operational.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the relationship between RIB, FIB, and CEF in the routing architecture?",
+      "a": "The RIB is the control-plane routing database that stores and selects best routes. The FIB is the data-plane forwarding table derived from the RIB. CEF is the Cisco data-plane forwarding architecture used to perform efficient packet forwarding. RIB = routing decision; FIB/CEF = forwarding decision.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "What command displays the complete IPv4 routing table?",
+      "a": "show ip route",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands display routing information for a specific prefix, connected routes, and routing-table statistics?",
+      "a": "show ip route <prefix> for a specific destination/prefix; show ip route connected for connected routes; show ip route summary for routing-table statistics and route counts.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the common OSPF route codes and what does O E1 mean?",
+      "a": "O = OSPF intra-area, O IA = OSPF inter-area, O E1 = OSPF external Type 1, O E2 = OSPF external Type 2, O N1 = OSPF NSSA external Type 1, O N2 = OSPF NSSA external Type 2. Do not confuse lowercase 'o' with NSSA.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the quick summary of how a prefix gets into the FIB and gets forwarded?",
+      "a": "Route sources (connected, static, OSPF, EIGRP, BGP) produce candidate routes. AD selects the routing source between protocols; protocol metric selects the best path within a protocol. The RIB stores the best route(s), the FIB is derived from the RIB, and CEF/hardware uses it for packet forwarding. RIB chooses the route; FIB/CEF forwards the packet.",
+      "tag": "Quick Review",
+      "context": "Both"
+    },
+    {
+      "q": "What command displays routing information for VRF X, OSPF-learned routes, and static routes?",
+      "a": "show ip route vrf X displays the routing table for VRF X; show ip route ospf displays OSPF-learned routes; show ip route static displays static routes.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What command would you use to check if OSPF adjacency/LSDB issues are preventing an OSPF route from appearing in the routing table?",
+      "a": "show ip ospf neighbor and show ip ospf database, along with show ip protocols.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    }
+  ]
+}

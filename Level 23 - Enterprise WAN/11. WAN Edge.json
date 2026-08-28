@@ -1,0 +1,76 @@
+{
+  "title": "WAN Edge",
+  "level": 23,
+  "levelTitle": "Level 23 - Enterprise WAN",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "11. WAN Edge.md",
+  "cards": [
+    {
+      "q": "What is a WAN Edge in SD-WAN?",
+      "a": "The SD-WAN term for the routers at each site — vEdge (Viptela OS) or cEdge (IOS-XE). They terminate overlay tunnels, run OMP with vSmart, forward data via secure DTLS/IPsec, and enforce app-aware policies.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the roles of a WAN edge router?",
+      "a": "Tunnel termination (DTLS/IPsec), running OMP with vSmart for control, forwarding overlay data, applying local policy from templates, and supporting multi-WAN transport.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do vEdge and cEdge differ?",
+      "a": "cEdge is an IOS-XE router (Catalyst/ISR) running SD-WAN; vEdge is Viptela-native hardware/virtual running Viptela OS. Config differs (IOS-XE SD-WAN vs SD-WAN CLI), both interoperate natively.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a TLOC and color in SD-WAN?",
+      "a": "A TLOC (transport locator) identifies a transport connection, and color labels it (e.g. MPLS/broadband); each TLOC + color is a potential path, and SLA measures path health.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the four session types a WAN edge maintains?",
+      "a": "vBond (onboarding), vSmart (OMP), vManage (management), and peers (edge-to-edge tunnels).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Where does the SD-WAN data plane actually live?",
+      "a": "On the WAN edge routers (vEdge/cEdge); data is encrypted in DTLS/IPsec tunnels and SLA-routed between edges.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands verify a WAN edge?",
+      "a": "show sdwan control connections, show sdwan control connections-history, show omp peers, show omp routes, show sdwan interface, and show sdwan running-config.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A WAN edge has no control connections. What is the likely cause and check?",
+      "a": "A DTLS/NAT problem is likely; check show sdwan control connections.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "OMP is not coming up on the edge. What is the likely cause and check?",
+      "a": "vSmart reachability is likely; check show omp peers.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A path fails SLA on the edge. What is the likely cause and check?",
+      "a": "A transport/SLA issue is likely; check show omp routes and the transport health.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Field distinctions of the WAN Edge?",
+      "a": "WAN Edge is the data plane (vEdge/cEdge); cEdge is IOS-XE while vEdge is Viptela OS; transports are identified by TLOC + color; tunnels are DTLS/IPsec with app-aware policy.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

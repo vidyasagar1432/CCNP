@@ -1,0 +1,142 @@
+{
+  "title": "Router-on-a-Stick (ROAS)",
+  "level": 7,
+  "levelTitle": "Level 07 - VLAN Technologies",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "11. Router-on-a-Stick.md",
+  "cards": [
+    {
+      "q": "What is Router-on-a-Stick (ROAS)?",
+      "a": "ROAS is an inter-VLAN routing design in which a single physical router interface connects to a switch through an 802.1Q trunk. The router uses subinterfaces, with one subinterface representing each VLAN's Layer 3 gateway.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the ROAS mental model?",
+      "a": "One physical link, one trunk, multiple router subinterfaces, one gateway per VLAN.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What IP address is normally placed on the physical interface in ROAS?",
+      "a": "The physical interface normally has no IP address when used as the parent for ROAS subinterfaces; IP addresses are placed on the subinterfaces.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is a router subinterface associated with a VLAN?",
+      "a": "Using 'encapsulation dot1Q <vlan-id>' on the subinterface. For example, 'interface GigabitEthernet0/0.10' with 'encapsulation dot1Q 10' handles VLAN 10 traffic.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Does the subinterface number automatically equal the VLAN ID?",
+      "a": "No. Gi0/0.10 does not automatically mean VLAN 10; the VLAN association comes from 'encapsulation dot1Q 10'. The subinterface number and VLAN ID do not have to match, though it is best practice to make them match for clarity.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How is the switch port connected to a ROAS router configured?",
+      "a": "The switch port must carry the required VLANs as a trunk: 'interface GigabitEthernet0/24', 'switchport mode trunk', and 'switchport trunk allowed vlan 10,20,30'. Both sides must agree on the VLANs being carried.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What default gateway do hosts in each VLAN use with ROAS?",
+      "a": "Each host uses the router subinterface for its VLAN as its default gateway, e.g., VLAN 10 host uses 10.1.10.1, VLAN 20 host uses 10.1.20.1, VLAN 30 host uses 10.1.30.1.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Trace the ROAS traffic flow from a VLAN 20 host to a VLAN 10 host.",
+      "a": "The host sends to its default gateway; the switch forwards the frame tagged VLAN 20 to the router; the router maps it to Gi0/0.20, does an L3 lookup (connected route via Gi0/0.10), builds a new frame tagged VLAN 10, and the switch delivers it to the destination host in VLAN 10.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How is the native VLAN configured on a ROAS subinterface?",
+      "a": "Explicitly with 'encapsulation dot1Q 999 native' on the subinterface, telling the router that VLAN 999 is the native VLAN (untagged). Do not assume Gi0/0.999 is automatically the native VLAN.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the advantages of ROAS?",
+      "a": "It is simple, low cost (no separate multilayer switch needed for basic inter-VLAN routing), easy to understand (each VLAN maps to a router subinterface), and excellent for labs learning VLANs, 802.1Q trunks, subinterfaces, default gateways, routing, ARP, and inter-VLAN traffic flow.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the disadvantages of ROAS?",
+      "a": "All VLAN traffic shares one physical router link (can become a bandwidth bottleneck), the router performs the Layer 3 forwarding, a single link failure disconnects all VLAN gateways through that connection, and it scales poorly as VLANs and traffic grow compared with a multilayer switch using SVIs.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does ROAS compare to SVI routing?",
+      "a": "ROAS uses a router with subinterfaces over an 802.1Q trunk, lower scalability, a shared trunk bottleneck, and typical use in small networks/labs. SVI routing uses a multilayer switch with 'interface VlanX', requires 'ip routing' on the switch, uses hardware-based L3 forwarding, higher scalability, and is typical for campus networks.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the key ROAS troubleshooting steps?",
+      "a": "Check the physical interface ('show ip interface brief'), subinterfaces, switch trunk and allowed/active VLANs, VLAN existence, subinterface encapsulation, routing table, and ARP. Use a structured Layer 2 to Layer 3 approach.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What can cause a ROAS VLAN to fail if the encapsulation VLAN ID is wrong?",
+      "a": "A VLAN ID mismatch causes the router not to associate that traffic with the intended subinterface. For example, a router configured with 'encapsulation dot1Q 20' will not process switch traffic tagged VLAN 30.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What happens if the parent physical interface is shutdown in ROAS?",
+      "a": "All subinterfaces depend on the parent physical interface, so they cannot function correctly if the parent is down.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the ROAS native VLAN mismatch scenario?",
+      "a": "If the switch is configured with 'switchport trunk native vlan 999' but the router uses 'encapsulation dot1Q 10 native', the devices disagree about which VLAN is native. Both sides must agree on the native VLAN configuration.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Does a router bridge VLANs directly?",
+      "a": "No. The router performs Layer 3 routing (VLAN 10 to VLAN 20), rebuilding the Layer 2 frame for the destination network. It does not simply bridge VLAN 10 into VLAN 20.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the classic ROAS scaling problem?",
+      "a": "Many VLANs over one physical trunk into one router interface can become a bandwidth and availability bottleneck.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does a router use ARP on IPv4 Ethernet interfaces?",
+      "a": "Although a router is not a Layer 2 switch, it still uses ARP to resolve a next-hop/destination IP address to a MAC address on directly connected networks, and it maintains an ARP cache for Ethernet Layer 2 framing.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What router commands verify ROAS operation?",
+      "a": "'show ip interface brief', 'show interfaces GigabitEthernet0/0', 'show running-config interface GigabitEthernet0/0.10', 'show ip route', and 'show ip arp'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What echo/trace commands test ROAS connectivity?",
+      "a": "'ping 10.1.10.10', 'ping 10.1.20.20', 'ping 10.1.20.20 source 10.1.10.1', and 'traceroute 10.1.20.20'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the one-minute ROAS summary?",
+      "a": "ROAS = one physical link, 802.1Q trunk, router subinterfaces, one gateway per VLAN. Traffic flows from a VLAN host to its default gateway, through the subinterface, Layer 3 routing, out the destination subinterface to the destination VLAN. Native VLAN uses encapsulation dot1Q <id> native. Subinterface number need not equal the VLAN ID.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

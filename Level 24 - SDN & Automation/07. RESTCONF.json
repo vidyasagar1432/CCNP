@@ -1,0 +1,21 @@
+{
+  "title": "RESTCONF",
+  "level": 24,
+  "levelTitle": "Level 24 - SDN & Automation",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "07. RESTCONF.md",
+  "cards": [
+    { "q": "What is RESTCONF?", "a": "RESTCONF is an IETF standard (RFC 8040) that exposes YANG models over HTTP(S) using REST verbs, giving a REST-style interface to network configuration. It is simpler than NETCONF, using stateless JSON/XML payloads, and is the modern way to configure Cisco IOS-XE devices via API.", "tag": "Overview", "context": "Both" },
+    { "q": "What are the building blocks of RESTCONF?", "a": "RESTCONF combines YANG data models with REST verbs delivered over HTTP/HTTPS, with payloads encoded as JSON or XML.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What do the RESTCONF verbs do?", "a": "GET reads config/state, POST creates data, PUT replaces data, PATCH performs a partial update, and DELETE removes data, matching the same semantics as generic REST.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How does RESTCONF compare to NETCONF?", "a": "RESTCONF uses HTTP(S) transport with JSON/XML encoding, is stateless, and uses HTTP verb operations; NETCONF uses SSH with XML encoding only, is RPC/stateful, and uses RPC operations like get and edit-config. RESTCONF is simpler; NETCONF is richer.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How is data addressed in a RESTCONF API?", "a": "Data lives at /data (config plus state), /operations (RPCs), and /yang-version (models), and is addressed by path into the YANG tree.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How do you configure an interface via RESTCONF on IOS-XE?", "a": "Send a PATCH to /restconf/data/Cisco-IOS-XE-native:native/interface/GigabitEthernet=1 with Content-Type application/yang-data+json and a JSON body for the YANG leaf, using curl with basic auth. The restconf command must be enabled in global config.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "How do you enable and verify RESTCONF on an IOS-XE device?", "a": "Enter global config and issue the restconf command, then verify with show netconf-yang and show running-config, and test with curl -k -u user:pass https://host/restconf/data/...", "tag": "Core Concept", "context": "Practical" },
+    { "q": "When should you choose RESTCONF versus NETCONF?", "a": "Pick RESTCONF for simple REST automation and NETCONF for rich operations and transactions; both run over YANG data models.", "tag": "Core Concept", "context": "Interview" },
+    { "q": "How do you troubleshoot RESTCONF failures?", "a": "404 = wrong path or model (check the /data path), 400 = bad JSON payload, 401 = authentication, no data returned = restconf not enabled (check the restconf command), and 500 = model/server problem (check YANG).", "tag": "Core Concept", "context": "Practical" },
+    { "q": "Which standard and transport does RESTCONF use?", "a": "RESTCONF is RFC 8040 over HTTP(S) with YANG data models and JSON/XML payloads, distinct from NETCONF's SSH plus XML/RPC approach.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "What is the key exam distinction between RESTCONF and NETCONF?", "a": "RESTCONF = HTTP + JSON/XML with REST verbs; NETCONF = SSH + XML with RPC operations like get and edit-config. RESTCONF is stateless and simpler, NETCONF is stateful and richer.", "tag": "Exam Trap", "context": "Exam" }
+  ]
+}

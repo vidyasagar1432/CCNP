@@ -1,0 +1,106 @@
+{
+  "title": "GNS3",
+  "level": 30,
+  "levelTitle": "Level 30 - Labs",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "03. GNS3.md",
+  "cards": [
+    {
+      "q": "What is GNS3?",
+      "a": "GNS3 is a free GUI that runs real device images (IOS, IOS-XE, and any VM) plus Docker containers, running images via QEMU and dynamips, popular for CCNP lab practice without Cisco licensing.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Why is GNS3 popular for CCNP lab practice?",
+      "a": "It is free and flexible, runs real device images plus VMs and Docker, is automation-friendly, and needs no Cisco licensing.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Which image types can GNS3 run?",
+      "a": "IOS via dynamips for routers, IOS-XE via QEMU for modern routers, firewalls like ASAv, Linux VMs as hosts/services, Docker containers, and VPCS for simple PCs.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the components of GNS3 architecture?",
+      "a": "GNS3 server for compute, GNS3 GUI as the client, QEMU for virtualization, Dynamips for IOS emulation, and Docker for containers.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between Dynamips and QEMU in GNS3?",
+      "a": "Dynamips emulates IOS images, while QEMU is used to run IOS-XE and other virtual machine images.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the correct order when building a GNS3 lab?",
+      "a": "Add the image first, then drop nodes on the canvas, connect them, boot and configure, save the project, and export/import as needed.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does GNS3 support automation?",
+      "a": "It exposes an API for scripts, pairs with Docker for code development, supports cloud integration as a bridge, and works with Ansible for configuration.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which resource factors matter most in a GNS3 lab?",
+      "a": "CPU and RAM per node because images are heavy, plus disk space for large images; the compute server can be local or remote.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does GNS3 compare to CML and EVE-NG?",
+      "a": "GNS3 is free, runs real images plus VMs, supports Docker, has an API and high fidelity, and uses a desktop UI — a flexible middle ground.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the default GNS3 API endpoint for local access?",
+      "a": "The GNS3 API is available via curl at http://127.0.0.1:3080/v2/.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A GNS3 node is stuck idle and not booting. What should you check?",
+      "a": "Check the emulator and image configuration, since a node stuck idle is likely caused by an image or emulator misconfiguration.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A GNS3 node has no console access. What is the likely cause and check?",
+      "a": "The likely cause is a port/binding issue, so check the console port bind configuration.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "GNS3 requires a Cisco license to use IOS images.",
+      "a": "False — GNS3 runs real images without requiring Cisco licensing, which is one reason it is popular for CCNP practice.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which emulator runs IOS images and which runs IOS-XE in GNS3?",
+      "a": "Dynamips runs IOS images, while QEMU runs IOS-XE (modern router) images.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What hardware should you plan for when running GNS3 images?",
+      "a": "Heavy CPU and RAM per image, plus disk for large image files; plan resources per node before scaling a lab.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "Which free tool is best for flexible CCNP labs combining real images, VMs, Docker, and automation?",
+      "a": "GNS3, which provides free, high-fidelity labs with real IOS images, VM support, Docker, and an API, without Cisco licensing.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

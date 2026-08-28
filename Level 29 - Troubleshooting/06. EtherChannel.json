@@ -1,0 +1,22 @@
+{
+  "title": "EtherChannel",
+  "level": 29,
+  "levelTitle": "Level 29 - Troubleshooting",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "06. EtherChannel.md",
+  "cards": [
+    { "q": "What does EtherChannel troubleshooting focus on?", "a": "Why bundle members do not bundle. Causes include protocol/mode mismatch, inconsistent speed/duplex/VLAN config, or STP interference.", "tag": "Overview", "context": "Both" },
+    { "q": "What is the first command to check for EtherChannel state?", "a": "show etherchannel summary, which shows the bundle state.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "In show etherchannel summary, what does the P state mean?", "a": "The port is in the channel bundle (P = in bundle).", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What does the I and S state in show etherchannel summary mean?", "a": "I means standalone (not in the bundle) and S means suspended. A member that will not bundle shows I or S.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What does U in show etherchannel summary mean?", "a": "The port is up and in the bundle.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What must match across all bundle members?", "a": "Speed, duplex, VLAN config (access or trunk), and native/trunk settings. Inconsistent members will not bundle.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "Which LACP mode combinations bundle and which do not?", "a": "active/active and active/passive bundle; passive/passive never bundles. Similarly auto/auto (PAgP) never bundles.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "What does mode on produce?", "a": "A static bundle with no negotiation (no LACP or PAgP).", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What is the load-balancing behavior of an EtherChannel?", "a": "The hash (based on src/dst MAC or IP) determines which member carries a flow, and traffic stays in order per flow. Verify with show etherchannel load-balance.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How is an EtherChannel treated by STP?", "a": "The bundle is one logical STP port, so a misconfiguration where members run STP separately means it is not a proper LAG.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "A suspended member is most likely caused by what?", "a": "A configuration mismatch across the bundle members, shown with show etherchannel detail.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "Why might traffic not load-share across bundle members?", "a": "The load-balance hash algorithm does not fit the traffic type. Fix with the port-channel load-balance command.", "tag": "Quick Review", "context": "Practical" }
+  ]
+}

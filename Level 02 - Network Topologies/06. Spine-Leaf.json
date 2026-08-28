@@ -1,0 +1,94 @@
+{
+  "title": "Spine-Leaf (Clos)",
+  "level": 2,
+  "levelTitle": "Level 02 - Network Topologies",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "06. Spine-Leaf.md",
+  "cards": [
+    {
+      "q": "What is spine-leaf architecture?",
+      "a": "A modern data-center/enterprise switching architecture where every leaf (ToR) switch connects to every spine switch, and no leaf connects to another leaf. It is a Clos network delivering predictable east-west performance, low latency, and easy scaling.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Why does spine-leaf replace the traditional tree?",
+      "a": "A traditional 3-tier tree concentrates north-south traffic and becomes a bottleneck, while east-west (server-to-server) traffic must traverse many hops. Spine-leaf keeps any-to-any traffic within at most N hops (leaf-to-spine-to-leaf) regardless of network size.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What are the roles and rules of spines and leaves, and their uplinks?",
+      "a": "Spines are the aggregation/backbone with no spine-to-spine links; all traffic passes through a spine. Leaves (ToR/EoR) connect servers/storage and gateways, with every leaf to every spine and no leaf-to-leaf links. Uplinks are equal-cost paths where all links are used via ECMP with no STP blocking.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the characteristics of spine-leaf in terms of latency, scalability, and loops?",
+      "a": "Latency is predictable at 3-4 hops for any flow, with each ECMP member equal cost. Adding a spine gives every leaf one more path, so capacity scales linearly. By design there are no loops (L2 fabric or fully L3 routed), avoiding STP blocking so ECMP can be run.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What overlay and control-plane technologies are used in modern spine-leaf fabrics?",
+      "a": "The overlay uses VXLAN to provide L2 segments over the L3 underlay, with anycast VTEP gateways enabling seamless VM migration. The control plane uses BGP EVPN (or MP-BGP) for MAC/IP reachability, and IS-IS or OSPF on the underlay.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does a small versus production spine-leaf look like physically?",
+      "a": "A classroom setup may be 2 spines and 4 leaves, while production runs 4-8+ spines with many leaves. Physical connectivity uses 40/100G uplinks with QSFP/MPO transceivers.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does spine-leaf compare to a traditional tree for hop count, utilization, east-west traffic, loops, and scaling?",
+      "a": "Traditional tree has variable/growing hop count, core bottleneck, slow east-west, STP blocking for loops, and scaling requires redesign at the core. Spine-leaf has fixed hops of at most 3-4, all uplinks used via ECMP, fast predictable east-west, no STP blocking (ECMP/routed fabric), and scaling by adding spines or leaves.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What commands configure a spine-leaf underlay IGP and verify ECMP?",
+      "a": "Configure each leaf uplink with an IP and run OSPF area 0 across leaves/spines ('router ospf 1', 'network 10.10.0.0/16 area 0'), or use BGP on the underlay. Verify ECMP with 'show ip route' including 'via Two' and 'show ip cef 1.1.1.1 internal' to see multiple FIB next-hops.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Are leaf-to-leaf and spine-to-spine links allowed in spine-leaf?",
+      "a": "No. The definition of spine-leaf is no leaf-to-leaf links and no spine-to-spine links; any config showing either is wrong.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "In spine-leaf, are all parallel links active or does STP block one?",
+      "a": "All parallel links are active and used via ECMP. Saying 'STP blocks one' is old-tree thinking and is wrong for spine-leaf.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How many hops does a leaf-to-leaf flow take with two spines?",
+      "a": "It takes 3 hops — leaf, spine, then the destination leaf.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "To increase capacity per leaf, and to add total capacity, what do you add?",
+      "a": "To increase capacity per leaf, add spines (spine count equals capacity). To add total capacity, add leaves.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the relationship between VXLAN and the spine-leaf fabric?",
+      "a": "VXLAN is the overlay that provides L2 segments over the L3 underlay. The topological question about the fabric concerns the interconnected L3 underlay below it, so distinguish underlay from overlay.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "In the spine-leaf Quick Review, summarize spine, leaf, uplinks, latency, overlay, and scaling.",
+      "a": "Spine aggregates/forwards and never links to another spine; leaf connects servers/storage and never links to another leaf; uplinks are ECMP paths, all active with no blocking; latency is fixed small with any-to-any at most N hops; overlay is VXLAN/EVPN (L2 over L3 underlay); and scaling adds spines/leaves predictably, giving faster east-west than a tree for the DC/enterprise answer.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "title": "MTU",
+  "level": 1,
+  "levelTitle": "Level 01 - Physical Layer",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "04. MTU.md",
+  "cards": [
+    {
+      "q": "What is MTU and what problems can a mismatch across a path cause?",
+      "a": "MTU (Maximum Transmission Unit) is the largest L3 packet a link can carry, and the Ethernet frame carrying it adds L2 overhead. Constraints across a path can cause fragmentation, black holes from PMTUD failures, or MTU mismatch flapping, all classic exam troubleshooting topics.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between MTU and frame size on Ethernet?",
+      "a": "MTU is the Layer 3 IP payload limit, defaulting to 1500 bytes. Frame size is MTU plus the 14-byte Ethernet header plus 4-byte FCS, plus a 4-byte 802.1Q VLAN tag when trunking. A 1500-MTU frame is 1518 bytes untrunked and 1522 bytes with a dot1Q tag.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do IPv4 and IPv6 differ in handling a packet that exceeds an egress interface MTU?",
+      "a": "IPv4 fragments the IP packet if it exceeds the egress interface MTU. IPv6 never fragments; it relies on PMTUD and an ICMPv6 Packet Too Big message from the sender.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Explain PMTUD and what happens when the ICMP reply is blocked.",
+      "a": "In path MTU discovery, the sender sets the DF (Don't Fragment) bit, and a router that cannot forward replies with ICMP Type 3, Code 4 (fragmentation needed and DF set). If firewalls block that ICMP, a PMTUD black hole results: large flows stall while small ones pass.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How is an MTU mismatch across a path detected, and what is the signature command pair?",
+      "a": "An MTU mismatch is seen on L3 links where one interface has jumbo and a peer does not, and OSPF or IS-IS hello dead in MTU-mismatch paths. The device-side configuration uses 'ip mtu' (L3) versus 'mtu' (L2) on the interface.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What MTU must tunnel links use for 802.1Q, VXLAN, GRE, MPLS, and PPPoE overheads?",
+      "a": "Encapsulation shrinks MTU: 802.1Q adds 4 B, VXLAN adds about 50 B (tunnel MTU about 1450), GRE adds 24 B (set 1476), MPLS adds 4 B per label, and PPPoE adds 8 B (MTU 1492). Otherwise encapsulation makes IP exceed link MTU and frames are dropped or fragmented.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does Cisco switch syntax handle L2 versus L3 MTU?",
+      "a": "On switches, 'system mtu jumbo' sets the L2 MTU for all ports, while 'mtu' on a routed port sets the IP MTU. Distinguish the interface mtu (L3) from 'ip mtu'. The default is 1500, and jumbo links must match across the switched path.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands test path MTU and configure a GRE tunnel MTU?",
+      "a": "Set a routed interface with 'ip mtu 1500'. Test with 'ping <target> size 1400 df-bit' and 'ping <target> size 9000 df-bit' for jumbo. For a GRE tunnel, configure 'ip mtu 1476', which is 1500 minus 24 bytes of GRE overhead (20 IP plus 4 GRE).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the first step in troubleshooting an MTU issue?",
+      "a": "Run 'ping ip <dst> packet-size 1472' (1500-28 ICMP); if that works but a larger MTU killer fails, it is a link MTU problem. Then check 'show interfaces | include MTU' and verify that ICMP unreachable (fragmentation-needed) is not filtered.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the signature of a PMTUD black hole?",
+      "a": "With DF set and ICMP fragmentation-needed messages filtered, large packets die silently while small ones pass, a condition called a PMTUD black hole. The fix is to lower the MTU or allow the ICMP type 3 code 4 packets.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does IPv6 fragment packets at intermediate routers?",
+      "a": "No. IPv6 never fragments; the sender performs PMTUD, so do not answer that routers fragment IPv6 packets.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between the 'mtu' and 'ip mtu' commands in Cisco CLI?",
+      "a": "'mtu' sets the L2 or default MTU, while 'ip mtu' sets the L3 IP MTU. Do not confuse them because the Cisco CLI differs by interface type.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens if only part of a campus is configured for jumbo frames?",
+      "a": "Jumbo frames must be configured everywhere or nowhere: a partially jumbo campus silently drops big frames, because a mismatch causes large frames to be discarded along the path.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

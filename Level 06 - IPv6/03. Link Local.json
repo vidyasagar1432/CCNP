@@ -1,0 +1,88 @@
+{
+  "title": "Link-Local (fe80::/10)",
+  "level": 6,
+  "levelTitle": "Level 06 - IPv6",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "03. Link Local.md",
+  "cards": [
+    {
+      "q": "What is an IPv6 link-local address?",
+      "a": "A link-local address (prefix fe80::/10) is automatically configured on every IPv6 interface. It is mandatory, non-routable, and used locally for ND, SLAAC signaling, neighbor discovery, and routing protocol adjacencies.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Are link-local addresses ever forwarded by routers?",
+      "a": "No. Link-local scope is the link only, so routers never forward them and they are never advertised into the global routing table.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is a link-local address generated?",
+      "a": "Either from the MAC via EUI-64 (flip the U/L bit and insert fffe) or randomly/stable per RFC 7217. It is always present, added automatically by ipv6 enable, and unique per interface.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Why does pinging a link-local address require a zone identifier?",
+      "a": "Because fe80:: addresses are identical on every host, the scope is per-link and you must identify the interface: ping6 fe80::1%eth0 on Linux/macOS and ping fe80::1%5 on Windows.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What protocols and functions rely on link-local addresses?",
+      "a": "Neighbor Discovery (NS/NA, RS/RA), SLAAC unicast, routing protocol adjacencies such as OSPFv3 and EIGRPv6 which use fe80 as next hop, default gateway learning from the RA sender, and management reachability on the connected segment.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the lifetime of each IPv6 address type on an interface?",
+      "a": "Link-local is mandatory and never removed; GUA/ULA addresses are removed when SLAAC stops receiving Router Advertisements or when their lifetime expires; temporary privacy addresses rotate every few days.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you enable link-local addressing on a Cisco IOS interface?",
+      "a": "Use ipv6 enable to auto-generate a fe80::/64 address with no global address, or ipv6 address fe80::1 link-local for a manual, deterministic link-local address.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands verify link-local addresses on Cisco IOS?",
+      "a": "show ipv6 interface Gi0/1 | include Link|fe80 and ping6 fe80::1%0 to ping from the device itself using the zone.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Is a fe80::/10 address invalid or broken?",
+      "a": "No. It is a normal, mandatory link-local address; this is the most common misunderstanding behind 'why do I have this weird fe80 address'.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Can a link-local address appear in the global routing table or be pinged across routers?",
+      "a": "No. Link-local is not routable, so it never appears in a global routing table and pinging one across routers fails.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is the % zone id in fe80::1%eth0 significant?",
+      "a": "The zone id %interface is required to disambiguate which interface the link-local address belongs to when multiple interfaces exist.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Can a link-local address appear as a next hop in an IPv6 routing table?",
+      "a": "Yes. On point-to-point links the next hop may display as a fe80 link-local address.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is a link-local fe80 address the IPv6 equivalent of IPv4 APIPA (169.254)?",
+      "a": "No. fe80 is normal and deliberate in IPv6, unlike IPv4's 169.254 APIPA fallback that indicates DHCP failure.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

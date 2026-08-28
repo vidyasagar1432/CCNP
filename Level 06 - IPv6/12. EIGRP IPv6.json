@@ -1,0 +1,88 @@
+{
+  "title": "EIGRP IPv6",
+  "level": 6,
+  "levelTitle": "Level 06 - IPv6",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "12. EIGRP IPv6.md",
+  "cards": [
+    {
+      "q": "What is EIGRP for IPv6?",
+      "a": "EIGRP for IPv6 brings EIGRP's DUAL convergence to IPv6 with the same metrics, timers, authentication, and route filtering as IPv4 EIGRP, but it has no network statements (address families instead), uses link-local neighbors and next hops, and is typically deployed using Named Mode.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How does EIGRP IPv6 differ from EIGRP for IPv4?",
+      "a": "It uses multicast ff02::A instead of 224.0.0.10, neighbors are identified by link-local addresses, there is no network statement in classic mode because interfaces enable the address-family ipv6 unicast, configuration can be classic or named mode, the composite K-value metric is identical, and a router-ID is still required (auto 0.0.0.x).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you configure classic EIGRP IPv6?",
+      "a": "Enable ipv6 eigrp 100 on the interface, then under router eigrp 100 use address-family ipv6 unicast with a router-id such as 1.1.1.1.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you configure EIGRP IPv6 in named mode?",
+      "a": "Create router eigrp ENCORE, then under address-family ipv6 unicast you can use a network 2001:db8:1:10::/64 statement and metric weights, and attach the interface with its own address-family ipv6 unicast.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do EIGRP IPv6 adjacencies form and stabilize?",
+      "a": "Interface-level enables start EIGRP on a link, adjacencies use link-local fe80 next hops with the same stability rule as OSPFv3, and the timers are hello 5 seconds with dead timer 3 times hello, the same as IPv4 EIGRP.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does EIGRP IPv6 handle metrics, summarization, and redistribution?",
+      "a": "It uses the same composite metric of bandwidth plus delay with identical successor and feasible-successor logic; summarization is per-interface with ipv6 summary-address eigrp, and redistribution into other protocols such as OSPF still requires seed metrics.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the multiprotocol relationship between EIGRP named mode and OSPFv3?",
+      "a": "OSPFv3 can carry IPv4 too, and EIGRP named mode covers IPv4 plus IPv6 in one process, so a single-protocol answer can simplify a dual-stack design.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What commands verify EIGRP IPv6?",
+      "a": "show ipv6 eigrp neighbors, show ipv6 route eigrp, and show ipv6 protocols.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Does classic EIGRP IPv6 use network statements?",
+      "a": "No. Interfaces or address families enable it; named mode may optionally use network statements under the address family.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the EIGRP IPv6 neighbor table display?",
+      "a": "Link-local fe80 addresses; you should not try to reach those neighbors via global unicast addresses.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does EIGRP IPv6 require a router-ID?",
+      "a": "Yes. It still needs a router-ID and auto-selection may warn, so configure one explicitly.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Do EIGRP metric weights and K-values carry over to IPv6?",
+      "a": "Yes, the same composite metric applies, so you should not change K-values lightly.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What multicast address does EIGRP use for IPv6?",
+      "a": "ff02::A for EIGRP routers, not the IPv4 224.0.0.10.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

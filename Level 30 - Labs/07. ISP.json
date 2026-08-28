@@ -1,0 +1,29 @@
+{
+  "title": "ISP",
+  "level": 30,
+  "levelTitle": "Level 30 - Labs",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "07. ISP.md",
+  "cards": [
+    { "q": "What does the ISP lab model and why does it matter for ENCOR?", "a": "It models a service provider core with eBGP between providers and customers, BGP attributes, MPLS transit, and traffic engineering, building internet-facing skills needed for SD-WAN underlay and BGP interconnect.", "tag": "Overview", "context": "Both" },
+    { "q": "What are the key elements of an ISP design?", "a": "OSPF as the IGP inside the AS, iBGP internally, eBGP to customers/peers, MPLS for label transit, and PE routers at the edge.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What distinguishes eBGP from iBGP?", "a": "eBGP peers are in different autonomous systems, while iBGP peers are in the same AS and typically require next-hop-self.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What is the eBGP setup sequence?", "a": "Configure router bgp, define neighbor remote-as, set next-hop-self for iBGP, advertise prefixes, then apply filters.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What does the BGP Weight attribute control?", "a": "Weight is a local (inbound) preference used to influence the outbound best-path selection within a router.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What does the Local-pref attribute control?", "a": "Local preference is used to influence outbound best-path selection toward a preferred exit.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How are AS-path, MED, and Community used for traffic control?", "a": "AS-path prepend makes a path less preferred, MED influences inter-AS path selection, and community is used for tagging and policy.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What is the MPLS transit setup sequence for VPNs?", "a": "Build an OSPF core, enable LDP, perform label switching, add MP-BGP, then configure L3VPNs.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "Which two protocols deliver MPLS VPN transit?", "a": "LDP for label distribution and MP-BGP for VPN prefix exchange.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What scales iBGP in a large ISP core?", "a": "Route reflectors and filters, with route reflectors reducing the number of iBGP sessions required.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What other features support an ISP core?", "a": "Prefix-list filtering, route reflectors to scale iBGP, confederations for ASN groups, QoS for class transit, and traffic-engineering tunnels.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "Which command sequence configures eBGP with a peer and iBGP next-hop-self?", "a": "router bgp 65001, then neighbor 10.0.0.2 remote-as 65002 for eBGP, and neighbor 10.0.0.1 remote-as 65000 with next-hop-self for iBGP.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "How is MPLS label distribution enabled in an OSPF core?", "a": "Set mpls label protocol ldp and use mpls ldp autoconfig under router ospf 1.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "Which commands verify eBGP and MPLS health?", "a": "show ip bgp summary for eBGP, show mpls ldp bindings for labels, show mpls forwarding, show ip vrf for VRFs, and show ip bgp for prefixes.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "No labels appear for MPLS transit. What is the likely cause and check?", "a": "LDP not running or out of sync, so check the LDP bindings with show mpls ldp bindings.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "Prefixes are leaking into the wrong neighbors. What is the likely cause?", "a": "Missing or incorrect filters, so check and correct the prefix-list filtering.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "iBGP and eBGP both require next-hop-self for correct advertisement.", "a": "False — next-hop-self is applied for iBGP peers; eBGP exchanges next hops normally between different ASes.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "A VRF table is empty despite configured L3VPN. What is the likely cause?", "a": "MP-BGP import/export not advertising the VRFs, so check the VRF with show ip vrf and verify MP-BGP.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "What summarizes a healthy ISP transit core?", "a": "Healthy BGP and LDP operation, verified with show ip bgp summary and show mpls ldp bindings.", "tag": "Quick Review", "context": "Both" }
+  ]
+}

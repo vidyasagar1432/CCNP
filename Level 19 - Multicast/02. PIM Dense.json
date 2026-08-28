@@ -1,0 +1,94 @@
+{
+  "title": "PIM Dense Mode (PIM-DM)",
+  "level": 19,
+  "levelTitle": "Level 19 - Multicast",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "02. PIM Dense.md",
+  "cards": [
+    {
+      "q": "What is PIM-DM and how does it distribute multicast traffic?",
+      "a": "PIM-DM (Dense Mode) assumes almost every LAN has a receiver. It floods multicast into the network (a push model) and then prunes branches with no members, building trees directly from the source.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Describe the PIM-DM flood-and-prune process.",
+      "a": "The source sends, traffic floods to all PIM neighbors, leaf routers without members send prunes, and after the prune state times out the network re-floods, which happens about every 3 minutes.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What kind of tree does PIM-DM build?",
+      "a": "It builds a source-based shortest-path tree (SPT) rooted at the source, held as (S,G) state.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which multicast state entries does PIM-DM use?",
+      "a": "Only (S,G) per-source entries; wildcard (*,G) any-source entries are not used in dense mode.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a graft in PIM-DM?",
+      "a": "A graft is the fast re-join message that restores a pruned branch when a new member appears below the prune point.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you enable PIM-DM on a router?",
+      "a": "Enable multicast globally with ip multicast-routing, then configure ip pim dense-mode per interface.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Does PIM-DM require a rendezvous point?",
+      "a": "No. PIM-DM is RP-less, so no RP configuration is needed.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does dense mode compare with sparse mode?",
+      "a": "Dense assumes members everywhere and pushes/floods with only (S,G) state and no RP; sparse assumes few members and pulls/joins using (*,G) then (S,G) with a required RP. Sparse is more efficient and is the production default.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "When is PIM-DM acceptable to use?",
+      "a": "For small, fully-meshed groups with dense receivers, such as LAN audio.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Which commands verify PIM-DM operation?",
+      "a": "show ip mroute, show ip pim interface, and show ip pim neighbor; debug ip pim helps diagnose problems.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A PIM-DM tree is not forming; what should you check?",
+      "a": "Whether ip pim dense-mode is enabled on the interfaces; use show ip mroute and show ip pim neighbor.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What do graft storms indicate in a PIM-DM network?",
+      "a": "A flapping member that triggers repeated graft/prune cycles; fix the member's stability.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the core exam distinction between the PIM-DM and PIM-SM trees?",
+      "a": "PIM-DM builds a source-based (S,G) SPT from the start with no RP; PIM-SM starts on a shared (*,G) tree through an RP before switching to the (S,G) SPT.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Summarize PIM-DM at a glance.",
+      "a": "A push/flood model that uses only (S,G) state, needs no RP, builds an SPT from the source, auto-prunes empty branches, restores them with grafts, and is not the default; it suits dense LANs.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,130 @@
+{
+  "title": "Floating Static Routes",
+  "level": 9,
+  "levelTitle": "Level 09 - Routing Fundamentals",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "09. Floating Static.md",
+  "cards": [
+    {
+      "q": "What is a floating static route?",
+      "a": "A floating static route is a static route configured with an administrative distance (AD) higher than the preferred route so that it normally remains out of the RIB and acts as a backup path. When the preferred route is no longer installed or selected, the floating static can become the best available route and enter the RIB.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the core AD idea behind a floating static route?",
+      "a": "Normal static AD = 1. To make it a backup, configure a higher AD, e.g. ip route 10.1.1.0 255.255.255.0 198.51.100.1 150, where the final 150 is the route's administrative distance. If another route has a lower AD, it is preferred.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is the floating static AD chosen relative to the primary route it backs up?",
+      "a": "The floating AD must be higher than the AD of the route source you want it to back up: Connected 0 → floating 1+, Static 1 → 2+, EIGRP Internal 90 → 100+, OSPF 110 → 120+, RIP 120 → 130+. Common values are OSPF/EIGRP → 150 and RIP → 200, but there is no special required value. The rule is floating AD > AD of the preferred route.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What AD value should not be used for a floating static, and why?",
+      "a": "Do not configure a floating static with AD 255 expecting it to become active, because AD 255 = route considered unreachable. Use an AD greater than the primary route but less than 255 (maximum usable AD is 254).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does a floating static automatically 'turn on' simply because a link goes down?",
+      "a": "No. A floating static does not automatically turn on when a link goes down. The router evaluates available routes using normal route-selection rules: longest-prefix match, compare competing routes for the prefix, administrative distance, then install the best route in the RIB for CEF forwarding.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Can a floating static be a default route, and for what purpose?",
+      "a": "Yes. A floating static can protect either a specific destination or a default route, e.g. ip route 0.0.0.0 0.0.0.0 198.51.100.1 200. A floating default route is common when a router has a primary and backup WAN/Internet connection.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Describe basic floating-static failover behavior. ",
+      "a": "When the primary route is installed, the floating static remains unselected. When the primary route is removed, the floating static can become active. When the primary route returns, the primary becomes preferred again. If the primary route flaps, traffic can move between primary and backup.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Why combine a floating static with IP SLA and object tracking?",
+      "a": "Without tracking, a primary static route can remain in the RIB even when the path beyond its next hop is unusable. With IP SLA + tracking, when the probe fails the track object goes DOWN, the tracked primary static is removed, and the floating static becomes preferred. IP SLA tracking provides a reachability test; it does not make static routing a dynamic protocol.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the difference between a floating static and a tracked static?",
+      "a": "A floating static is a backup route with a higher AD whose role is determined by route preference. A tracked static is tied to a tracking object whose state determines whether the route remains eligible for installation. A common WAN failover design combines a primary static with tracking plus a floating static as backup.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are common use cases for floating static routes?",
+      "a": "Backup WAN link (primary leased line + backup Internet), secondary ISP (primary ISP + backup ISP), branch connectivity (primary MPLS + backup VPN), default-route backup (primary default + floating default), static backup to dynamic routing (OSPF/EIGRP primary + static backup), and a simple disaster recovery path.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "For an OSPF primary with AD 110, what floating static AD would you use, and why?",
+      "a": "Use a floating static AD greater than 110, commonly 150, e.g. ip route 10.1.1.0 255.255.255.0 198.51.100.1 150. For EIGRP internal (AD 90), use a value greater than 90 such as 150; for RIP (AD 120), use a value greater than 120 such as 200.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "For a primary static and backup static configuration, what AD values result?",
+      "a": "Primary static ip route ... 192.0.2.1 has AD 1; backup static ip route ... 198.51.100.1 200 has AD 200. The AD 200 route is used only when the AD 1 route is no longer selected/installed.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands verify a floating static route, tracking, and IP SLA?",
+      "a": "show ip route 10.1.1.0 checks the route; show ip route static shows all static routes; show track 1 checks tracking; show ip sla statistics 100 checks IP SLA; show running-config | include ^ip route shows configured statics; show ip cef 10.1.1.0 checks forwarding.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What should you check if a floating route never becomes active?",
+      "a": "The primary route may still be preferred, so check show ip route <prefix>. If the backup activates immediately, verify the AD values (backup AD must be higher than the intended primary). If the backup does not work, verify the backup next hop/interface reachability with show ip route and show ip cef.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Does floating static mean 'link down = backup'?",
+      "a": "No. A physical interface going down is one way the primary route may disappear, but floating static routing is based on route availability and preference, not simply detecting a cable/link failure. For failures beyond the directly connected next hop, use tracking/IP SLA where appropriate.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "Does IP SLA automatically mean a floating static?",
+      "a": "No. IP SLA measures reachability; object tracking connects that result to a route or other tracked action. The common chain is IP SLA → track object → tracked static route → route withdrawn when tracking fails → floating static becomes preferred.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is a floating static still a static route with respect to dynamic behavior?",
+      "a": "Yes. A floating static does not automatically discover neighbors, exchange topology information, or advertise itself, and it requires manual configuration. If it needs to be advertised through a routing protocol, redistribution or another appropriate mechanism must be configured.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "Is AD compared before longest prefix?",
+      "a": "No. With Static 10.0.0.0/8 at AD 1 and OSPF 10.10.10.0/24 at AD 110, traffic to 10.10.10.5 uses the /24 because it is more specific. Remember: longest prefix first → route preference/AD → best route. Do not memorize 'lower AD always wins'.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is an arbitrary AD margin required for floating static routes?",
+      "a": "No. There is no rule such as 'AD must be primary + 40'. Any appropriate value works as long as the floating route has a higher AD than the route it backs up and remains below 255.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Summarize the floating static quick review.",
+      "a": "Purpose is a backup route; route type is static; normal static AD is 1; floating AD is higher than the preferred route; maximum usable AD is 254; AD 255 makes the route considered unreachable; when primary is available the floating route is normally not selected; when primary is unavailable the floating route can become active; faster condition-based detection uses IP SLA + tracking; typical use is WAN/ISP backup; it can be a default route; automatic advertisement is no; verification is show ip route <prefix>, show track, show ip sla statistics.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

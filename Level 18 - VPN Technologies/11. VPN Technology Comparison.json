@@ -1,0 +1,82 @@
+{
+  "title": "VPN Technology Comparison",
+  "level": 18,
+  "levelTitle": "Level 18 - VPN Technologies",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "11. VPN Technology Comparison.md",
+  "cards": [
+    {
+      "q": "What are the six VPN technologies compared for ENCOR?",
+      "a": "GRE (transport/multicast), IPsec (encryption), DMVPN (dynamic spokes), FlexVPN (unified IKEv2 framework), GET VPN (tunnel-free any-to-any over MPLS), and SSL VPN (remote user access).",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the key difference between GRE and IPsec?",
+      "a": "GRE provides no encryption but carries multicast and any routing protocol over a tunnel, while IPsec provides encryption but does not directly carry multicast or routing; the classic combination is GRE-in-IPsec.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do DMVPN and FlexVPN differ?",
+      "a": "DMVPN uses mGRE and NHRP for dynamic spoke-to-spoke tunnels and may run IKEv1 or IKEv2, while FlexVPN is IKEv2-only and uses IKEv2 profiles, supporting site-to-site, remote access, and hub-spoke.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What makes GET VPN different from DMVPN and crypto-map IPsec?",
+      "a": "GET VPN has no tunnel interfaces and uses a shared GDOI group key for direct any-to-any encryption, whereas DMVPN and crypto-map/VTI build point-to-point tunnels.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the advantage of SSL VPN over IPsec remote access?",
+      "a": "SSL VPN uses TLS/DTLS on ports 443, which passes most NAT and firewalls with low setup friction, while IPsec remote access uses UDP 500/4500 which is sometimes blocked and requires an IPsec client.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which VPN technology would you choose to carry multicast plus routing protocols?",
+      "a": "GRE over IPsec, because GRE supports multicast and any IGP/BGP over the tunnel while IPsec provides the encryption.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which VPN technology is best for dynamic branches over the Internet without a hub bottleneck?",
+      "a": "DMVPN, because mGRE plus NHRP lets spokes build direct IPsec tunnels to each other after registering at the hub.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which VPN technology provides tunnel-free any-to-any encryption over an MPLS backbone?",
+      "a": "GET VPN, which uses a GDOI group key so routers encrypt directly to each other with no tunnel interfaces or overlay routing.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "A company wants one framework covering both site-to-site tunnels and remote access clients; which technology fits?",
+      "a": "FlexVPN, because it is an IKEv2 profile-based framework that supports site-to-site, remote access, hub-and-spoke, and spoke-to-spoke configurations.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which commands help compare and verify the VPN technologies?",
+      "a": "show dmvpn, show crypto session, show crypto ipsec sa, show ip nhrp, show vpn-sessiondb, and show ip mroute to inspect group/tunnel state.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is a common VPN exam misconception about GRE?",
+      "a": "That GRE alone provides security; GRE does not encrypt at all and must be paired with IPsec for confidentiality.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the VPN technology quick-review summary?",
+      "a": "Pick IPsec for encrypting fixed links, GRE over IPsec when you need multicast and routing, DMVPN for dynamic Internet branches, FlexVPN for a unified IKEv2 framework, GET VPN for tunnel-free any-to-any on MPLS, and SSL VPN for remote users.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

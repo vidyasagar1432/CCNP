@@ -1,0 +1,82 @@
+{
+  "title": "Modular QoS CLI (MQC)",
+  "level": 21,
+  "levelTitle": "Level 21 - QoS",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "09. Modular QoS CLI.md",
+  "cards": [
+    {
+      "q": "What is the Modular QoS CLI (MQC)?",
+      "a": "MQC is the standard Cisco QoS framework that separates QoS into three building blocks: class-map to match traffic, policy-map to define the treatment, and service-policy to attach them to an interface.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the three MQC building blocks and their commands?",
+      "a": "class-map (match traffic), policy-map (define treatment), and service-policy (attach to an interface in the input or output direction).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between match-all and match-any in a class-map?",
+      "a": "match-all requires every criterion in the class-map to match, while match-any lets the packet match if any single criterion matches.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are common class-map match commands?",
+      "a": "match dscp, match access-group, match ip precedence, match cos, and match protocol for NBAR application-level matching.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the main policy-map action commands?",
+      "a": "set dscp/set cos/set precedence for marking, police for rate enforcement, shape for smoothing, bandwidth for CBWFQ, priority for LLQ, queue-limit, random-detect for WRED, and fair-queue for per-flow scheduling.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How is a policy-map attached to an interface?",
+      "a": "With the command service-policy input NAME or service-policy output NAME; a policy is attached in only one direction (input or output).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is class-default?",
+      "a": "It is the implicit catch-all class that matches all traffic not matched by any other class in a policy-map, used for default behavior such as shaping or queuing.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is hierarchical MQC?",
+      "a": "It nests a child policy-map inside a parent policy using a service-policy statement, so the parent shapes the aggregate rate while the child applies per-class sub-treatments.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which commands verify MQC policy and class state?",
+      "a": "show class-map, show policy-map, and show policy-map interface.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A QoS policy has no effect on traffic; what is the likely cause?",
+      "a": "The policy-map was never attached with service-policy, or it was attached in the wrong direction (input vs output); verify the interface attach with show policy-map interface.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the key exam distinction among the three MQC blocks?",
+      "a": "class-map matches (what), policy-map acts (how), and service-policy attaches (where and in which direction); confusing these three is a common mistake.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the MQC quick-review summary?",
+      "a": "MQC uses class-map to match (match-all vs match-any), policy-map to apply actions (set, police, shape, priority, bandwidth), and service-policy input/output to attach, with class-default catching unmatched traffic and parent/child policies for hierarchy.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "title": "Kubernetes Basics",
+  "level": 25,
+  "levelTitle": "Level 25 - Virtualization & Cloud",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "05. Kubernetes Basics.md",
+  "cards": [
+    {
+      "q": "What is Kubernetes (K8s)?",
+      "a": "The container orchestrator that schedules, scales, and heals container workloads across a cluster. Core objects are nodes, pods, deployments, services, and namespaces.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the cluster structure components of Kubernetes?",
+      "a": "Control plane (the brain, includes the API server), worker nodes (run pods), kubelet (the node agent), and etcd (the state store). The control plane decides; workers run workloads.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the core Kubernetes objects?",
+      "a": "Node (a worker machine), Pod (the smallest unit, one or more containers), Deployment (desired replicas), Service (stable network endpoint), and Namespace (logical partition).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the relationship among pods, deployments, and services?",
+      "a": "Pods run the applications, services expose them as a stable endpoint, and deployments maintain the desired replica count.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Why are Services needed in Kubernetes?",
+      "a": "Because pods are ephemeral and get their own IP, a Service provides a stable VIP/clusterIP with a selector that matches pods by labels, so applications don't chase changing pod IPs.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How does Kubernetes networking expose workloads?",
+      "a": "The pod network provides full-mesh connectivity via CNI, internal Services use a stable clusterIP, Ingress exposes services at L7, and NodePort/load balancers provide external access.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does Kubernetes scale and self-heal workloads?",
+      "a": "It maintains a declarative desired state, auto-scales replicas, checks health with liveness probes, and re-creates crashed pods, continuously reconciling current state to desired state.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What do the kubectl verbs get, apply, and scale do?",
+      "a": "get lists resources (e.g., kubectl get pods -A), apply declaratively applies a manifest (kubectl apply -f deployment.yaml), and scale changes the replica count (kubectl scale deploy app --replicas=5).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A pod is pending or in CrashLoopBackOff. What do you check?",
+      "a": "For pending, check resources with kubectl describe pod; for CrashLoop, check logs with kubectl logs. Also check the kubelet state and image pull events.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the difference between Docker and Kubernetes?",
+      "a": "Kubernetes is the orchestrator; Docker is the container runtime. K8s schedules, scales, and heals; Docker just runs containers.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What layering does Kubernetes use to provide external network access?",
+      "a": "CNI provides pod networking, Service exposes a clusterIP internally, and Ingress (L7) plus NodePort/LB provide external access.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Match the quick review: orchestrate, node, pod, service, deployment, namespace, network, run.",
+      "a": "Orchestrates containers; node = worker; pod = unit; service = endpoint; deployment = replicas; namespace = partition; network via CNI; run via kubectl.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

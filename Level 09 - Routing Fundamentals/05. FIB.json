@@ -1,0 +1,130 @@
+{
+  "title": "FIB (Forwarding Information Base)",
+  "level": 9,
+  "levelTitle": "Level 09 - Routing Fundamentals",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "05. FIB.md",
+  "cards": [
+    {
+      "q": "What is the Forwarding Information Base (FIB)?",
+      "a": "The FIB is the data-plane forwarding table derived from the routing table (RIB). It contains the Layer-3 information required to make a forwarding decision for a destination prefix. On Cisco IOS the FIB is part of Cisco Express Forwarding (CEF), which uses the FIB together with the adjacency table to forward packets efficiently.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the key relationship between RIB, FIB, and adjacency?",
+      "a": "RIB decides the best route → FIB provides the Layer-3 forwarding decision → adjacency provides the Layer-2 rewrite → packet is forwarded.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the differences between RIB and FIB?",
+      "a": "RIB is the control plane whose purpose is to select the best route, built from connected, static, and routing-protocol routes, and viewed with show ip route. FIB is the data plane whose purpose is to forward packets, built from the best routes in the RIB, containing forwarding information and references to adjacency information, and viewed with show ip cef.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How is the FIB built?",
+      "a": "Connected/static/routing-protocol routes feed the RIB, which selects the best route per prefix. CEF builds the corresponding FIB entries and resolves next-hop information through the adjacency table. On hardware-forwarding platforms the information can be programmed into hardware, so packets are forwarded without performing a full routing-protocol decision for every packet.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between the FIB and the adjacency table?",
+      "a": "The FIB answers 'which forwarding path should be used for this destination prefix?' and contains Layer-3 forwarding decisions (e.g. 10.1.1.0/24 → Gi0/1 → next-hop 192.168.1.2). The adjacency table provides the Layer-2 forwarding information needed to rewrite the outgoing frame (next hop, interface, destination MAC). ARP for IPv4 or Neighbor Discovery (ND) for IPv6 resolves the Layer-2 address of a directly reachable next hop.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the CEF forwarding entry type 'glean'?",
+      "a": "A glean adjacency commonly appears for a connected subnet when the router knows the destination belongs to that subnet but does not yet have a specific Layer-2 adjacency for the host. For IPv4 the router uses ARP, and for IPv6 Neighbor Discovery (ND), to resolve the host. Glean = connected subnet + specific host adjacency not yet resolved.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the main CEF forwarding entry/adjacency types?",
+      "a": "Receive (traffic destined to an address owned by the router), Connected/Attached (directly connected network), Glean (connected subnet where the specific host adjacency is not yet resolved), Next-hop (forward toward a resolved next hop), Drop (explicitly discard), and Null (forward to a null interface for intentional discards/summarization).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does longest-prefix match apply in the FIB?",
+      "a": "Yes. The FIB follows the same fundamental forwarding rule: the most specific matching prefix wins. For destination 10.10.10.50 with routes 10.0.0.0/8, 10.10.0.0/16, and 10.10.10.0/24, the FIB selects 10.10.10.0/24 because it is the most specific.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "When is the default route 0.0.0.0/0 used in the FIB?",
+      "a": "The default route 0.0.0.0/0 is used when no more-specific FIB entry matches a destination. It is not automatically used simply because a more-specific route is absent; it must exist in the forwarding table as a usable route. If no specific route and no default route exist, the packet is dropped.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does the FIB handle ECMP (Equal-Cost Multi-Path)?",
+      "a": "ECMP allows the FIB to maintain multiple equal-cost forwarding paths for the same prefix. Cisco platforms commonly use a hashing mechanism to distribute traffic, typically per-flow, keeping packets of the same flow on the same path to reduce reordering. ECMP does not mean every packet must alternate between paths; exact load sharing is platform-dependent.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What command displays the FIB, a specific FIB entry, and detailed CEF information?",
+      "a": "show ip cef displays the full FIB; show ip cef 10.1.1.0 shows a specific entry; show ip cef detail shows detailed CEF information. show ip route displays the RIB for comparison.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands verify adjacency information and ARP resolution?",
+      "a": "show adjacency displays adjacency information, and show ip arp checks ARP resolution.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why is 'FIB and RIB are the same' a misconception?",
+      "a": "They are different. The RIB is control-plane routing information; the FIB is data-plane forwarding information. The RIB determines the best route; the FIB is used to forward packets.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does the FIB contain only destination MAC addresses?",
+      "a": "No. The FIB contains Layer-3 forwarding information and works with the shared adjacency table for the Layer-2 rewrite. Do not think of the FIB as simply a table of prefix + MAC.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does CEF perform a recursive routing lookup for every packet?",
+      "a": "No. CEF resolves forwarding information before packet forwarding so packets do not require a full recursive route lookup every time. Recursive next-hop resolution is performed ahead of forwarding, not for every packet.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "Is every FIB lookup always performed by an ASIC/TCAM?",
+      "a": "No. Cisco forwarding architecture is platform-dependent. CEF provides efficient forwarding, but the exact hardware/software implementation varies by platform, so show ip cef summary alone does not diagnose every hardware-resource problem.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does a glean entry mean the route is missing?",
+      "a": "No. A glean entry generally indicates the router knows the destination is on a directly connected subnet but does not yet have the specific host's Layer-2 adjacency. The route is present; only the host adjacency is unresolved.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Summarize FIB vs RIB vs adjacency: what question does each answer?",
+      "a": "Routing Protocol: 'How can I reach the network?' (OSPF, EIGRP, BGP). RIB: 'Which route is the best?' (show ip route). FIB: 'How should I forward toward the destination?' (show ip cef). Adjacency Table: 'What Layer-2 rewrite is required?' (next-hop MAC/interface).",
+      "tag": "Quick Review",
+      "context": "Both"
+    },
+    {
+      "q": "If a route exists in the RIB but forwarding fails, what could be wrong and what do you check?",
+      "a": "The problem may be in the FIB/adjacency, Layer-2 resolution, an unreachable next hop, a drop/null entry, or hardware resources. Check show ip route and show ip cef, and use show ip arp / show adjacency for Layer-2 issues. A healthy RIB does not guarantee successful forwarding.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the one-line exam definition of the FIB?",
+      "a": "The FIB is the data-plane forwarding table derived from the RIB that provides the Layer-3 forwarding decision, working with adjacency information to efficiently forward packets toward their destination.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,118 @@
+{
+  "title": "IPv6 Addressing",
+  "level": 6,
+  "levelTitle": "Level 06 - IPv6",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "01. IPv6 Addressing.md",
+  "cards": [
+    {
+      "q": "What is IPv6?",
+      "a": "IPv6 is a 128-bit addressing scheme providing roughly 3.4 × 10^38 addresses. It solves IPv4 exhaustion, removes the need for NAT in most designs, and provides automatic link-local addressing, SLAAC, and no broadcast.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How is an IPv6 address written?",
+      "a": "As eight groups of four hexadecimal digits (hextets), each group being 16 bits, for a total of 128 bits. Example: 2001:0db8:85a3:0000:0000:8a2e:0370:7334.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the IPv6 shortening rules?",
+      "a": "Drop leading zeros in each group and replace the longest run of zero groups with :: exactly once. Example: 2001:0db8:85a3:0000:0000:8a2e:0370:7334 becomes 2001:db8:85a3::8a2e:370:7334.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is an IPv4-mapped IPv6 address?",
+      "a": "An IPv6 address that embeds an IPv4 address in the final 32 bits, written like ::ffff:192.168.1.1 with the prefix ::ffff:0:0/96.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the IPv6 prefixes for global unicast, link-local, unique local, and multicast?",
+      "a": "Global unicast is 2000::/3, link-local is fe80::/10, unique local is fc00::/7 (commonly seen as fd), and multicast is ff00::/8.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the IPv6 loopback and unspecified addresses?",
+      "a": "Loopback is ::1 and the unspecified address is ::.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What prefix identifies an anycast address?",
+      "a": "None: anycast uses the same address space as unicast, so it cannot be distinguished by prefix; any unicast address can be assigned to multiple nodes as an anycast address.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does IPv6 replace broadcast and ARP?",
+      "a": "IPv6 has no broadcast; broadcast is replaced by multicast (for example, all-nodes ff02::1) and ARP is replaced by Neighbor Discovery (ND). Routers do not fragment IPv6 packets; the sender performs Path MTU Discovery.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the standard IPv6 subnetting units?",
+      "a": "A /64 is one LAN subnet and is required for SLAAC; the lower 64 bits are the interface ID (EUI-64 or random for privacy). Common allocations are /48 per site and /64 per VLAN, with providers assigning /56 to /48.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What Linux host commands view IPv6 addressing?",
+      "a": "ip -6 addr show to view IPv6 addresses, ip -6 route for the IPv6 routing table, and ping6 2001:db8::1 to ping over IPv6.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you configure IPv6 on a Cisco IOS interface?",
+      "a": "Use ipv6 address 2001:db8:1:10::1/64 for a static GUA, optionally ipv6 address fe80::1 link-local for a manual link-local address, or ipv6 enable to autoconfigure only a link-local address.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands verify IPv6 on Cisco IOS?",
+      "a": "show ipv6 interface GigabitEthernet0/1 and show ipv6 route.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Can an IPv6 address contain two double colons?",
+      "a": "No. The :: notation may appear only once, because two double colons would make the number of zero groups ambiguous and the address invalid.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is 2001:db8:: a production IPv6 prefix?",
+      "a": "No, 2001:db8:: is the documentation prefix defined in RFC 3849 and must not be used in production networks.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does a link-local address need to be configured manually?",
+      "a": "No. A fe80::/10 link-local address is automatically present on every IPv6-enabled interface; configuring one manually is always optional.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Can SLAAC work on a /127 IPv6 subnet?",
+      "a": "No. SLAAC requires a /64 subnet; a /127 or /128 prefix breaks automatic address configuration.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is there such a thing as an IPv6 broadcast address?",
+      "a": "No. IPv6 has no broadcast; asking for the IPv6 broadcast address is a trick question, and broadcast-like traffic uses multicast such as ff02::1.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How many hex digits does an IPv6 address contain?",
+      "a": "32 hex digits arranged as 8 groups of 4.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

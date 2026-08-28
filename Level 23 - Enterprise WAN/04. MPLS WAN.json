@@ -1,0 +1,88 @@
+{
+  "title": "MPLS WAN",
+  "level": 23,
+  "levelTitle": "Level 23 - Enterprise WAN",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "04. MPLS WAN.md",
+  "cards": [
+    {
+      "q": "What is an MPLS WAN?",
+      "a": "A WAN that connects enterprise sites over a provider's L3VPN using PE routers that carry customer routes; the customer gets a private, any-to-any VPN while the SP handles routing between sites.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the three device roles in an MPLS L3VPN model?",
+      "a": "CE (customer, connects to PE), PE (SP edge, runs VRF + MP-BGP), and P (SP core, forwards on labels).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which routing protocols can be used on the CE-PE link?",
+      "a": "eBGP (most common), OSPF (mutual redistribution), EIGRP (legacy), or static (simplest); the choice shapes the L3VPN design.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the key contrast between MPLS L3VPN and Metro Ethernet?",
+      "a": "MPLS L3VPN is L3 with the provider doing routing and redundancy, while Metro Ethernet is L2 keeping routing and redundancy with the customer (any-to-any via VPLS/EVPN).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What benefits does an MPLS L3VPN provide an enterprise?",
+      "a": "Private VRF isolation, any-to-any full mesh at no extra cost, managed routing by the SP, and provider-guaranteed SLA.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does dual-homing provide resilience in an MPLS WAN?",
+      "a": "Using dual PE and dual CE gives fast failover through routing, with BGP handling the path selection.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Why is Internet traffic often kept off the MPLS private VPN?",
+      "a": "Internet often goes direct via DIA (direct Internet access), keeping MPLS reserved for private traffic; QoS is applied per-class over the VPN.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands verify an MPLS L3VPN?",
+      "a": "show ip route vrf CUST1 and ping vrf CUST1 verify routing; show bgp vpnv4 unicast vrf CUST1 and show ip bgp vpnv4 all check MP-BGP; show mpls forwarding-table checks labels.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "No VPN routes are being received across an MPLS WAN. What is the likely cause and check?",
+      "a": "An MP-BGP problem is likely; check show bgp vpnv4.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A CE site is unreachable through the MPLS VPN. What is the likely cause and check?",
+      "a": "A CE-PE protocol problem is likely; check show ip route vrf.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "MPLS forwarding is missing (no labels). What is the likely cause and check?",
+      "a": "An LDP/label problem is likely; check show mpls forwarding-table.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "VPN route overlap occurs between customers. What is the likely cause and check?",
+      "a": "An RD (route distinguisher) overlap is likely; check the rd configuration.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Summarize the MPLS WAN model and who routes.",
+      "a": "MPLS WAN is an SP-provided L3VPN using VRF + MP-BGP at the PE; the SP routes between sites (L3 = SP routes), while L2 Metro Ethernet keeps routing with the customer.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

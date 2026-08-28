@@ -1,0 +1,82 @@
+{
+  "title": "Congestion Avoidance",
+  "level": 21,
+  "levelTitle": "Level 21 - QoS",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "06. Congestion Avoidance.md",
+  "cards": [
+    {
+      "q": "What is congestion avoidance in QoS and what tool implements it?",
+      "a": "Congestion avoidance drops packets before a queue overflows to prevent tail-drop and TCP global synchronization. The tool is WRED (Weighted Random Early Detection), which randomly drops lower-priority traffic as the queue fills.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What problem does tail drop cause and why is it bad?",
+      "a": "Tail drop discards the last packets in a full queue, causing TCP global synchronization where TCP windows collapse together, plus burst loss for voice and retransmit efficiency loss.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do the RED/WRED thresholds behave as queue depth grows?",
+      "a": "Below the min threshold there is no drop, from min to max the random drop rate rises, and above max the queue is full so all packets are dropped.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does WRED weight drops per traffic class?",
+      "a": "WRED is weighted per class/DSCP: voice (EF) has no drop or the highest min threshold, video (AF) is moderate, and best effort is aggressive, so premium traffic drops last.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What command enables WRED and what variants does it support?",
+      "a": "random-detect enables WRED, random-detect dscp enables per-DSCP weighting, and random-detect precedence enables per-precedence weighting. Min/max thresholds define the drop curve.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is ECN and how does it interact with WRED?",
+      "a": "ECN (Explicit Congestion Notification) marks packets (using ECT/CE bits) instead of dropping them when WRED would drop, so TCP backs off, making it TCP-friendly.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Where should WRED be applied?",
+      "a": "Apply WRED where congestion is real: egress WAN (to protect voice/video), core queues (to avoid TCP sync), and at the edge with drop profiles.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "ACLs/clients still experience tail drop even though WRED is intended to prevent it; what is the likely cause?",
+      "a": "WRED is not applied (random-detect not enabled in the policy, or the policy not attached with service-policy output).",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "TCP synchronization persists despite using WRED; what is the likely cause?",
+      "a": "All classes share the same drop profile, so there is no weighting. Configure differentiated min/max thresholds per class so drops are spread.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What does WRED stand for and what makes it different from plain RED?",
+      "a": "WRED (Weighted Random Early Detection) is RED applied per class/DSCP, so different traffic classes get different drop profiles and premium traffic drops last.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the three queue thresholds in WRED/RED?",
+      "a": "min (below = no drop), max (random drop reaches max rate), and full (above max = drop all).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "When WRED is about to drop, what does ECN do instead and why?",
+      "a": "ECN marks the packet (ECT/CE bits) instead of dropping it, so TCP backs off without losing the packet, which is TCP-friendly.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

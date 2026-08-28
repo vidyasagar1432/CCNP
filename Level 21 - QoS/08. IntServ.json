@@ -1,0 +1,82 @@
+{
+  "title": "IntServ (Integrated Services)",
+  "level": 21,
+  "levelTitle": "Level 21 - QoS",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "08. IntServ.md",
+  "cards": [
+    {
+      "q": "What is IntServ and why does it not scale to large networks?",
+      "a": "IntServ delivers per-flow, hard QoS guarantees using RSVP to reserve bandwidth end-to-end before traffic flows. Every router holds per-flow state, which is why it does not scale to large networks.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the key elements of the IntServ model?",
+      "a": "A flow (per session/application), RSVP reservations (PATH/RESV messages), per-flow reservation state on every router, hard guarantees, and poor scale.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the role of PATH and RESV messages in RSVP?",
+      "a": "PATH goes sender to receiver to announce requirements; RESV goes receiver to sender to reserve resources. Each hop runs admission control to accept or reject the reservation.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the three IntServ service types and what does each guarantee?",
+      "a": "Guaranteed (hard bandwidth plus delay), Controlled load (QoS under load), and Best effort (no guarantee). Guaranteed is the classic hard-commit service.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands configure RSVP on an interface and what do they do?",
+      "a": "ip rsvp bandwidth <max> <typical> sets bandwidth, ip rsvp reservation bandwidth per-flow sets per-flow caps, and ip rsvp neighbor defines explicit peers. Configure RSVP on every hop along the path.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do IntServ and DiffServ differ in unit, signaling, state, guarantee, and scale?",
+      "a": "IntServ works per-flow with RSVP signaling, holds per-flow state, gives hard guarantees, and scales poorly; DiffServ works per-class with no signaling, has per-class state, gives statistical guarantees, and scales well. DiffServ wins on scale; IntServ wins on guarantee.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Where does IntServ live today and what is its surviving major use?",
+      "a": "It survives as RSVP-TE for MPLS traffic engineering, plus voice gateways on small segments and niche hard-guarantee uses. RSVP-TE (TE path setup) is the major surviving use.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What command verifies RSVP reservations on an interface?",
+      "a": "show ip rsvp interface, show ip rsvp reservation, show ip rsvp sender, and show ip rsvp installed.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A receiver is not getting a reservation; RESV is rejected. What is the likely cause and check?",
+      "a": "There is not enough RSVP bandwidth on a hop. Check show ip rsvp interface and the rsvp bandwidth configured on each router.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the direction and job of PATH versus RESV in RSVP?",
+      "a": "PATH flows sender toward receiver to announce requirements; RESV flows receiver toward sender to reserve resources.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why does IntServ have poor scalability?",
+      "a": "Every router on the path must maintain per-flow reservation state, which does not scale to large networks, unlike DiffServ's per-class state.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the modern surviving form of RSVP in MPLS networks?",
+      "a": "RSVP-TE, used for MPLS traffic engineering (TE path setup).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

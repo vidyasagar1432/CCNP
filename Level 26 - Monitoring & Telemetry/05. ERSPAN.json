@@ -1,0 +1,82 @@
+{
+  "title": "ERSPAN",
+  "level": 26,
+  "levelTitle": "Level 26 - Monitoring & Telemetry",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "05. ERSPAN.md",
+  "cards": [
+    {
+      "q": "What is ERSPAN (Encapsulated Remote SPAN)?",
+      "a": "ERSPAN mirrors traffic across a routed/IP network by encapsulating mirrored packets in IP/GRE toward a destination on any reachable subnet, extending SPAN beyond a single switch.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How does ERSPAN encapsulation work?",
+      "a": "The mirrored frame is wrapped with GRE and an outer IP header: the outer IP provides router-to-router routing, GRE tunnels to the destination, and the original mirrored frame is carried as the payload; the result is routable.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do SPAN, RSPAN, and ERSPAN differ?",
+      "a": "SPAN is local, RSPAN is remote via a Layer 2 VLAN, and ERSPAN is remote via Layer 3 IP/GRE routing.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands configure an ERSPAN source session?",
+      "a": "Use monitor session N type erspan-source, then monitor session N source interface Gi x/y (both), and under monitor session N destination set erspan id 100, erspan ip-address, and erspan origin-ip.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What fields are required in the ERSPAN destination configuration?",
+      "a": "The destination needs erspan id (session key), erspan ip-address (remote destination), and erspan origin-ip (source IP).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the requirements for ERSPAN to work?",
+      "a": "Both routers need IP routes plus GRE support, the ACL must permit GRE, and MTU headroom must account for GRE overhead.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the caveats of ERSPAN?",
+      "a": "MTU may need raising or fragmenting, there is extra CPU processing, overload must be planned for traffic rate, and only IP is carried (no raw Layer 2).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the GRE overhead of ERSPAN?",
+      "a": "ERSPAN adds roughly 50 bytes of GRE/IP overhead, so MTU size matters.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Nothing is received at the ERSPAN destination; what is the likely cause and check?",
+      "a": "Likely a routing problem; check by pinging the destination. Also verify origin IP with show monitor, MTU for fragmentation, ACL permitting GRE, and matching erspan id on both sides.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which session type command is used for ERSPAN source side?",
+      "a": "monitor session N type erspan-source (with an erspan-destination type on the receiver side).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the difference between RSPAN and ERSPAN?",
+      "a": "RSPAN is remote Layer 2 mirroring over a VLAN, while ERSPAN is remote Layer 3 routed mirroring over IP/GRE.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What two ERSPAN settings are essential for a working session?",
+      "a": "erspan id (must match on both sides) and erspan ip-address (the destination IP); origin-ip identifies the sender.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

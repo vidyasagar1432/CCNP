@@ -1,0 +1,190 @@
+{
+  "title": "VRRP (Virtual Router Redundancy Protocol)",
+  "level": 14,
+  "levelTitle": "Level 14 - First Hop Redundancy",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "02. VRRP.md",
+  "cards": [
+    {
+      "q": "What is VRRP?",
+      "a": "VRRP (Virtual Router Redundancy Protocol) is an IETF-standard First Hop Redundancy Protocol (FHRP) that provides a redundant default gateway for hosts. Multiple routers share a virtual IP and virtual MAC, with one Master forwarding traffic while one or more Backups monitor it.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the Master and Backup roles in VRRP?",
+      "a": "The Master owns forwarding responsibility for the VIP, responds to ARP, sends periodic advertisements, and forwards traffic to the virtual MAC. The Backup monitors advertisements, does not normally forward, and takes over when the Master is unavailable.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the IPv4 values for VRRP?",
+      "a": "VRRP IPv4 uses IP protocol 112, multicast 224.0.0.18, virtual MAC 0000.5e00.01XX, default priority 100, and a 1-second advertisement interval. VRRP does not use UDP.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which RFCs define VRRPv2 and VRRPv3?",
+      "a": "VRRPv2 is defined by RFC 3768 and supports IPv4 only; VRRPv3 is defined by RFC 5798 and supports both IPv4 and IPv6.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which VRRP version adds IPv6 support?",
+      "a": "VRRPv3 is the version to associate with IPv6 support (both IPv4 and IPv6); VRRPv2 is IPv4 only.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a VRID?",
+      "a": "VRID (Virtual Router Identifier) identifies a VRRP virtual router; the range is 1-255, and multiple VRIDs can exist on the same physical interface, each with its own VIP, virtual MAC, Master, and Backup.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the IP Address Owner in VRRP?",
+      "a": "The IP Address Owner is the router whose real interface IP address is the same as the VRRP virtual IP. It has a priority of 255, which is reserved for the IP Address Owner.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the VRRP priority values and their meanings?",
+      "a": "VRRP default priority is 100, the normal range is 1-254, priority 255 is reserved for the IP Address Owner, and priority 0 indicates the Master is relinquishing its role. Higher priority wins the election.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does a VRRP priority of 0 advertise?",
+      "a": "A priority of 0 in a VRRP advertisement indicates the Master is relinquishing the Master role so Backups react immediately rather than waiting for the normal Master Down Interval.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does VRRP break a priority tie during election?",
+      "a": "When two routers have equal priority, the router with the higher primary IPv4 address wins and becomes Master.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the three VRRP states?",
+      "a": "VRRP has three primary states: Initialize (startup or interface unavailable), Master (owns forwarding and sends advertisements), and Backup (listens and monitors the Master).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does VRRP terminology differ from HSRP?",
+      "a": "VRRP does not use HSRP's Active, Standby, Speak, and Listen terminology; VRRP uses Master and Backup roles with Initialize, Master, and Backup states.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why do VRRP advertisements use TTL 255?",
+      "a": "VRRP advertisements use TTL 255; a receiving router expects TTL 255 because a lower TTL indicates the packet was routed through another Layer-3 hop and is not a valid directly connected VRRP advertisement, preventing acceptance of packets from off-link sources.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the VRRP IPv4 virtual MAC for VRID 10?",
+      "a": "The VRRP IPv4 virtual MAC for VRID 10 is 0000.5e00.010a, where the last byte 0a is the VRID in hexadecimal.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do IPv4 and IPv6 VRRP gateway resolution differ?",
+      "a": "IPv4 VRRP uses ARP to resolve the VIP to the virtual MAC, while IPv6 VRRP uses Neighbor Discovery (ND) because IPv6 does not use ARP.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is the VRRP Master Down Interval calculated?",
+      "a": "The Master Down Interval is (3 x Advertisement Interval) + Skew Time, where Skew Time equals (256 - Priority) / 256. With the default 1-second advertisement this is approximately 3 seconds plus priority-based skew.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why does VRRP use Skew Time?",
+      "a": "Skew Time helps prevent multiple Backup routers from attempting to become Master simultaneously; higher-priority routers have a smaller skew and earlier takeover, favoring them during Master election.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is the VRRP preemption default behavior?",
+      "a": "VRRP preemption is enabled by default, so a higher-priority router can reclaim the Master role when it becomes available; this differs from traditional HSRP where preemption must be configured.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does VRRP tracking do?",
+      "a": "VRRP implementations can track interfaces or objects and decrement the router's effective priority; when the tracked object fails, another router may have the higher priority and become Master. Tracking changes priority/election preference, not the VIP.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How is VRRP gateway load sharing achieved?",
+      "a": "Multiple VRIDs can be used so one router is Master for one VRID and Backup for another, distributing gateway forwarding responsibility, with each VRID having its own VIP, virtual MAC, Master, and priority.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the VRRPv3 authentication behavior?",
+      "a": "VRRPv3 removed the authentication mechanism from the protocol specification that existed in older VRRPv2; modern deployments should not treat VRRP authentication as a core VRRPv3 feature.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which command verifies VRRP status?",
+      "a": "Common VRRP verification commands include show vrrp, show vrrp brief, and show vrrp all, along with show ip interface brief and show ip arp.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What happens on a VRRP Master failure?",
+      "a": "When the Master fails, Backup routers stop receiving advertisements, the Master Down Interval expires, and a Backup transitions to Master using the same VIP and virtual MAC, so hosts need no gateway change.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What happens when a VRRP Backup fails?",
+      "a": "When a Backup fails, the Master remains Master, there is no gateway outage, but redundancy is reduced.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the result of a VRRP VLAN partition?",
+      "a": "If VRRP routers can no longer communicate at Layer 2, each side may stop receiving advertisements and think it is Master, producing two Masters in a dual-Master condition.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the VRRP IPv4 of protocol 112, multicast 224.0.0.18, TTL 255 flow?",
+      "a": "VRRP IPv4 advertisements are sent by the Master to multicast 224.0.0.18 using IP protocol 112 with TTL 255 at the default 1-second interval.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which VRRP packet fields matter for troubleshooting?",
+      "a": "Important VRRP advertisement fields for troubleshooting are VRID, Priority, Advertisement Interval, Virtual IP, and Checksum.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the core idea of VRRP?",
+      "a": "VRRP provides a standards-based virtual default gateway: one router is Master, one or more are Backup, and the appropriate Backup takes over the same virtual IP/MAC when the Master fails.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the VRRP 'higher-priority router does not take over' troubleshooting cause?",
+      "a": "When a higher-priority VRRP router does not take over, the likely cause is that preemption is disabled or configured differently, so check the preemption configuration.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which protocol and multicast does VRRP use instead of HSRP's 224.0.0.2?",
+      "a": "VRRP uses IP protocol 112 and multicast 224.0.0.18, not HSRP's 224.0.0.2.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

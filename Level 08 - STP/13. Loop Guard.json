@@ -1,0 +1,106 @@
+{
+  "title": "Loop Guard",
+  "level": 8,
+  "levelTitle": "Level 08 - STP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "13. Loop Guard.md",
+  "cards": [
+    {
+      "q": "What problem does Loop Guard solve?",
+      "a": "Loop Guard protects against a non-designated port incorrectly transitioning to forwarding when expected BPDUs stop arriving (e.g., from a unidirectional link, software failure, or one-way fiber issue), which could create a Layer-2 loop.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What state does Loop Guard place a port in, and how does it recover?",
+      "a": "Loop Guard places the port in a loop-inconsistent state (blocking) when expected BPDUs are lost. It recovers (returns to normal STP) automatically once valid BPDUs are received again.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "On which types of ports does Loop Guard act?",
+      "a": "Loop Guard acts on non-designated ports (Root, Alternate, or Backup) and is especially useful where expected BPDUs could stop arriving. It should not be enabled on edge/PortFast ports.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why should Loop Guard not be used on PortFast/edge ports?",
+      "a": "Because an edge port does not expect regular BPDUs to keep frames flowing; Loop Guard is for non-designated STP ports where BPDU loss indicates a failure.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does Loop Guard differ from UDLD?",
+      "a": "UDLD detects unidirectional links at the physical/link level (one direction working, one not) and can error-disable a port. Loop Guard works at the STP layer by detecting the loss of expected BPDUs on a non-designated port.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What command enables Loop Guard on an interface and globally?",
+      "a": "spanning-tree guard loop per interface and spanning-tree loopguard default globally.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which Cisco STP protection triggers on the loss of BPDUs and creates a loop-inconsistent state?",
+      "a": "Loop Guard.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the key difference between Root Guard and Loop Guard behavior?",
+      "a": "Root Guard reacts to a superior BPDU (root-inconsistent, blocking). Loop Guard reacts to missing expected BPDUs (loop-inconsistent, blocking).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does Loop Guard error-disable or permanently shut down the port?",
+      "a": "No. It blocks (loop-inconsistent) and can automatically recover, unlike an err-disable.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why might Loop Guard be used together with UDLD?",
+      "a": "Because they address related failure modes (unidirectional link and lost BPDUs) but Loop Guard is STP-layer and UDLD is link-layer; designers often use them together for redundancy.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "Which commands verify loop-inconsistent state and Loop Guard status?",
+      "a": "show spanning-tree inconsistentports shows blocked/inconsistent ports; show spanning-tree vlan 10 / show spanning-tree interface Gi0/1 shows state; show spanning-tree summary can show loopguard; log messages confirm.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the mental model for Loop Guard?",
+      "a": "If a non-designated port stops receiving expected BPDUs, block it (loop-inconsistent) instead of risking an accidental forwarding loop.",
+      "tag": "Quick Review",
+      "context": "Both"
+    },
+    {
+      "q": "How do Root Guard, BPDU Guard, and Loop Guard compare?",
+      "a": "Root Guard: blocks on superior BPDU (root-inconsistent). BPDU Guard: err-disables edge port on unexpected BPDU. Loop Guard: blocks non-designated port on lost BPDUs (loop-inconsistent). All protect different aspects of the spanning tree.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the key concept of Loop Guard in one sentence?",
+      "a": "Loop Guard prevents an accidental Layer-2 loop by blocking a non-designated port that loses expected BPDUs, using the loop-inconsistent state.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is it wrong to say Loop Guard is for access/edge ports?",
+      "a": "Loop Guard is for non-designated ports where BPDUs are expected; edge/PortFast ports normally do not use it.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is it wrong to say Loop Guard error-disables the port?",
+      "a": "It places the port in loop-inconsistent (blocking) state, not an error-disable.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

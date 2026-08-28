@@ -1,0 +1,136 @@
+{
+  "title": "EIGRP Feasible Successor",
+  "level": 11,
+  "levelTitle": "Level 11 - EIGRP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "04. Feasible Successor.md",
+  "cards": [
+    {
+      "q": "What is an EIGRP Feasible Successor (FS)?",
+      "a": "An FS is a loop-free backup path that satisfies DUAL's feasibility condition RD < FD. It is kept in the EIGRP topology table but is not normally installed in the routing table while the current successor is available. If the successor fails and a valid FS exists, EIGRP can promote it without a diffusing computation or queries, which is a major reason EIGRP converges quickly.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What does Reported Distance (RD) mean?",
+      "a": "RD is the metric that a neighboring EIGRP router reports for reaching a destination; it is also commonly called Advertised Distance (AD). For example, if neighbor B reports RD 15, B is telling our router its metric toward the destination is 15.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is Feasible Distance (FD) calculated?",
+      "a": "FD is the local router's total EIGRP metric for the selected successor path, conceptually local cost to the neighbor plus the neighbor's RD. For example, local cost 10 plus B's RD 15 gives a total metric of 25. The current successor's total metric is the relevant FD for the feasibility condition.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is DUAL's feasibility condition and its results?",
+      "a": "RD(neighbor) < FD(current successor). RD < FD qualifies the path as a feasible successor; RD = FD does not qualify; RD > FD does not qualify. Memorize: strictly less than, equal does not qualify.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why does the feasibility condition matter for DUAL?",
+      "a": "It provides DUAL with a loop-free condition for selecting a backup path. The rule is neighbor's RD < current successor's FD, not 'second-best metric = FS'. A path can have a higher total metric than the successor and still be a valid feasible successor.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "With successor A at FD 20, what qualifies neighbors B (RD 15) and C (RD 18) whose total metrics are 25 and 28?",
+      "a": "Both B and C are feasible successors because their RD values are strictly less than FD 20 (15 < 20 and 18 < 20), even though their total metrics of 25 and 28 are higher than the successor's FD.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do the Successor and Feasible Successor roles differ?",
+      "a": "Successor: best path, selected by best eligible total metric, installed in the routing table and used for forwarding. Feasible Successor: loop-free backup satisfying RD < FD, in the topology table but not installed in the routing table while only an FS. On successor failure, a valid FS can become successor without queries.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What happens when the successor fails and a feasible successor exists?",
+      "a": "DUAL processes the topology change and promotes the FS to successor, installing the route. There is no diffusing computation and no EIGRP query process for that destination, providing fast convergence.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What happens when the successor fails and no feasible successor exists?",
+      "a": "The route becomes Active, EIGRP sends queries to neighbors, neighbors process the queries and send replies, DUAL performs a diffusing computation, and a new path is selected. This process is generally slower than promoting an existing FS.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does each EIGRP table store for a destination?",
+      "a": "The EIGRP topology table stores the successor, feasible successors, and other candidate paths. The routing table normally contains only the currently selected successor path or paths.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Can a destination have multiple feasible successors?",
+      "a": "Yes. For example, with successor A at FD 20, both B (RD 15) and C (RD 18) satisfy RD < 20 and are feasible successors. If A fails, DUAL can select an appropriate qualifying path as the new successor.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does the variance command bypass DUAL's feasibility requirement?",
+      "a": "No. Variance enables unequal-cost load balancing, but it does not remove DUAL's loop-free requirement. A path must first satisfy the feasibility condition (RD < FD) before variance determines whether its metric is acceptable for load balancing.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Path A has total metric 20 (RD 10), B total 25 (RD 22), and C total 30 (RD 15). Who is successor, FS, and not FS?",
+      "a": "A is the successor with FD 20. B has RD 22 (22 < 20 is false), so B is not an FS despite having the second-lowest total metric. C has RD 15 (15 < 20 is true), so C is an FS. The path with the second-lowest total metric is not necessarily a feasible successor.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Summarize the feasible successor decision process.",
+      "a": "EIGRP learns paths → calculate total metrics → select the best eligible path as successor → its total metric is FD → evaluate other paths: RD < FD makes it an FS, otherwise it is not an FS.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What causes 'no feasible successor' and which commands check it?",
+      "a": "No alternate path exists, alternate paths do not satisfy RD < FD, the topology changed, metrics changed, or the neighbor/path disappeared. Check show ip eigrp topology and show ip eigrp neighbors.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why might a previously valid feasible successor disappear?",
+      "a": "A previously valid FS can stop qualifying if the EIGRP topology or metrics change. Check show ip eigrp topology and show ip eigrp topology all-links; the exact availability and output of all-links can vary by IOS/platform.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "When the successor fails with no fast failover, how do you verify and recover?",
+      "a": "Check whether an FS exists with show ip eigrp topology. If no FS exists, the route goes Active and queries are sent; investigate with show ip eigrp topology active.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands inspect feasible successor and candidate-path information?",
+      "a": "show ip eigrp topology shows successor and feasible successor information, FD, RD, and route state. Adding a prefix (for example show ip eigrp topology 10.1.1.0 255.255.255.0) examines paths to a specific destination. show ip eigrp topology all-links shows additional candidate paths that may not currently qualify as feasible successors, where supported. show ip eigrp neighbors verifies neighbor adjacencies.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "With a successor FD of 20, which RD values qualify as a feasible successor?",
+      "a": "Only RD values strictly below 20: 15 < 20 and 19 < 20 qualify. RD 20 (20 < 20 is false) and RD 21 or above do not qualify. The condition is RD < FD, not RD <= FD.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does having no feasible successor automatically mean SIA?",
+      "a": "No. No FS means DUAL may need to perform a diffusing computation, taking the route through Active and queries. SIA occurs only when the required query/reply process does not complete as expected.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does a feasible successor forward traffic while the successor is available?",
+      "a": "No. A normal FS is a backup path in the topology table; the successor does the forwarding. The FS is not installed in the routing table unless the successor fails and it is promoted.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "title": "RF (Radio Frequency)",
+  "level": 22,
+  "levelTitle": "Level 22 - Wireless",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "06. RF.md",
+  "cards": [
+    {
+      "q": "What does RF physics govern in Wi-Fi design?",
+      "a": "RF physics decide whether Wi-Fi works: signal strength (RSSI), signal-to-noise ratio (SNR), attenuation, interference, and antenna behavior. Design covers dBm, path loss, coverage, the noisy-cell/small-cell trade-off, and validation with a site survey.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the key RF metrics and what do they measure?",
+      "a": "RSSI is the received signal strength in dBm, SNR is the signal-vs-noise cleanliness in dB, dBm is the power level, and EIRP is the total transmit power (transmit plus antenna). An SNR of about 25 dB or more is good.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What effects degrade RF signals?",
+      "a": "Attenuation from distance and free-space loss, absorption by walls and people, reflection causing multipath, and interference from other radios.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the RF rule of thumb relating bandwidth and signal?",
+      "a": "The RF rule of thumb is that bandwidth roughly halves for every approximately +3 dB of signal loss.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the small-cell vs large-cell capacity trade-off in RF design?",
+      "a": "Small cells give high capacity with more APs, lower interference, less coverage per AP, and higher cost. Large cells give more coverage per AP and lower cost but less capacity and more interference. Smaller cells mean more capacity.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does dBm mean and what is its formula?",
+      "a": "dBm measures power level and is computed as 10 times the base-10 logarithm of power in milliwatts: dBm = 10·log10(mW).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you calculate EIRP?",
+      "a": "EIRP = transmit power + antenna gain minus cable loss. For example, 20 dBm transmit plus 3 dBi antenna = 23 dBm EIRP.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the three types of site survey?",
+      "a": "Passive (measure existing RF), active (test throughput), and predictive (software model). Surveys validate coverage, interference, and capacity.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does RRM use RF information?",
+      "a": "RRM uses RF data to tune channels and transmit power automatically.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What commands verify RF and radio health?",
+      "a": "show ap radio summary, show ap dot11 5ghz monitor, show ap monitor cable, show ap config general, and show wireless client summary.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Clients report low signal and noisy connections. What are the causes and checks?",
+      "a": "Low signal points to a coverage gap, so check RSSI; noise points to interference, so check SNR.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Throughput drops, clients stick to weak APs, and cross-talk appears. What should you check?",
+      "a": "Throughput drops may be multipath (check with monitoring), sticky clients are below the RSSI threshold for association, and cross-talk comes from channel overlap so check RRM channel assignment.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the difference between RSSI and SNR?",
+      "a": "RSSI is how strong the received signal is (dBm); SNR is how clean the signal is relative to noise (dB). A strong-but-noisy signal can still be unusable.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which RF quick review facts should you remember?",
+      "a": "Strength is RSSI, cleanliness is SNR, power is dBm, output is EIRP, loss comes from distance and walls, noise from interference, small cells give capacity, and a site survey validates the design.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

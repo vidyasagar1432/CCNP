@@ -1,0 +1,82 @@
+{
+  "title": "MPLS VPN (L3VPN)",
+  "level": 20,
+  "levelTitle": "Level 20 - MPLS",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "09. MPLS VPN.md",
+  "cards": [
+    {
+      "q": "What is MPLS L3VPN?",
+      "a": "MPLS L3VPN delivers private, isolated customer connectivity over a shared SP core. Each customer has a VRF on the PE; the PE exchanges routes with the customer (CE), turns them into VPNv4 routes with a service label via MP-BGP, and the core carries them inside a two-label stack. Customers never touch the core routing.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the roles of CE, PE, and P in an L3VPN?",
+      "a": "CE is the customer router facing the PE; PE is the provider edge running VRF and MP-BGP (the intelligence); P is the provider core doing plain label switching.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the purpose of each label in the two-label stack?",
+      "a": "The top label is the transport label that reaches the egress PE (built by LDP), and the inner label is the service (VPN) label that identifies which VRF/CE is at the egress. The core looks only at the top label; the egress PE uses the inner one.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the end-to-end forwarding flow for an L3VPN packet?",
+      "a": "CE1 sends IP to PE1, which does a VRF lookup and pushes the service plus transport labels; P swaps the transport label; PE2 pops, reads the service label, and forwards to CE2.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What three routing layers cooperate to build an L3VPN?",
+      "a": "The core uses IGP plus LDP for transport labels, the VPN plane uses MP-BGP for VPNv4 plus the service label, and the CE-PE plane uses eBGP/OSPF/EIGRP/static for customer routes.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What VPN models can the RT policy create?",
+      "a": "Full mesh (all RTs shared), hub-and-spoke (import/export split), and extranet (selective sharing). The RTs determine the VPN topology.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What commands verify an L3VPN?",
+      "a": "show ip vrf, show ip route vrf CUST1, show bgp vpnv4 unicast vrf CUST1, show mpls forwarding-table, and ping vrf CUST1 (or traceroute vrf CUST1).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the likely cause and check when there is no VPN route?",
+      "a": "MP-BGP is down, so check show bgp vpnv4.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the likely cause and check when a ping fails in an L3VPN?",
+      "a": "The service label may be missing, so check show mpls forwarding-table.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the likely cause and check when there is overlapping address confusion?",
+      "a": "An RD issue (duplicate RD), so check the rd configuration.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "In an L3VPN, which label is transport, which is service, and what builds each?",
+      "a": "The top label is the transport label built by LDP, and the inner label is the service/VPN label, so the core does pure label switching while the PE reads the service label. RTs define membership and topology, and CE-PE can be eBGP, OSPF, EIGRP, or static.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does MPLS VPN map to the quick review table?",
+      "a": "The edge is PE + VRF, the core is P (labels), the customer is CE, the transport label comes from LDP, the service label is the VPN, the control plane is MP-BGP, the topology is set by RTs, and it is verified with show bgp vpnv4.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

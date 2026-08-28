@@ -1,0 +1,112 @@
+{
+  "title": "DMVPN",
+  "level": 30,
+  "levelTitle": "Level 30 - Labs",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "12. DMVPN.md",
+  "cards": [
+    {
+      "q": "What does the DMVPN lab build?",
+      "a": "It builds a hub-and-spoke overlay using NHRP for dynamic spoke discovery, mGRE tunnels, and IPsec protection, enabling spoke-to-spoke direct tunnels.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the key components of DMVPN?",
+      "a": "The hub as NHRP server, spokes as NHRP clients, mGRE for dynamic tunnels, NHRP for address resolution, and IPsec to encrypt the overlay.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What makes the DMVPN topology dynamic?",
+      "a": "mGRE combined with NHRP creates dynamic tunnels, where spokes register to the hub and resolve addresses on demand.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How do spokes register and communicate in DMVPN?",
+      "a": "Spokes register to the hub (NHS) via NHRP; the hub resolves their addresses so direct spoke-to-spoke tunnels can be built.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the NHRP verification and configuration relationship?",
+      "a": "NHRP uses the nhs command for the server, nhrp map for mapping, nhrp network-id for the network, a cache of entries, and is verified with show ip nhrp.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does a spoke-to-spoke tunnel form?",
+      "a": "Traffic first flows via the hub, the spoke learns the peer through NHRP resolution, a direct tunnel is built, and idle tunnels are dropped by the resolution timer.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the DMVPN phase variants for spoke-to-spoke communication?",
+      "a": "Phase 1 is hub-only, Phase 2 sends traffic via the hub, Phase 3 enables direct spoke tunnels, and Phase 4 adds hierarchical scaling.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which DMVPN phase allows direct spoke-to-spoke tunnels?",
+      "a": "Phase 3 provides direct spoke-to-spoke tunnels.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is IPsec integrated with a DMVPN tunnel?",
+      "a": "Configure an isakmp profile, a transform set, an ipsec profile, then apply tunnel protection ipsec profile DMVPN to wrap the mGRE tunnel.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands verify NHRP, tunnel, and crypto state?",
+      "a": "show ip nhrp, show interface tunnel, show crypto isakmp sa, show ip route, and show crypto ipsec sa.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What configuration creates a DMVPN tunnel interface?",
+      "a": "interface Tunnel0 with ip nhrp network-id 1, ip nhrp nhs for the server, tunnel mode gre multipoint, tunnel source Gi0/1, tunnel destination 1.1.1.1, and tunnel protection ipsec profile DMVPN.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A spoke is not registering with the hub. What is the likely cause and check?",
+      "a": "An NHRP network-id or server configuration issue, so check show ip nhrp.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A spoke cannot build a direct tunnel to another spoke in a Phase 3 network. What is the likely cause?",
+      "a": "An NHRP resolution failure prevents the spoke from learning the peer address, so check show ip nhrp.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "The DMVPN crypto is down. What is the likely cause and check?",
+      "a": "An IPsec profile problem, so check the crypto session with show crypto session.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Every spoke in DMVPN must be configured with a static tunnel destination address.",
+      "a": "False — with mGRE the tunnel destination is hub-only; spokes use NHRP to resolve peers dynamically.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What three technologies together define DMVPN?",
+      "a": "mGRE, NHRP, and IPsec.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the recommended DMVPN verification order?",
+      "a": "Verify NHRP, then tunnel, then crypto — NHRP, tunnel, crypto.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    }
+  ]
+}

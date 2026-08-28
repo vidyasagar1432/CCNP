@@ -1,0 +1,82 @@
+{
+  "title": "OSPF",
+  "level": 29,
+  "levelTitle": "Level 29 - Troubleshooting",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "07. OSPF.md",
+  "cards": [
+    {
+      "q": "What does OSPF troubleshooting target?",
+      "a": "Adjacencies, areas, networks, and routes. Typical failures are hello mismatch, MTU, area type, passive interface, and network type.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the OSPF adjacency requirements on both sides?",
+      "a": "Matching hello interval, matching dead interval (default 4x hello), network type, area, MTU (or negotiation), and authentication.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the first OSPF check?",
+      "a": "show ip ospf neighbor, then the LSDB (show ip ospf database) and OSPF routes (show ip route ospf).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does a stuck EXSTART or EXCHANGE state classically indicate?",
+      "a": "An MTU mismatch between the neighbors.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the 2WAY OSPF neighbor state mean?",
+      "a": "The routers have seen each other's hellos but there is no DR or the interface is passive.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the FULL OSPF neighbor state mean?",
+      "a": "Adjacency is complete; all LSDBs are synchronized.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which network types use DR/BDR election?",
+      "a": "Broadcast (Ethernet) and Non-broadcast (NBMA) use DR/BDR. Point-to-point and point-to-multipoint use no DR.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What happens with a passive OSPF interface?",
+      "a": "The network/area is still advertised on that interface but no adjacency is formed.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What defines which networks OSPF advertises?",
+      "a": "The network and area statements (e.g. network 10.0.0.0 0.0.0.255 area 0).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What command shows OSPF interface configuration?",
+      "a": "show ip ospf interface (Gi0/1), which shows hello/dead timers, network type, and area.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the default OSPF dead interval relationship?",
+      "a": "The dead interval defaults to 4 times the hello interval.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "DR flapping is most likely caused by what?",
+      "a": "Priority or DR election changes, checked with show ip ospf.",
+      "tag": "Quick Review",
+      "context": "Practical"
+    }
+  ]
+}

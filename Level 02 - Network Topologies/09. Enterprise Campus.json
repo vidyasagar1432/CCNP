@@ -1,0 +1,76 @@
+{
+  "title": "Enterprise Campus",
+  "level": 2,
+  "levelTitle": "Level 02 - Network Topologies",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "09. Enterprise Campus.md",
+  "cards": [
+    {
+      "q": "What is the enterprise campus network?",
+      "a": "It is the full in-building/between-buildings network serving users, plus its server, WAN, and security modules. It is not one topology — it assembles three-tier hierarchy, star access, mesh-ish cores, and modules (server farm, WAN edge, wireless, DMZ) into a resilient, segmentable whole.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Name the campus blocks and the topology flavor of each.",
+      "a": "Campus core is the routed mesh/collapsed backbone between buildings; distribution is a dual switch pair (HSRP) for per-building aggregation and policy; access is star for endpoints, VLANs, and wireless APs; server farm/DC uses spine-leaf (modern) or 3-tier; WAN edge is partial mesh/hub-spoke (MPLS/SD-WAN/Internet); DMZ is two-arm to firewalls for public-facing servers; management is a dedicated VLAN/VRF for OOB and NMS.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the campus design goals (shared with Level 00)?",
+      "a": "High availability everywhere (dual core, dual dist, dual-home access, HSRP/VRRP, port channeling, redundant PSUs) to remove single points of failure; fast convergence via routed summaries, RSTP on L2, and first-hop redundancy; segmentation with VLANs per role plus VRF/ACL where security needs it (guest/voice/management separated); manageability via a dedicated management VLAN and OOB with NetFlow/telemetry feeding NMS/syslog; and QoS with trust boundaries at access, marking, and priority queuing on uplinks for voice/video.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How is wireless treated in the modern campus?",
+      "a": "Wireless is a first-class citizen: APs connect to access switches and use CAPWAP to WLCs. SSIDs map to VLANs, roaming is anchored at the WLC, and AAA runs via RADIUS.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "In a classic small-campus scenario, what VLANs are typically defined?",
+      "a": "VLAN 10 users, VLAN 20 servers, VLAN 30 management, VLAN 40 voice, and VLAN 50 guest.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands configure a distribution pair with HSRP and an access host port?",
+      "a": "On the distribution pair, configure 'interface Vlan10' with 'ip address 10.1.10.2 255.255.255.0', 'standby 1 ip 10.1.10.1', and 'standby 1 preempt'. On the access switch, use 'interface GigabitEthernet0/1' with 'switchport access vlan 10' and 'spanning-tree portfast'. The core is configured with 'ip cef' and OSPF area 0.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Is the enterprise campus just a single-building star?",
+      "a": "No. 'Enterprise campus' is the whole modular model, not a single-building star.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Where does the default gateway live in the campus, and where is STP used?",
+      "a": "The default gateway lives at the distribution layer (HSRP), not at the access switch. STP applies only to the L2 spans (access-to-distribution); the core is routed.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How must you distinguish the campus core from the DC spine-leaf?",
+      "a": "The DC is often its own block attached to the campus core, so always distinguish the campus design from the DC spine-leaf.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the common full-architecture answer for branch, campus, and DC?",
+      "a": "Collapsed core for the branch, three-tier for the campus, and a spine-leaf DC attached to the campus core.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "In the enterprise campus Quick Review, summarize each block's role and redundancy trick.",
+      "a": "Core is the backbone with dual routed switches; distribution does policy and routing with an HSRP/VRRP pair; access provides ports/endpoints with dual-homing and portfast; server farm supplies compute/storage with spine-leaf east-west capacity; WAN edge handles carriers/SD-WAN with partial mesh/DMVPN; DMZ hosts public services via two-arm firewalls; management provides OOB tools on a dedicated VLAN/VRF; wireless gives coverage and mobility with CAPWAP+WLC and SSID-to-VLAN mapping.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

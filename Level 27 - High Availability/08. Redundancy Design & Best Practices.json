@@ -1,0 +1,76 @@
+{
+  "title": "Redundancy Design & Best Practices",
+  "level": 27,
+  "levelTitle": "Level 27 - High Availability",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "08. Redundancy Design & Best Practices.md",
+  "cards": [
+    {
+      "q": "What is redundancy design?",
+      "a": "Redundancy design is the disciplined selection of HA mechanisms matched to a business availability target, layering device, chassis, link, gateway, and path redundancy so every critical path has a backup and no single point of failure.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the layers in a comprehensive HA design?",
+      "a": "Device/software (SSO, NSF, ISSU), chassis (redundant supervisors), link (EtherChannel/M-LAG), gateway (HSRP/VRRP/GLBP), path (ECMP, routing, multihoming), and power/cooling redundancy.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the most important best practice in redundancy design?",
+      "a": "The top best practice is having no single point of failure on any critical path, supported by fast convergence, testing failovers, and consistent software across peers.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Why is redundant not always equal to load-shared?",
+      "a": "Paired devices in an active/standby design protect against failure but do not split load, so redundancy should not be assumed to also provide load sharing.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Why are bundled links preferred over single redundant links?",
+      "a": "EtherChannel bundles parallel links into one logical channel that STP does not block, so you get both redundancy and full utilization instead of one blocking link.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What mechanisms cover gateway and path redundancy together?",
+      "a": "FHRP protocols such as HSRP, VRRP, and GLBP cover the first-hop gateway, while routing failover, ECMP, and BGP multihoming cover path and transit failures.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is a common design pattern at the distribution layer?",
+      "a": "A distribution layer often uses VSS or a switch stack with SSO to provide fast Layer 2 failover and a single management domain.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which commands verify the HA mechanisms?",
+      "a": "show redundancy states, show redundancy sso, show standby brief, show etherchannel summary, show ip route, show switch, and show vss.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A failover causes dropped traffic and slow recovery; what is likely missing?",
+      "a": "SSO and NSF may not be enabled, so control state is not synchronized and forwarding stops during switchover; verify with show redundancy and the routing protocol NSF configuration.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the key exam principle of layered HA design?",
+      "a": "No single mechanism covers all failures; HA is layered (device, chassis, link, gateway, path), and one mechanism such as SSO does not replace link or gateway redundancy.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the redundancy design quick-review summary?",
+      "a": "Design with layered redundancy plus no single point of failure, using SSO/NSF for device, redundant supervisors for chassis, EtherChannel for links, HSRP/VRRP/GLBP for gateway, and routing/ECMP for path, while testing failover.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

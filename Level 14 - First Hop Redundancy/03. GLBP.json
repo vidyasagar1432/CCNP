@@ -1,0 +1,178 @@
+{
+  "title": "GLBP (Gateway Load Balancing Protocol)",
+  "level": 14,
+  "levelTitle": "Level 14 - First Hop Redundancy",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "03. GLBP.md",
+  "cards": [
+    {
+      "q": "What is GLBP?",
+      "a": "GLBP (Gateway Load Balancing Protocol) is a Cisco-proprietary First Hop Redundancy Protocol (FHRP) that provides both default-gateway redundancy and built-in gateway load balancing, allowing multiple routers to actively forward traffic for the same virtual IP.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the GLBP protocol values?",
+      "a": "GLBP is a Cisco proprietary FHRP using UDP port 3222, IPv4 multicast 224.0.0.102, virtual MAC prefix 0007.b400, and supports a maximum of 4 active forwarders.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the AVG (Active Virtual Gateway) in GLBP?",
+      "a": "The AVG is the router elected to manage the GLBP group; there is one AVG per group, and it maintains forwarder info, assigns virtual MACs, responds to ARP requests for the virtual IP, and selects which virtual MAC is returned to hosts.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is an AVF (Active Virtual Forwarder)?",
+      "a": "An AVF is a router actively forwarding traffic for a GLBP virtual MAC. GLBP supports up to four active virtual forwarders per group, each associated with a different virtual MAC.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the GLBP virtual MAC format?",
+      "a": "The GLBP virtual MAC format is 0007.b400.XXYY, where 0007.b400 is the GLBP MAC prefix, XX is the group identifier in hex, and YY is the forwarder identifier, typically 01-04.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does GLBP achieve load balancing over ARP?",
+      "a": "When a host sends ARP for the virtual IP, the AVG responds with a GLBP virtual MAC; different hosts receive different virtual MACs pointing to different AVFs, so one VIP maps to multiple virtual MACs and AVFs for load balancing.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the three GLBP load-balancing methods and their default?",
+      "a": "GLBP supports round-robin, host-dependent, and weighted load balancing; round-robin is the default method, where the AVG rotates the virtual MAC in ARP replies.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is host-dependent GLBP load balancing?",
+      "a": "Host-dependent load balancing gives the same host consistently the same virtual MAC, preserving the host's association with the same forwarder across repeated ARP resolutions; it is useful when a stable host-to-forwarder relationship is desired.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How is the AVG elected in GLBP?",
+      "a": "One AVG is elected per GLBP group based on the highest GLBP priority; if priorities are equal, the router with the highest IP address wins.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between GLBP priority and weighting?",
+      "a": "GLBP priority is used for AVG election, while GLBP weighting is used for AVF forwarding eligibility; the two must not be confused.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do GLBP lower and upper weighting thresholds work?",
+      "a": "The configured lower and upper thresholds control AVF activity: if the weighting falls below the lower threshold the forwarder becomes inactive, and when it recovers to the upper threshold it can become active again. Weighting 0 is not the only inactivity condition.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does GLBP object tracking change?",
+      "a": "GLBP object tracking decrements the AVF's weighting (not priority) when a tracked object fails; if the weighting crosses the lower threshold, the AVF becomes inactive.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the GLBP default timers?",
+      "a": "GLBP default hello is 3 seconds and hold is 10 seconds; timers should be configured consistently among GLBP peers using a command such as glbp 10 timers 3 10.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the GLBP forwarder Active state?",
+      "a": "The most important forwarder state for troubleshooting is Active because an AVF in the active state is eligible to forward traffic; other states include Listen and Disabled.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What happens when the GLBP AVG fails?",
+      "a": "When the AVG fails, GLBP detects the failure and an AVG election is held, and another eligible router becomes the AVG while the group continues operating.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is GLBP redirect and secondary forwarding?",
+      "a": "When an active forwarder fails, a host may still have an ARP entry pointing to that failed AVF's virtual MAC; GLBP can temporarily redirect traffic associated with the failed forwarder toward another active forwarder to provide forwarding continuity during convergence.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which authentication mechanisms can GLBP use?",
+      "a": "GLBP supports authentication such as plain-text and MD5; authentication must match between participating peers, and a mismatch can prevent GLBP neighbors from establishing correctly.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands verify GLBP?",
+      "a": "GLBP verification commands include show glbp, show glbp brief, show glbp all, show ip arp | include 0007.b400, and show track; debug glbp is also available.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the difference between GLBP load balancing and HSRP/VRRP load sharing?",
+      "a": "HSRP and VRRP distribute traffic by using multiple groups or VRIDs/VIPs, but GLBP provides built-in load balancing within one GLBP group and one virtual IP using multiple virtual MACs and up to four AVFs.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What distinguishes GLBP from HSRP and VRRP regarding active forwarders?",
+      "a": "HSRP and VRRP normally have one active gateway per group, while GLBP can have up to four active virtual forwarders for one virtual IP, providing built-in load balancing.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does the AVG forward all GLBP traffic?",
+      "a": "No. The AVG manages the group and answers ARP; the AVFs perform the actual traffic forwarding. The AVG is not necessarily the only router forwarding traffic.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does GLBP require multiple virtual IPs for load balancing?",
+      "a": "No. GLBP can load-balance using one virtual IP together with multiple virtual MACs and multiple AVFs.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What are GLBP's five things to memorize?",
+      "a": "AVG manages and answers ARP; AVF actually forwards traffic; priority controls AVG election; weighting controls AVF forwarding eligibility; and the virtual MAC format is 0007.b400.XXYY.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "How does the GLBP example packet flow operate?",
+      "a": "A host sends an ARP for the virtual IP 10.0.0.1, the AVG answers with a virtual MAC such as 0007.b400.0A02, the host stores the mapping and sends frames to that MAC, and the corresponding AVF2 forwards the traffic.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are common GLBP failure causes?",
+      "a": "Common GLBP failure causes include wrong GLBP group, different virtual IP, multicast (224.0.0.102) disruption, UDP 3222 filtering, authentication mismatch, and weighting crossing below the lower threshold.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the one-sentence GLBP exam definition?",
+      "a": "GLBP is a Cisco-proprietary FHRP that provides first-hop redundancy and built-in gateway load balancing by using one AVG to distribute multiple virtual MAC addresses among up to four active virtual forwarders for a single virtual IP.",
+      "tag": "Overview",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the core idea and ultimate memory formula of GLBP?",
+      "a": "AVG assigns, AVF forwards, priority elects, weighting controls, ARP distributes, virtual MACs load balance, UDP 3222 is the protocol, and 224.0.0.102 is the multicast.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "How does a GLBP AVF failure differ from a default-gateway change?",
+      "a": "When an AVF fails, another router can take over the failed forwarder's role and virtual MAC responsibility so traffic to that forwarder continues during convergence, and the host continues using the same virtual IP, rather than requiring a default-gateway change.",
+      "tag": "Core Concept",
+      "context": "Both"
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "title": "NSSA (Not-So-Stubby Area)",
+  "level": 10,
+  "levelTitle": "Level 10 - OSPF",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "11. NSSA.md",
+  "cards": [
+    {
+      "q": "What is a Not-So-Stubby Area (NSSA)?",
+      "a": "An NSSA is a stub area that allows an ASBR. External routes are injected as Type 7 LSAs, flooded only inside the NSSA, then translated to Type 5 by the ABR at the exit. This solves the stub paradox of wanting a small LSDB but still needing to redistribute local routes. NSSA still blocks inbound Type 5 from the rest of the domain.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How does an NSSA differ from a plain stub area?",
+      "a": "An NSSA allows an ASBR inside (a stub does not). External routes from inside enter as Type 7 LSAs translated to Type 5 by the ABR, whereas a stub has none. Both block inbound Type 5. The NSSA's default route is optional (default-information-originate), while a stub's default is auto-injected.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Describe the Type 7 to Type 5 translation process in an NSSA.",
+      "a": "The ASBR inside the NSSA redistributes and produces Type 7 LSAs, which are flooded only inside the NSSA. The ABR at the NSSA edge sees the Type 7, generates Type 5, and floods it to the rest of the domain. Only the ABR performs translation; if multiple ABRs exist, only the elected one translates.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the P-bit (propagate bit) do in an NSSA?",
+      "a": "The P-bit marks which Type 7 LSAs are eligible to be translated into Type 5 by the ABR.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What do the route codes O N1 and O N2 mean in an NSSA?",
+      "a": "O N1 is an NSSA external E1-style route that includes the cost to the ASBR. O N2 is an NSSA external E2-style route that uses only the external cost. This is the same E1/E2 concept as Type 5, just applied to Type 7.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you enable a default route in an NSSA?",
+      "a": "On the ABR use area 5 nssa default-information-originate. The default is optional in an NSSA (unlike a plain stub where it is auto-injected).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands show Type 7 and translated Type 5 routes in an NSSA?",
+      "a": "show ip ospf database nssa-external shows Type 7, show ip ospf database external shows the translated Type 5, show ip route ospf with N1/N2 filter shows NSSA external routes, and show ip ospf shows NSSA configuration.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the constraints of an NSSA?",
+      "a": "It cannot be Area 0, all routers in the NSSA must be configured nssa, Type 5 is blocked from outside (like a stub), virtual links cannot pass through an NSSA, and Type 7 stays area-local with translation happening at the ABR.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Where does Type 7 originate and where does it translate to Type 5?",
+      "a": "Type 7 originates at the ASBR inside the NSSA. The ABR (not the ASBR) translates Type 7 to Type 5 at the exit to the rest of the OSPF domain.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is the default route automatic in an NSSA?",
+      "a": "No. The default route is optional in an NSSA and must be injected with default-information-originate on the ABR, unlike a plain stub where the default is automatic.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Can Type 5 external routes enter an NSSA from the rest of the domain?",
+      "a": "No. Type 5 is blocked from entering the NSSA, just like a stub. External routes from inside exit as Type 7 translated to Type 5 by the ABR.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Summarize the NSSA quick-review facts.",
+      "a": "NSSA is a stub with a local ASBR; ASBR inside yes; external in as Type 7 (area-local); external out translated by ABR to Type 5; blocks inbound Type 5; default is optional; route codes O N1/O N2; not Area 0; no virtual link; only the ABR translates.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

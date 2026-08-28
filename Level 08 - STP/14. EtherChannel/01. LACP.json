@@ -1,0 +1,178 @@
+{
+  "title": "EtherChannel — LACP",
+  "level": 8,
+  "levelTitle": "Level 08 - STP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "01. LACP.md",
+  "cards": [
+    {
+      "q": "What is LACP and what standard defines it?",
+      "a": "LACP (Link Aggregation Control Protocol) is the IEEE-standard EtherChannel negotiation protocol, originally IEEE 802.3ad and now IEEE 802.1AX. It dynamically negotiates multiple physical interfaces into one logical Port-Channel for increased bandwidth, redundancy, and a single logical Layer-2/Layer-3 interface.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are LACP's two negotiation modes and how does negotiation work?",
+      "a": "active: actively sends LACP PDUs and can form with active or passive. passive: waits for LACP PDUs and responds, forming with active only. At least one side must be active for a bundle to form.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which LACP mode combinations form a bundle?",
+      "a": "active + active = Yes; active + passive = Yes; passive + active = Yes; passive + passive = No. At least one side must be active.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why does passive + passive not form an LACP bundle?",
+      "a": "Because neither side initiates LACP negotiation (no side actively sends the LACP PDUs needed to start the bundle).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Is Cisco `on` an LACP mode?",
+      "a": "No. `on` is not an LACP mode; it creates a static EtherChannel with no negotiation protocol.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What EtherType carries LACP, and under what protocol class does it run?",
+      "a": "LACP is carried as an IEEE Slow Protocol using EtherType 0x8809.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are LACP's fast and slow PDU intervals?",
+      "a": "Fast LACP = 1 second; Slow LACP = 30 seconds. Do not memorize LACP as universally 1-second PDUs.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What information is exchanged in LACP PDUs?",
+      "a": "Actor System ID, Partner System ID, Actor/Partner Key, Port Priority, Port Number, and LACP state information.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the LACP System ID and how is it prioritized?",
+      "a": "It is System Priority + System MAC Address. Lower system priority is preferred when determining the LACP system relationship.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the difference between LACP System Priority and Port Priority?",
+      "a": "System Priority helps determine LACP system selection. Port Priority helps select member ports when there are more eligible links than the active-member limit.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Should you memorize a universal active-member limit for LACP?",
+      "a": "No. Exact active-member limits are platform-dependent; do not memorize a universal '8 active / 16 total' rule for all Cisco platforms.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What command creates an LACP EtherChannel?",
+      "a": "channel-group 1 mode active on each physical interface, which associates the interface with EtherChannel 1, enables LACP active mode, and creates/binds the logical Port-channel1 interface.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the recommended EtherChannel configuration model?",
+      "a": "Configure the logical Port-channel1 interface with the common bundle behavior (e.g., switchport mode trunk, allowed VLANs) and keep physical member interfaces compatible.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Is `switchport trunk encapsulation dot1q` always required?",
+      "a": "No. It is platform-dependent; on platforms where 802.1Q is the only supported trunk encapsulation, the command may not exist.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does EtherChannel normally send every packet round-robin across all links?",
+      "a": "No. EtherChannel calculates a hash from selected packet fields and uses the result to choose a member link. A single flow normally remains on one physical member, preventing packet reordering.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What fields can EtherChannel hash inputs include?",
+      "a": "Source MAC, Destination MAC, source+destination MAC, Source IP, Destination IP, source+destination IP, Layer-4 source/destination ports, and other platform-supported combinations.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does one TCP flow get the full aggregate of a 4-link EtherChannel?",
+      "a": "No. A 4 × 1-Gbps EtherChannel has about 4 Gbps aggregate capacity, but a single flow typically uses one 1-Gbps member; multiple flows are distributed across members.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What parameter consistency is required among EtherChannel members?",
+      "a": "Speed, duplex, switchport mode, access VLAN (when used), native VLAN (for trunks), allowed VLANs, trunk configuration, Layer-3 configuration (for L3 EtherChannels), and compatible EtherChannel protocol/mode. Exact checks are platform and configuration dependent.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does STP view an EtherChannel?",
+      "a": "STP treats the EtherChannel as one logical link/port. It does not normally see the member interfaces as separate Layer-2 paths, preventing STP from blocking individual members of the same EtherChannel.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "In `show etherchannel summary`, what do SU and P mean?",
+      "a": "S = Layer-2 EtherChannel; U = in use. P means the port is bundled in the port-channel. P does not mean 'LACP negotiated'.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What do the EtherChannel flags I, D, and s mean?",
+      "a": "I = Stand-alone; D = Down; s = Suspended. The exact flag set and interpretation should be read from the platform's command output.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which commands verify an LACP EtherChannel?",
+      "a": "show etherchannel summary; show etherchannel 1 port-channel; show lacp neighbor; show lacp counters; show lacp sys-id; show etherchannel load-balance.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the troubleshooting order for an LACP EtherChannel that will not form?",
+      "a": "Physical layer → LACP mode → EtherChannel membership (show etherchannel summary) → member consistency (speed/duplex/VLAN/trunk) → Port-channel state → LACP neighbor → load balancing.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "When is `show lacp sys-id` useful?",
+      "a": "For viewing the local LACP system identifier on platforms that support the command.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A member shows flag I — what does it indicate and what should you check?",
+      "a": "I = Stand-alone. Likely cause is LACP mode/compatibility; check LACP mode (e.g., ensure not passive + passive) and member compatibility.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the most important CCNP LACP rule?",
+      "a": "ACTIVE + ACTIVE = BUNDLE; ACTIVE + PASSIVE = BUNDLE; PASSIVE + PASSIVE = NO BUNDLE; ON = STATIC / NO LACP.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the key LACP quick-review facts?",
+      "a": "IEEE 802.3ad/802.1AX; modes active/passive; forms active↔active/passive, not passive↔passive; EtherType 0x8809; fast 1 s, slow 30 s; System ID = priority+MAC; hash-based per-flow load balancing; STP sees one logical port; on = static.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "Compare LACP, PAgP, and static `on`.",
+      "a": "LACP: IEEE standard, negotiates, active/passive, multi-vendor, modern choice. PAgP: Cisco proprietary, negotiates, desirable/auto, Cisco-only, legacy. on: no standard, no negotiation, static, must be manually consistent.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    }
+  ]
+}

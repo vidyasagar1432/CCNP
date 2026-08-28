@@ -1,0 +1,208 @@
+{
+  "title": "IPv4 Address Structure",
+  "level": 5,
+  "levelTitle": "Level 05 - IPv4",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "01. Address Structure.md",
+  "cards": [
+    {
+      "q": "What is an IPv4 address and how is it written?",
+      "a": "An IPv4 address is a 32-bit Layer 3 logical address identifying a network interface or endpoint, normally written as four 8-bit octets in dotted-decimal notation, for example 192.168.1.10.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Why did IPv4 address scarcity contribute to IPv6?",
+      "a": "IPv4 has only 2^32 (about 4.3 billion) addresses; this limited space contributed to the development and deployment of IPv6, which uses 128-bit addresses.",
+      "tag": "Overview",
+      "context": "Interview"
+    },
+    {
+      "q": "How are the 32 bits of an IPv4 address organized and what is the total address space?",
+      "a": "Four octets of 8 bits each; each octet ranges 0–255; the total IPv4 address space is 2^32 = 4,294,967,296 addresses.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the binary value of each bit position in an octet?",
+      "a": "128, 64, 32, 16, 8, 4, 2, 1; for example 11000000 = 128 + 64 = 192 and 10101000 = 128 + 32 + 8 = 168.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What determines the network/host boundary of an IPv4 unicast address?",
+      "a": "The subnet mask or prefix length; the address alone does not reveal it. For 192.168.10.5/24, /24 means 24 network bits and 8 host bits.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do the 1 and 0 bits of a subnet mask apply to an IPv4 address?",
+      "a": "1 bits mark the network portion and 0 bits mark the host portion; for example /24 = 255.255.255.0 = 11111111.11111111.11111111.00000000.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "State the subnet masks for /8 through /32.",
+      "a": "/8 255.0.0.0, /16 255.255.0.0, /24 255.255.255.0, /25 255.255.255.128, /26 255.255.255.192, /27 255.255.255.224, /28 255.255.255.240, /29 255.255.255.248, /30 255.255.255.252, /31 255.255.255.254, /32 255.255.255.255.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the /n in CIDR notation represent and what is its valid range?",
+      "a": "It is the prefix length, the number of network bits; it ranges from /0 through /32.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are /0 and /32 prefixes used for?",
+      "a": "0.0.0.0/0 matches the entire IPv4 space and is used for a default route; a /32 represents exactly one address and is used for host routes.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is the network address of a subnet derived?",
+      "a": "Set all host bits to 0; for example 192.168.10.37/24 has the network address 192.168.10.0.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a directed broadcast address and how is it derived?",
+      "a": "Set all host bits to 1; it is tied to a specific subnet, for example the broadcast for 192.168.10.0/24 is 192.168.10.255.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the traditional formula for usable hosts in a subnet and what exceptions exist?",
+      "a": "Usable hosts = 2^h − 2 where h = host bits; exceptions are /31, commonly used on point-to-point links where both addresses are usable, and /32, which represents a single host with no host range.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you find the first and last usable host address of a subnet?",
+      "a": "First usable = network + 1 and last usable = broadcast − 1; for 10.10.10.0/24 that gives 10.10.10.1 and 10.10.10.254 with broadcast 10.10.10.255.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What three ranges does RFC 1918 define as private IPv4, and are they routable on the Internet?",
+      "a": "10.0.0.0/8, 172.16.0.0/12, and 192.168.0.0/16; they are intended for private networks, are not globally routable on the public Internet, and NAT is commonly used when they need Internet connectivity.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How many addresses are in each RFC 1918 private range?",
+      "a": "10.0.0.0/8 provides 16,777,216; 172.16.0.0/12 provides 1,048,576; 192.168.0.0/16 provides 65,536.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the IPv4 loopback range and what is the most common loopback address?",
+      "a": "127.0.0.0/8 is reserved for loopback testing and 127.0.0.1 is the common address; traffic sent to a loopback address stays within the local host.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is 169.254.0.0/16 and when do hosts use it?",
+      "a": "It is the IPv4 link-local range (called APIPA in Microsoft environments); hosts may auto-select a 169.254.x.x address when they cannot obtain one through normal configuration such as DHCP.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What range covers IPv4 multicast and what do multicast addresses identify?",
+      "a": "224.0.0.0/4 covers 224.0.0.0–239.255.255.255; multicast addresses identify groups, not individual unicast hosts. Examples: 224.0.0.5 OSPF routers, 224.0.0.6 OSPF DR/BDR, 224.0.0.9 RIPv2 routers, 224.0.0.10 EIGRP routers.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is 255.255.255.255 and is it forwarded by routers?",
+      "a": "It is the limited broadcast address, intended for the local network only; it is not forwarded by routers.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the 100.64.0.0/10 range used for?",
+      "a": "It is shared address space, commonly used for Carrier-Grade NAT (CGNAT).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "For 192.168.1.0/26, what is the mask, usable host count, and subnet increment?",
+      "a": "Mask 255.255.255.192 with 6 host bits, giving 64 total addresses and 62 usable hosts; subnets increment by 256 − 192 = 64, so 192.168.1.0, .64, .128, .192; for 192.168.1.64/26 the range is .65–.126 with broadcast .127.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a wildcard mask and where is it used in Cisco IOS?",
+      "a": "It is the inverse of the subnet mask (e.g. 255.255.255.0 → 0.0.0.255) and is used in ACLs, OSPF network statements, and some routing-policy configurations.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Is a wildcard mask the same thing as a subnet mask?",
+      "a": "No; a subnet mask's 1s mark network bits, while in a wildcard mask 0 means must match and 1 means don't care — the two are inverses and serve different purposes.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you assign an IPv4 address to an interface in Cisco IOS?",
+      "a": "Enter interface configuration mode and use the syntax ip address <IPv4-address> <subnet-mask>, for example interface GigabitEthernet0/1, ip address 192.168.1.1 255.255.255.0, then no shutdown.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands verify an interface's IPv4 configuration on Cisco IOS?",
+      "a": "show ip interface brief quickly checks IP address and interface/line protocol status; show running-config interface Gi0/1 (or show run interface Gi0/1) shows configured values; show ip interface Gi0/1 shows detailed IP information.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the IPv4 address classes and their default masks?",
+      "a": "Class A 1–126 with /8, Class B 128–191 with /16, Class C 192–223 with /24, Class D 224–239 for multicast, and Class E 240–255 reserved/experimental.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does modern routing determine the network portion from Class A/B/C boundaries?",
+      "a": "No; modern IPv4 routing uses CIDR and does not depend on classful boundaries — classful addressing is historical background for CCNP ENCOR.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "For 192.168.1.0/24, which addresses cannot normally be assigned to hosts?",
+      "a": "192.168.1.0 is the network address and 192.168.1.255 is the directed broadcast, so the traditional host range is 192.168.1.1–192.168.1.254.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does /24 mean the subnet provides 24 usable hosts?",
+      "a": "No; /24 means 24 network bits and 8 host bits, giving 2^8 = 256 total addresses and 254 traditional usable host addresses.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does an IPv4 address identify a device?",
+      "a": "Not necessarily; it identifies an interface or logical endpoint, and a single device can have multiple addresses, for example a router with Gi0/0 = 192.168.1.1/24 and Gi0/1 = 10.0.0.1/30.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between the limited broadcast and a directed broadcast?",
+      "a": "255.255.255.255 is the limited broadcast for the local network and is not forwarded by routers; a directed broadcast such as 192.168.10.255 belongs to a specific subnet like 192.168.10.0/24.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Give the binary forms of 127, 128, 192, 224, and 255.",
+      "a": "127 = 01111111, 128 = 10000000, 192 = 11000000, 224 = 11100000, 255 = 11111111.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "For prefix /n, how do you compute host bits, total addresses, and usable hosts?",
+      "a": "Host bits = 32 − n, total addresses = 2^(32−n), traditional usable hosts = 2^(32−n) − 2, with exceptions for /31 point-to-point and /32 host routes.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "title": "BGP Aggregation (Summarization)",
+  "level": 12,
+  "levelTitle": "Level 12 - BGP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "10. Aggregation.md",
+  "cards": [
+    {
+      "q": "What is BGP aggregation?",
+      "a": "Summarizing more-specific prefixes into a single shorter prefix before advertising to neighbors, which shrinks the global table and hides internal flaps. The core commands are aggregate-address and network (with masks), and the exam focuses on summary-only, the as-set behavior, and the atomic-aggregate and aggregator attributes that mark the aggregation point.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the two ways to summarize in BGP?",
+      "a": "Static network with network X mask Y, which requires the exact route to exist in the BGP table or be IGP-known, and aggregate with aggregate-address X mask, which synthesizes from any more-specific present in the BGP table.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does aggregate-address advertise by default and how do you suppress more-specifics?",
+      "a": "By default it advertises the summary plus the more-specifics; adding summary-only suppresses the more-specifics, e.g. aggregate-address 172.16.0.0 255.255.0.0 summary-only.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the as-set keyword do for an aggregate?",
+      "a": "Without as-set, the aggregate's AS_PATH lists only the aggregating AS, hiding the originating ASes, which risks black-holes or loops for multi-origin aggregates. With as-set the aggregate carries an AS_SET such as {AS1, AS2} listing the origins.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What do atomic-aggregate and aggregator mean?",
+      "a": "atomic-aggregate is set automatically and signals that a less-specific exists and details were lost; it is a well-known discretionary hint. aggregator records the router ID and AS that performed the aggregation.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you hide only selected more-specifics instead of all of them?",
+      "a": "Use a route-map with a prefix-list out filter, e.g. ip prefix-list HIDE deny 172.16.1.0/24 then permit 0.0.0.0/0 le 32, applied as neighbor route-map HIDE out. summary-only hides everything, while route-maps hide selected more-specifics.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the benefits and risks of BGP aggregation?",
+      "a": "Benefits include smaller tables, hiding internal flaps, a stable upstream view, and fewer RIB entries. Risks are loss of path diversity, lost MED and preference differences, the need for as-set on multi-origin aggregates, and the requirement for precise filtering.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Command to see aggregation attributes like atomic-aggregate and as-set?",
+      "a": "show ip bgp 172.16.0.0 shows the atomic-aggregate and as-set attributes on the aggregate; show ip bgp neighbors <ip> advertised-routes and show run | include aggregate support verification.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Does network X mask Y need the route already in the BGP table?",
+      "a": "Yes, network needs the exact route present or IGP-known, while aggregate-address works from any more-specific already in the BGP table.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What attributes are lost during aggregation?",
+      "a": "MED and communities are lost during aggregation, which is the main tradeoff; the aggregate also needs as-set to preserve the origin ASes.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

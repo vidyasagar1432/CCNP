@@ -1,0 +1,82 @@
+{
+  "title": "DSCP / PHB Deep-Dive (EF, AF, CS)",
+  "level": 21,
+  "levelTitle": "Level 21 - QoS",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "11. DSCP PHB Deep-Dive.md",
+  "cards": [
+    {
+      "q": "What is DSCP and how does it relate to PHB?",
+      "a": "DSCP is the 6-bit Differentiated Services Code Point field in the IP header that selects a Per-Hop Behavior (PHB) which each router applies to the packet's queuing and dropping.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the value of EF and what is it used for?",
+      "a": "EF (Expedited Forwarding) is DSCP 46, a single PHB value with no drop precedences, used for low-latency voice and placed in the LLQ priority queue.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is the 8-bit ToS byte split?",
+      "a": "The ToS byte is split into 6 bits of DSCP (the PHB selector) and 2 bits of ECN (congestion notification).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What do the digits in an AF DSCP like AF41 mean?",
+      "a": "The first digit is the AF class (1-4) identifying the queue, and the second digit is the drop precedence (1 low, 2 medium, 3 high); AF41 is class 4 with low drop precedence.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the DSCP values for AF1x through AF4x?",
+      "a": "AF1x is 10/12/14, AF2x is 18/20/22, AF3x is 26/28/30, and AF4x is 34/36/38, where the middle value variants correspond to drop precedences 1, 2, and 3.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the relationship between CSx and IP precedence?",
+      "a": "CSx has a DSCP value of x times 8 (CS6 = 48), mapping directly to the classic IP precedence value x, which makes CS backward-compatible with IP precedence.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which DSCP is used for network control or routing traffic?",
+      "a": "CS6 (DSCP 48) is the class selector used for network control and routing protocol traffic.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you map EF, AF, and CS to queuing?",
+      "a": "EF maps to the LLQ priority queue, AF classes map to CBWFQ with WRED for drop management, and CS/BE traffic uses the default best-effort treatment.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Which traffic types typically use AF41 and AF31?",
+      "a": "AF41 (34) is commonly used for video conferencing and AF31 (26) for video streaming.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which DSCP value survives congestion best within the same AF class?",
+      "a": "The lower drop-precedence value survives best, so AF41 (drop 1) is dropped less than AF43 (drop 3) in the AF4 class.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a common DSCP misconception about EF?",
+      "a": "That EF has multiple variants or drop precedences; EF is exactly one DSCP value (46) with no sub-classes.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the DSCP/PHB quick-review summary?",
+      "a": "DSCP (6 bits, ECN is the other 2) selects a PHB: EF (46) is voice for LLQ, AFxy has a class and drop precedence for CBWFQ/WRED, and CSx equals x times 8 (CS6 = 48) for control, mapped once at the edge and trusted in the core.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

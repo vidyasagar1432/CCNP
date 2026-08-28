@@ -1,0 +1,94 @@
+{
+  "title": "NetFlow",
+  "level": 26,
+  "levelTitle": "Level 26 - Monitoring & Telemetry",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "02. NetFlow.md",
+  "cards": [
+    {
+      "q": "What does NetFlow export and to whom?",
+      "a": "NetFlow exports flow records (per-conversation metadata, not full packets) to a collector, typically over a UDP export port.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What identifies a NetFlow flow?",
+      "a": "A flow is identified by the 7-tuple: source IP, destination IP, source port, destination port, protocol, TOS, and interface (in/out).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the differences between NetFlow v5 and v9?",
+      "a": "v5 uses fixed record fields and is the most famous fixed format; v9 is template-based, allowing flexible and extensible records.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are NetFlow v1, v9, and IPFIX formats?",
+      "a": "v1 uses fixed fields, v9 is template-based and flexible, and IPFIX is the template-based standard; v5 is the fixed-format most famous version.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is flow direction in NetFlow?",
+      "a": "Flows are bidirectional: forward is initiator to responder, reverse is responder to initiator, and a biflow combines both directions in one record; the router caches both directions.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does NetFlow export data and where is the cache?",
+      "a": "The device caches flows locally and exports them to a collector, usually over UDP 2055; caching is on the device and aggregation is done on the collector.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What benefit does NetFlow v9 provide over fixed versions?",
+      "a": "v9 sends rich, extensible records using templates, giving better agility than fixed formats.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the core NetFlow flexible configuration components?",
+      "a": "flow record defines the fields, flow exporter sets the collector destination, flow monitor binds a record and exporter, and ip flow monitor applies it to an interface (e.g. input).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does the flow record configuration do in Flexible NetFlow?",
+      "a": "It defines which fields are matched and collected, such as match ipv4 source/destination address, transport ports, ip protocol, and collect counter bytes/packets.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you configure the NetFlow exporter destination?",
+      "a": "In flow exporter mode use destination 192.0.2.10 and transport udp 2055 to send records to the collector.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "No flows are being exported from the device; what is the likely cause and check?",
+      "a": "Likely a collector configuration issue; check with show flow exporter. No flows could also relate to the record, checked with show flow monitor.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which UDP port does NetFlow usually export to?",
+      "a": "UDP 2055.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the classic exam trap between NetFlow v5 and v9?",
+      "a": "v5 uses fixed records while v9/IPFIX use templates; this fixed vs template distinction is the classic trap.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does NetFlow export full packets or metadata?",
+      "a": "NetFlow exports metadata (flow records/statistics), not full packets.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

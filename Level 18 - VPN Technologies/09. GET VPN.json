@@ -1,0 +1,76 @@
+{
+  "title": "GET VPN",
+  "level": 18,
+  "levelTitle": "Level 18 - VPN Technologies",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "09. GET VPN.md",
+  "cards": [
+    {
+      "q": "What is GET VPN?",
+      "a": "GET VPN (Group Encrypted Transport VPN) provides any-to-any encryption over an MPLS or IP backbone without tunnel interfaces, using a shared GDOI group key so member routers encrypt directly with each other.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the role of a Key Server (KS) in GET VPN?",
+      "a": "The Key Server manages and distributes group keys to members over GDOI; it sends the KEK and TEK so members can encrypt peer-to-peer without building tunnels.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What do TEK and KEK stand for in GET VPN?",
+      "a": "TEK is the Traffic Encryption Key used to encrypt data, and KEK is the Key Encryption Key that protects distribution of the TEK.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What protocol and port does GET VPN use for key management?",
+      "a": "GET VPN uses GDOI (Group Domain of Interpretation) on UDP 848 for members to register with the key server and receive group keys.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does GET VPN differ from DMVPN?",
+      "a": "GET VPN uses no tunnel interfaces and a shared GDOI group key for direct any-to-any encryption, while DMVPN uses mGRE plus NHRP for spoke-to-spoke tunnels with hub control.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Why does GET VPN avoid a hub bottleneck?",
+      "a": "After registering with the key server, members share a TEK and encrypt directly to each other, so no hub sits in the data path and traffic is not hair-pinned.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does COOP provide in GET VPN?",
+      "a": "COOP (Cooperative Key Server) provides redundant key servers for GET VPN high availability and continuous key distribution.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands verify GET VPN status?",
+      "a": "show crypto gdoi group, show crypto gdoi ks, show crypto gdoi member, show crypto ipsec sa, and debug crypto gdoi.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A GET VPN member cannot register; what is a likely cause?",
+      "a": "GDOI traffic on UDP 848 is likely blocked or the key server is unreachable; check show crypto gdoi and reachability to the key server.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the key GET VPN exam distinction from other VPN types?",
+      "a": "GET VPN uses a shared GDOI group key with no tunnel interfaces at all, so it encrypts natively and any-to-any over an MPLS/backbone, unlike DMVPN or crypto-map/VTI which build point-to-point tunnels.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the GET VPN quick-review summary?",
+      "a": "GET VPN is group-key IPsec based on GDOI (UDP 848) with no tunnels, where members register at a Key Server, receive a TEK (data) and KEK (key), and encrypt directly any-to-any, best suited to MPLS or backbone networks with COOP redundancy.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

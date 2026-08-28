@@ -1,0 +1,20 @@
+{
+  "title": "Policy-Based Routing (PBR)",
+  "level": 12,
+  "levelTitle": "Level 12 - BGP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "11. Policy Routing.md",
+  "cards": [
+    { "q": "What is PBR?", "a": "Policy-Based Routing forwards traffic based on policy such as source, protocol, or DSCP instead of the routing table. It uses a route-map applied inbound on an interface, giving matching traffic a set action typically a next hop, output interface, or packet marking. PBR is evaluated before the normal longest-match lookup, so it overrides the RIB for matched flows.", "tag": "Overview", "context": "Both" },
+    { "q": "How does PBR differ from normal routing and BGP policy?", "a": "IP routing forwards all traffic based on destination plus the RIB; BGP policy affects path selection based on attributes; PBR decides per-flow forwarding based on match criteria. PBR can send traffic to a next hop the RIB would not choose.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What is the match-to-set structure of a PBR route-map?", "a": "route-map PBR permit 10 with match ip address prefix-list VOIP, set ip next-hop 10.1.1.2, and set ip precedence 5. Common match criteria are ip address, ip precedence, and length; forwarding actions are set ip next-hop, set interface, and set default next-hop.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What is the difference between set ip next-hop and set default next-hop?", "a": "set ip next-hop X always sends matched traffic to X when reachable, a strict override; set default next-hop X uses X only if no RIB route exists, a fallback; set interface forces traffic out a given interface.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How and where do you apply PBR?", "a": "Apply route-map PBR inbound on the interface receiving the traffic with ip policy route-map PBR. The next hop must be reachable in the routing table or PBR will not install, and ip local policy route-map applies PBR to locally generated traffic.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "How do you verify PBR?", "a": "show ip policy lists interfaces with their route-maps, show route-map shows match/set statements and counters, and debug ip policy traces PBR decisions. The show route-map counters showing matched traffic are the first verification step.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What are common PBR uses?", "a": "Sending voice over a dedicated link by matching DSCP EF to a voice-router next hop, steering branch A traffic by source prefix-list to uplink A, marking packets with set ip precedence, and local PBR with ip local policy for the router's own traffic.", "tag": "Core Concept", "context": "Both" },
+    { "q": "Which PBR command overrides the routing table?", "a": "set ip next-hop; it always sends matched traffic to that hop if reachable, whereas set default next-hop only applies when no RIB route exists.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "What command applies PBR to locally generated traffic?", "a": "ip local policy route-map PBR. Without it, locally sourced traffic is not affected by interface-applied PBR.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "When is PBR evaluated relative to the routing table?", "a": "Before the routing table lookup for matched packets; PBR overrides the RIB for the matched flows.", "tag": "Exam Trap", "context": "Exam" }
+  ]
+}

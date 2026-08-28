@@ -1,0 +1,26 @@
+{
+  "title": "Enterprise Campus",
+  "level": 30,
+  "levelTitle": "Level 30 - Labs",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "05. Enterprise Campus.md",
+  "cards": [
+    { "q": "What does the Enterprise Campus lab build and why is it important for ENCOR?", "a": "It builds a three-tier campus with access/distribution/core, VLANs, EtherChannel, STP, and routing, tying L2 and L3 together as the backbone of ENCOR hands-on practice.", "tag": "Overview", "context": "Both" },
+    { "q": "What are the three tiers of the classic campus design and their roles?", "a": "Access switches connect hosts, distribution switches perform L3 routing, and core routers/switches form the backbone, with uplinks interconnected via EtherChannel.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What is the typical Layer 2 setup sequence in a campus lab?", "a": "Create VLANs, configure trunks, bundle ports with EtherChannel, set STP root, and assign access ports — VLAN, trunk, bundle, then STP.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "How is Layer 3 routing built in a campus lab?", "a": "Create SVIs with interface VlanX, enable routing with OSPF or EIGRP, add default routes with ip route, configure HSRP for FHRP redundancy, and use routed uplink ports.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What configuration is used to make an SVI the gateway and provide first-hop redundancy?", "a": "Assign an IP on the SVI (interface Vlan10) and enable a standby/HSRP group, e.g. standby 1 ip for the virtual gateway address.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What is the correct verification order for a campus lab?", "a": "Work L1 to L3 methodically: show interfaces status, show vlan, show etherchannel summary, show spanning-tree, show ip route, then show standby brief.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "Which command checks EtherChannel bundle state?", "a": "show etherchannel summary, used to confirm ports are bundled correctly into a channel-group.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "Which command shows first-hop redundancy status?", "a": "show standby brief, which displays HSRP/standby group state and redundancies.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "Which features provide campus redundancy?", "a": "EtherChannel on uplinks, HSRP/VRRP for gateways, a designed STP root, and loop prevention via Root Guard.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What is the common repeatable lab build order for a campus?", "a": "VLANs, trunks, EtherChannel, SVIs, routing, FHRP, then verification.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What commands configure a trunk carrying multiple VLANs and bundle it?", "a": "switchport mode trunk, switchport trunk allowed vlan 10,20, then channel-group 1 mode active to bundle the port.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "No VLAN appears in a campus lab. What is the likely cause and check?", "a": "The VLAN was not created, so check with show vlan.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "An EtherChannel bundle is not forming. What is the likely cause and check?", "a": "A protocol or mode mismatch, so check the bundle using show etherchannel summary.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "The cpu sees a blocked STP port where it should not be. What is the correct approach?", "a": "Root priority should be controlled by design, so check show spanning-tree and adjust the designed root rather than forcing the port.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "The campus distribution layer only performs switching, not routing.", "a": "False — in this design the distribution layer performs L3 routing, while the access layer connects hosts and the core is the backbone.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "What is the enterprise campus lab verification goal and redundancy approach?", "a": "Verify L1 to L3 using the command chain, and design for redundancy everywhere using EtherChannel, HSRP/VRRP, and a designed STP root.", "tag": "Exam Trap", "context": "Exam" }
+  ]
+}

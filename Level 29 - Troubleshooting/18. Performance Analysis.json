@@ -1,0 +1,22 @@
+{
+  "title": "Performance Analysis",
+  "level": 29,
+  "levelTitle": "Level 29 - Troubleshooting",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "18. Performance Analysis.md",
+  "cards": [
+    { "q": "What does performance analysis isolate?", "a": "Latency, throughput, jitter, and loss, tying them to the network path. Tools include ping, traceroute, NetFlow, IP SLA, and protocol analyzers.", "tag": "Overview", "context": "Both" },
+    { "q": "What are the key performance metrics and their meanings?", "a": "Latency (RTT delay), throughput (bits/sec), jitter (delay variation), loss (dropped percentage), and utilization (capacity use).", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What are the four components of latency?", "a": "Serialization (link speed), propagation (distance), processing (router), and queueing (congestion). Latency equals all four combined.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "Why is jitter different from latency?", "a": "Jitter is the variation in delay, not the level of delay itself.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "What tool measures jitter and loss, and what measures flows?", "a": "IP SLA measures jitter/loss; NetFlow measures throughput and applications/flows.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What does a constant high latency pattern indicate?", "a": "Serialization delay or propagation distance, as opposed to spiking latency which indicates queueing.", "tag": "Core Concept", "context": "Both" },
+    { "q": "What does burst loss indicate?", "a": "Congestion on the path.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How is throughput different from bandwidth?", "a": "Bandwidth is capacity, while throughput is what is actually delivered. TCP behavior often caps throughput before the link does.", "tag": "Core Concept", "context": "Both" },
+    { "q": "How does TCP affect throughput?", "a": "The TCP window limits throughput, window scaling helps raise it, and drops shrink the window.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What is the performance analysis workflow?", "a": "Establish a baseline, measure latency/loss, identify the segment, capture traffic, then confirm the fix. Baseline, measure, isolate, capture, verify.", "tag": "Core Concept", "context": "Both" },
+    { "q": "What command shows the IP SLA measurement results?", "a": "show ip sla statistics.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What does traceroute reveal about performance when RTT is high?", "a": "It pinpoints which hop is adding latency, helping isolate the failing segment.", "tag": "Quick Review", "context": "Practical" }
+  ]
+}

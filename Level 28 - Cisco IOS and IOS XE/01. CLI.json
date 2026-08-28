@@ -1,0 +1,82 @@
+{
+  "title": "CLI",
+  "level": 28,
+  "levelTitle": "Level 28 - Cisco IOS and IOS XE",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "01. CLI.md",
+  "cards": [
+    {
+      "q": "What is the Cisco CLI?",
+      "a": "The primary configuration interface for IOS and IOS XE. Exec commands (like show and ping) run in privileged mode; configure commands (like interface and router) run in config mode. It includes built-in help, tab completion, and the do command to run EXEC commands from any mode.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Which two command classes exist in the Cisco CLI, and where does each run?",
+      "a": "EXEC commands run in user or privileged mode (for example show and ping); configure commands run in configuration mode (for example interface and router).",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the difference between typing ? with a space and ? with no space after a word?",
+      "a": "? with a space lists commands or subcommands, which is context help (for example show ?). ? with no space completes the word and shows possible completions (for example show co?).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which keyboard shortcuts complete a word, recall history, exit config mode, abort, and interrupt output?",
+      "a": "Tab completes a word, Up arrow recalls command history, Ctrl+Z exits config mode (the same as end), Ctrl+C aborts, and Ctrl+Shift+6 interrupts an operation.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the do command allow you to do?",
+      "a": "The do command runs an EXEC command, such as show or ping, from inside configuration mode without leaving it.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What do privilege levels 0, 1, and 15 mean?",
+      "a": "0 is minimal access, 1 is user mode, and 15 is privileged mode (enable, full access). Custom levels are created with the privilege command.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which show commands verify the live config, saved config, image, and interface status?",
+      "a": "show running-config shows the live config, show startup-config shows the saved config, show version shows the image and uptime, and show interfaces shows interface status. terminal length 0 disables output paging.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What do the output modifiers | include, | exclude, | section, | begin, and | redirect do?",
+      "a": "| include X shows only lines containing X, | exclude X hides lines containing X, | section X shows the block containing X, | begin X starts output at X, and | redirect saves the output to a location such as tftp:.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the purpose of the enable, configure terminal, no, and end commands?",
+      "a": "enable enters privileged mode (level 15), configure terminal enters global config mode, no removes or disables a setting, and end returns to privileged EXEC from config mode (same as Ctrl+Z).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why does the % Ambiguous error appear?",
+      "a": "The typed abbreviation matches more than one possible command. Type more characters so the command becomes unambiguous.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the % Invalid input error mean?",
+      "a": "The command uses wrong syntax or was entered in the wrong mode. Check the prompt and the command spelling.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why can you not configure an interface even though the command looks correct?",
+      "a": "The device is not in config mode, or the privilege level is below 15. Enter configure terminal from privileged EXEC before interface commands; without level 15 privilege you cannot reach config mode.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,124 @@
+{
+  "title": "Advanced BGP",
+  "level": 30,
+  "levelTitle": "Level 30 - Labs",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "10. Advanced BGP.md",
+  "cards": [
+    {
+      "q": "What does the Advanced BGP lab practice?",
+      "a": "It practices iBGP full mesh versus route reflectors, attribute manipulation, filtering, and advanced features such as communities and confederation, verifying sessions, paths, and best-path outcomes.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the main iBGP scaling options?",
+      "a": "Full mesh for small networks, route reflectors for scale, confederation using ASN groups, and multihop for non-adjacent peers.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does a route reflector change iBGP peering?",
+      "a": "Route reflectors break iBGP full-mesh limits because clients only peer with the route reflector rather than forming a full mesh.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the roles in a route reflector topology?",
+      "a": "The route reflector reflects routes to its clients; clients only peer to the RR, while non-clients must be fully meshed among themselves.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the BGP Weight attribute control and which value wins?",
+      "a": "Weight is a local attribute where the highest weight is preferred for best-path selection.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do Local-pref, AS-path, and MED influence best path?",
+      "a": "Local-pref influences outbound choice, AS-path (with prepend) uses path length, and MED influences inter-AS selection.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the BGP Origin values?",
+      "a": "IGP, EGP, and incomplete, which indicate how a route was originated.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the BGP filtering methods?",
+      "a": "Prefix-list with distribute-list, AS-path with ip as-path access-list, community with route-map, and neighbor filter-list.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do BGP filtering methods control routes?",
+      "a": "They control what routes you accept from or advertise to neighbors using prefix-list, as-path access-list, or community-based route-maps.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What advanced BGP features help with scale and config simplification?",
+      "a": "Communities for tagging, confederation for scale, peer groups for config reuse, next-hop-self for iBGP, and allowas-in when a similar AS number repeats.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the benefit of BGP peer groups?",
+      "a": "Peer groups simplify configuration of many neighbors by reusing the same settings across them.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What command configures a neighbor as a route-reflector client?",
+      "a": "Under router bgp, use neighbor 10.0.0.1 route-reflector-client, with next-hop-self and send-community as needed.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why is send-community required for community exchange?",
+      "a": "By default communities are not advertised; send-community must be configured on the neighbor to exchange community values.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands verify BGP sessions, best path, and installed routes?",
+      "a": "show ip bgp summary for sessions, show ip bgp for best path, show ip bgp rr for reflectors, show ip route bgp for installed routes, and show ip bgp <net> for attributes.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "An iBGP session does not establish. What is the likely cause and check?",
+      "a": "A multihop requirement being missed, so check with show ip bgp summary.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "A BGP route is not being advertised as expected. What is the likely cause?",
+      "a": "A filter blocking the advertisement, so check the inbound prefix-list filtering.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Communities are not reaching a neighbor despite correct policy. What is the likely cause?",
+      "a": "send-community is not configured on the neighbor, so community values are not advertised.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the BGP best-path selection order?",
+      "a": "Weight, then local-pref, then AS path length, then MED.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the recommended BGP verification chain?",
+      "a": "Verify sessions with summary, then path, then installed route — summary, path, installed.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    }
+  ]
+}

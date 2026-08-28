@@ -1,0 +1,82 @@
+{
+  "title": "Speed",
+  "level": 1,
+  "levelTitle": "Level 01 - Physical Layer",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "03. Speed.md",
+  "cards": [
+    {
+      "q": "What is speed on an Ethernet port, and how is it negotiated?",
+      "a": "Speed is the line rate of an Ethernet port. It is negotiated on copper, fixed on fiber, and constrained by the cable category or optics installed. A slow port is usually a mismatch, cabling, or bottleneck rather than the nominal rate.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "List the standard Ethernet speed ladder from 10 Mbps to 400 Gbps with typical media.",
+      "a": "10 Mbps 10BASE-T on Cat3; 100 Mbps 100BASE-TX on Cat5 (2 pair); 1 Gbps 1000BASE-T/-SX/-LX on Cat5e or MM/SM; 2.5 Gbps 2.5GBASE-T on Cat5e/Cat6; 5 Gbps 5GBASE-T on Cat6; 10 Gbps 10GBASE-T/-SR/-LR/-ER on Cat6a or optics; 25 Gbps 25GBASE-* on SFP28; 40 Gbps 40GBASE-* on QSFP+; 100 Gbps 100GBASE-* on QSFP28; 400 Gbps 400GBASE-* on OSFP or QSFP-DD.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do copper and fiber ports negotiate speed?",
+      "a": "Copper ports advertise capability and the highest common rate becomes the negotiated speed, with forced settings overriding. Fiber ports have no speed negotiation (1G SFP and 10G SFP+ are fixed), though some QSFPs auto-negotiate Ethernet rates via 802.3 AN.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is breakout and how is it used?",
+      "a": "Breakout splits one high-speed port into several lower-rate links, such as 40G into 4x10G or 100G into 4x25G, using DAC and a splitter. It is a data center staple.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is link speed not equal to throughput?",
+      "a": "Link speed (line rate) is not throughput. TCP window, latency, MSS, and drops cap real performance, and the weakest link in a path sets the end-to-end rate, so a 100 Mbps uplink limits a gigabit campus flow.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What does auto-negotiation off on a broken cable cause?",
+      "a": "With auto-negotiation off on a broken cable, the port falls to the lowest common speed, typically 10 Mbps. This red flag appears in the commonly tested suddenly slow question pattern.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What commands configure and verify the negotiated speed of a port?",
+      "a": "Configure with 'speed 1000' (or auto) and 'duplex full' on the interface. Verify the negotiated reality with 'show interfaces gig0/1 | include Gb/s|Mb/s|Duplex|Speed', 'show interfaces status', and 'show interfaces counters rate'.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Should you assume the CLI speed setting is the actual negotiated speed?",
+      "a": "No. Never assume the CLI speed 1000 is running; always verify with 'show interfaces' to confirm what was actually negotiated.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What do NBASE-T speeds of 2.5G and 5G provide?",
+      "a": "NBASE-T (2.5G and 5G) extends the life of existing Cat5e/Cat6 copper without re-cabling, operating at higher speeds over the same 100 m.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "If a 1G SFP module is inserted into a 10G port, what speed results?",
+      "a": "Fiber speed is set by the module, so a 1G SFP in a 10G port stays at 1G. A wrong module (for example SX versus LX) is a common silent failure.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "When one side has a forced speed, why should you also check the duplex?",
+      "a": "A forced speed may still allow the link to come up yet operate half-duplex, resulting in a slow but up link. So when one side is forced, verify the sibling duplex setting.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which speeds are full-duplex only?",
+      "a": "1G and above are full-duplex only. Half-duplex exists only for 100M (and legacy 10M) links.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

@@ -1,0 +1,124 @@
+{
+  "title": "ARP (Address Resolution Protocol)",
+  "level": 4,
+  "levelTitle": "Level 04 - Ethernet & Switching",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "10. ARP.md",
+  "cards": [
+    {
+      "q": "What is ARP and what does it do?",
+      "a": "ARP (Address Resolution Protocol) maps an IPv4 address to a MAC address on the local Layer 2 segment. It is carried directly inside Ethernet frames and is not encapsulated inside IP, so it operates at the Layer 2/Layer 3 boundary.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Which MAC does a host resolve via ARP for same-subnet vs different-subnet destinations?",
+      "a": "For a same-subnet destination, the host ARPs for the destination host's IPv4 address. For a different subnet, it does not ARP for the remote destination; it ARPs for the next-hop router/default gateway's IPv4 address.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does the frame look like when a host sends to a remote subnet via its gateway?",
+      "a": "IP source and destination stay as the host and remote host addresses, but the MAC source is the host's MAC and the MAC destination is the gateway's MAC. The router then removes the incoming Layer 2 frame, routes the IP packet, and creates a new Layer 2 frame on the outgoing interface.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Is an ARP request broadcast and an ARP reply unicast?",
+      "a": "Yes. The ARP request is broadcast to FF:FF:FF:FF:FF:FF so all devices in the local broadcast domain receive it but only the owner of the requested IP answers. The normal ARP reply is unicast to the requester.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the key fields of an ARP message?",
+      "a": "HTYPE (hardware type, Ethernet = 1), PTYPE (protocol type, IPv4 = 0x0800), HLEN (MAC = 6), PLEN (IPv4 = 4), Opcode (1 = request, 2 = reply), Sender MAC, Sender IP, Target MAC, and Target IP.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Which EtherType identifies ARP frames?",
+      "a": "0x0806. IPv4 itself uses EtherType 0x0800.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the ARP table and how do you view it on Cisco IOS?",
+      "a": "The ARP cache/table stores IPv4-to-MAC mappings per interface. View it with show arp or show ip arp.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the Cisco IOS default ARP timeout and how is it changed?",
+      "a": "Cisco IOS default ARP timeout is 14400 seconds (4 hours), configurable per interface with arp timeout <seconds>, e.g. interface GigabitEthernet0/0 with arp timeout 7200. Host OS ARP aging can differ.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do the ARP table and the switch MAC table differ?",
+      "a": "The ARP table maps IPv4 address -> MAC address on the host/router. The CAM/MAC table on the switch maps MAC address -> switch port. ARP resolution and MAC learning are related but are different tables and processes.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is Proxy ARP?",
+      "a": "Proxy ARP lets a router answer an ARP request on behalf of another device when it can route traffic toward that destination, so the host learns the router's MAC instead of the remote host's MAC. It is a router/L3 function, not the switch using its CAM table as an ARP table.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is ARP poisoning or spoofing and what can it enable?",
+      "a": "ARP does not authenticate messages, so a malicious device can send forged ARP replies and associate the gateway's IP with the attacker's MAC. This can enable man-in-the-middle attacks, traffic interception or redirection, and denial of service.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is Dynamic ARP Inspection (DAI) and what does it depend on?",
+      "a": "DAI is the primary Cisco Layer 2 feature for mitigating ARP spoofing/poisoning: it validates ARP packets on switch ports and drops invalid messages. It commonly works with the DHCP Snooping binding database to determine valid IP-to-MAC-to-port relationships.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a Gratuitous ARP (GARP) and why does it matter in troubleshooting?",
+      "a": "A GARP is an ARP message sent without a preceding request, used to detect duplicate IPv4 addresses, update neighboring ARP caches, announce a changed MAC/IP association, or flag first-hop redundancy events. It matters because an unexpected GARP can change other devices' ARP-cache entries.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does IPv6 address resolution compare to IPv4 ARP?",
+      "a": "IPv6 does not use ARP; it uses Neighbor Discovery (ND/NDP) over ICMPv6. The equivalents are ARP Request = Neighbor Solicitation (NS), ARP Reply = Neighbor Advertisement (NA), and broadcast-based ARP requests become ICMPv6 multicast-based discovery. RS/RA are used for router discovery.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which commands view, filter, clear, and configure ARP entries?",
+      "a": "show arp / show ip arp view entries; show ip arp | include 10.1.1. filters; clear ip arp 10.1.1.2 clears a specific entry; arp 10.1.1.2 abcd.1234.5678 arpa configures a static ARP entry; interface-level arp timeout changes aging. Static ARP entries are uncommon in normal enterprise networks.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you debug ARP and why must you be careful?",
+      "a": "Use debug arp and disable it afterward with undebug all or u all. Debugging must be used carefully, especially on production devices, because it can be disruptive.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the troubleshooting workflow for an IPv4 host that cannot communicate locally?",
+      "a": "Check IP configuration (show ip interface brief: interface up/up, correct IPv4 and mask), check the ARP table (show ip arp), clear stale entries with clear ip arp <IPv4-address> and generate traffic again, check the switch MAC table (show mac address-table), and check for ARP security issues with show ip arp inspection and show ip dhcp snooping binding.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which facts belong in the ARP quick review?",
+      "a": "Purpose: IPv4 -> MAC on the local layer; EtherType 0x0806; request broadcast, reply unicast; same subnet -> ARP for destination, different subnet -> ARP for next hop/gateway; ARP table = IPv4 -> MAC, CAM table = MAC -> port; Cisco default ARP timeout 14400 s (4 h); IPv6 uses Neighbor Discovery over ICMPv6; threat = ARP spoofing; mitigation = DAI using DHCP Snooping bindings.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the one-minute mental model for ARP?",
+      "a": "Before sending, the host asks who is my IPv4 next hop, then ARP resolves IPv4 -> MAC for it, and the frame is delivered through the Layer 2 switch which maps MAC -> port. ARP answers what MAC to use for the IPv4 next hop; the switch answers which port to send the MAC-addressed frame out.",
+      "tag": "Quick Review",
+      "context": "Both"
+    }
+  ]
+}

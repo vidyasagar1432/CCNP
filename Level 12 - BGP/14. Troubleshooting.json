@@ -1,0 +1,82 @@
+{
+  "title": "BGP Troubleshooting",
+  "level": 12,
+  "levelTitle": "Level 12 - BGP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "14. Troubleshooting.md",
+  "cards": [
+    {
+      "q": "What does BGP troubleshooting cover and what is the standard flow?",
+      "a": "It spans session establishment (TCP/179, TTL, update-source), route selection (best-path steps), and policy effects (route-maps in and out). The standard flow is: establish sessions, verify the BGP table, trace the best path, then check policy and RIB. Most exam failures hide in session mismatch, next-hop, or route-map direction.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What is the five-step BGP troubleshooting flow?",
+      "a": "1 Sessions, are neighbors Established, with show ip bgp summary; 2 Table, are prefixes present, with show ip bgp; 3 Best path, why this winner, with show ip bgp <prefix>; 4 RIB, is it installed, comparing show ip bgp versus show ip route bgp; 5 Policy, route-map effect, using counters and neighbor routes.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What do the BGP session states mean?",
+      "a": "Idle means init, often remote-as not configured; Connect means SYN sent but no route to peer; Active means retrying, with TCP 179 blocked or wrong update-source; OpenSent/Confirm means capability mismatch during negotiation; Established means the session is good. Active almost always means the neighbor cannot reach your advertised address.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are common BGP session formation problems?",
+      "a": "eBGP will not form over a loopback because TTL defaults to 1, fixed with ebgp-multihop; iBGP flaps on update-source mismatch, fixed with loopback plus update-source; an Active loop from TCP 179 blocked by an ACL; no eBGP peering when remote-as numbers are swapped; and capability mismatch after newer peer upgrades.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What causes typical route-selection problems?",
+      "a": "Wrong path installed from attribute priority misunderstanding, checked with show ip bgp attributes; next hop unreachable because it is outside the RIB, affecting iBGP recursion and needing next-hop-self; MED ignored from cross-AS comparison; routes filtered by route-map in or out; and old paths lingering after session flaps.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What do the policy misconfiguration signatures indicate?",
+      "a": "Inbound attributes missing means a route-map was applied out instead of in; communities lost means no send-community; everything blocked means a prefix-list implicit deny; only self routes advertised means no network statements; and a best path that never changes means the policy is on the wrong neighbor.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does advertised-routes versus received-routes help troubleshooting?",
+      "a": "show ip bgp neighbors <ip> received-routes shows what was received pre-policy and advertised-routes shows what was sent, which isolates which direction is broken. show ip bgp neighbors <ip> routes shows received post-policy.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the key diagnostic command for neighbor states?",
+      "a": "show ip bgp summary, showing states, uptime, and prefix counts; show ip bgp <prefix> shows all paths with attributes; show ip bgp dampening shows flap statistics; and debug ip bgp traces the session.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does an Active BGP state almost always indicate?",
+      "a": "A reachability or policy problem, not remote-as: the neighbor cannot reach your advertised address, typically due to TTL, update-source, or an ACL, rather than a wrong remote-as.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why might MED appear ignored during troubleshooting?",
+      "a": "Because of the MED same-AS rule: MED from different neighbor ASes is not comparable unless bgp always-compare-med is configured.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why do iBGP routes fail to install even when present in the BGP table?",
+      "a": "Because the next hop is not reachable; iBGP requires next-hop-self or IGP recursion before it can install the route in the RIB.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "BGP troubleshooting quick review?",
+      "a": "No session: check TCP 179, TTL, update-source; flap: update-source and keepalive; no routes: filters or missing network command; wrong winner: best-path attributes; not in RIB: next-hop recursion; communities lost: send-community; policy wrong: in versus out direction; verify from summary to table to RIB.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

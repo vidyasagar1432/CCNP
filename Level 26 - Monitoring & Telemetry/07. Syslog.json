@@ -1,0 +1,82 @@
+{
+  "title": "Syslog",
+  "level": 26,
+  "levelTitle": "Level 26 - Monitoring & Telemetry",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "07. Syslog.md",
+  "cards": [
+    {
+      "q": "What is Syslog and over which port does it work?",
+      "a": "Syslog sends device log messages to a central syslog server over UDP 514; entries carry facility plus severity (0-7) and timestamps.",
+      "tag": "Overview",
+      "context": "Exam"
+    },
+    {
+      "q": "What makes up a syslog message?",
+      "a": "A syslog message consists of facility (source of the event) plus severity (importance) plus the event text, with a timestamp; destinations can be console, buffer, or server.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does syslog severity numbering work?",
+      "a": "Severity ranges 0-7 where a lower number is more severe: 0 emergencies, 1 alerts, 2 critical, 3 errors, 4 warnings, 5 notification, 6 informational, 7 debugging.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the syslog destinations and their commands?",
+      "a": "Console via logging console, on-box buffer via logging buffered, and server via logging host; SNMP traps can be sent via an NMS. Configure each separately.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you configure the syslog server destination and level?",
+      "a": "Use logging host 192.0.2.10 to set the UDP server and logging trap informational to set the server level; logging source-interface Loopback0 sets the sender IP and logging timestamp datetime adds timestamps.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What does the logging buffered command do?",
+      "a": "logging buffered 8192 stores log messages in an on-box ring buffer, separate from the server or console destinations.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How does syslog differ from SNMP traps?",
+      "a": "Syslog is text logs over UDP 514 with numeric severity, while SNMP traps are structured alerts over UDP 162 using OIDs; syslog is for logs, SNMP for alerts.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you view logged messages on a device and in a session?",
+      "a": "Use show logging to view the buffer/log, show logging | include 192 to filter, and terminal monitor to see log messages in the current terminal session.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "No logs arrive at the syslog server; what is the likely cause and check?",
+      "a": "Likely the trap/server level setting; check with show logging. Also check buffered config, clock for timestamps, firewall for UDP 514, and console level.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Which syslog severity is the most severe?",
+      "a": "Severity 0 (emergencies) is the most severe; a lower number always means higher severity.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which command controls the level of logs sent to the syslog server?",
+      "a": "logging trap (e.g. logging trap informational) controls what goes to the server and can differ from the console level.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does device-buffered logging differ from server logging?",
+      "a": "Buffered logging is stored on-box via logging buffered and is separate from the server (logging host) or console destinations.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

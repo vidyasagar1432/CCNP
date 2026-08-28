@@ -1,0 +1,70 @@
+{
+  "title": "Route Reflector (RR)",
+  "level": 12,
+  "levelTitle": "Level 12 - BGP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "08. Route Reflector.md",
+  "cards": [
+    {
+      "q": "What is a route reflector?",
+      "a": "A mechanism that breaks iBGP's full-mesh requirement by making one or more reflectors act as hubs that re-advertise iBGP-learned routes, cutting the session count from n(n-1)/2 to n. Reflection is controlled by three attributes, ORIGINATOR_ID, CLUSTER_LIST, and CLUSTER_ID, which guarantee loop-freedom when iBGP split horizon is bypassed.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How much does a route reflector reduce iBGP sessions?",
+      "a": "From n(n-1)/2 sessions with a full mesh to n sessions per client, giving linear scaling. Full mesh collapses beyond about 10 routers while a reflector design scales linearly.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the route reflector roles?",
+      "a": "RR re-advertises iBGP routes; a client is an iBGP peer of the RR that peers only with the RR; a non-client is an iBGP peer of the RR but is not a client. A client never peers with another client, the RR relays between them.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are the three rr reflection rules?",
+      "a": "A route learned from a client is sent to all other clients and non-clients; a route learned from a non-client is sent to clients only; a route learned from eBGP is sent to everyone. Otherwise iBGP-learned routes are not re-advertised (split horizon) except by these rules.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What attributes prevent loops in route reflection?",
+      "a": "ORIGINATOR_ID carries the original router ID, and any router seeing its own ID drops the route; CLUSTER_ID identifies the reflector cluster; CLUSTER_LIST records the cluster IDs traversed, and any router in the list drops the route on re-receipt. Two RRs in one cluster share a CLUSTER_ID while distinct clusters have distinct IDs.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you configure a route reflector?",
+      "a": "Under router bgp add neighbor 10.0.0.2 remote-as 65001 and neighbor 10.0.0.2 route-reflector-client per client, on the reflector. Clients keep normal iBGP config such as loopback and update-source and must peer with the reflector.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you build a multi-cluster reflector design?",
+      "a": "Give each reflector its own cluster with bgp cluster-id 1, so several reflectors each with a unique cluster-id scale larger ASes; clients peer only with their local RR and the RRs peer with each other.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Command to verify routes reflected through a cluster?",
+      "a": "show ip bgp cluster-list 1 shows routes carrying that cluster; show ip bgp neighbors <ip> and show ip bgp paths support the check.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Where does a route learned from a non-client go?",
+      "a": "To clients only, not to other non-clients. The RR does not forward a non-client route to other non-clients.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "How does a route reflector safely bypass iBGP split horizon?",
+      "a": "It re-advertises iBGP-learned routes, but loop-freedom is guaranteed by ORIGINATOR_ID and CLUSTER_LIST instead of split horizon.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

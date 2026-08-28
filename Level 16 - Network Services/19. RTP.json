@@ -1,0 +1,24 @@
+{
+  "title": "RTP / RTCP (Real-time Transport Protocol)",
+  "level": 16,
+  "levelTitle": "Level 16 - Network Services",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "19. RTP.md",
+  "cards": [
+    { "q": "What is RTP and what does it carry?", "a": "RTP (Real-time Transport Protocol) carries the actual media payload, such as voice and video, for real-time sessions, delivering millisecond-spaced packets with sequence numbers, timestamps, and a payload-type header; RTCP is its control counterpart reporting QoS statistics.", "tag": "Overview", "context": "Both" },
+    { "q": "How do SIP, RTP, and RTCP divide their roles?", "a": "SIP does signaling on 5060/5061, RTP carries the media payload on even UDP ports from 16384, and RTCP provides control and statistics on the RTP port plus one (the odd port).", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What is the RTP and RTCP port convention?", "a": "RTP uses an even UDP port in the 16384-32767 range and RTCP uses the next odd port, which is the RTP port plus one.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "Why does RTP use UDP rather than TCP?", "a": "UDP gives low latency without retransmission; RTP tolerates packet loss, uses sequence numbers for ordering and loss detection, uses the timestamp for timing, and never retransmits because retransmitting old voice is useless.", "tag": "Core Concept", "context": "Both" },
+    { "q": "What are the key RTP header fields?", "a": "Payload type (PT) identifies the codec such as G.711 or G.729, the sequence number detects loss and ordering, the timestamp drives decode timing, SSRC identifies the media source, and CSRC lists contributing sources in mixes.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "Where does codec negotiation happen for RTP?", "a": "During call setup via SDP, which negotiates the codec and the media IP addresses and ports that will carry RTP.", "tag": "Core Concept", "context": "Both" },
+    { "q": "Does RTP retransmit lost media packets?", "a": "No. Retransmission of old voice is useless, so RTP favors freshness over completeness; it tolerates some loss and lets the decoder handle gaps.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "What reports does RTCP provide?", "a": "SR (Sender Report) gives sender statistics, RR (Receiver Report) gives loss and jitter measured by the receiver, and SDES provides session description; RTCP typically uses about 5 percent of the session bandwidth for QoE monitoring.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What are the target QoS metrics for voice?", "a": "One-way latency under 150 ms, jitter under 30 ms, and packet loss under 1 percent for voice; jitter is considered a key killer of RTP quality.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What DSCP markings are used for real-time traffic?", "a": "DSCP EF (46) for voice, DSCP AF41 (34) for video, and CS3 for signaling; queuing and LLQ protect RTP during congestion.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What does a jitter buffer do and why is it needed?", "a": "It smooths out the variance in packet arrival times at the receiving end to make decoded audio play back cleanly, and it is often the countermeasure against jitter.", "tag": "Core Concept", "context": "Both" },
+    { "q": "How do you troubleshoot common RTP quality failures?", "a": "One-way audio points to a broken RTP path or NAT problem, garbled audio suggests jitter or loss (check the jitter buffer and QoS), no media at all means UDP media ports are blocked (check the ACL for even ports), static or noise indicates packet loss, and delay points to latency and queueing issues in the LLQ.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What are the key RTP exam traps?", "a": "RTP carries media over UDP with sequence numbers, timestamps, and payload type; RTCP is the control channel on RTP port plus one; RTP never retransmits; DSCP EF marks voice; jitter is the main enemy; SIP sets up and RTP carries.", "tag": "Quick Review", "context": "Exam" },
+    { "q": "What port should you open so RTP can flow?", "a": "The even UDP media ports in the typical 16384-32767 range (and the adjacent odd RTCP ports), not just the SIP signaling port 5060.", "tag": "Exam Trap", "context": "Practical" }
+  ]
+}

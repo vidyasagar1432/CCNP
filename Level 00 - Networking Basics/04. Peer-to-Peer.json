@@ -1,0 +1,88 @@
+{
+  "title": "Peer-to-Peer",
+  "level": 0,
+  "levelTitle": "Level 00 - Networking Basics",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "04. Peer-to-Peer.md",
+  "cards": [
+    {
+      "q": "What is a peer-to-peer (P2P) network?",
+      "a": "A model in which every node is treated as an equal peer, with each device able to both request and provide services directly to others without a dedicated central server. It is used for sharing resources such as files, processing, and bandwidth among functionally equivalent nodes.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How does discovery and coordination work in a P2P network without a central authority?",
+      "a": "There is no central authority, so directory and coordination duties are distributed. Each peer maintains a partial view of the network and discovery is done via broadcast, distributed hash tables (DHT), or trackers.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are examples of P2P applications?",
+      "a": "BitTorrent for file sharing, blockchain nodes, VoIP (early SIP without a central proxy), Windows workgroup file shares, and chat applications.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the advantages of P2P networking?",
+      "a": "No server cost or bottleneck and no single point of failure; it scales with demand since each new peer adds capacity as well as load; it is resilient with no central directory to take down; and it is cheap to start for small or home groups.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What are the disadvantages of P2P networking?",
+      "a": "Security risk with no centralized authentication or authorization, no central management, patching, or audit trail, unpredictable performance depending on peers being online, discovery overhead, and NAT traversal issues (needing hole punching, STUN, TURN). It also provides no SLA, backup, or data integrity guarantees.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "How does the 'peer' concept apply in routing protocols?",
+      "a": "In routing, a peer is a router that builds adjacencies and exchanges updates as an equal, such as eBGP/iBGP neighbors or OSPF/EIGRP adjacencies. These protocols are P2P in control plane behavior even inside a client-server style network.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the distinction between data plane and control plane in P2P?",
+      "a": "End-user client-server applications operate in the data plane, while routers peering with each other operate in the control plane. This distinction between data plane and control plane is a recurring ENCOR theme.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Is P2P a physical topology or a logical model?",
+      "a": "P2P is a logical or application model, not a physical topology. A P2P application can run over a star-switched network.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Do BGP/OSPF 'peers' have the same meaning as file-sharing P2P peers?",
+      "a": "No. BGP/OSPF peers are equal routing relationships in the control plane, while file-sharing P2P refers to distributed application-level resource sharing. Same word, different meaning; know both.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does P2P apply at the OSI application layer or does it imply P2P at each layer?",
+      "a": "P2P applies at the application layer; it is not automatically peer-to-peer across OSI, because transport still uses TCP/UDP connections.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "When choosing between P2P and client-server for an enterprise service, which should you prefer?",
+      "a": "Client-server should be preferred for manageability, centralized security, and compliance. P2P should be restricted to specific applications such as updates and caching.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "In the P2P vs client-server comparison, what is the failure mode of each?",
+      "a": "P2P has no single point of failure but peers may be offline, while client-server has a server single point of failure unless it is clustered.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What command shares a Windows folder as a workgroup (P2P-style file sharing)?",
+      "a": "net share notes=D:\\notes /grant:everyone,read shares the folder D:\\notes under the share name 'notes' with read access for everyone.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    }
+  ]
+}

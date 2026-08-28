@@ -1,0 +1,124 @@
+{
+  "title": "Storm Control",
+  "level": 17,
+  "levelTitle": "Level 17 - Security",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "08. Storm Control.md",
+  "cards": [
+    {
+      "q": "What is Storm Control?",
+      "a": "Storm Control is a Layer 2 switchport protection feature that monitors and limits excessive broadcast, multicast, and unknown-unicast traffic at the interface level.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Does Storm Control eliminate the underlying Layer 2 loop?",
+      "a": "No. Storm Control limits the effects of excessive flooded traffic; it does not eliminate the loop, and STP is responsible for preventing Layer 2 loops.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What three traffic classes does Storm Control monitor?",
+      "a": "Broadcast (frames to FF:FF:FF:FF:FF:FF), multicast, and unknown unicast (unicast destination not in the MAC table).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does Storm Control normally limit known unicast traffic?",
+      "a": "No. Known unicast traffic whose destination is in the MAC table is forwarded to a specific port and is normally not controlled by storm control.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What measurement methods can Storm Control use for thresholds?",
+      "a": "Percentage of interface bandwidth, packets per second (pps), and bits per second (bps), depending on the Cisco platform and IOS release.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What are rising and falling thresholds and what do they provide?",
+      "a": "A rising threshold begins suppression and a falling threshold ends it; using separate thresholds provides hysteresis to avoid repeated state changes around a single threshold.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the default storm-control suppression behavior?",
+      "a": "Traffic exceeding the configured threshold is suppressed (dropped/excluded) while the interface remains operational.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does 'storm-control action trap' do?",
+      "a": "It generates an SNMP notification/trap when storm conditions are detected; it does not shut down the port.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does 'storm-control action shutdown' do?",
+      "a": "When the storm condition triggers it, the interface is placed into an err-disabled state (requiring manual or automatic recovery).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do suppression, trap, and shutdown differ?",
+      "a": "Suppress controls traffic (port stays up), trap notifies management via SNMP, and shutdown disables the interface (err-disables it).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do Storm Control and STP differ and complement each other?",
+      "a": "STP prevents Layer 2 loops by blocking redundant paths; Storm Control limits excessive flooded traffic. Storm Control does not replace STP, and they can complement each other.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "How does Storm Control differ from CoPP?",
+      "a": "Storm Control operates at the interface/data-plane scope to limit excessive flooded traffic; CoPP protects the switch/router CPU/control plane from excessive traffic destined to it.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the primary Storm Control verification command?",
+      "a": "show storm-control (plus show storm-control broadcast/multicast/unicast where supported).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What command would you use to check whether an interface is err-disabled from a storm-control shutdown?",
+      "a": "show interfaces status err-disabled.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What should you check if a storm appears to be caused by a loop?",
+      "a": "Check STP topology with 'show spanning-tree', looking for unexpected topology, incorrect port roles, STP state changes, missing edge configuration, or redundant links not being blocked.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why should storm-control thresholds not be too low or too high?",
+      "a": "Too low suppresses legitimate traffic; too high may not react quickly enough to a real storm, causing greater impact. Design should consider interface speed, expected traffic, and business requirements.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is the relationship between Storm Control and other L2 security features?",
+      "a": "Port security restricts source MACs, DHCP Snooping builds trusted bindings, DAI validates ARP, IPSG validates source IP/MAC, and Storm Control limits excessive flooded traffic.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What command configures a rising/falling broadcast threshold?",
+      "a": "storm-control broadcast level 50 30 (50 begins suppression, 30 stops suppression); exact syntax varies by platform.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How can automatic recovery be configured for a storm-control err-disabled interface?",
+      "a": "Using the appropriate supported errdisable recovery mechanism, e.g., 'errdisable recovery interval 60', and the relevant supported cause (verify with 'errdisable recovery cause ?').",
+      "tag": "Core Concept",
+      "context": "Practical"
+    }
+  ]
+}

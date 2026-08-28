@@ -1,0 +1,124 @@
+{
+  "title": "PortFast",
+  "level": 8,
+  "levelTitle": "Level 08 - STP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "10. PortFast.md",
+  "cards": [
+    {
+      "q": "What is PortFast and what problem does it solve?",
+      "a": "PortFast is the Cisco name for an STP edge port. It lets a port connected to an end device (PC, printer, server, IP phone) transition quickly to Forwarding, avoiding long listening/learning delays for access/edge ports.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "Does PortFast disable STP?",
+      "a": "No. PortFast does not disable STP. It only changes how the port transitions to Forwarding as an edge port.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Where should PortFast normally be configured and where should it not?",
+      "a": "PortFast should be configured on ports connecting to end devices (access/edge ports). It should not be configured on switch-to-switch trunk ports or links to another switch.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why is PortFast risky on a switch-to-switch link?",
+      "a": "A loop could form before STP can detect it, since the port with STP disabled for edge behavior transitions immediately and may forward BPDUs-less traffic that could create a temporary Layer-2 loop.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is Edge Port Strictness and how does RSTP handle unexpected BPDUs?",
+      "a": "Edge Port Strictness controls whether a port configured as edge (PortFast) is moved out of edge mode/strict edge behavior if a BPDU is received. Without it (non-strict), a port receiving a BPDU is treated as non-edge.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do RSTP/Spanning-Tree edge ports prevent loops while remaining fast?",
+      "a": "Edge ports are connected to a single end device (so no other bridges contend on the link), so they can transition immediately to Forwarding while STP still runs.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What does BPDU Guard do, and how does it relate to PortFast/edge ports?",
+      "a": "BPDU Guard err-disables a port if a BPDU is received on an edge port. It provides extra protection when a device that should not send BPDUs is connected.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the required recommendation when enabling PortFast?",
+      "a": "Best practice is to also enable BPDU Guard (since PortFast/edge does not disable STP). Auto edge can help if used, but be cautious because a wrong/missing BPDU setup can allow a loop.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What is the difference between BPDU Filter and BPDU Guard?",
+      "a": "BPDU Filter suppresses BPDUs in/out and can disable STP arbitration; BPDU Guard only err-disables a port if a BPDU is received. BPDU Filter is potentially dangerous on links connected to other switches.",
+      "tag": "Exam Trap",
+      "context": "Practical"
+    },
+    {
+      "q": "What was the behavior difference of RSTP edge ports with strict mode?",
+      "a": "With Edge Port Strictness, a port that receives a BPDU is not automatically treated as non-edge; the strict setting defines whether unexpected BPDUs move the port out of edge mode.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is an IP phone scenario and what must you be careful about?",
+      "a": "An IP phone can be connected to the port (phones may forward VLAN traffic), but the phone is not a bridge in the same way, so PortFast is still used with the caveat of voice VLANs and ensuring the port is really an edge port.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Why is the phrase 'PortFast disables STP' a trap?",
+      "a": "PortFast is an edge-port behavior, not an STP shutdown. STP still runs; the port just skips the long listening/learning delay.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is the phrase 'PortFast is only for access ports' misleading?",
+      "a": "PortFast is for edge ports, which are usually access ports, but a link to a single end device is the real condition; auto edge can help detect the situation.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "When is it incorrect to claim that PortFast prevents all Layer-2 loops?",
+      "a": "PortFast prevents loops only for true edge/end-device connections; on ordinary switch-to-switch links it can hide a loop rather than prevent it.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What does 'PortFast does not disable STP and is not a general STP replacement' mean in practice?",
+      "a": "It means edge ports still participate in STP logic, and you should pair PortFast with BPDU Guard/edge strictness rather than relying on it to replace STP.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the typical setup for a PC access port with PortFast and BPDU Guard?",
+      "a": "interface Gi0/1; switchport mode access; spanning-tree portfast; spanning-tree bpduguard enable (or spanning-tree guard root/other protections as needed).",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "What are the key facts about PortFast in quick review?",
+      "a": "Edge port concept; immediate forwarding to end devices; does not disable STP; normal use access/edge ports; pair with BPDU Guard; Edge Port Strictness for unexpected BPDUs; never use as STP replacement.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "Why is BPDU Guard recommended alongside PortFast?",
+      "a": "An edge port that immediately forwards user data could be connected accidentally to another switch, clearly leaving a potential loop; BPDU Guard err-disables the port if a BPDU is received, providing safety.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How would you respond in an interview: 'Does PortFast bypass STP entirely?'",
+      "a": "No. PortFast is a Cisco edge-port feature. It lets the port reach Forwarding faster for end devices, but it does not disable STP. To protect edge ports you also configure BPDU Guard; for switch links you should not rely on PortFast.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    }
+  ]
+}

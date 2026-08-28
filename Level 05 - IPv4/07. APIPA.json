@@ -1,0 +1,100 @@
+{
+  "title": "APIPA (Automatic Private IP Addressing)",
+  "level": 5,
+  "levelTitle": "Level 05 - IPv4",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "07. APIPA.md",
+  "cards": [
+    {
+      "q": "What is APIPA?",
+      "a": "APIPA is the Microsoft/Windows term for automatic IPv4 link-local addressing: when a DHCP-configured host cannot obtain a lease it may automatically assign itself an address in 169.254.0.0/16 to talk to other link-local hosts on the same segment, and it is not the same as RFC 1918 private addressing.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How does APIPA work step by step?",
+      "a": "The host attempts DHCP; no server responds; if supported and enabled it selects an address from 169.254.0.0/16; it runs ARP-based duplicate-address detection; if clear it configures the address with a /16 mask, and communication is limited to the local L2 link/segment.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the IPv4 link-local range and its key properties?",
+      "a": "Network 169.254.0.0/16 (range 169.254.0.0–169.254.255.255), mask 255.255.0.0, purpose is IPv4 link-local communication; it is not routed by routers and its typical trigger is DHCP configuration failure. RFC 3927 reserves portions, so not every address in the /16 is a normal host address.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is duplicate-address detection performed for link-local addresses?",
+      "a": "Before claiming the address the host sends ARP probes to check whether another device is using it; if a conflict is detected it selects another address, and after success it can send an APIPA-style ARP announcement to inform other hosts.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What does a 169.254.x.x address on a DHCP client indicate and what could cause it?",
+      "a": "A DHCP or configuration problem, such as DHCP server unavailable, incorrect VLAN assignment, broken cabling or switch port, DHCP relay/helper failure, DHCP snooping or switch security config, or lost connectivity between client and DHCP server.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Does DHCP failure guarantee APIPA on every operating system?",
+      "a": "No; automatic IPv4 link-local configuration depends on the host OS and its configuration, so DHCP failure does not guarantee a 169.254.x.x address.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Compare APIPA, RFC 1918 private, and public IPv4 addresses.",
+      "a": "APIPA/link-local (169.254.10.20) is automatic, not routable, for local-link communication; RFC 1918 private (10.10.10.20) is static/DHCP, not globally Internet-routable, for private networks; public (8.8.8.8) is static/DHCP, routable, for global Internet communication.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Is 169.254.0.0/16 an RFC 1918 private range?",
+      "a": "No; it is IPv4 link-local addressing (APIPA), distinct from the RFC 1918 private ranges 10.0.0.0/8, 172.16.0.0/12, and 192.168.0.0/16.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Can a host with a link-local address use a default gateway to reach the Internet?",
+      "a": "No; routers do not forward IPv4 link-local traffic between links, so local-link communication may work but Internet access through a normal default gateway fails.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What Windows commands check and renew a link-local/DHCP address?",
+      "a": "ipconfig /all shows the IPv4 address and mask (look for 169.254.x.x with 255.255.0.0); ipconfig /release and ipconfig /renew renew the DHCP lease; ping 169.254.10.10 tests a peer on the local link.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you configure a basic Cisco IOS DHCP pool and verify it?",
+      "a": "Use ip dhcp excluded-address 10.1.10.1 and ip dhcp pool CLIENTS with network 10.1.10.0 255.255.255.0 and default-router 10.1.10.1; verify with show ip dhcp binding, show ip dhcp pool, and show ip dhcp server statistics.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Is manually configuring 169.254.x.x the correct fix for an APIPA host?",
+      "a": "No; the correct troubleshooting action is to restore the DHCP path/server/configuration, and APIPA should not be treated as a replacement for DHCP, static addressing, RFC 1918 private addressing, a default gateway, or Internet connectivity.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the IPv6 link-local range and how does it compare with IPv4 APIPA?",
+      "a": "IPv6 link-local is fe80::/10 and is normal and fundamental to IPv6 operation, used for Neighbor Discovery, Router Discovery, routing protocols, and neighbor communication; unlike the typical IPv4 APIPA failure symptom it is expected on interfaces, and both are not routed.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does a fe80::/10 address on an interface mean IPv6 configuration failure?",
+      "a": "No; IPv6 link-local addresses are expected on IPv6-enabled interfaces and are a normal part of IPv6, unlike the IPv4 APIPA troubleshooting symptom.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Summarize the key APIPA facts for the exam.",
+      "a": "APIPA = IPv4 link-local addressing, range 169.254.0.0/16, mask 255.255.0.0, automatic, often triggered by DHCP failure, not routed, no usable Internet gateway, local L2 scope, ARP duplicate detection, not RFC 1918; on a DHCP client it means investigate DHCP/network failure and the typical fix is to restore DHCP/network connectivity.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}

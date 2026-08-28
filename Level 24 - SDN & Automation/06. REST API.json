@@ -1,0 +1,20 @@
+{
+  "title": "REST API",
+  "level": 24,
+  "levelTitle": "Level 24 - SDN & Automation",
+  "exam": "ENCOR-350-401",
+  "difficulty": "medium",
+  "source": "06. REST API.md",
+  "cards": [
+    { "q": "What is a REST API?", "a": "REST is an HTTP-based API style where resources are URL-addressable and actions are HTTP verbs (GET/POST/PUT/PATCH/DELETE) carrying JSON or XML data. Network controllers like DNA Center, SD-WAN vManage, and routers via RESTCONF expose REST APIs, making the network scriptable.", "tag": "Overview", "context": "Both" },
+    { "q": "What are the core principles of REST?", "a": "Resources are URL-addressable, actions use HTTP verbs, requests are stateless (each request is independent), and data is carried as JSON/XML.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What is the meaning of each HTTP verb in REST?", "a": "GET = read, POST = create, PUT = replace, PATCH = modify, and DELETE = remove.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "What do the common HTTP status codes 200, 201, 401, 404, and 500 mean?", "a": "200 = OK, 201 = created, 401 = unauthorized, 404 = not found, and 500 = server error. In general 2xx = success, 4xx = client error, 5xx = server error.", "tag": "Core Concept", "context": "Exam" },
+    { "q": "How is a REST API request structured?", "a": "It has a base URL (e.g., https://controller), a path (e.g., /dna/intent/api/...), token/header-based authentication, and a JSON payload body. Token-based auth such as OAuth/bearer is standard.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "What do the cURL flags -X, -H, -d, and -k do?", "a": "-X sets the HTTP verb, -H adds headers, -d sends a JSON body, and -k skips TLS certificate verification. Example: curl -X GET -H \"X-Auth-Token: $TOKEN\" -k against the DNA Center network-device endpoint.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "Why is REST the automation gateway for SDN and controllers?", "a": "It enables scripting/automation, provides the same consistent API for read and write (full device lifecycle), and integrates with tools like Ansible and Python.", "tag": "Core Concept", "context": "Interview" },
+    { "q": "How do you troubleshoot REST API failures?", "a": "401 = bad token (check auth), 404 = wrong path (check URL), 500 = server problem (check logs), timeout = reachability to the base URL, and 400 = bad JSON body.", "tag": "Core Concept", "context": "Practical" },
+    { "q": "Which verb replaces an entire REST resource for a network change?", "a": "PUT replaces the resource; PATCH performs a partial update, POST creates, and DELETE removes. GET only reads.", "tag": "Exam Trap", "context": "Exam" },
+    { "q": "What is the state model of REST requests?", "a": "REST requests are stateless: every request is independent and carries what it needs, so the server keeps no session state between calls.", "tag": "Exam Trap", "context": "Exam" }
+  ]
+}

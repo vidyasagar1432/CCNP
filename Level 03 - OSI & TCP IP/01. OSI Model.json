@@ -1,0 +1,118 @@
+{
+  "title": "OSI Model",
+  "level": 3,
+  "levelTitle": "Level 03 - OSI & TCP IP",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "01. OSI Model.md",
+  "cards": [
+    {
+      "q": "What is the OSI reference model?",
+      "a": "The Open Systems Interconnection (OSI) reference model (ISO/IEC 7498) describes networking in seven layers, each with a distinct function. It provides a vocabulary for discussing protocols, troubleshooting (is it Layer 2 or Layer 3), and matching real protocols to functions.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "List the seven OSI layers from top to bottom and their PDU names.",
+      "a": "7 Application (Data), 6 Presentation (Data), 5 Session (Data), 4 Transport (Segment), 3 Network (Packet), 2 Data Link (Frame), 1 Physical (Bits).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the function of the Transport layer (L4)?",
+      "a": "End-to-end delivery, ports, and reliability. It performs segmentation, reliability (TCP), and port multiplexing, with error recovery via ACKs.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the function of the Network layer (L3)?",
+      "a": "Logical addressing (IP), best-path selection (routing), and fragmentation. Real-world protocol is IP and devices are routers.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the function of the Data Link layer (L2)?",
+      "a": "MAC addressing, framing, and media access, plus error detection via FCS. It has two sublayers: LLC and MAC.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the function of the Physical layer (L1)?",
+      "a": "Transmitting bits on the wire using electrical, optical, or RF signals; also defines connectors and topology. Devices include hubs and transceivers.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the function of the Application layer (L7)?",
+      "a": "Interfaces applications to network services such as DNS names, file transfer, and email. Examples include HTTP, DNS, FTP, SMTP, and DHCP.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the function of the Presentation layer (L6)?",
+      "a": "Data formatting, character encoding, encryption, and compression. TLS is sometimes associated with this layer in OSI terms.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the function of the Session layer (L5)?",
+      "a": "Establishes and tears down sessions, tracks connection state, and does checkpointing. Examples include NetBIOS and RPC.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What are the two sublayers of the Data Link layer and their roles?",
+      "a": "LLC (Logical Link Control, 802.2) handles multiplexing of protocols via EtherType; the MAC sublayer handles media access (CSMA/CD history and backoff) and addressing.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Give the mnemonic for remembering the OSI layers.",
+      "a": "Top-down: All People Seem To Need Data Processing. Bottom-up (L1 to L7): Please Do Not Throw Sausage Pizza Away.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does the OSI model help in troubleshooting networks?",
+      "a": "It enables layer-by-layer isolation: physical (link lights, errors) to data link (MAC, VLAN, STP) to network (IP route) to transport (ports) to application. For example, 'ping OK but telnet fails' suggests a Layer 4 ports or Layer 7 issue.",
+      "tag": "Core Concept",
+      "context": "Interview"
+    },
+    {
+      "q": "What is the #1 OSI exam trap regarding PDUs?",
+      "a": "Confusing PDU names: segment is the Transport layer PDU, packet is the Network layer (IP) PDU, and frame is the Data Link (Ethernet) PDU. Remember which name belongs to which layer.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Where does encryption live in the OSI model, and what is the TLS caveat?",
+      "a": "OSI-wise, encryption lives at Layer 6 Presentation, so TLS is approximately Layer 6. In practice TLS is often described as Layer 4 or Layer 7, and exams want you to know both viewpoints without mixing them up.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Map these devices to their OSI layers: switch, router, hub, firewall.",
+      "a": "Switch = Layer 2, router = Layer 3, hub = Layer 1, firewall/load balancer = Layers 4-7.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Map MAC, IP, and port to their OSI layers.",
+      "a": "MAC = Layer 2 (Data Link), IP = Layer 3 (Network), port = Layer 4 (Transport).",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What commands help isolate which OSI layer is at fault?",
+      "a": "ping verifies L1-L3 (ICMP is L3), telnet to a port checks L4 reachability, and curl verifies L7. On devices, show interfaces shows L1 health, show mac address-table shows L2, and show ip route shows L3.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Where do NAT, ACLs, and firewalls sit relative to OSI layers?",
+      "a": "These functions sit at layer boundaries: NAT is L3/L4, ACLs are L3+L4, and firewalls operate at L4-L7.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    }
+  ]
+}

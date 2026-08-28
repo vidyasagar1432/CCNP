@@ -1,0 +1,166 @@
+{
+  "title": "NAT64",
+  "level": 15,
+  "levelTitle": "Level 15 - NAT",
+  "exam": "ENCOR-350-401",
+  "difficulty": "hard",
+  "source": "05. NAT64.md",
+  "cards": [
+    {
+      "q": "What does NAT64 do?",
+      "a": "NAT64 enables IPv6-only clients to communicate with IPv4-only servers by translating traffic between IPv6 and IPv4. A common deployment combines IPv6-only clients, DNS64, a stateful NAT64 translator, and IPv4-only servers.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "How do DNS64 and NAT64 divide the work?",
+      "a": "DNS64 creates an IPv6 destination that represents the IPv4 server by synthesizing an AAAA record, while NAT64 translates the resulting IPv6 traffic into IPv4 traffic (and return traffic the other way).",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Why is NAT64 needed for IPv6-only clients?",
+      "a": "An IPv6-only client cannot directly send IPv6 traffic to an IPv4-only destination because it has no IPv4 address and the protocols differ. NAT64 provides the IPv6-to-IPv4 translation boundary, letting IPv6-only networks reach legacy IPv4 services.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "For an A record 192.0.2.10, what AAAA record does a DNS64 resolver synthesize, and in what other form?",
+      "a": "DNS64 synthesizes 64:ff9b::192.0.2.10, which can textually also appear as 64:ff9b::c000:020a, because 192.0.2.10 encodes as C0 00 02 0A. The client then believes it is communicating with an IPv6 destination.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What is the standard NAT64 Well-Known Prefix, and where does the IPv4 address go?",
+      "a": "The Well-Known Prefix is 64:ff9b::/96, and the IPv4 address is embedded in its final 32 bits, e.g. 64:ff9b::c000:20a for 192.0.2.10.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How does Stateful NAT64 work, and how does it scale with IPv4 addresses?",
+      "a": "Stateful NAT64 maintains a translation state table mapping IPv6 flows to IPv4 flows, so return traffic can be mapped back to the correct IPv6 client. It may use an IPv4 pool for translated source addresses, allowing many IPv6 clients to share a smaller IPv4 address pool.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Compare Stateful NAT64 and Stateless NAT64.",
+      "a": "Stateful NAT64 maintains per-flow translation state, supports many-to-few address mapping with IPv4 address sharing and common/required port translation, and scales high. Stateless NAT64 has no per-flow state, uses algorithmic/address-based deterministic mapping, generally does not share IPv4 addresses, and suits controlled address mapping.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "Is Stateless NAT64 just 'Stateful NAT64 without a state table'?",
+      "a": "No. Stateless NAT64 uses algorithmic mappings and has different addressing requirements; it is not simply stateful NAT64 with the state table removed.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Trace a stateful NAT64 flow from an IPv6 client to an IPv4 server.",
+      "a": "The client (2001:db8:10::10) resolves a server to the synthesized AAAA 64:ff9b::c633:640a and sends IPv6 traffic to it. The NAT64 translator recognizes the 64:ff9b::/96 prefix, extracts the IPv4 address 198.51.100.10, creates the IPv4-side translation (e.g. source 192.0.2.100:40000), and return traffic follows the state the translator created.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Distinguish DNS64 and NAT64.",
+      "a": "DNS64 synthesizes IPv6 AAAA records from IPv4 A records ('which IPv6 address should the client use?'), while NAT64 translates IPv6 packets into IPv4 packets and vice versa ('how do I translate that IPv6 traffic into IPv4?'). They are complementary technologies; DNS64 does not translate packets and only changes the DNS answer.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Does NAT64 always require DNS64?",
+      "a": "No. NAT64 can translate without DNS64 if an application already knows a suitable synthesized IPv6 destination. DNS64 is commonly deployed alongside NAT64 so hostname-based applications on IPv6-only clients can reach IPv4-only destinations.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "What was NAT-PT, and how does it relate to NAT64?",
+      "a": "NAT-PT (Network Address Translation - Protocol Translation) was an earlier IPv4/IPv6 transition mechanism that was deprecated because of architectural and operational issues. NAT64 is the modern IPv6/IPv4 translation architecture; do not treat them as interchangeable.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is 464XLAT, and what are its two components?",
+      "a": "464XLAT is a deployment architecture using two translation stages: CLAT, the customer-side IPv4-to-IPv6 translation, and PLAT, the provider-side NAT64 translation. It is important in mobile networks where IPv6-only access networks must still support IPv4 applications.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Compare NAT64 and 464XLAT.",
+      "a": "NAT64 performs IPv6/IPv4 translation with no client-side CLAT and is commonly deployed for IPv6-only clients. 464XLAT is an end-to-end architecture using two translation stages (client-side CLAT plus provider-side NAT64/PLAT), commonly deployed in mobile/IPv6-only networks and designed to support legacy IPv4 applications.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "Does NAT64 provide inbound IPv4-to-IPv6 connections by default?",
+      "a": "No. For unsolicited connections initiated from an IPv4 network toward an IPv6-only host, a normal stateful NAT64 deployment does not automatically provide a permanent inbound mapping; a separate mechanism or explicit mapping is needed. Do not describe NAT64 as a general-purpose bidirectional replacement for dual-stack; its classic use case is IPv6-only clients accessing IPv4 resources.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Which applications can be affected by NAT64?",
+      "a": "Applications that embed IPv4 literals or carry IP addresses inside payloads, some FTP modes, some SIP deployments, and other protocols that do not work correctly through address translation. Modern applications should prefer DNS names and IPv6/IPv4-independent addressing over embedded literal addresses.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What fragmentation and MTU considerations apply to NAT64?",
+      "a": "IPv6 and IPv4 have different fragmentation behavior, so the translator must handle path MTU, ICMPv6 Packet Too Big, IPv4 fragmentation, reassembly, and transport-layer behavior. A NAT64 deployment should have appropriate MTU and ICMP handling; if small packets work but larger traffic fails, inspect path MTU and fragmentation.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What routing is required for NAT64 to work?",
+      "a": "Routing is required on both sides: the IPv6 network needs a route toward the NAT64 prefix (64:ff9b::/96 → NAT64 translator), and the NAT64 device needs IPv4 reachability toward the translated IPv4 destinations. A correct NAT64 configuration alone does not guarantee connectivity.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "Show a conceptual stateful NAT64 configuration.",
+      "a": "nat64 enable on the IPv6-facing interface (e.g. GigabitEthernet0/0 with an IPv6 address) and on the IPv4-facing interface (GigabitEthernet0/1 with an IP address), nat64 prefix stateful 64:ff9b::/96, and nat64 v4 pool NAT64-POOL 192.0.2.100 192.0.2.120. NAT64 command syntax and support vary by IOS XE platform and release, so treat this as conceptual, not a universal template.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "How do you verify NAT64 translation activity?",
+      "a": "Use show nat64 translations, show nat64 statistics, and show nat64 prefix (names vary by platform), plus show ipv6 route, show ip route, and DNS checks for troubleshooting. Confirm the exact supported commands against the platform-specific command reference.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "In what order should you troubleshoot NAT64?",
+      "a": "Verify IPv6 connectivity (show ipv6 interface brief, show ipv6 route), verify the route to the NAT64 prefix 64:ff9b::/96, verify DNS64 (the client must receive a synthesized AAAA such as 64:ff9b::c633:640a), verify IPv4 reachability (show ip route), check show nat64 translations for the flow, check show nat64 statistics for packets/errors/resource exhaustion, then check MTU and ICMP.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Ping works through NAT64 but the application fails. What is the likely cause?",
+      "a": "Application/protocol compatibility, not basic translation: the application may embed IPv4 literals, rely on protocol-specific behavior such as certain FTP modes or SIP deployments, or otherwise not work through address translation.",
+      "tag": "Exam Trap",
+      "context": "Both"
+    },
+    {
+      "q": "Is NAT64 the same as PAT?",
+      "a": "No. Stateful NAT64 can use port translation to share addresses, but NAT64 translates between IPv6 and IPv4 protocol/address families (IPv6 → IPv4). PAT is an IPv4 NAT mechanism that uses Layer-4 identifiers to multiplex IPv4 translations.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Compare Dual-Stack and NAT64 for IPv6/IPv4 coexistence.",
+      "a": "Dual-stack gives clients both IPv4 and IPv6, accesses IPv4 servers natively, requires no DNS64 and no translation, but has higher addressing/operation complexity. NAT64 requires no client IPv4, translates access to IPv4 servers, commonly uses DNS64, and is the typical choice for IPv6-only access to IPv4 resources.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "Summarize NAT64 in one quick-review line.",
+      "a": "NAT64 lets IPv6-only clients access IPv4 resources by translating IPv6 ↔ IPv4, usually with DNS64 synthesizing AAAA records into the Well-Known Prefix 64:ff9b::/96; stateful NAT64 keeps per-flow state and can share an IPv4 pool, stateless NAT64 is algorithmic, routing is needed on both sides, and connectivity still depends on DNS, MTU, and application compatibility.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    },
+    {
+      "q": "State the one-minute mental model for DNS64 and NAT64.",
+      "a": "DNS64 creates the IPv6 destination the client uses; NAT64 translates the packets between IPv6 and IPv4. 64:ff9b::/96 is the NAT64 Well-Known Prefix, stateful NAT64 maintains per-flow state, stateless NAT64 uses algorithmic mapping, and the main use case is IPv6-only clients reaching IPv4-only resources while routing, DNS, MTU, and application compatibility still matter.",
+      "tag": "Core Concept",
+      "context": "Both"
+    }
+  ]
+}

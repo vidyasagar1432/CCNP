@@ -1,0 +1,106 @@
+{
+  "title": "Broadcast (IPv4)",
+  "level": 5,
+  "levelTitle": "Level 05 - IPv4",
+  "exam": "ENCOR-350-401",
+  "difficulty": "easy",
+  "source": "09. Broadcast.md",
+  "cards": [
+    {
+      "q": "What is an IPv4 broadcast and what are its two forms?",
+      "a": "An IPv4 broadcast is traffic addressed to multiple/all hosts within a broadcast domain; it has two forms: directed broadcast (all host bits = 1 for a specific subnet, e.g. 10.1.1.255 for 10.1.1.0/24) and limited broadcast (255.255.255.255, restricted to the local broadcast domain). Broadcasts are normally not routed between IPv4 subnets.",
+      "tag": "Overview",
+      "context": "Both"
+    },
+    {
+      "q": "What are the differences between a directed and a limited broadcast?",
+      "a": "A directed broadcast uses host bits all 1 and targets a specific destination subnet, normally not forwarded by routers; the limited broadcast is 255.255.255.255, scoped to the local broadcast domain, and is never routed.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How is an IPv4 broadcast carried on Ethernet and where does it remain?",
+      "a": "On Ethernet it uses the destination MAC FF:FF:FF:FF:FF:FF and stays within the Layer 2 broadcast domain, normally a VLAN; a router is normally a broadcast boundary and does not forward IPv4 broadcasts from one subnet to another.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What common traffic uses IPv4 broadcast?",
+      "a": "ARP requests use a Layer 3 broadcast (Ethernet destination FF:FF:FF:FF:FF:FF); DHCP clients commonly broadcast during initial address acquisition, which a DHCP relay can forward between subnets; and RIPv1 updates use the limited broadcast 255.255.255.255.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do RIPv1 and RIPv2 deliver routing updates?",
+      "a": "RIPv1 uses the IPv4 limited broadcast 255.255.255.255, while RIPv2 uses the multicast address 224.0.0.9.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "How do you compute a subnet's directed broadcast address?",
+      "a": "Set all host bits to 1; for 10.1.1.0/24 the broadcast is 10.1.1.255, and for 10.1.10.64/26 the broadcast is 10.1.10.127 with usable hosts 10.1.10.65–10.1.10.126.",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Is 10.1.10.79 the broadcast address of 10.1.10.64/26?",
+      "a": "No; the /26 broadcast is 10.1.10.127 because all 6 host bits are set to 1; 10.1.10.79 falls inside the usable host range.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "For a normal subnet, which two addresses are excluded from hosts and why?",
+      "a": "The network address (host bits all 0) and the broadcast address (host bits all 1); neither is assigned to an ordinary host, so usable hosts = 2^host_bits − 2, with exceptions for /31 (two usable addresses under RFC 3021) and /32 (single host route with no conventional network/broadcast pair).",
+      "tag": "Core Concept",
+      "context": "Exam"
+    },
+    {
+      "q": "Do routers forward directed broadcasts by default, and what Cisco command controls this?",
+      "a": "No; modern Cisco IOS disables directed-broadcast forwarding by default with no ip directed-broadcast on the interface, which helps prevent Smurf attacks that abuse directed broadcasts to amplify ICMP traffic.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What is the exam distinction between directed and limited broadcast scope?",
+      "a": "A directed broadcast can identify a specific remote subnet, but routers normally block forwarding it; the limited broadcast 255.255.255.255 is local-only and is not routed.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "What is a broadcast storm and how do you control it?",
+      "a": "A broadcast storm occurs when excessive broadcast traffic consumes network resources, typically from Layer 2 loops, misconfigured devices, excessive ARP/DHCP, or faulty or malicious hosts; controls include STP, storm control, VLAN segmentation, and loop prevention, e.g. the Cisco command storm-control broadcast level 20.",
+      "tag": "Core Concept",
+      "context": "Both"
+    },
+    {
+      "q": "What Cisco commands verify or control broadcast behavior?",
+      "a": "no ip directed-broadcast disables directed-broadcast forwarding on an interface; storm-control broadcast level 20 configures broadcast storm control; show interfaces (or show interfaces | include broadcast) displays broadcast-related interface counters.",
+      "tag": "Core Concept",
+      "context": "Practical"
+    },
+    {
+      "q": "Does a router ever forward broadcasts?",
+      "a": "In limited cases, yes: a configured DHCP relay can forward DHCP requests between subnets by converting the L2 broadcast into routed/unicast forwarding, and a router can be explicitly configured to permit directed-broadcast forwarding toward a destination subnet.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Does IPv6 use ARP or IPv4-style broadcast?",
+      "a": "No; IPv6 does not use ARP or IPv4-style broadcasts, instead using Neighbor Discovery (ND) with ICMPv6 multicast.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "Is every DHCP message always a broadcast?",
+      "a": "No; DHCP clients commonly use broadcast during initial address acquisition because they lack a usable address and do not know the server, but DHCP messages can also be unicast or relayed, so do not assume every DHCP message is broadcast.",
+      "tag": "Exam Trap",
+      "context": "Exam"
+    },
+    {
+      "q": "State the core IPv4 broadcast facts for the exam.",
+      "a": "Directed broadcast = host bits all 1 for a specific subnet; limited broadcast = 255.255.255.255; Ethernet broadcast = FF:FF:FF:FF:FF:FF; routers normally do not forward broadcasts; ARP uses broadcast while IPv6 uses Neighbor Discovery; RIPv1 = broadcast 255.255.255.255 and RIPv2 = multicast 224.0.0.9; network address = host bits all 0; normal usable hosts = 2^host_bits − 2.",
+      "tag": "Quick Review",
+      "context": "Exam"
+    }
+  ]
+}
