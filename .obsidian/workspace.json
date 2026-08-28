@@ -11,14 +11,14 @@
             "id": "7459754f8d3422f4",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "split-diff-view",
               "state": {
-                "file": "Level 09 - Routing Fundamentals/12. Dynamic Routing.md",
-                "mode": "preview",
-                "source": false
+                "aFile": "Level 14 - First Hop Redundancy/03. GLBP.md",
+                "bFile": "Level 14 - First Hop Redundancy/03. GLBP.md",
+                "aRef": ""
               },
-              "icon": "lucide-file",
-              "title": "12. Dynamic Routing"
+              "icon": "diff",
+              "title": "Diff: 03. GLBP  (Working Tree)"
             }
           },
           {
@@ -35,8 +35,7 @@
               "title": "10. Device Hardening"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       },
       {
         "id": "00800c293e289829",
@@ -192,7 +191,6 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Level 17 - Security/10. Device Hardening.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -231,18 +229,26 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "9daaa1979730b6e8",
+  "active": "7459754f8d3422f4",
   "lastOpenFiles": [
     "Level 09 - Routing Fundamentals/12. Dynamic Routing.md",
+    "MAC Address.md",
+    "Broadcast Domains.md",
+    "fix_glued.py",
+    "check_md.py",
+    "Level 16 - Network Services/17. LDAP.md",
+    "Level 17 - Security/11. Secure Management.md",
     "Level 17 - Security/10. Device Hardening.md",
+    "Level 17 - Security/04. ACL.md",
+    "Level 16 - Network Services/01. DHCP.md",
+    "Level 11 - EIGRP/09. Variance.md",
+    "Level 08 - STP/14. EtherChannel/03. Static.md",
     "copilot/copilot-conversations/agent__i_think_this_file_format_is_incorrect_3.4_`service_password-encryption@20260829_005113.md",
     "Level 17 - Security/Security Overview.md",
     "Level 17 - Security/12. Infrastructure Security.md",
-    "Level 17 - Security/11. Secure Management.md",
     "Level 17 - Security/01. AAA.md",
     "Level 17 - Security/02. TACACS+.md",
     "Level 17 - Security/03. RADIUS.md",
-    "Level 17 - Security/04. ACL.md",
     "Level 17 - Security/05. Port Security.md",
     "Level 17 - Security/06. Dynamic ARP Inspection.md",
     "Level 17 - Security/07. IP Source Guard.md",
@@ -253,12 +259,6 @@
     "Level 13 - Route Redistribution/02. OSPF to BGP.md",
     "Level 15 - NAT/03. PAT.md",
     "Level 15 - NAT/01. Static NAT.md",
-    "Level 22 - Wireless/01. WLAN.md",
-    "Level 22 - Wireless/10. Roaming.md",
-    "Level 22 - Wireless/06. RF.md",
-    "Level 22 - Wireless/Wireless Overview.md",
-    "Level 11 - EIGRP/02. RTP.md",
-    "Level 10 - OSPF/05. DR BDR.md",
     "copilot/projects/CCNP",
     "copilot/projects",
     "Level 28 - Cisco IOS and IOS XE/11. Device-Level Security Hardening.json",
@@ -266,8 +266,6 @@
     "Level 28 - Cisco IOS and IOS XE/09. IOS XE Architecture (Linux-based).json",
     "Level 27 - High Availability/08. Redundancy Design & Best Practices.json",
     "Level 27 - High Availability/07. StackWise VSS.json",
-    "Level 27 - High Availability/06. ISSU.json",
-    "Level 21 - QoS/12. QoS Marking & Trust Boundaries.json",
-    "Level 21 - QoS/11. DSCP PHB Deep-Dive.json"
+    "Level 27 - High Availability/06. ISSU.json"
   ]
 }
