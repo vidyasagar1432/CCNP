@@ -6,7 +6,6 @@
       {
         "id": "9ee4cdf53dfb658b",
         "type": "tabs",
-        "dimension": 54.39266615737204,
         "children": [
           {
             "id": "7459754f8d3422f4",
@@ -21,16 +20,30 @@
               "icon": "lucide-file",
               "title": "12. Dynamic Routing"
             }
+          },
+          {
+            "id": "9daaa1979730b6e8",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Level 17 - Security/10. Device Hardening.md",
+                "mode": "preview",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "10. Device Hardening"
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       },
       {
-        "id": "2c6c008dfed878e6",
+        "id": "00800c293e289829",
         "type": "tabs",
-        "dimension": 45.60733384262796,
         "children": [
           {
-            "id": "c9e581cbf1ed9a95",
+            "id": "2d9ee01c88a858a6",
             "type": "leaf",
             "state": {
               "type": "copilot-agent-chat-view",
@@ -179,7 +192,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Level 08 - STP/06. Root Bridge.md",
+                "file": "Level 17 - Security/10. Device Hardening.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -218,36 +231,36 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "7459754f8d3422f4",
+  "active": "9daaa1979730b6e8",
   "lastOpenFiles": [
+    "Level 09 - Routing Fundamentals/12. Dynamic Routing.md",
+    "Level 17 - Security/10. Device Hardening.md",
+    "copilot/copilot-conversations/agent__i_think_this_file_format_is_incorrect_3.4_`service_password-encryption@20260829_005113.md",
+    "Level 17 - Security/Security Overview.md",
+    "Level 17 - Security/12. Infrastructure Security.md",
+    "Level 17 - Security/11. Secure Management.md",
+    "Level 17 - Security/01. AAA.md",
+    "Level 17 - Security/02. TACACS+.md",
+    "Level 17 - Security/03. RADIUS.md",
+    "Level 17 - Security/04. ACL.md",
+    "Level 17 - Security/05. Port Security.md",
+    "Level 17 - Security/06. Dynamic ARP Inspection.md",
+    "Level 17 - Security/07. IP Source Guard.md",
+    "Level 17 - Security/08. Storm Control.md",
+    "Level 17 - Security/09. CoPP.md",
+    "Level 13 - Route Redistribution/04. Seed Metrics.md",
+    "Level 13 - Route Redistribution/03. EIGRP to BGP.md",
+    "Level 13 - Route Redistribution/02. OSPF to BGP.md",
+    "Level 15 - NAT/03. PAT.md",
+    "Level 15 - NAT/01. Static NAT.md",
+    "Level 22 - Wireless/01. WLAN.md",
+    "Level 22 - Wireless/10. Roaming.md",
+    "Level 22 - Wireless/06. RF.md",
+    "Level 22 - Wireless/Wireless Overview.md",
     "Level 11 - EIGRP/02. RTP.md",
     "Level 10 - OSPF/05. DR BDR.md",
-    "Level 10 - OSPF/08. Areas.md",
-    "Level 10 - OSPF/07. SPF Algorithm.md",
-    "Level 10 - OSPF/04. Neighbor States.md",
-    "Level 10 - OSPF/03. Router ID.md",
-    "Level 10 - OSPF/01. OSPFv2.md",
-    "Level 29 - Troubleshooting/07. OSPF.md",
-    "SLAAC.md",
-    "MAC Address.md",
-    "copilot/projects/CCNP/project.md",
     "copilot/projects/CCNP",
     "copilot/projects",
-    "Level 03 - OSI & TCP IP/01. OSI Model.md",
-    "Broadcast Domains.md",
-    "copilot/copilot-conversations/agent__anylaze_whole_valut_for_any_formating_error_or_any_you@20260828_170246.md",
-    "Level 15 - NAT/NAT Overview.md",
-    "Level 07 - VLAN Technologies/10. Inter-VLAN Routing.md",
-    "Level 09 - Routing Fundamentals/06. RIB.md",
-    "Level 09 - Routing Fundamentals/12. Dynamic Routing.md",
-    "Level 07 - VLAN Technologies/04. Access Port.md",
-    "Level 07 - VLAN Technologies/09. QinQ.md",
-    "Level 04 - Ethernet & Switching/Ethernet & Switching Overview.md",
-    "Level 05 - IPv4/04. Classes.md",
-    "Level 05 - IPv4/07. APIPA.md",
-    "Level 05 - IPv4/IPv4 Overview.md",
-    "00. MOC - CCNP Study Map.md",
-    "Level 30 - Labs/Labs Overview.md",
     "Level 28 - Cisco IOS and IOS XE/11. Device-Level Security Hardening.json",
     "Level 28 - Cisco IOS and IOS XE/10. YANG & RESTCONF.json",
     "Level 28 - Cisco IOS and IOS XE/09. IOS XE Architecture (Linux-based).json",
