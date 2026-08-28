@@ -2,6 +2,8 @@
 tags: [CCNP, MOC]
 aliases: ["Level 30 - Labs"]
 status: complete
+created: 2026-08-28
+difficulty: medium
 level: 30
 exam: ENCOR-350-401
 type: index
@@ -11,21 +13,21 @@ type: index
 
 Collects the hands-on lab scenarios that consolidate the entire CCNP study path. Covers the lab platforms used for practice and the scenario-based lab builds spanning enterprise campus, branch office, ISP, and data center designs, along with protocol-specific labs for OSPF, BGP, MPLS, DMVPN, and IPsec, SD-WAN labs, automation labs, and end-to-end enterprise scenarios.
 
-### Lab Platforms
+## Lab Platforms
 
 1. [[01. Cisco Packet Tracer]] - Packet Tracer simulation platform
 2. [[02. Cisco Modeling Labs (CML)]] - CML virtual lab environment
 3. [[03. GNS3]] - GNS3 emulation platform
 4. [[04. EVE-NG]] - EVE-NG lab environment
 
-### Design-Based Labs
+## Design-Based Labs
 
 5. [[05. Enterprise Campus]] - Campus network lab
 6. [[06. Branch Office]] - Branch network lab
 7. [[07. ISP]] - Service provider lab
 8. [[08. Data Center]] - Data center network lab
 
-### Protocol Labs
+## Protocol Labs
 
 9. [[09. Multi-Area OSPF]] - Multi-area OSPF lab
 10. [[10. Advanced BGP]] - Advanced BGP lab
@@ -34,7 +36,7 @@ Collects the hands-on lab scenarios that consolidate the entire CCNP study path.
 13. [[13. IPsec]] - IPsec VPN lab
 14. [[14. SD-WAN]] - SD-WAN lab
 
-### Automation & Capstone
+## Automation & Capstone
 
 15. [[15. Automation Labs]] - Network automation lab
 16. [[16. End-to-End Enterprise Scenarios]] - Full enterprise integration scenario

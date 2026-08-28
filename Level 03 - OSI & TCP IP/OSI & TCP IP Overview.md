@@ -2,6 +2,8 @@
 tags: [CCNP, MOC]
 aliases: ["Level 03 - OSI & TCP IP"]
 status: complete
+created: 2026-08-28
+difficulty: medium
 level: 03
 exam: ENCOR-350-401
 type: index
@@ -11,12 +13,12 @@ type: index
 
 Explains the layered model of networking through both the seven-layer OSI reference model and the four-layer TCP/IP model. This level covers how data is encapsulated and decapsulated as it travels through the stack and how protocol data units (PDUs) move between layers.
 
-### Reference Models
+## Reference Models
 
 1. [[01. OSI Model]] - The seven layers and their functions
 2. [[02. TCP IP Model]] - The four-layer model used in practice
 
-### Data Flow
+## Data Flow
 
 3. [[03. Encapsulation]] - Adding headers as data moves down the stack
 4. [[04. Decapsulation]] - Removing headers as data moves up the stack

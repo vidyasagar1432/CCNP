@@ -2,6 +2,8 @@
 tags: [CCNP, MOC]
 aliases: ["Level 05 - IPv4"]
 status: complete
+created: 2026-08-28
+difficulty: medium
 level: 05
 exam: ENCOR-350-401
 type: index
@@ -11,7 +13,7 @@ type: index
 
 Provides a complete treatment of IPv4 addressing: address structure, binary/decimal conversion, address classes, and the special-purpose address ranges. Also covers CIDR and subnetting techniques (VLSM, FLSM, summarization, supernetting) used for efficient address allocation and route aggregation.
 
-### Addressing Fundamentals
+## Addressing Fundamentals
 
 1. [[01. Address Structure]] - The 32-bit IPv4 address format
 2. [[02. Binary]] - Binary representation of IPv4 addresses
@@ -24,13 +26,13 @@ Provides a complete treatment of IPv4 addressing: address structure, binary/deci
 9. [[09. Broadcast]] - Directed and limited broadcast addresses
 10. [[10. Multicast]] - Class D multicast addressing
 
-### Subnetting
+## Subnetting
 
 11. [[11. CIDR]] - Classless Inter-Domain Routing notation
 12. [[12. VLSM]] - Variable Length Subnet Masks
 13. [[13. FLSM]] - Fixed Length Subnet Masks
 
-### Aggregation
+## Aggregation
 
 14. [[14. Summarization]] - Combining subnets into a single prefix
 15. [[15. Supernetting]] - Route aggregation of classful networks

@@ -2,6 +2,8 @@
 tags: [CCNP, MOC]
 aliases: ["Level 17 - Security"]
 status: complete
+created: 2026-08-28
+difficulty: medium
 level: 17
 exam: ENCOR-350-401
 type: index
@@ -11,21 +13,21 @@ type: index
 
 Covers network security controls used to protect enterprise infrastructure. Explains AAA and its protocols (TACACS+, RADIUS), access control with ACLs, and the Layer 2 security features of port security, Dynamic ARP Inspection, IP Source Guard, and Storm Control, plus control-plane protection (CoPP), device hardening, and secure management practices.
 
-### Authentication & Access Control
+## Authentication & Access Control
 
 1. [[01. AAA]] - Authentication, Authorization, and Accounting
 2. [[02. TACACS+]] - Cisco's AAA protocol
 3. [[03. RADIUS]] - The RADIUS AAA protocol
 4. [[04. ACL]] - Access Control Lists
 
-### Layer 2 Security
+## Layer 2 Security
 
 5. [[05. Port Security]] - Restricting MAC addresses on switch ports
 6. [[06. Dynamic ARP Inspection]] - Mitigating ARP spoofing
 7. [[07. IP Source Guard]] - Preventing IP spoofing
 8. [[08. Storm Control]] - Limiting broadcast, multicast, and unicast storms
 
-### Infrastructure Protection
+## Infrastructure Protection
 
 9. [[09. CoPP]] - Control Plane Policing
 10. [[10. Device Hardening]] - Securing device configuration

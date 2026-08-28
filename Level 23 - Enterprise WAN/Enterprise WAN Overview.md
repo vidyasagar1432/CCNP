@@ -2,6 +2,8 @@
 tags: [CCNP, MOC]
 aliases: ["Level 23 - Enterprise WAN"]
 status: complete
+created: 2026-08-28
+difficulty: medium
 level: 23
 exam: ENCOR-350-401
 type: index
@@ -11,7 +13,7 @@ type: index
 
 Covers the technologies that connect enterprise sites across wide-area networks. Explains traditional WAN protocols (PPP, PPPoE, Metro Ethernet), the use of MPLS and broadband/LTE as WAN transports, and the components of a modern SD-WAN architecture including vManage, vSmart, vBond, and WAN edge routers.
 
-### Traditional WAN
+## Traditional WAN
 
 1. [[01. PPP]] - Point-to-Point Protocol
 2. [[02. PPPoE]] - PPP over Ethernet
@@ -20,7 +22,7 @@ Covers the technologies that connect enterprise sites across wide-area networks.
 5. [[05. Broadband]] - Broadband internet as WAN connectivity
 6. [[06. LTE]] - Cellular LTE WAN links
 
-### SD-WAN
+## SD-WAN
 
 7. [[07. SD-WAN]] - Software-Defined WAN overview
 8. [[08. vManage]] - SD-WAN management plane

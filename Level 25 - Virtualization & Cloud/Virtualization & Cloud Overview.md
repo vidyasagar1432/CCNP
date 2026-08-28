@@ -2,6 +2,8 @@
 tags: [CCNP, MOC]
 aliases: ["Level 25 - Virtualization & Cloud"]
 status: complete
+created: 2026-08-28
+difficulty: medium
 level: 25
 exam: ENCOR-350-401
 type: index
@@ -11,7 +13,7 @@ type: index
 
 Covers server and network virtualization and cloud computing models. Explains virtual machines and hypervisors, containers and orchestration with Docker and Kubernetes, network virtualization through VRF and VRF-Lite, and the public/private/hybrid cloud deployment models with their SaaS, PaaS, and IaaS service models.
 
-### Server Virtualization
+## Server Virtualization
 
 1. [[01. Virtual Machines]] - Virtual machine fundamentals
 2. [[02. Hypervisors]] - Type 1 and Type 2 hypervisors
@@ -19,18 +21,18 @@ Covers server and network virtualization and cloud computing models. Explains vi
 4. [[04. Docker]] - Docker container platform
 5. [[05. Kubernetes Basics]] - Container orchestration
 
-### Network Virtualization
+## Network Virtualization
 
 6. [[06. VRF]] - Virtual Routing and Forwarding
 7. [[07. VRF Lite]] - VRF without MPLS
 
-### Cloud Models
+## Cloud Models
 
 8. [[08. Public Cloud]] - Public cloud deployment
 9. [[09. Private Cloud]] - Private cloud deployment
 10. [[10. Hybrid Cloud]] - Hybrid cloud deployment
 
-### Cloud Services
+## Cloud Services
 
 11. [[11. SaaS]] - Software as a Service
 12. [[12. PaaS]] - Platform as a Service

@@ -2,6 +2,8 @@
 tags: [CCNP, MOC]
 aliases: ["Level 01 - Physical Layer"]
 status: complete
+created: 2026-08-28
+difficulty: medium
 level: 01
 exam: ENCOR-350-401
 type: index
@@ -11,21 +13,21 @@ type: index
 
 Covers the physical foundation of networking: cabling, connectors, transceivers, and the Ethernet specifications that determine how bits travel across the wire. This level explains the transmission media and physical-layer devices that everything else depends on.
 
-### Cabling
+## Cabling
 
 1. [[01. Cables/01. UTP]] - Unshielded twisted pair cabling and its categories
 2. [[01. Cables/02. STP]] - Shielded twisted pair and its noise protection
 3. [[01. Cables/03. Fiber]] - Fiber optic cabling and its variants
 4. [[01. Cables/04. Wireless]] - The wireless medium and radio transmission basics
 
-### Ethernet Standards
+## Ethernet Standards
 
 5. [[02. Ethernet/01. Standards]] - 802.3 Ethernet standards and speeds
 6. [[02. Ethernet/02. Duplex]] - Half and full duplex operation
 7. [[02. Ethernet/03. Speed]] - Ethernet speed negotiation and auto-negotiation
 8. [[02. Ethernet/04. MTU]] - Maximum transmission unit and frame sizing
 
-### Physical Components
+## Physical Components
 
 9. [[03. Connectors]] - RJ-45, fiber, and other physical connectors
 10. [[04. Transceivers]] - SFP, SFP+, QSFP and other pluggable modules

@@ -2,6 +2,8 @@
 tags: [CCNP, MOC]
 aliases: ["Level 19 - Multicast"]
 status: complete
+created: 2026-08-28
+difficulty: medium
 level: 19
 exam: ENCOR-350-401
 type: index
@@ -11,12 +13,12 @@ type: index
 
 Covers IP multicast and how one-to-many traffic is delivered efficiently. Explains group membership with IGMP, the dense and sparse modes of the PIM routing protocol, the role of rendezvous points, and overall multicast routing and distribution tree concepts.
 
-### Group Management
+## Group Management
 
 1. [[01. IGMP]] - Internet Group Management Protocol
 2. [[06. IGMP Snooping]] - Switch-layer multicast pruning
 
-### Multicast Routing
+## Multicast Routing
 
 3. [[02. PIM Dense]] - Protocol Independent Multicast Dense Mode
 4. [[03. PIM Sparse]] - Protocol Independent Multicast Sparse Mode

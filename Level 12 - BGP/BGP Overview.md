@@ -2,6 +2,8 @@
 tags: [CCNP, MOC]
 aliases: ["Level 12 - BGP"]
 status: complete
+created: 2026-08-28
+difficulty: medium
 level: 12
 exam: ENCOR-350-401
 type: index
@@ -11,7 +13,7 @@ type: index
 
 Covers the Border Gateway Protocol, the routing protocol of the internet. Explains eBGP and iBGP operation, the path selection process, and the path attributes such as AS path, local preference, and MED. Also covers communities, route reflectors, confederations, aggregation, policy routing, and the prefix-list and route-map tools used to influence BGP behavior.
 
-### BGP Fundamentals
+## BGP Fundamentals
 
 1. [[01. eBGP]] - External BGP between autonomous systems
 2. [[02. iBGP]] - Internal BGP within an autonomous system
@@ -21,13 +23,13 @@ Covers the Border Gateway Protocol, the routing protocol of the internet. Explai
 6. [[06. MED]] - Multi-Exit Discriminator for inbound routing
 7. [[07. Communities]] - Tagging and signaling path policy
 
-### Scaling BGP
+## Scaling BGP
 
 8. [[08. Route Reflector]] - Scaling iBGP full-mesh
 9. [[09. Confederation]] - Dividing an AS into sub-ASes
 10. [[10. Aggregation]] - Summarizing BGP prefixes
 
-### Policy & Control
+## Policy & Control
 
 11. [[11. Policy Routing]] - Applying routing policy
 12. [[12. Prefix Lists]] - Matching network prefixes in filters

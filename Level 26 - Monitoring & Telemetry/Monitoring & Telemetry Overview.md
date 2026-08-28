@@ -2,6 +2,8 @@
 tags: [CCNP, MOC]
 aliases: ["Level 26 - Monitoring & Telemetry"]
 status: complete
+created: 2026-08-28
+difficulty: medium
 level: 26
 exam: ENCOR-350-401
 type: index
@@ -11,14 +13,14 @@ type: index
 
 Covers the tools and methods for observing network performance and health. Explains SNMP for device polling, NetFlow and Flexible NetFlow for traffic accounting, SPAN/ERSPAN for traffic mirroring, IP SLA for synthetic probes, Syslog for logging, modern streaming telemetry, and Wireshark for packet analysis.
 
-### Device & Performance Monitoring
+## Device & Performance Monitoring
 
 1. [[01. SNMP]] - SNMP polling and traps
 2. [[06. IP SLA]] - Synthetic traffic monitoring
 3. [[07. Syslog]] - Centralized event logging
 4. [[08. Telemetry]] - Modern streaming telemetry
 
-### Traffic Monitoring
+## Traffic Monitoring
 
 5. [[02. NetFlow]] - Flow-based traffic accounting
 6. [[03. Flexible NetFlow]] - Extensible NetFlow version

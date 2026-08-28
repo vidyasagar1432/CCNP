@@ -2,6 +2,8 @@
 tags: [CCNP, MOC]
 aliases: ["Level 10 - OSPF"]
 status: complete
+created: 2026-08-28
+difficulty: medium
 level: 10
 exam: ENCOR-350-401
 type: index
@@ -11,7 +13,7 @@ type: index
 
 Covers the Open Shortest Path First link-state routing protocol in depth, from OSPFv2 and OSPFv3 operation to neighbor state machines, DR/BDR election, LSA types, and the SPF algorithm. Also covers area design with stub, totally stubby, and NSSA areas, virtual links, authentication, summarization, and troubleshooting.
 
-### Protocol Basics
+## Protocol Basics
 
 1. [[01. OSPFv2]] - OSPF for IPv4
 2. [[02. OSPFv3]] - OSPF for IPv6
@@ -19,12 +21,12 @@ Covers the Open Shortest Path First link-state routing protocol in depth, from O
 4. [[04. Neighbor States]] - The OSPF neighbor state machine
 5. [[05. DR BDR]] - Designated and backup designated router election
 
-### LSDB & SPF
+## LSDB & SPF
 
 6. [[06. LSA Types]] - Link State Advertisement types
 7. [[07. SPF Algorithm]] - Dijkstra shortest path computation
 
-### Areas
+## Areas
 
 8. [[08. Areas]] - Area design and ABR/ASBR roles
 9. [[09. Stub]] - Stub areas that block external routes
@@ -32,7 +34,7 @@ Covers the Open Shortest Path First link-state routing protocol in depth, from O
 11. [[11. NSSA]] - Not-So-Stubby areas with external route import
 12. [[12. Virtual Links]] - Connecting disconnected areas
 
-### Operations
+## Operations
 
 13. [[13. Authentication]] - Securing OSPF neighbor relationships
 14. [[14. Summarization]] - Summarizing routes at area boundaries

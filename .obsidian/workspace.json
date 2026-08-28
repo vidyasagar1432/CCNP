@@ -12,15 +12,14 @@
             "id": "7459754f8d3422f4",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "markdown",
               "state": {
-                "aFile": "Level 30 - Labs/index.md",
-                "bFile": "Level 30 - Labs/Labs Overview.md",
-                "aRef": "HEAD",
-                "bRef": ""
+                "file": "Level 07 - VLAN Technologies/10. Inter-VLAN Routing.md",
+                "mode": "preview",
+                "source": false
               },
-              "icon": "diff",
-              "title": "Diff: Labs Overview  (Index)"
+              "icon": "lucide-file",
+              "title": "10. Inter-VLAN Routing"
             }
           }
         ]
@@ -31,7 +30,7 @@
         "dimension": 49.691358024691354,
         "children": [
           {
-            "id": "56e18719ff43b769",
+            "id": "c9e581cbf1ed9a95",
             "type": "leaf",
             "state": {
               "type": "copilot-agent-chat-view",
@@ -221,6 +220,15 @@
   },
   "active": "7459754f8d3422f4",
   "lastOpenFiles": [
+    "Level 09 - Routing Fundamentals/06. RIB.md",
+    "Level 09 - Routing Fundamentals/12. Dynamic Routing.md",
+    "Level 07 - VLAN Technologies/10. Inter-VLAN Routing.md",
+    "copilot/copilot-conversations/agent__anylaze_whole_valut_for_any_formating_error_or_any_you@20260828_170246.md",
+    "Level 07 - VLAN Technologies/04. Access Port.md",
+    "Level 07 - VLAN Technologies/09. QinQ.md",
+    "Level 04 - Ethernet & Switching/Ethernet & Switching Overview.md",
+    "Level 05 - IPv4/04. Classes.md",
+    "Level 05 - IPv4/07. APIPA.md",
     "Level 05 - IPv4/IPv4 Overview.md",
     "00. MOC - CCNP Study Map.md",
     "Level 30 - Labs/Labs Overview.md",
@@ -238,15 +246,6 @@
     "Level 18 - VPN Technologies/VPN Technologies Overview.md",
     "Level 17 - Security/Security Overview.md",
     "Level 16 - Network Services/Network Services Overview.md",
-    "Level 15 - NAT/NAT Overview.md",
-    "Level 14 - First Hop Redundancy/First Hop Redundancy Overview.md",
-    "Level 13 - Route Redistribution/Route Redistribution Overview.md",
-    "Level 12 - BGP/BGP Overview.md",
-    "Level 11 - EIGRP/EIGRP Overview.md",
-    "Level 10 - OSPF/OSPF Overview.md",
-    "Level 09 - Routing Fundamentals/Routing Fundamentals Overview.md",
-    "Level 08 - STP/STP Overview.md",
-    "Level 07 - VLAN Technologies/VLAN Technologies Overview.md",
     "Level 28 - Cisco IOS and IOS XE/11. Device-Level Security Hardening.json",
     "Level 28 - Cisco IOS and IOS XE/10. YANG & RESTCONF.json",
     "Level 28 - Cisco IOS and IOS XE/09. IOS XE Architecture (Linux-based).json",

@@ -2,6 +2,8 @@
 tags: [CCNP, MOC]
 aliases: ["Level 16 - Network Services"]
 status: complete
+created: 2026-08-28
+difficulty: medium
 level: 16
 exam: ENCOR-350-401
 type: index
@@ -11,7 +13,7 @@ type: index
 
 Surveys the application and network services that run on and through the network: address assignment (DHCP), name resolution (DNS), time (NTP), and management (SNMP, Syslog), alongside the common application protocols for file transfer, web access, remote management, email, and real-time communication.
 
-### Addressing & Management Services
+## Addressing & Management Services
 
 1. [[01. DHCP]] - Dynamic Host Configuration Protocol
 2. [[02. DHCP Snooping]] - Security feature validating DHCP messages
@@ -21,19 +23,19 @@ Surveys the application and network services that run on and through the network
 6. [[06. SNMP]] - Simple Network Management Protocol
 7. [[07. Syslog]] - Centralized logging
 
-### File & Web Protocols
+## File & Web Protocols
 
 8. [[08. FTP]] - File Transfer Protocol
 9. [[09. TFTP]] - Trivial File Transfer Protocol
 10. [[10. HTTP]] - Hypertext Transfer Protocol
 11. [[11. HTTPS]] - Secure HTTP
 
-### Remote Management
+## Remote Management
 
 12. [[12. SSH]] - Secure Shell
 13. [[13. Telnet]] - Unencrypted remote terminal access
 
-### Email & Communication
+## Email & Communication
 
 14. [[14. SMTP]] - Simple Mail Transfer Protocol
 15. [[15. POP3]] - Post Office Protocol v3

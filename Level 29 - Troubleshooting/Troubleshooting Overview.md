@@ -2,6 +2,8 @@
 tags: [CCNP, MOC]
 aliases: ["Level 29 - Troubleshooting"]
 status: complete
+created: 2026-08-28
+difficulty: medium
 level: 29
 exam: ENCOR-350-401
 type: index
@@ -11,7 +13,7 @@ type: index
 
 Provides a systematic approach to diagnosing and resolving network faults across the technology stack. Covers troubleshooting by layer (L1, L2, L3), by technology (VLAN, STP, EtherChannel, OSPF, EIGRP, BGP, NAT, ACL, DHCP, DNS, VPN, Wireless, QoS, SD-WAN), and overall performance analysis.
 
-### Layer & Switching Troubleshooting
+## Layer & Switching Troubleshooting
 
 1. [[01. Layer 1]] - Physical layer fault isolation
 2. [[02. Layer 2]] - Data link layer troubleshooting
@@ -20,20 +22,20 @@ Provides a systematic approach to diagnosing and resolving network faults across
 5. [[05. STP]] - Spanning tree problems
 6. [[06. EtherChannel]] - Link aggregation issues
 
-### Routing Protocol Troubleshooting
+## Routing Protocol Troubleshooting
 
 7. [[07. OSPF]] - OSPF adjacencies and routing issues
 8. [[08. EIGRP]] - EIGRP neighbor and route issues
 9. [[09. BGP]] - BGP peering and policy issues
 
-### Services & Connectivity Troubleshooting
+## Services & Connectivity Troubleshooting
 
 10. [[10. NAT]] - NAT translation issues
 11. [[11. ACL]] - Access list blocking issues
 12. [[12. DHCP]] - Address assignment problems
 13. [[13. DNS]] - Name resolution problems
 
-### Advanced Troubleshooting
+## Advanced Troubleshooting
 
 14. [[14. VPN]] - VPN tunnel and encryption issues
 15. [[15. Wireless]] - Wireless connectivity and RF issues

@@ -2,6 +2,8 @@
 tags: [CCNP, MOC]
 aliases: ["Level 04 - Ethernet & Switching"]
 status: complete
+created: 2026-08-28
+difficulty: medium
 level: 04
 exam: ENCOR-350-401
 type: index
@@ -11,31 +13,31 @@ type: index
 
 Delves into the Layer 2 fundamentals of Ethernet: MAC addressing, frame structure, and the switching logic of learning, flooding, forwarding, and filtering used to build the CAM table. Also covers broadcast and collision domains, ARP behavior, and a first look at Cisco Express Forwarding.
 
-### Addressing & Frames
+## Addressing & Frames
 
 1. [[01. MAC Address]] - Layer 2 addressing and its format
 2. [[02. Ethernet Frame]] - The structure of an Ethernet frame
 3. [[03. CAM Table]] - The content-addressable memory used for forwarding
 
-### Switching Logic
+## Switching Logic
 
 4. [[04. MAC Learning]] - How switches learn source MAC addresses
 5. [[05. Flooding]] - Sending unknown unicast and broadcast frames to all ports
 6. [[06. Forwarding]] - Delivering frames based on the CAM table
 7. [[07. Filtering]] - Dropping frames destined for the source segment
 
-### Domains
+## Domains
 
 8. [[08. Broadcast Domains]] - The boundary of Layer 2 broadcast propagation
 9. [[09. Collision Domains]] - Where frames can collide on the wire
 
-### ARP
+## ARP
 
 10. [[10. ARP]] - Address Resolution Protocol for IP-to-MAC resolution
 11. [[11. Gratuitous ARP]] - Unsolicited ARP announcements and their uses
 12. [[12. Proxy ARP]] - A device answering ARP on behalf of another
 
-### Forwarding Acceleration
+## Forwarding Acceleration
 
 13. [[13. CEF Basics]] - Cisco Express Forwarding fundamentals
 

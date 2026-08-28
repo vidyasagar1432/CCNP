@@ -2,6 +2,8 @@
 tags: [CCNP, MOC]
 aliases: ["Level 02 - Network Topologies"]
 status: complete
+created: 2026-08-28
+difficulty: medium
 level: 02
 exam: ENCOR-350-401
 type: index
@@ -11,7 +13,7 @@ type: index
 
 Describes how network devices are physically and logically interconnected, from classic topologies like bus, star, ring, and mesh to modern data-center and campus designs such as spine-leaf and hierarchical two/three-tier models. This is the blueprint for how networks are laid out and scaled.
 
-### Classic Topologies
+## Classic Topologies
 
 1. [[01. Bus]] - A single shared backbone connecting all devices
 2. [[02. Star]] - Central hub or switch connecting all nodes
@@ -19,7 +21,7 @@ Describes how network devices are physically and logically interconnected, from 
 4. [[04. Mesh]] - Full and partial mesh redundancy
 5. [[05. Hybrid]] - Combinations of multiple basic topologies
 
-### Modern Enterprise Designs
+## Modern Enterprise Designs
 
 6. [[06. Spine-Leaf]] - Data-center fabric with uniform east-west latency
 7. [[07. Two-Tier]] - Collapsed-core access and distribution design

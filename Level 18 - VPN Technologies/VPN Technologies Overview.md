@@ -2,6 +2,8 @@
 tags: [CCNP, MOC]
 aliases: ["Level 18 - VPN Technologies"]
 status: complete
+created: 2026-08-28
+difficulty: medium
 level: 18
 exam: ENCOR-350-401
 type: index
@@ -11,12 +13,12 @@ type: index
 
 Covers the tunneling and encryption technologies that create secure virtual networks over shared infrastructure. Explains GRE tunnels, IPsec security, and the enterprise VPN solutions of DMVPN, FlexVPN, SSL VPN, and site-to-site VPNs.
 
-### Tunneling & Encryption
+## Tunneling & Encryption
 
 1. [[01. GRE]] - Generic Routing Encapsulation tunneling
 2. [[02. IPsec]] - IP Security protocol suite
 
-### Enterprise VPN Solutions
+## Enterprise VPN Solutions
 
 3. [[03. DMVPN]] - Dynamic Multipoint VPN
 4. [[04. FlexVPN]] - Cisco's flexible VPN framework

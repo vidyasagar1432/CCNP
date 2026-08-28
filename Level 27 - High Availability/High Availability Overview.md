@@ -2,6 +2,8 @@
 tags: [CCNP, MOC]
 aliases: ["Level 27 - High Availability"]
 status: complete
+created: 2026-08-28
+difficulty: medium
 level: 27
 exam: ENCOR-350-401
 type: index
@@ -11,12 +13,12 @@ type: index
 
 Covers the mechanisms that keep networks available during failures. Explains Stateful Switchover and Non-Stop Forwarding for software resiliency, redundant supervisors for chassis redundancy, and link and gateway redundancy for path and first-hop availability.
 
-### Software Resiliency
+## Software Resiliency
 
 1. [[01. SSO]] - Stateful Switchover
 2. [[02. NSF]] - Non-Stop Forwarding
 
-### Hardware & Path Redundancy
+## Hardware & Path Redundancy
 
 3. [[03. Redundant Supervisors]] - Supervisor redundancy in chassis
 4. [[04. Link Redundancy]] - Path redundancy at Layers 1 and 2
