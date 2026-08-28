@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Level 08 - STP/01. STP.md",
+                "file": "Level 08 - STP/06. Root Bridge.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "01. STP"
+              "title": "06. Root Bridge"
             }
           }
         ]
@@ -177,7 +177,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Level 08 - STP/01. STP.md",
+                "file": "Level 08 - STP/06. Root Bridge.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -218,15 +218,18 @@
   },
   "active": "7d89de05ca9fb5db",
   "lastOpenFiles": [
-    "Level 08 - STP/02. RSTP.md",
-    "Level 08 - STP/04. Rapid PVST+.md",
-    "Level 08 - STP/05. MST.md",
     "Level 08 - STP/07. Port Roles.md",
-    "Level 08 - STP/06. Root Bridge.md",
-    "Level 08 - STP/01. STP.md",
-    "Level 08 - STP/03. PVST+.md",
-    "Level 08 - STP/10. PortFast.md",
     "Level 08 - STP/08. Port States.md",
+    "Level 08 - STP/13. Loop Guard.md",
+    "Level 07 - VLAN Technologies/03. Private VLAN.md",
+    "Level 08 - STP/03. PVST+.md",
+    "Level 08 - STP/11. BPDU Guard.md",
+    "Level 08 - STP/04. Rapid PVST+.md",
+    "Level 08 - STP/01. STP.md",
+    "Level 08 - STP/02. RSTP.md",
+    "Level 08 - STP/05. MST.md",
+    "Level 08 - STP/06. Root Bridge.md",
+    "Level 08 - STP/10. PortFast.md",
     "00. MOC - CCNP Study Map.md",
     "Level 09 - Routing Fundamentals/03. Metrics.md",
     "Level 06 - IPv6/index.md",
@@ -250,9 +253,6 @@
     "Level 21 - QoS/11. DSCP PHB Deep-Dive.json",
     "Level 21 - QoS/11. DSCP PHB Deep-Dive.md",
     "Level 21 - QoS/10. LLQ & CBWFQ.json",
-    "Level 21 - QoS/10. LLQ & CBWFQ.md",
-    "Level 21 - QoS/09. Modular QoS CLI.json",
-    "Level 21 - QoS/09. Modular QoS CLI.md",
-    "Level 19 - Multicast/09. PIM Designated Router (DR) & Assert.md"
+    "Level 21 - QoS/09. Modular QoS CLI.json"
   ]
 }
