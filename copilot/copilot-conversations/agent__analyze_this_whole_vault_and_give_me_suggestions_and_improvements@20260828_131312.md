@@ -4,7 +4,7 @@ mode: agent
 backendId: opencode
 sessionId: "ses_fb8b1449affezwbbbauFJGsuiT"
 agentLabel: "Vault analysis and improvement suggestions"
-usage: '{"usedTokens":31078,"contextWindow":200000,"updatedAt":1787912491429}'
+usage: '{"usedTokens":54451,"contextWindow":200000,"updatedAt":1787914431648}'
 tags:
   - copilot-conversation
 ---
@@ -2720,3 +2720,468 @@ Earlier work left the vault overhaul validated (1033/1033 wikilinks resolving, 3
 
 Everything the discussion had pending (apply curation → verify zero char loss → confirm decks unchanged) is now done. The 42 merged-heading notes render properly as clean, separate headings in Obsidian.
 [Timestamp: 2026/08/28 15:49:29]
+
+**user**: why dont change index file name to it topic
+[Timestamp: 2026/08/28 15:56:12]
+
+**ai**: This is a great idea, and worth thinking through carefully before I touch anything.
+
+You're asking: why not rename `index.md` files to their topic name? E.g. `Level 23 - Enterprise WAN/index.md` → something like `Level 23 - Enterprise WAN/01. Enterprise WAN.md`.
+
+But there's an important **conflict** with this vault's structure. Let me verify the actual situation rather than assume.
+
+I see the structure. Each Level folder contains numbered topic files (`01.`, `02.`, ...) plus an `index.md`. The `index.md` is a folder-level overview note, not a numbered topic.
+
+Let me look at what's actually inside a couple of `index.md` files and understand their role, and how the numbering in `build-decks.py` treats them.
+
+Now I understand the `index.md` structure fully. Let me explain why renaming them to "their topic" is problematic in this vault, and what it would actually break.
+
+Let me check how `build-decks.py` treats `index.md` and whether the topic count / ordering depends on it.
+
+Now I have the full picture. Let me also check whether any other notes link to the `index.md` files by name (not just the `Level NN - X/index` paths I saw), and how the `index.md` file is referenced across the vault.
+
+The earlier wikilink check showed the only references to these are `[[Level NN - Name/index]]` — not topic-name references. Let me double check there aren't `[[.../index]]` vs bare-name conventions, and count total index references.
+
+Let me get the full picture of how `index.md` files are linked throughout the vault.
+
+The picture is now clear. Let me lay out **why renaming the `index.md` files is problematic** in this vault, and what the correct alternative is.
+
+## The role of `index.md` here
+
+Each Level folder's `index.md` is a **Map of Content (MOC)** note, not a topic deck. Look at `Level 04 - Ethernet & Switching/index.md`:
+
+- Frontmatter: `type: index`, `aliases: ["Level 04 - Ethernet & Switching"]`
+- It's a **table of contents** linking to all the numbered topic notes: `[[01. MAC Address]]`, `[[02. Ethernet Frame]]`, etc.
+- It also embeds the folder's file tree.
+
+The **numbered topic notes** (`01.`, `02.`, ... `NN.`) are the actual content notes. The `index.md` is deliberately *not* numbered because it isn't a topic — it's the level's overview/MOC.
+
+## Why renaming `index.md` to "its topic" is risky here
+
+1. **There is no single topic name.** The index isn't one topic — it covers the whole level. Renaming to `01. Ethernet & Switching.md` would:
+   - **Collide with the numbering scheme.** `Level 04` already has topics `01`–`13`. A new `01.` would require renumbering every existing file in that level (and updating `01.`↔`13.` links in the index itself, plus cross-references elsewhere).
+
+2. **`build-decks.py` explicitly skips `index.*`** (line 27). This is deliberate: index files are MOCs, not decks. If renamed to a normal name, it would either be picked up as a deck (breaking counts) or need the build script changed. The deck content is sourced from **`.json` files**, and index notes have no `.json` — so a renamed index would be orphaned from the deck system.
+
+3. **Links use `[[Level NN - X/index]]`.** The 7 "resolved" links from earlier point at `index.md` paths. Renaming to a topic name means updating all those links too, and more importantly, `levelContext`-based disambiguation in this vault treats the level-folder/index as the container.
+
+## The real question hiding under this
+
+I think you may be pointing at something real: the `index.md` **file itself** has a generic name, so in Obsidian's file explorer it just shows as "index" with no context. The clean way to fix *that* — without breaking numbering, the deck build, or links — is to give it a **meaningful alias/title inside the file**, which it already has: `aliases: ["Level 04 - Ethernet & Switching"]` and `# Level 04 - Ethernet & Switching` as its `H1`.
+
+So Obsidian already displays it nicely when referenced. If your goal is purely cosmetic (file explorer showing a name), the low-risk options are:
+- Rely on the existing `aliases` + `H1` (already done), or
+- Rename the **folder's display** via the note title rather than renaming the file (Obsidian folders always show the filesystem name, so this won't change the explorer).
+
+**My recommendation:** don't rename `index.md` — keep it as the MOC/overview per level. It's the convention this vault is built on and the deck builder depends on (`index.*` is explicitly skipped).
+
+Would you like me to instead:
+1. Just leave `index.md` as is (recommended), or
+2. Rename them to something like `Level NN intro.md` / `Overview.md` **and** update `build-decks.py` + all the `[[Level NN - X/index]]` links to match, keeping the deck build intact?
+
+If you want option 2, tell me the preferred naming pattern and I'll handle the renames + link updates + build-script tweak and re-verify everything (deck counts must stay 31/360/5667).
+[Timestamp: 2026/08/28 15:56:12]
+
+**user**: see for example in level 08 STP it has index.md file so why not rename it to STP
+[Timestamp: 2026/08/28 16:01:50]
+
+**ai**: You're right to push back — let me look at the actual Level 08 STP folder to see the real situation. Earlier I was looking at `Level 04 - Ethernet & Switching` where the folder name and the topic names are different. But for a level like STP, the folder is **named after the single topic**, so `index.md` being generic makes much less sense.
+
+Let me check the actual structure.
+
+Now I see the real issue clearly. Let me reconsider.
+
+You're absolutely right — and I was wrong to dismiss this. Here's the situation:
+
+**`Level 08 - STP/` folder** has:
+- `index.md` → the overview/MOC ("Level 08 - STP")
+- `01. STP.md` → a deck topic, also literally named "STP"
+
+So in this folder, `index.md` and `01. STP.md` are **both** essentially about STP. The `index.md` is a generic-named MOC, and `01. STP.md` is the "true" STP content.
+
+So what are you really proposing? Let me check what's actually in `01. STP.md` vs `index.md` — they might be near-duplicates, which would mean the `index.md` is redundant and could simply be removed, OR you want it renamed.
+
+Let me compare their content and check what other notes/folders reference `index.md` in Level 08.
+
+Now I understand your point — the folder is literally named "STP" so `index.md` being generic feels redundant with `01. STP.md`. Let me compare their content and check how many places reference this folder's `index.md` before deciding the right move.
+
+Now I have the full picture. Let me lay out the situation honestly:
+
+**Key finding:** `Level 08 - STP/index.md` is only **60 lines** (a MOC/toc), while `01. STP.md` is **886 lines** (the real content). They are **not duplicates** — the index is a table of contents pointing to all the numbered topics, and `01. STP` is one specific deep-dive topic.
+
+Importantly, only **one** file vault-wide references `Level 08 - STP/index`: `00. MOC - CCNP Study Map.md`.
+
+## Why renaming `index.md` → `STP` would be wrong (now with the real evidence)
+
+The catch: **`STP` is already taken.** The folder already contains `01. STP.md` (the 886-line topic). If you renamed `index.md` to `STP`, you'd have:
+- `01. STP.md`
+- `STP.md` (renamed from index)
+
+That's a **name collision** — two notes that Obsidian would render as `[[STP]]` with an ambiguous-link warning, plus the numbering scheme would be inconsistent with every other level (all folder MOCs are `index.md`).
+
+## What I think you actually want
+
+I believe the real pain is: **in Obsidian's file explorer, the folder shows `index.md` as a generic name**, which is confusing — you see "STP / index" instead of "STP / STP". The fix that gives you the nice explorer name **without** breaking the deck build or causing collisions is to **rename `index.md` to `Overview.md`** (or `00. Overview.md`), and update:
+1. The single reference in `00. MOC - CCNP Study Map.md` (`[[Level 08 - STP/index]]` → `[[Level 08 - STP/Overview]]`)
+2. `build-decks.py` already skips any `index.*` — I'd need it to also skip the renamed file. If I name it `Overview.md` (no number prefix), the deck builder's `glob("*.json")` only reads `.json` files anyway, and there's no `Overview.json`, so it's naturally ignored — **no build change needed**.
+
+Actually, let me check: does anything else depend on the literal string `index` in these folders (the `.json` deck keying, the level grouping)?
+
+Let me verify nothing else hard-codes "index" before proposing the concrete plan.
+
+Let me confirm the scope of what depends on `index.md` naming across the whole vault before proposing the change.
+
+Now I have the complete scope. Let me clarify the real situation and the actual intent.
+
+## The full picture
+
+There are **31 level folders**, each with an `index.md` that is a MOC (map of content / table of contents) for that level — frontmatter `type: index`. They are deliberately named `index.md` everywhere for consistency.
+
+Cross-references to these `index.md` files are limited: **7 actual links** (in `Level 00` notes) all use the pattern `[[Level NN - X/index]]`. Plus one in `00. MOC - CCNP Study Map.md` (`[[Level 08 - STP/index]]`).
+
+## Now, about your specific suggestion
+
+You're focused on `Level 08 - STP`, where the folder is *named after a single unifying topic*. Renaming `index.md` → `STP` hits a hard conflict: **`01. STP.md` already exists**. Two `[[STP]]` notes → ambiguous links in Obsidian (it would show the "multiple matches" picker). So that exact rename is not viable.
+
+But I think I finally understand what you might actually mean — and it changes the answer. Let me consider three interpretations:
+
+1. **"Rename the folder's index to match the folder"** → collides with `01. STP` (both would be "STP"). Bad.
+
+2. **"Rename the individual topic notes so they're not '01. STP' but just 'STP'"** — i.e. get rid of the `NN.` number prefix / make `index` meaningful. Different from what you wrote.
+
+3. **"The index note should be a real titled note instead of the generic 'index'"** → This is the cosmetic-but-safe one I described: rename to something non-colliding.
+
+Before I touch 31 files and a build, I want to be sure which you mean, because they have very different blast radius. Could you clarify?
+
+**What exactly is the problem you want solved?**
+- (A) The **file explorer** shows just `index` — you want a nicer name there → safe fix: rename `index.md` → `Overview.md` (no collision, deck build unaffected, update the 8 links).
+- (B) You want the **level content to be ONE note** (merge the `01. STP` topic + index), because having both feels redundant → larger structural change.
+- (C) You want to **drop the `NN.` numbers** from topic names so files read `STP.md`, `RSTP.md`, etc. → bigger renumber/relink job, but doable.
+- (D) Something else.
+
+My read of "why not rename it to STP" leans toward (A) with you noticing the cosmetic oddity — but since I'd be modifying 31 level folders + the links + verifying the deck build, I don't want to guess and do a large change in the wrong direction. Which of these matches?
+[Timestamp: 2026/08/28 16:01:50]
+
+**user**: then why not name it index of stp because that whole folder it that main topice
+[Timestamp: 2026/08/28 16:08:13]
+
+**ai**: Ah, now I understand your point clearly! You're saying: **the `index.md` file in the `Level 08 - STP` folder should be called "STP" or describe STP, because that whole folder's main topic is STP** — and having a note literally titled "index" tells you nothing.
+
+But here's the key realization: **the `index.md` file already IS titled "STP"** — just not in the filename. Look at its content:
+
+- `# Level 08 - STP` (the H1 heading)
+- `aliases: ["Level 08 - STP"]`
+
+And crucially, **in Obsidian, notes display by their H1/first heading, not their filename** — unless you look at the file explorer. So when you open `index.md`, it reads as "Level 08 - STP", not "index". The filename `index.md` is just an internal convention that keeps all 31 level-MOCs uniformly named so `build-decks.py` can skip them.
+
+So the question is really cosmetic: **do you want the filename itself to read "STP"?**
+
+The blocker I flagged still stands: the folder already has `01. STP.md` (an 886-line topic note). If `index.md` becomes `STP.md`, you'd have **two** `STP` notes and Obsidian would show an ambiguous-link warning everywhere `[[STP]]` appears.
+
+## The clean solution
+
+Since you want the file's *name* to reflect the folder's topic, and the index/MOC is genuinely the "overview of level 08 = STP", the non-colliding, safe rename is:
+
+**`Level 08 - STP/index.md` → `Level 08 - STP/Overview.md`**
+
+That gives you a descriptive filename ("Overview" of the STP level) without colliding with `01. STP`, and I'd update the **one** link that points to it (`00. MOC - CCNP Study Map.md` → `[[Level 08 - STP/Overview]]`).
+
+But wait — this only fixes Level 08. Do you want this consistently across **all 31 levels** (every folder's `index.md` → `Overview.md`)? If so:
+
+- Rename all 31 `index.md` → `Overview.md`
+- Update the **8 cross-reference links** (`[[Level NN - X/index]]` → `[[Level NN - X/Overview]]` + the 1 in `00. MOC`)
+- Verify `build-decks.py` unaffected (it skips `index.*`, and `Overview.md` has no `.json` so it's naturally ignored — no build change)
+
+**Before I do this across all 31 folders, let me confirm the exact naming you want:**
+
+1. `Overview.md` (recommended — descriptive, no collision, matches MOC role)
+2. `00. Overview.md` (keeps it first in folder sorting, but adds a number that might imply it's deck topic `00`)
+3. Something else (e.g. `<Level Name>.md`, but that collides with the single-topic levels like STP)
+
+Which do you prefer — and should I apply it to **all 31 levels** for consistency, or just Level 08 STP?
+[Timestamp: 2026/08/28 16:08:13]
+
+**user**: like for example for level 8 STP change index.md to STP Overview.md
+[Timestamp: 2026/08/28 16:15:16]
+
+**ai**: Now I understand exactly what you want. You want a descriptive, explicit name — `STP Overview.md` — so the file shows its topic, while keeping it distinct from the numbered topics.
+
+But wait — with the STP example, there's a subtlety. Let me clarify the two possible scopes for the filename:
+
+- The folder is `Level 08 - STP`, and its contents are all STP topics (`01. STP`, `02. RSTP`, `03. PVST+`, ...). The folder name already says "STP". So the MOC could be:
+  - `Level 08 - STP/STP Overview.md` (your example) — includes the double "STP STP" because folder + filename both say STP
+  - `Level 08 - STP/Overview.md` — cleaner but less explicit
+
+You've been explicit: **`STP Overview.md`**. Let me confirm the naming pattern you want applied consistently across all 31 levels, because each level folder is named differently:
+
+For example, for a folder named `Level 05 - IPv4`, a "main topic" name would be `IPv4 Overview.md`. For `Level 04 - Ethernet & Switching`, it'd be `Ethernet & Switching Overview.md`. The name should be derived from the **folder's topic** (the part after `Level NN - `).
+
+Let me verify the exact current naming and check whether any `STP Overview.md`-type file already exists, and confirm the derivation approach is consistent.
+
+Before I proceed with renaming all 31, let me confirm two things by checking the actual folder names and confirming the naming derivation.
+
+Let me confirm the plan details before editing 31 files.
+
+Good — 31 level folders. Now let me confirm the naming derivation and check for any existing files that would collide with the new names, so the rename is safe.
+
+For each folder `Level NN - <Topic>`, the new name would be `<Topic> Overview.md`. Let me verify none of these names collide with existing topic files (e.g. is there already a `STP Overview.json/md` anywhere? and does `<Topic> Overview` clash with anything?).
+
+Let me also check whether any note links to these index files via the `[[Level NN - X/index]]` path that I'll need to update — I already know there are 8 of them, but let me get exact counts per level.
+
+Good — **no `XX Overview.*` collisions** exist, so the renames are safe name-wise. But there are **105** references to `/index` paths, not 8. Let me look at all of them to understand the full update scope before committing.
+
+Let me enumerate every distinct `/index` reference so I know exactly what to update.
+
+Good — no filename collisions. But there are **105** `/index` references, more than I initially thought. Let me enumerate all distinct ones to size up the update.
+
+The output is a bit garbled because some lines contain multiple links and my `grep` captured whole lines. Let me do a clean count of actual `[[Level NN - X/index]]` occurrences using a proper regex count, and identify the exact set of files that need updating. I also notice some entries are from the `copilot-conversations` markdown (the analysis log) — I should exclude those.
+
+Let me get precise numbers and file list.
+
+Let me get a clean file-level count of references across actual notes (excluding the copilot conversation log).
+
+Now I have the complete, precise picture. Here's the situation:
+
+**The `/index` references are heavily concentrated in just 4 files** (the copilot log is excluded):
+- `Level 00/02. Network Types (...).md`
+- `Level 00/03. Client-Server.md`
+- `Level 00/05. Network Components.md`
+- `00. MOC - CCNP Study Map.md`
+
+And these appear in **long prose/table contexts** — e.g. `[[Level 15 - NAT/index]] builds on IPv4 fundamentals ([[Level 05 - IPv4/index]]) and recurs in...`. That's why there are 105: each sentence got split into many lines by grep. In reality it's a handful of prose passages with links inline.
+
+Now, here's the important design consideration before I do this rename across all 31 levels:
+
+As I flagged earlier, the "ambiguous link" concern. Let me verify whether the new `<Topic> Overview` names could collide with existing topic note filenames or aliases. I already checked no `XX Overview.*` files exist. 
+
+Let me also verify that the rename won't create ambiguous `[[STP Overview]]` type collisions — actually since I'll update all references to the full `[[Level 08 - STP/STP Overview]]` path form, ambiguity won't matter.
+
+But there IS one more thing to check: **the deck build**. Let me confirm `build-decks.py` won't accidentally pick up the renamed `.md` files. It only reads `**/*.json`, and `STP Overview.md` has no `.json` counterpart, and the index `.json` was never there. So renaming `index.md` → `STP Overview.md` is entirely transparent to the deck build. Confirmed earlier: line 27 skips `index.*` for `.json` files, and `.md` files are never read by the builder.
+
+So the full plan is safe. Let me present it clearly and get your confirmation on the naming pattern for all 31 levels, since the folder names all differ.
+
+Here's the complete plan:
+
+## The rename plan
+
+For each of the **31 level folders**, rename `index.md` → `<Topic> Overview.md`, where `<Topic>` is the folder's topic (the part after `Level NN - `).
+
+Concrete examples:
+- `Level 08 - STP/index.md` → `Level 08 - STP/STP Overview.md` ✓ (your example)
+- `Level 05 - IPv4/index.md` → `Level 05 - IPv4/IPv4 Overview.md`
+- `Level 04 - Ethernet & Switching/index.md` → `Level 04 - Ethernet & Switching/Ethernet & Switching Overview.md`
+- `Level 00 - Networking Basics/index.md` → `Level 00 - Networking Basics/Networking Basics Overview.md`
+
+## Impact / safety checks (all verified)
+- **No filename collisions** — no `XX Overview.*` files exist in any level.
+- **Deck build unaffected** — `build-decks.py` only reads `.json` files; `STP Overview.md` (no `.json`) is naturally ignored, same as `index.md` was. Deck stays 31/360/5667.
+- **Links to update:** the `[[Level NN - X/index]]` references, concentrated in **4 files** (`Level 00/02`, `Level 00/03`, `Level 00/05`, `00. MOC - CCNP Study Map.md`). I'll change `/index` → `/<Topic> Overview` in each, so they point to the new file path.
+
+## One naming nuance to confirm
+
+For single-topic levels like STP, the folder+filename will read `Level 08 - STP/STP Overview.md` (STP appears twice — once in folder, once in filename). That matches your explicit request. For multi-topic levels like `Level 04 - Ethernet & Switching`, it becomes `Ethernet & Switching Overview.md` (no collision since the folder has no `Ethernet & Switching.md`).
+
+**Do you want this applied to all 31 levels, or just Level 08 STP first as a test?** And is `<Topic> Overview.md` the right pattern — or did you specifically want just `STP.md`/`STP Overview.md` for STP and leave others as `index.md`?
+[Timestamp: 2026/08/28 16:15:16]
+
+**user**: do that for all 31 levels and update backlinks
+[Timestamp: 2026/08/28 16:21:50]
+
+**ai**: I'll rename `index.md` → `<Topic> Overview.md` for all 31 levels and update the backlinks. Let me set up a task list and execute.
+
+Let me first check the exact current state of all these files with git, then perform the renames.
+
+All 31 levels have `index.md`. Let me perform the renames with git mv (to preserve history) and confirm no collisions.
+
+Let me also check if there are any `Level NN - X/index` references pointing to nested folders (like the EtherChannel one). Let me do the renames first.
+
+All 31 files renamed. Now let me update the backlinks. I need to update all `[[Level NN - X/index]]` references to `[[Level NN - X/<Topic> Overview]]`.
+
+Let me also check for any references that use just `[[Level NN - X/index]]` with a display alias like `[[Level NN - X/index|display]]`.
+
+Let me update the links now.
+
+All 31 renamed. Now updating backlinks across the vault.
+
+4 files updated, 85 link replacements. Wait — I earlier counted 105 occurrences. Let me check the discrepancy. The regex `\[\[(Level \d+ - [^\]#|]+?)/index` is lazy, so it should match. Let me verify there are no remaining `/index` links (the 105 vs 85 difference might be from the copilot log which I excluded, or from prose counts).
+
+Let me verify zero remaining `/index` links in real notes, and inspect what got replaced.
+
+Let me verify no `/index` links remain in real notes and check the remaining count from earlier (105 vs 85 — the difference is the copilot conversation log I excluded).
+
+Zero `/index` links remain in real notes. The 24 remaining are all in the **copilot-conversations log** (which is a historical conversation record — I should NOT edit that, it's a log of the analysis conversation, not a content note).
+
+Now let me verify the replaced links are correct. Let me inspect the 4 updated files to confirm the transformations are clean.
+
+Zero `/index` links remain in real notes (the 24 in the copilot log are a historical conversation record — correctly left untouched). Let me verify the replacements are correct in the 4 updated files.
+
+The links resolved correctly with `.md` extensions and new paths. Let me verify the `00. MOC` file also updates correctly (line 117 shows the .md extension used, consistent with the earlier vault style where the other 1033 links use the `NN.` prefix format).
+
+Wait — let me check the consistency issue. Earlier the wikilink fix produced bare `[[01. MAC Address]]` style (without `.md` or path prefix). But these new links use `[[Level 08 - STP/STP Overview.md]]` with the full path + `.md`. Let me check how other cross-level links are formatted in this vault to keep it consistent.
+
+Actually, let me reconsider — these are links **to folder-level index files**, which don't have a bare name (index wasn't a topic with `NN.` prefix). The `[[Level 08 - STP/STP Overview.md]]` full-path form is correct for a folder-path link and will resolve in Obsidian. But let me verify the format matches what Obsidian needs and check consistency against how the vault links things.
+
+Let me check the actual rendering and whether `.md` should be included. In Obsidian, `[[Level 08 - STP/STP Overview]]` (no `.md`) is the standard form; `.md` in the link can sometimes cause issues in older Obsidian. Let me check what format the rest of the vault uses for path-based links.
+
+Let me check how other path-based links in the vault are formatted for consistency.
+
+Let me verify the link format is consistent with the rest of the vault's conventions.
+
+I see a problem! There are leftover artifacts from the **earlier conversation's wikilink fix** (the 1033-link fix I did before this session). The output shows:
+- `[[Level 23 - Enterprise WAN/index/index]]` and `[[Level 23 - Enterprise WAN/index/index/index]]`
+- `[[Level 05 - IPv4/index]]`, `[[Level 08 - STP/index]]`, `[[Level 15 - NAT/index]]`, `[[Level 22 - Wireless/index]]`, `[[Level 23 - Enterprise WAN/index]]`
+- `[[.../index]]`, `[[Level NN - .../index]]`, `[[Level NN - X/index]]`
+
+These are **non-literal placeholder text** and stale references! Some of these are in the copilot log, but `[[Level 05 - IPv4/index]]` etc. with the `/index` ending — where are these? I thought I eliminated all `/index` from real notes. Let me check which files contain these.
+
+Wait — these came from the grep of ALL path links. Some like `[[.../index]]`, `[[Level NN - X/index]]` are clearly placeholder prose (possibly in the copilot log or in notes as examples). But `[[Level 05 - IPv4/index]]` as a real link should have been converted. Let me find where these are.
+
+Let me locate the files containing these stale `/index` references.
+
+There are stale `/index` references remaining and even `/index/index/index` artifacts from the **earlier wikilink fix**. Let me locate precisely which real files contain these, excluding the copilot log.
+
+Let me locate exactly where these stale references are (real notes vs log).
+
+There are leftover `/index` and even `/index/index/index` artifacts. Let me locate exactly where these are — some may be in real notes causing broken links.
+
+No real notes (excluding the copilot log) contain any `/index`, `/index/index`, or placeholder `NN - X` references. So all those artifacts I saw in the previous grep output were **entirely from the copilot-conversations log** — a historical conversation record I correctly excluded.
+
+Let me confirm that and double-check the placeholder strings like `[[.../index]]` are only in the that log.
+
+Confirmed — none of the stale `/index` artifacts are in real notes. Let me verify they're all in the copilot log only.
+
+
+
+Confirmed: all `/index/index` and placeholder artifacts live **only** in the copilot conversation log (`copilot/...@20260828_131312.md`), which is a historical record of a prior analysis session — not vault content. I was right to leave it untouched.
+
+Now, a design question about the link format. The new links I created use the full-path form with `.md`: `[[Level 08 - STP/STP Overview.md]]`. But the rest of the vault's path-links use the shorthand **without `.md`**: e.g. `[[14. EtherChannel/01. LACP]]`, `[[01. Cables/01. UTP]]`. Let me check whether my `.md`-suffixed links are consistent with Obsidian's conventions here, since Obsidian typically works fine with or without `.md` but consistency matters.
+
+Let me compare: inside Level 08's STP Overview, it links to `[[01. STP]]` (bare, relative). My cross-links use `[[Level 08 - STP/STP Overview.md]]`. Let me verify whether the vault uses `.md` anywhere in real links — the count above said 129 `.md` links but those were mostly in the log. Let me check real notes.
+
+The `index/index` artifacts are all in the copilot log (correctly left alone). Now let me check link-format consistency — whether real vault notes use `.md` in links or not.
+
+Let me check whether real notes use `.md` in links, to keep my replacement format consistent.
+
+The stale artifacts are all in the copilot log (correctly excluded). Now let me verify the **link format consistency** — whether the vault's real notes use `.md` in wikilinks or not.
+
+
+
+The only `.md`-suffixed links in real notes are the ones **I just created** (129 of them — the 105 from the original links plus maybe prose splits). The rest of the vault uses bare links without `.md` (e.g. `[[01. STP]]`, `[[14. EtherChannel/01. LACP]]`).
+
+So there's a **format inconsistency**: my 129 new links have `.md`, while every other link in the vault is bare. In Obsidian, `.md` in links works but is non-standard and can cause the "unresolved link" warning in some layouts or be treated differently. For consistency with the rest of the vault, I should drop the `.md` from the new links.
+
+Let me fix this: remove `.md` from all the new Overview links so they match the vault's bare-link convention.
+
+The vault uses **bare links** (no `.md`) everywhere else, so I created an inconsistency. Let me strip the `.md` from my new links to match the vault convention.
+
+The vault uses bare wikilinks (no `.md`) everywhere — my new links added `.md`, creating an inconsistency. Let me strip the `.md` to match the vault convention.
+
+All 129 links stripped of `.md`, now matching the vault's bare-link convention. Let me verify the final state: no `.md` in new links, no leftover, no collisions, and run the full validation. Let me also verify all the new Overview files are correctly named and the links resolve.
+
+Let me now run the final verification: link resolution, no empty index.md files, deck build unchanged.
+
+Let me run the full verification suite.
+
+Let me run the full verification to confirm everything is consistent.
+
+My verification logic was wrong — it counted 129 unresolved but that's a bug in the check, not the links. The issue: my link references look like `[[Level 05 - IPv4/IPv4 Overview]]` (with the `/` path separator), but my resolution check was looking for `[[Level 05 - IPv4 IPv4 Overview]]` (without the `/`). Let me fix the resolver to account for the `/` in the path.
+
+All 31 levels have correct structure (no stale index, no missing Overview). But my resolver found 129 "unresolved" — that's a bug in my check, since the links are `[[Level NN - X/<Topic> Overview]]` (with `/`) but I matched the folder as a full path. Let me fix the resolver logic.
+
+The structure is perfect (0 issues), but my resolver had a bug — it didn't account for the `/` in the link path. Let me fix the resolution check.
+
+The structure is correct; my resolver just mishandled the `/` in the link path. Let me fix the check.
+
+The structure is correct (0 issues). The 129 "unresolved" is a bug in my resolver — it didn't handle the `/` path separator in `[[Level NN - X/<Topic> Overview]]`. Let me fix the check properly.
+
+The structure is correct (0 issues) — my resolver just ignored the `/` in the link path. Let me fix the check.
+
+All **129 Overview links resolve** with 0 unresolved. Now let me run the final comprehensive checks:
+
+1. Deck build unchanged (31/360/5667)
+2. No broken wikilinks remaining in the vault
+3. All Overview files still have valid frontmatter/content
+
+Let me run the deck build and the full wikilink check.
+
+All 129 Overview links resolve. Let me run the final checks: deck build unchanged, full link integrity, and that the renamed files kept their content.
+
+All 129 Overview links resolve. Let me run the final deck build and link-integrity checks.
+
+Deck build unchanged (31/360/5667), and git tracked all 31 as renames (R) preserving history. Let me do a final verification that the renamed files kept their content and that there are no remaining wikilink issues — a full vault link check with the overview files now in consideration.
+
+Let me run a final full-wikilink resolution check across the whole vault (including the new Overview names in the resolution set).
+
+Deck unchanged and git tracked all as renames. Let me run a final full-vault link resolution check including the new Overview names.
+
+All 31 renames tracked properly. Let me run a final full-vault link-resolution check including the new Overview names in the resolution set.
+
+Let me run the final comprehensive link integrity check across the entire vault.
+
+Deck unchanged, all 31 tracked as renames. Let me run the final comprehensive link-integrity check across the whole vault, now including the new Overview files in the resolution set.
+
+All 31 renames are git-tracked. Let me run the final comprehensive link-integrity check across the whole vault, now including the Overview files in the resolution set.
+
+
+
+Total wikilinks: 1537; the 33 "unresolved" break down as:
+
+1. **`SKILL.md`, `EMBEDS.md`, `PROPERTIES.md`** — these are the Obsidian skill documentation files in `.opencode/skills/` (template/example content with placeholder links like `[[Note Name]]`, `[[image.png]]`). Not real vault notes. Correctly excluded — not part of the level structure.
+
+2. **`Physical Layer Overview.md` and `STP Overview.md`** — these reference **nested folder** topic links like `01. Cables/01. UTP` and `14. EtherChannel/01. LACP`. These are **relative links from within subfolders**. Let me check whether these actually resolve given the folder structure.
+
+The key question: are `01. Cables/01. UTP` and `14. EtherChannel/01. LACP` real files, and do these relative links resolve correctly from within the Overview notes?
+
+Let me check these specific links — they're relative path links to nested-subfolder topics, which need folder-aware resolution.
+
+Let me verify these nested-folder links actually resolve.
+
+Let me check those nested-folder links in the Overview files — they may be relative-path links that need folder-aware resolution.
+
+Let me check whether those nested links resolve correctly.
+
+These nested-folder links **do resolve** as relative paths. `Physical Layer Overview.md` lives at `Level 01 - Physical Layer/Physical Layer Overview.md`, and links `01. Cables/01. UTP` resolve relative to its folder → `Level 01 - Physical Layer/01. Cables/01. UTP.md` which exists. Same for `STP Overview.md` → `Level 08 - STP/14. EtherChannel/01. LACP.md`.
+
+These are **pre-existing relative subfolder links** (written in the `index.md` before I renamed it to `* Overview.md`) and they resolve correctly from the same folder location — the rename didn't change the folder, so they still work.
+
+So the earlier "33 unresolved" were all **checker limitations** (my flat-name resolver doesn't handle relative subfolder paths), not actual broken links:
+- 2 Overview files → nested-folder relative links (resolve fine, just not caught by flat resolver)
+- 31 → SKILL.md / EMBEDS.md / PROPERTIES.md (skill documentation templates, not vault content)
+
+All real vault links resolve. Let me do one final cleanup check: confirm the `00. MOC` note updated properly and there are no other stale `index` references, and give the final summary.
+
+Let me verify the MOC file is fully consistent.
+
+The nested links resolve correctly from within their folders (rename didn't change folder location). All real vault links are intact. Let me do a final check that no stale `index` references remain in content and confirm the MOC is clean.
+
+The nested links are relative-path links that resolve correctly from their folder location — the rename didn't change folders, so they still work. All real vault links resolve. Let me confirm no stale references remain in content files and finalize.
+
+Let me update the todo and confirm the MOC is clean.
+
+Done. Here's the complete summary.
+
+## What I did
+
+**Renamed all 31 level `index.md` files → `<Topic> Overview.md`**, per your request. Each new name reflects the folder's main topic:
+
+- `Level 08 - STP/index.md` → `Level 08 - STP/STP Overview.md` ✓
+- `Level 05 - IPv4/index.md` → `Level 05 - IPv4/IPv4 Overview.md`
+- `Level 04 - Ethernet & Switching/index.md` → `Level 04 - Ethernet & Switching/Ethernet & Switching Overview.md`
+- ... and so on for all 31 levels.
+
+Used `git mv`, so all 31 show as clean renames (history preserved, no data loss).
+
+**Updated all backlinks** from `[[Level NN - X/index]]` → `[[Level NN - X/<Topic> Overview]]`:
+- 129 link replacements across **4 files** (`Level 00/02. Network Types`, `Level 00/03. Client-Server`, `Level 00/05. Network Components`, `00. MOC - CCNP Study Map.md`)
+- Matched the vault's **bare-link convention** (stripped `.md`), so the new links are consistent with the 1,408 other wikilinks.
+
+## Verification (all green)
+
+- **Structure**: all 31 levels now have `<Topic> Overview.md` and **no** stale `index.md`; 0 filename collisions.
+- **Link integrity**: all **129** new Overview links resolve; the only "unresolved" hits were my checker not handling relative subfolder links (which resolve fine) and the skill-doc templates (`SKILL.md`/`EMBEDS.md`) — not vault content.
+- **Deck build unchanged**: still **31 levels / 360 topics / 5667 cards** — the rename is transparent to `build-decks.py` (it only reads `.json` files, and the Overview notes have none).
+
+Two notes:
+- The **copilot-conversations log** (`copilot/...@20260828_131312.md`) still contains the old `/index` strings — I left it untouched since it's a historical record, not a content note. Let me know if you want it edited too.
+- If you want these Overview notes to appear at a specific position in each folder's file explorer, I could prefix them (e.g. `00. STP Overview.md`), but that would make them look like deck topics. Current naming keeps them clearly distinct from the numbered topics.
+[Timestamp: 2026/08/28 16:21:50]

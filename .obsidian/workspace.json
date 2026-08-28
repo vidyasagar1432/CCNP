@@ -4,28 +4,31 @@
     "type": "split",
     "children": [
       {
-        "id": "2c3b1bd0bff4f2f5",
+        "id": "9ee4cdf53dfb658b",
         "type": "tabs",
+        "dimension": 50.308641975308646,
         "children": [
           {
-            "id": "9ee289856649cea9",
+            "id": "7459754f8d3422f4",
             "type": "leaf",
             "state": {
               "type": "split-diff-view",
               "state": {
-                "aFile": "Level 17 - Security/12. Infrastructure Security.md",
-                "bFile": "Level 17 - Security/12. Infrastructure Security.md",
-                "aRef": ""
+                "aFile": "Level 30 - Labs/index.md",
+                "bFile": "Level 30 - Labs/Labs Overview.md",
+                "aRef": "HEAD",
+                "bRef": ""
               },
               "icon": "diff",
-              "title": "Diff: 12. Infrastructure Security  (Working Tree)"
+              "title": "Diff: Labs Overview  (Index)"
             }
           }
         ]
       },
       {
-        "id": "9ee4cdf53dfb658b",
+        "id": "2c6c008dfed878e6",
         "type": "tabs",
+        "dimension": 49.691358024691354,
         "children": [
           {
             "id": "56e18719ff43b769",
@@ -216,42 +219,42 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "9ee289856649cea9",
+  "active": "7459754f8d3422f4",
   "lastOpenFiles": [
-    "Level 08 - STP/01. STP.md",
-    "Level 08 - STP/06. Root Bridge.md",
-    "Level 08 - STP/07. Port Roles.md",
-    "Level 08 - STP/08. Port States.md",
-    "Level 08 - STP/13. Loop Guard.md",
-    "Level 07 - VLAN Technologies/03. Private VLAN.md",
-    "Level 08 - STP/03. PVST+.md",
-    "Level 08 - STP/11. BPDU Guard.md",
-    "Level 08 - STP/04. Rapid PVST+.md",
-    "Level 08 - STP/02. RSTP.md",
-    "Level 08 - STP/05. MST.md",
-    "Level 08 - STP/10. PortFast.md",
+    "Level 05 - IPv4/IPv4 Overview.md",
     "00. MOC - CCNP Study Map.md",
-    "Level 09 - Routing Fundamentals/03. Metrics.md",
-    "Level 06 - IPv6/index.md",
-    "Level 08 - STP/index.md",
-    "Level 09 - Routing Fundamentals/index.md",
-    "Level 09 - Routing Fundamentals/12. Dynamic Routing.md",
+    "Level 30 - Labs/Labs Overview.md",
+    "Level 29 - Troubleshooting/Troubleshooting Overview.md",
+    "Level 28 - Cisco IOS and IOS XE/Cisco IOS and IOS XE Overview.md",
+    "Level 27 - High Availability/High Availability Overview.md",
+    "Level 26 - Monitoring & Telemetry/Monitoring & Telemetry Overview.md",
+    "Level 25 - Virtualization & Cloud/Virtualization & Cloud Overview.md",
+    "Level 24 - SDN & Automation/SDN & Automation Overview.md",
+    "Level 23 - Enterprise WAN/Enterprise WAN Overview.md",
+    "Level 22 - Wireless/Wireless Overview.md",
+    "Level 21 - QoS/QoS Overview.md",
+    "Level 20 - MPLS/MPLS Overview.md",
+    "Level 19 - Multicast/Multicast Overview.md",
+    "Level 18 - VPN Technologies/VPN Technologies Overview.md",
+    "Level 17 - Security/Security Overview.md",
+    "Level 16 - Network Services/Network Services Overview.md",
+    "Level 15 - NAT/NAT Overview.md",
+    "Level 14 - First Hop Redundancy/First Hop Redundancy Overview.md",
+    "Level 13 - Route Redistribution/Route Redistribution Overview.md",
+    "Level 12 - BGP/BGP Overview.md",
+    "Level 11 - EIGRP/EIGRP Overview.md",
+    "Level 10 - OSPF/OSPF Overview.md",
+    "Level 09 - Routing Fundamentals/Routing Fundamentals Overview.md",
+    "Level 08 - STP/STP Overview.md",
+    "Level 07 - VLAN Technologies/VLAN Technologies Overview.md",
     "Level 28 - Cisco IOS and IOS XE/11. Device-Level Security Hardening.json",
-    "Level 28 - Cisco IOS and IOS XE/11. Device-Level Security Hardening.md",
     "Level 28 - Cisco IOS and IOS XE/10. YANG & RESTCONF.json",
-    "Level 28 - Cisco IOS and IOS XE/10. YANG & RESTCONF.md",
     "Level 28 - Cisco IOS and IOS XE/09. IOS XE Architecture (Linux-based).json",
-    "Level 28 - Cisco IOS and IOS XE/09. IOS XE Architecture (Linux-based).md",
     "Level 27 - High Availability/08. Redundancy Design & Best Practices.json",
-    "Level 27 - High Availability/08. Redundancy Design & Best Practices.md",
     "Level 27 - High Availability/07. StackWise VSS.json",
-    "Level 27 - High Availability/07. StackWise VSS.md",
     "Level 27 - High Availability/06. ISSU.json",
-    "Level 27 - High Availability/06. ISSU.md",
     "Level 21 - QoS/12. QoS Marking & Trust Boundaries.json",
-    "Level 21 - QoS/12. QoS Marking & Trust Boundaries.md",
     "Level 21 - QoS/11. DSCP PHB Deep-Dive.json",
-    "Level 21 - QoS/11. DSCP PHB Deep-Dive.md",
     "Level 21 - QoS/10. LLQ & CBWFQ.json",
     "Level 21 - QoS/09. Modular QoS CLI.json"
   ]
