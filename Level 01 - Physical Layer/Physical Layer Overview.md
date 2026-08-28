@@ -11,7 +11,7 @@ type: index
 
 # Level 01 - Physical Layer
 
-Covers the physical foundation of networking: cabling, connectors, transceivers, and the Ethernet specifications that determine how bits travel across the wire. This level explains the transmission media and physical-layer devices that everything else depends on.
+Covers the physical foundation of networking: cabling ([[UTP]], [[Shielded Twisted Pair]], [[Fiber]], [[Radio Frequency|RF]]), [[Connectors|connectors]], [[Transceiver|transceivers]], patch panels, media conversion, and the [[Ethernet|Ethernet specifications]] ([[Ethernet Standards|standards]], [[Duplex]], [[Auto-Negotiation]], [[MTU]]) that determine how bits travel across the wire. This level explains the transmission media and physical-layer devices that everything else depends on.
 
 ## Cabling
 
@@ -50,3 +50,7 @@ Covers the physical foundation of networking: cabling, connectors, transceivers,
 ├── 05. Patch Panels.md
 └── 06. Media Conversion.md
 ```
+
+## Glossary Terms Used
+
+- [[UTP]], [[Shielded Twisted Pair]], [[Fiber]], [[Radio Frequency]], [[Ethernet]], [[Ethernet Standards]], [[Duplex]], [[Auto-Negotiation]], [[MTU]], [[Connectors]], [[Transceiver]], [[Patch Panel]], [[Media Conversion]]

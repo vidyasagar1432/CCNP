@@ -11,7 +11,7 @@ type: index
 
 # Level 12 - BGP
 
-Covers the Border Gateway Protocol, the routing protocol of the internet. Explains eBGP and iBGP operation, the path selection process, and the path attributes such as AS path, local preference, and MED. Also covers communities, route reflectors, confederations, aggregation, policy routing, and the prefix-list and route-map tools used to influence BGP behavior.
+Covers the [[BGP|Border Gateway Protocol]], the routing protocol of the internet. Explains [[eBGP]] and [[iBGP]] operation, the [[BGP Path Selection|path selection]] process, and the path attributes such as [[AS Path|AS path]], [[Local Preference|local preference]], and [[MED]]. Also covers [[Communities|communities]], [[Route Reflector|route reflectors]], [[Confederation|confederations]], [[BGP Aggregation|aggregation]], [[Policy-Based Routing|policy routing]], and the [[Prefix List|prefix-list]] and [[Route Map|route-map]] tools used to influence BGP behavior.
 
 ## BGP Fundamentals
 
@@ -50,5 +50,10 @@ Covers the Border Gateway Protocol, the routing protocol of the internet. Explai
 ├── 11. Policy Routing.md
 ├── 12. Prefix Lists.md
 ├── 13. Route Maps.md
-└── 14. Troubleshooting.md
+├── 14. Troubleshooting.md
+└── BGP Overview.md
 ```
+
+## Glossary Terms Used
+
+- [[BGP]], [[eBGP]], [[iBGP]], [[BGP Path Selection]], [[AS Path]], [[Local Preference]], [[MED]], [[Communities]], [[Route Reflector]], [[Confederation]], [[BGP Aggregation]], [[Policy-Based Routing]], [[Prefix List]], [[Route Map]]

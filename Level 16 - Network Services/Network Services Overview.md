@@ -65,3 +65,7 @@ Surveys the application and network services that run on and through the network
 ├── 18. SIP.md
 └── 19. RTP.md
 ```
+
+## Glossary Terms Used
+
+- [[DHCP]], [[DHCP Snooping]], [[DHCP Relay]], [[DNS]], [[NTP]], [[SNMP]], [[Syslog]], [[FTP]], [[TFTP]], [[HTTP]], [[HTTPS]], [[SSH]], [[Telnet]], [[SMTP]], [[POP3]], [[IMAP]], [[LDAP]], [[SIP]], [[RTP]]

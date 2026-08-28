@@ -11,7 +11,7 @@ type: index
 
 # Level 30 - Labs
 
-Collects the hands-on lab scenarios that consolidate the entire CCNP study path. Covers the lab platforms used for practice and the scenario-based lab builds spanning enterprise campus, branch office, ISP, and data center designs, along with protocol-specific labs for OSPF, BGP, MPLS, DMVPN, and IPsec, SD-WAN labs, automation labs, and end-to-end enterprise scenarios.
+Collects the hands-on lab scenarios that consolidate the entire CCNP study path. Covers the lab platforms used for practice ([[Network Simulator|simulators and emulators]]) and the scenario-based lab builds spanning enterprise campus, branch office, ISP, and data center designs, along with protocol-specific labs for OSPF, BGP, MPLS, DMVPN, and IPsec, SD-WAN labs, automation labs, and end-to-end enterprise scenarios.
 
 ## Lab Platforms
 
@@ -59,3 +59,7 @@ Collects the hands-on lab scenarios that consolidate the entire CCNP study path.
 ├── 15. Automation Labs.md
 └── 16. End-to-End Enterprise Scenarios.md
 ```
+
+## Glossary Terms Used
+
+- [[Network Simulator]], [[Enterprise Campus]], [[SD-WAN]]

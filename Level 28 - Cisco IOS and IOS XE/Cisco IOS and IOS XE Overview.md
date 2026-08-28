@@ -49,3 +49,7 @@ Covers operating a Cisco IOS/IOS XE device from the CLI. Explains the command-li
 ├── 10. YANG & RESTCONF.md
 └── 11. Device-Level Security Hardening.md
 ```
+
+## Glossary Terms Used
+
+- [[Cisco IOS]], [[Cisco Licensing]], [[Smart Licensing]], [[IOS File System]], [[IOS Upgrade]], [[Configuration Archive]], [[ROMMON]], [[IOS XE]], [[YANG]], [[RESTCONF]], [[NETCONF]], [[Device Hardening]]

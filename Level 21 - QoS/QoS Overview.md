@@ -51,3 +51,7 @@ Covers Quality of Service mechanisms that prioritize and manage network traffic.
 ├── 11. DSCP PHB Deep-Dive.md
 └── 12. QoS Marking & Trust Boundaries.md
 ```
+
+## Glossary Terms Used
+
+- [[QoS Classification]], [[QoS Marking]], [[Policing]], [[Shaping]], [[Queuing]], [[WRED]], [[DiffServ]], [[IntServ]], [[MQC]], [[CBWFQ]], [[LLQ]], [[DSCP]], [[Trust Boundary]]

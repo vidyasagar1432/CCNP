@@ -13,22 +13,26 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Level 09 - Routing Fundamentals/12. Dynamic Routing.md",
+                "file": "Glossary/Forwarding.md",
                 "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "12. Dynamic Routing"
+              "title": "Forwarding"
             }
           },
           {
             "id": "d26831fd6dc20016",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "Level 09 - Routing Fundamentals/12. Dynamic Routing.md",
+                "mode": "preview",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "New tab"
+              "title": "12. Dynamic Routing"
             }
           }
         ]
@@ -187,7 +191,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Level 09 - Routing Fundamentals/12. Dynamic Routing.md",
+                "file": "Glossary/Forwarding.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -228,41 +232,41 @@
   },
   "active": "7d89de05ca9fb5db",
   "lastOpenFiles": [
-    "copilot/copilot-conversations/agent__i_want_to_add_more_reboust_terms_in_a_folder@20260829_015946.md",
-    "Level 17 - Security/10. Device Hardening.md",
-    "Level 09 - Routing Fundamentals/12. Dynamic Routing.md",
-    "MAC Address.md",
-    "Broadcast Domains.md",
+    "Glossary/Git.md",
+    "Glossary/Gratuitous ARP.md",
+    "Glossary/Glossary.md",
+    "Glossary/First Hop Redundancy Protocol.md",
+    "Glossary/Network Simulator.md",
+    "Glossary/QoS.md",
+    "Glossary/Troubleshooting.md",
+    "Glossary/IOS XE.md",
+    "Glossary/ROMMON.md",
+    "Glossary/Configuration Archive.md",
+    "Glossary/IOS Upgrade.md",
+    "Glossary/IOS File System.md",
+    "Glossary/Smart Licensing.md",
+    "Glossary/Cisco Licensing.md",
+    "Glossary/Cisco IOS.md",
+    "Glossary/High Availability.md",
+    "Glossary/Virtual Switching System.md",
+    "Glossary/ISSU.md",
+    "Glossary/Redundant Supervisors.md",
+    "Glossary/NSF.md",
+    "Glossary/SSO.md",
+    "Glossary/Wireshark.md",
+    "Glossary/Telemetry.md",
+    "Glossary/IP SLA.md",
+    "Glossary/ERSPAN.md",
+    "Glossary/SPAN.md",
+    "Glossary/DR",
+    "Glossary",
     "fix_glued.py",
     "check_md.py",
-    "Level 16 - Network Services/17. LDAP.md",
-    "Level 17 - Security/11. Secure Management.md",
-    "Level 17 - Security/04. ACL.md",
-    "Level 16 - Network Services/01. DHCP.md",
-    "Level 11 - EIGRP/09. Variance.md",
-    "Level 08 - STP/14. EtherChannel/03. Static.md",
-    "copilot/copilot-conversations/agent__i_think_this_file_format_is_incorrect_3.4_`service_password-encryption@20260829_005113.md",
-    "Level 17 - Security/Security Overview.md",
-    "Level 17 - Security/12. Infrastructure Security.md",
-    "Level 17 - Security/01. AAA.md",
-    "Level 17 - Security/02. TACACS+.md",
-    "Level 17 - Security/03. RADIUS.md",
-    "Level 17 - Security/05. Port Security.md",
-    "Level 17 - Security/06. Dynamic ARP Inspection.md",
-    "Level 17 - Security/07. IP Source Guard.md",
-    "Level 17 - Security/08. Storm Control.md",
-    "Level 17 - Security/09. CoPP.md",
-    "Level 13 - Route Redistribution/04. Seed Metrics.md",
-    "Level 13 - Route Redistribution/03. EIGRP to BGP.md",
-    "Level 13 - Route Redistribution/02. OSPF to BGP.md",
-    "Level 15 - NAT/03. PAT.md",
     "copilot/projects/CCNP",
     "copilot/projects",
     "Level 28 - Cisco IOS and IOS XE/11. Device-Level Security Hardening.json",
     "Level 28 - Cisco IOS and IOS XE/10. YANG & RESTCONF.json",
     "Level 28 - Cisco IOS and IOS XE/09. IOS XE Architecture (Linux-based).json",
-    "Level 27 - High Availability/08. Redundancy Design & Best Practices.json",
-    "Level 27 - High Availability/07. StackWise VSS.json",
-    "Level 27 - High Availability/06. ISSU.json"
+    "Level 27 - High Availability/08. Redundancy Design & Best Practices.json"
   ]
 }

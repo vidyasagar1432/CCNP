@@ -11,7 +11,7 @@ type: index
 
 # Level 08 - STP
 
-Covers Spanning Tree Protocol and its variants — RSTP, PVST+, Rapid PVST+, and MST — that prevent Layer 2 loops. Includes the mechanics of root bridge election, port roles and states, BPDUs, and the protection features like PortFast, BPDU Guard, Root Guard, and Loop Guard, plus EtherChannel link aggregation.
+Covers [[STP|Spanning Tree Protocol]] and its variants — [[RSTP]], [[PVST+]], and [[MST]] — that prevent Layer 2 loops. Includes the mechanics of [[Root Bridge|root bridge]] election, [[STP Port Roles|port roles]] and [[STP Port States|states]], [[BPDU]]s, and the protection features like [[PortFast]], [[BPDU Guard]], [[Root Guard]], and [[Loop Guard]], plus [[EtherChannel]] link aggregation.
 
 ## Spanning Tree Protocols
 

@@ -51,3 +51,7 @@ Covers wireless LAN concepts and the 802.11 standards. Explains WLAN architectur
 ├── 11. WPA2.md
 └── 12. WPA3.md
 ```
+
+## Glossary Terms Used
+
+- [[WLAN]], [[802.11]], [[SSID]], [[BSSID]], [[Channels]], [[RF]], [[WLC]], [[CAPWAP]], [[Mobility]], [[Roaming]], [[WPA2]], [[WPA3]]

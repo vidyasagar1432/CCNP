@@ -11,7 +11,7 @@ type: index
 
 # Level 03 - OSI & TCP IP
 
-Explains the layered model of networking through both the seven-layer OSI reference model and the four-layer TCP/IP model. This level covers how data is encapsulated and decapsulated as it travels through the stack and how protocol data units (PDUs) move between layers.
+Explains the layered model of networking through both the seven-layer [[OSI Model|OSI reference model]] and the four-layer [[TCP-IP Model|TCP/IP model]]. This level covers how data is [[Encapsulation|encapsulated]] and [[Decapsulation|decapsulated]] as it travels through the stack and how protocol data units ([[PDU]]s) move between layers.
 
 ## Reference Models
 
@@ -33,3 +33,7 @@ Explains the layered model of networking through both the seven-layer OSI refere
 ├── 05. PDUs.md
 └── 06. Data Flow.md
 ```
+
+## Glossary Terms Used
+
+- [[OSI Model]], [[TCP-IP Model]], [[Encapsulation]], [[Decapsulation]], [[PDU]]

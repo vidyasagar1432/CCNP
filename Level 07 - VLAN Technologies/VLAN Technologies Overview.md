@@ -49,3 +49,7 @@ Explores virtual LANs and how they segment broadcast domains at Layer 2. Covers 
 ├── 10. Inter-VLAN Routing.md
 └── 11. Router-on-a-Stick.md
 ```
+
+## Glossary Terms Used
+
+- [[VLAN]], [[Voice VLAN]], [[Private VLAN]], [[Access Port]], [[Trunk Port]], [[Native VLAN]], [[802.1Q]], [[DTP]], [[QinQ]], [[Inter-VLAN Routing]], [[Router-on-a-Stick]]

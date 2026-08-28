@@ -11,7 +11,7 @@ type: index
 
 # Level 00 - Networking Basics
 
-A foundational introduction to computer networking, covering what networks are, the common network types, and the core components that make up modern enterprise networks. This level establishes the vocabulary and architectural context used throughout the rest of the CCNP study path.
+A foundational introduction to computer networking, covering what networks are, the common network types ([[LAN]], [[WAN]], [[MAN]], [[PAN]], [[WLAN]], [[SAN]]), and the core components ([[End Device|end devices]], [[Intermediary Device|intermediary devices]], the [[Data Plane|data]]/[[Control Plane|control]]/[[Management Plane|management]] planes) that make up modern enterprise networks. This level establishes the vocabulary and architectural context — the [[Client-Server]] and [[Peer-to-Peer]] models, [[Enterprise Network Architecture]], and [[Network Design Principles]] — used throughout the rest of the CCNP study path.
 
 ## Core Concepts
 
@@ -35,3 +35,7 @@ A foundational introduction to computer networking, covering what networks are, 
 ├── 06. Enterprise Network Architecture.md
 └── 07. Network Design Principles.md
 ```
+
+## Glossary Terms Used
+
+- [[LAN]], [[WAN]], [[MAN]], [[PAN]], [[WLAN]], [[SAN]], [[End Device]], [[Intermediary Device]], [[Data Plane]], [[Control Plane]], [[Management Plane]], [[Client-Server]], [[Peer-to-Peer]], [[Enterprise Network Architecture]], [[Network Design Principles]]

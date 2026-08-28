@@ -53,3 +53,7 @@ Covers the next-generation IP protocol: the 128-bit addressing scheme, the vario
 ├── 12. EIGRP IPv6.md
 └── 13. BGP IPv6.md
 ```
+
+## Glossary Terms Used
+
+- [[IPv6]], [[Global Unicast]], [[Link Local]], [[Unique Local]], [[Anycast]], [[IPv6 Multicast]], [[SLAAC]], [[DHCPv6]], [[Neighbor Discovery]], [[ICMPv6]], [[OSPFv3]], [[EIGRP for IPv6]], [[BGP]]

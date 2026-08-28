@@ -413,6 +413,13 @@ A top-level study planner lives at `00. MOC - CCNP Study Map.md`. It links all 3
 level `index.md` notes, a recommended study order, an ENCOR exam-weight table, and
 cross-cutting themes. Open it in Obsidian to navigate the vault from one place.
 
+## Glossary
+
+A dedicated `Glossary/` folder defines key terms as standalone notes — each with a
+definition, a worked example, an exam focus, and links to related terms. Level notes
+backlink to these terms wherever they appear, so clicking any linked term jumps to its
+full definition. Start at `Glossary/Glossary.md` (index).
+
 ## `difficulty` values
 
 Each deck's `difficulty` is now meaningful (`easy` / `medium` / `hard`) rather than a

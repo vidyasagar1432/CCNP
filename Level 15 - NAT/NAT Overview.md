@@ -11,7 +11,7 @@ type: index
 
 # Level 15 - NAT
 
-Covers Network Address Translation and how private networks reach the public internet. Explains static NAT, dynamic NAT, and PAT (overload), plus policy NAT, the IPv6 transition mechanism NAT64, and troubleshooting of common NAT issues.
+Covers [[NAT|Network Address Translation]] and how private networks reach the public internet. Explains [[Static NAT]], [[Dynamic NAT]], and [[PAT]] (overload), plus [[Policy NAT]], the IPv6 transition mechanism [[NAT64]], and troubleshooting of common NAT issues.
 
 ## NAT Types
 

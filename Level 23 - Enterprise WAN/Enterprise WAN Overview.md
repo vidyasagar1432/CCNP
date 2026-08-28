@@ -43,3 +43,7 @@ Covers the technologies that connect enterprise sites across wide-area networks.
 ├── 10. vBond.md
 └── 11. WAN Edge.md
 ```
+
+## Glossary Terms Used
+
+- [[PPP]], [[PPPoE]], [[Metro Ethernet]], [[MPLS WAN]], [[Broadband]], [[LTE]], [[SD-WAN]], [[vManage]], [[vSmart]], [[vBond]], [[WAN Edge]]

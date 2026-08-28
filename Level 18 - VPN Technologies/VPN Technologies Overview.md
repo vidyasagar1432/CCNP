@@ -43,3 +43,7 @@ Covers the tunneling and encryption technologies that create secure virtual netw
 ├── 10. Remote Access VPN.md
 └── 11. VPN Technology Comparison.md
 ```
+
+## Glossary Terms Used
+
+- [[VPN]], [[GRE]], [[IPsec]], [[DMVPN]], [[FlexVPN]], [[SSL VPN]], [[Site-to-Site VPN]], [[IKEv2]], [[Virtual Tunnel Interface]], [[GET VPN]], [[Remote Access VPN]]

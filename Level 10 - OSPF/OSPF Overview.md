@@ -11,7 +11,7 @@ type: index
 
 # Level 10 - OSPF
 
-Covers the Open Shortest Path First link-state routing protocol in depth, from OSPFv2 and OSPFv3 operation to neighbor state machines, DR/BDR election, LSA types, and the SPF algorithm. Also covers area design with stub, totally stubby, and NSSA areas, virtual links, authentication, summarization, and troubleshooting.
+Covers the [[OSPF|Open Shortest Path First]] link-state routing protocol in depth, from OSPFv2 and OSPFv3 operation to neighbor state machines, DR/BDR election, LSA types, and the SPF algorithm. Also covers [[OSPF Area|area]] design with [[Stub Area|stub]], [[Totally Stubby Area|totally stubby]], and [[NSSA]] areas, [[Virtual Link|virtual links]], [[OSPF Authentication|authentication]], summarization, and troubleshooting.
 
 ## Protocol Basics
 
@@ -57,3 +57,7 @@ Covers the Open Shortest Path First link-state routing protocol in depth, from O
 ├── 14. Summarization.md
 └── 15. Troubleshooting.md
 ```
+
+## Glossary Terms Used
+
+- [[OSPF]], [[OSPFv3]], [[OSPF Area]], [[Stub Area]], [[Totally Stubby Area]], [[NSSA]], [[Virtual Link]], [[OSPF Authentication]]

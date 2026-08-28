@@ -11,7 +11,7 @@ type: index
 
 # Level 11 - EIGRP
 
-Covers the Enhanced Interior Gateway Routing Protocol, a hybrid distance-vector/link-state protocol. Explains the DUAL algorithm, Reliable Transport, successor and feasible successor concepts, named mode configuration, IPv6 support, stub operation, authentication, and advanced features like variance and unequal-cost load balancing, plus troubleshooting.
+Covers the [[EIGRP|Enhanced Interior Gateway Routing Protocol]], a hybrid distance-vector/link-state protocol. Explains the [[DUAL]] algorithm, [[RTP|Reliable Transport]], [[Successor|successor]] and [[Feasible Successor|feasible successor]] concepts, [[Named Mode EIGRP|named mode]] configuration, [[EIGRP for IPv6|IPv6 support]], [[EIGRP Stub|stub]] operation, [[EIGRP Authentication|authentication]], and advanced features like [[Variance|variance]] and [[Unequal-Cost Load Balancing|unequal-cost load balancing]], plus troubleshooting.
 
 ## Algorithm & Transport
 
@@ -44,5 +44,10 @@ Covers the Enhanced Interior Gateway Routing Protocol, a hybrid distance-vector/
 ├── 08. Authentication.md
 ├── 09. Variance.md
 ├── 10. Unequal Load Balancing.md
-└── 11. Troubleshooting.md
+├── 11. Troubleshooting.md
+└── EIGRP Overview.md
 ```
+
+## Glossary Terms Used
+
+- [[EIGRP]], [[DUAL]], [[RTP]], [[Successor]], [[Feasible Successor]], [[Feasibility Condition]], [[EIGRP Metric]], [[Named Mode EIGRP]], [[EIGRP for IPv6]], [[EIGRP Stub]], [[EIGRP Authentication]], [[Variance]], [[Unequal-Cost Load Balancing]]

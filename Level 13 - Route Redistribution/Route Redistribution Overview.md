@@ -40,3 +40,7 @@ Covers the process of exchanging routes between different routing protocols. Exp
 ├── 07. Filtering.md
 └── 08. Loop Prevention.md
 ```
+
+## Glossary Terms Used
+
+- [[Route Redistribution]], [[BGP]], [[Seed Metric]], [[Administrative Distance]], [[Route Tag]], [[Route Filtering]], [[Routing Loop]]

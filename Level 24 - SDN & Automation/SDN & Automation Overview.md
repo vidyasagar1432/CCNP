@@ -59,3 +59,7 @@ Covers Software-Defined Networking and the automation ecosystem that programs mo
 ├── 15. Terraform.md
 └── 16. Git.md
 ```
+
+## Glossary Terms Used
+
+- [[SDN]], [[DNA Center]], [[SD-Access]], [[VXLAN]], [[LISP]], [[REST API]], [[RESTCONF]], [[NETCONF]], [[YANG]], [[JSON]], [[XML]], [[YAML]], [[Python]], [[Ansible]], [[Terraform]], [[Git]]

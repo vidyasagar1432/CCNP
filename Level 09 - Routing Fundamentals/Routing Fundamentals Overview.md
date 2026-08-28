@@ -48,3 +48,7 @@ Introduces how routers make forwarding decisions: the routing table, metrics, an
 ├── 11. Route Summarization.md
 └── 12. Dynamic Routing.md
 ```
+
+## Glossary Terms Used
+
+- [[Routing Table]], [[Administrative Distance]], [[Metrics]], [[Recursive Lookup]], [[FIB]], [[RIB]], [[CEF]], [[Static Routing]], [[Floating Static]], [[Default Route]], [[Summarization]], [[Dynamic Routing]]

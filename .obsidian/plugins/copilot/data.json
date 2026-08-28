@@ -485,7 +485,7 @@
           "baseModelId": "opencode/big-pickle",
           "effort": null
         },
-        "defaultMode": "default"
+        "defaultMode": "auto"
       }
     },
     "debugFullFrames": true,

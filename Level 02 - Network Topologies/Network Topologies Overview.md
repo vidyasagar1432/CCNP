@@ -11,7 +11,7 @@ type: index
 
 # Level 02 - Network Topologies
 
-Describes how network devices are physically and logically interconnected, from classic topologies like bus, star, ring, and mesh to modern data-center and campus designs such as spine-leaf and hierarchical two/three-tier models. This is the blueprint for how networks are laid out and scaled.
+Describes how network devices are physically and logically interconnected, from classic topologies like [[Bus Topology|bus]], [[Star Topology|star]], [[Ring Topology|ring]], and [[Mesh Topology|mesh]] to modern data-center and campus designs such as [[Spine-Leaf|spine-leaf]] and hierarchical [[Collapsed Core|two]]/[[Three-Tier|three-tier]] models — assembled into the [[Enterprise Campus|enterprise campus]]. This is the blueprint for how networks are laid out and scaled.
 
 ## Classic Topologies
 
@@ -39,3 +39,7 @@ Describes how network devices are physically and logically interconnected, from 
 ├── 08. Three-Tier.md
 └── 09. Enterprise Campus.md
 ```
+
+## Glossary Terms Used
+
+- [[Bus Topology]], [[Star Topology]], [[Ring Topology]], [[Mesh Topology]], [[Hybrid Topology]], [[Spine-Leaf]], [[Collapsed Core]], [[Three-Tier]], [[Enterprise Campus]]

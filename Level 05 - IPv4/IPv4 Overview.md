@@ -56,3 +56,7 @@ Provides a complete treatment of IPv4 addressing: address structure, binary/deci
 ├── 15. Supernetting.md
 └── 16. Route Aggregation.md
 ```
+
+## Glossary Terms Used
+
+- [[IPv4]], [[IPv4 Classes]], [[Public IP]], [[Private IP]], [[APIPA]], [[Loopback Address]], [[IPv4 Broadcast]], [[IPv4 Multicast]], [[CIDR]], [[VLSM]], [[FLSM]], [[Summarization]], [[Supernetting]], [[Route Aggregation]]

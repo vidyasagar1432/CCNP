@@ -53,3 +53,7 @@ Covers server and network virtualization and cloud computing models. Explains vi
 ├── 12. PaaS.md
 └── 13. IaaS.md
 ```
+
+## Glossary Terms Used
+
+- [[Virtual Machine]], [[Hypervisor]], [[Container]], [[Docker]], [[Kubernetes]], [[VRF]], [[Public Cloud]], [[Private Cloud]], [[Hybrid Cloud]], [[SaaS]], [[PaaS]], [[IaaS]]

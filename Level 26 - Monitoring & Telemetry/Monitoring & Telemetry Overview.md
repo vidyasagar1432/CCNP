@@ -39,3 +39,7 @@ Covers the tools and methods for observing network performance and health. Expla
 ├── 08. Telemetry.md
 └── 09. Wireshark.md
 ```
+
+## Glossary Terms Used
+
+- [[SNMP]], [[NetFlow]], [[Flexible NetFlow]], [[SPAN]], [[ERSPAN]], [[IP SLA]], [[Syslog]], [[Telemetry]], [[Wireshark]]

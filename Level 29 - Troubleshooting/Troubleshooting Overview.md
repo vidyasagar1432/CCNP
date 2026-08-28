@@ -11,7 +11,7 @@ type: index
 
 # Level 29 - Troubleshooting
 
-Provides a systematic approach to diagnosing and resolving network faults across the technology stack. Covers troubleshooting by layer (L1, L2, L3), by technology (VLAN, STP, EtherChannel, OSPF, EIGRP, BGP, NAT, ACL, DHCP, DNS, VPN, Wireless, QoS, SD-WAN), and overall performance analysis.
+Provides a **[[Troubleshooting|systematic approach]]** to diagnosing and resolving network faults across the technology stack. Covers troubleshooting by layer (L1, L2, L3), by technology (VLAN, STP, EtherChannel, OSPF, EIGRP, BGP, NAT, ACL, DHCP, DNS, VPN, Wireless, QoS, SD-WAN), and overall performance analysis.
 
 ## Layer & Switching Troubleshooting
 
@@ -63,3 +63,7 @@ Provides a systematic approach to diagnosing and resolving network faults across
 ├── 17. SD-WAN.md
 └── 18. Performance Analysis.md
 ```
+
+## Glossary Terms Used
+
+- [[Troubleshooting]], [[QoS]], [[OSI Model]]

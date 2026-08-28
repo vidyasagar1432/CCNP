@@ -39,3 +39,7 @@ Covers Multiprotocol Label Switching, the foundation of modern service-provider 
 ├── 08. MP-BGP.md
 └── 09. MPLS VPN.md
 ```
+
+## Glossary Terms Used
+
+- [[MPLS]], [[MPLS Label]], [[LER]], [[LSR]], [[LFIB]], [[FEC]], [[VRF]], [[MP-BGP]], [[MPLS VPN]]

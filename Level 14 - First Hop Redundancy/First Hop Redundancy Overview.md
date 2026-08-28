@@ -31,3 +31,7 @@ Covers the protocols that provide gateway redundancy so hosts always have a defa
 ├── 04. Object Tracking.md
 └── 05. Gateway Redundancy.md
 ```
+
+## Glossary Terms Used
+
+- [[First Hop Redundancy Protocol]], [[HSRP]], [[VRRP]], [[GLBP]], [[Object Tracking]]

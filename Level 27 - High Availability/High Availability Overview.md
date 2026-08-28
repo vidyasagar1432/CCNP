@@ -37,3 +37,7 @@ Covers the mechanisms that keep networks available during failures. Explains Sta
 ├── 07. StackWise VSS.md
 └── 08. Redundancy Design & Best Practices.md
 ```
+
+## Glossary Terms Used
+
+- [[SSO]], [[NSF]], [[Redundant Supervisors]], [[EtherChannel]], [[First Hop Redundancy Protocol]], [[ISSU]], [[Virtual Switching System]], [[High Availability]]

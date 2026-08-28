@@ -39,3 +39,7 @@ Covers IP multicast and how one-to-many traffic is delivered efficiently. Explai
 ├── 08. Multicast Boundaries & RPF.md
 └── 09. PIM Designated Router (DR) & Assert.md
 ```
+
+## Glossary Terms Used
+
+- [[Multicast]], [[IGMP]], [[PIM]], [[PIM-DM]], [[PIM-SM]], [[Rendezvous Point]], [[IGMP Snooping]], [[Source-Specific Multicast]], [[Reverse Path Forwarding]], [[PIM DR]]

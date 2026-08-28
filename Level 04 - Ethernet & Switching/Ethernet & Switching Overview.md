@@ -11,7 +11,7 @@ type: index
 
 # Level 04 - Ethernet & Switching
 
-Delves into the Layer 2 fundamentals of Ethernet: MAC addressing, frame structure, and the switching logic of learning, flooding, forwarding, and filtering used to build the CAM table. Also covers broadcast and collision domains, ARP behavior, and a first look at Cisco Express Forwarding.
+Delves into the Layer 2 fundamentals of Ethernet: [[MAC Address|MAC addressing]], [[Ethernet Frame|frame structure]], and the switching logic of [[MAC Learning|learning]], [[Flooding|flooding]], [[Forwarding|forwarding]], and [[Filtering|filtering]] used to build the [[CAM Table|CAM table]]. Also covers [[Broadcast Domain|broadcast]] and [[Collision Domain|collision domains]], [[ARP|ARP behavior]], and a first look at Cisco Express Forwarding ([[CEF]]).
 
 ## Addressing & Frames
 
@@ -56,3 +56,7 @@ Delves into the Layer 2 fundamentals of Ethernet: MAC addressing, frame structur
 ├── 12. Proxy ARP.md
 └── 13. CEF Basics.md
 ```
+
+## Glossary Terms Used
+
+- [[MAC Address]], [[Ethernet Frame]], [[CAM Table]], [[MAC Learning]], [[Flooding]], [[Forwarding]], [[Filtering]], [[Broadcast Domain]], [[Collision Domain]], [[ARP]], [[Gratuitous ARP]], [[Proxy ARP]], [[CEF]]
