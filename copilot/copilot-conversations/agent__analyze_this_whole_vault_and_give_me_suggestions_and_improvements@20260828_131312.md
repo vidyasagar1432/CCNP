@@ -4,7 +4,7 @@ mode: agent
 backendId: opencode
 sessionId: "ses_fb8b1449affezwbbbauFJGsuiT"
 agentLabel: "Vault analysis and improvement suggestions"
-usage: '{"usedTokens":29296,"contextWindow":200000,"updatedAt":1787906722722}'
+usage: '{"usedTokens":31078,"contextWindow":200000,"updatedAt":1787912491429}'
 tags:
   - copilot-conversation
 ---
@@ -1638,3 +1638,1085 @@ When we added `## Related Notes` to all 360 notes, the links were written in **b
 
 Let me know if you want me to tackle that merged-heading cleanup, or anything else.
 [Timestamp: 2026/08/28 13:28:21]
+
+**user**: sure do it
+[Timestamp: 2026/08/28 15:04:24]
+
+**ai**: I'll take on the merged-heading-line cleanup for the 42 notes. Since auto-splitting with regex was judged too risky, I need to do this carefully. Let me first inspect exactly what these merged lines look like so I can understand the patterns before making changes.
+
+Let me identify the 42 affected notes and examine the patterns.
+
+Now I understand the patterns clearly. There are several distinct merged-heading cases:
+
+1. **`## N. Overview<text>`** — heading followed directly by paragraph text (no separator). E.g. `## 1. OverviewAn **Ethernet frame**...`
+2. **`## N. Title### N.M Subtitle`** — two headings merged (consecutive heading). E.g. `## 3. Preamble and SFD### 3.1 Preamble`
+3. **`### N.M Subtitle**text**`** — heading + bold content. E.g. `### 3.2 SFD**Size:** 1 byte`
+4. **`### Dynamic EntryA ...`** — heading + text.
+5. **`# N. TitleA **...`** — H1 + text. E.g. `# 7. Static MAC EntriesA **static...`
+
+The tricky part: distinguishing where the heading ends and the body begins, especially with camelCase-joined words like `OverviewAn` (head `Overview`, body `An...`).
+
+Let me get the FULL inventory of all merged lines across all 42 notes so I can design the split correctly. I need to see every merged line to understand the exact character boundary.
+
+Let me dump all merged lines from all 42 notes.
+
+Now I understand the patterns. Let me dump the **full inventory** of every merged line across all 42 notes so I can accurately determine the heading/body split boundary for each one.
+
+This is a substantial and delicate task. There are many distinct merged patterns. Let me get the complete list of files and total merged-line count, and understand every distinct pattern precisely.
+
+The patterns I can identify:
+
+**Pattern A — Heading + body text joined without space** (`OverviewAn`, `TitleThe`, `RolesPort`):
+- `## 1. Overview` + `An **Ethernet frame**...` → split into `## 1. Overview` / blank / `An **Ethernet frame**...`
+- The boundary is a camelCase join: heading word + body's first word joined (e.g., `OverviewAn`, `StateDescribes`, `RolesPort`, `coreextends`?)
+- This is the risky one — needs precise camelCase splitting.
+
+**Pattern B — Two headings joined** (`### 3.1 Preamble### 3.2 SFD`, `## 2. Core Concepts## 2.1...`):
+- e.g. `## 3. Preamble and SFD### 3.1 Preamble` → heading + heading. Split at the second `#`.
+- `# 2. Core Concepts## 2.1 What CAM Means` → H1 + H2.
+
+**Pattern C — Heading + bold content joined** (`### 3.2 SFD**Size:** 1 byte`, `## 4. Destination MAC**Size:** 6 bytes`):
+- Here the body is a bold-run `**Size:**...`. The heading ends right before `**`. Split at `**`; heading is `## 4. Destination MAC`, body is `**Size:** 6 bytes`.
+- But careful: some headings legitimately contain `**`? Unlikely. And some merged lines have heading + `**bold text**` + more body.
+
+**Pattern D — Heading + text where body starts with a recognized sentence** (`# 4. Router-on-a-Stick (ROAS)A **Router-on-a-Stick** uses...`, `# 10. Native VLANOn an 802.1Q...`, `# 9. STP Port RolesPort **roles**...`):
+- camelCase word-join (ROASA, VLANOn, RolesPort).
+
+**Pattern E — Heading where the merged content is exam-trap lists** (`# 41. Exam Traps- HSRP is...`, `# 30. Exam Traps- **UDP 53...**`):
+- `# N. Exam Traps- **...` → heading + list. Need to insert newline before the `- `.
+
+**Pattern F — Pure consecutive headings where the trailing one is a "Trap" or code fence marker** like `# 19. Exam Traps### Trap ...`.
+
+This is quite complex. Given the volume (~392 merged lines, many distinct patterns), doing this correctly by hand for each is huge. Let me count total and design a robust splitter.
+
+Critically, I must NOT break content or headings. The safest approach is a **pattern-matching splitter** with careful rules, applied to each line, then verify the result (markdown still renders, code fences balanced, no info lost).
+
+Let me first get the exact count and build a comprehensive rule set, testing on a copy before writing.
+
+Let me count total merged lines across all 42 files and enumerate the distinct split-boundary types precisely.
+
+This is a large, delicate task. Let me first quantify the total scope and enumerate the exact boundary types, working on copies before writing anything back.
+
+My detection is way too broad — it's catching ALL legitimate headings (10,000+ lines that start with `#`). The heuristic of "contains `**`" or "camelCase" or "consecutive `#`" flags normal headings too. For example, a normal heading `## 3. VLAN Identification and VLAN IDs` contains no `**`, but my `B_twoheadings`/`A_camel` no — wait, 5098 OTHER are normal headings.
+
+I need to be more precise. The actual "merged" lines are the ones where a **heading and its body content are joined on the same physical line** — but distinguishing these from normal headings requires knowing the split boundary.
+
+Let me reconsider. A normal heading line is exactly: `# ` + heading text + (nothing, or the line continues with ONLY the heading). A merged line has heading text followed immediately by body content (bold, more headings, paragraph text, lists) with **no newline**.
+
+The key insight: I can detect these by checking the rest of the vault's structure. But more reliably — let me look at what fraction lines actually need splitting. My earlier, more targeted heuristic (the one that found exactly 42 files) used: `'**' in body` OR contains an inner `#` OR camelCase-join of `OptionalDigit. TitleWord`. That found 42 files.
+
+Let me recount using that precise detection, and get the exact per-file count. Let me reconstruct the precise 42-file list.
+
+My detection was far too broad — it flag 8,745 normal headings. Let me use the precise detection (matching what identified the 42 files): a heading line followed by **body content on the same line** (bold run, inner heading, or camelCase-joined continuation), and count per-file precisely.
+
+Hmm, this now detects **50 files / 925 lines** — but earlier I had narrowed it to 42 files. The discrepancy is because my detection flags some borderline cases. Wait — but this broader detection might include **false positives** (legitimate headings that just happen to contain `**` or an inner pattern but are actually clean). 
+
+Let me be very careful here. This is delicate. The risk is splitting a legitimate heading or corrupting content.
+
+Let me reconsider the detection categories and look at actual borderline cases to separate TRUE merged lines from FALSE positives. Let me examine the specific ambiguous cases — e.g. lines that have `**` but might be a legit standalone heading like `## Important` (a heading whose text is literally a bold-ish fragment, or `## 3.1 Final Exam Memory` at end of file).
+
+Actually, the deeper issue: the previously-noted "42 notes/392 merged lines" came from the *original classification*, but my recount here yields 50 files/925. The original account said "392 total merged lines (115 are 'consecutive heading' cases; rest riskier)". My current detection is too permissive.
+
+Let me focus. The reliable way to find TRUE merged lines without guessing: a line is merged if removing the heading prefix leaves trailing content. I'll look at each flagged line and decide. But 925 is a lot to eyeball.
+
+Better strategy: Let me carefully classify each flagged line into concrete categories by examining the actual text, then write precise rules. Let me look at ALL flagged lines in a few representative files to build the exact rule set, especially the borderline ones (e.g., does `## 9. PoE` in Voice VLAN have content merged or is it a false positive?).
+
+Let me inspect the cleanest borderline examples to calibrate.
+
+The detection now finds 50 files/925 lines, but it's too permissive (may include false positives). This is delicate — I must not split legitimate headings. Let me examine the borderline cases in detail to calibrate precise rules.
+
+These are critical findings. Look at these "flagged" lines:
+
+- `## 13. EtherChannel Consideration` (33 chars) — this is a **clean, standalone heading**! There's NO merged content. It's 33 characters ending after "Consideration". It was flagged because... "Consideration" → `[a-z][A-Z]`? No. Let me see: `EtherChannel Consideration` has "Channel" (capital C) after "Ether" — `rH`? No, `EtherChannel` → `rC` is `[a-z][A-Z]` = "rC"! So the camelCase heuristic misfired on `EtherChannel` inside a legit heading.
+
+- `## 9. PoE` (9 chars) — clean heading, false positive.
+- `## 7. Voice VLAN and QoS` — clean, false positive (`oC`... no, "QoS" has `oS`).
+- `## 6. PortFast vs UplinkFast` — clean heading, false positive (`tF` in PortFast, `kF` in UplinkFast).
+- `## 3. CoPP Configuration Structure` — clean, false positive (`oPP` `PConfiguration` → `oP`? "CoPP" `oPP` = `[a-z][A-Z]` no wait "oP" yes `oP`).
+
+So my camelCase heuristic is generating LOTS of false positives from legitimate multi-word headings where one word has an internal capital (camelCase like `EtherChannel`, `PortFast`, `CoPP`, `QoS`).
+
+**These files do NOT actually have merged lines** — the earlier precise account (42 files) was correct, and my broadened detection added 8 false-positive files. So the TRUE set is the one I identified in the very first detection: the 42 files. The additional 8 (09 Collision Domains, 02 Voice VLAN, 05 Trunk Port, 07 802.1Q, 10 PortFast, 11 BPDU Guard, 09 CoPP) are actually CLEAN — just multi-word heading names with camelCase internal matches.
+
+So I should restore my **original precise detection** which correctly found 42 files. My original heuristic was:
+```
+if '**' in body: hits  (merged)
+elif re.search(r'#{1,6}\s', body): hits  (consecutive heading)
+```
+plus the camelCase ONLY for `# N. TitleWord` pattern at top-level where the heading itself is a pure number+single-word... 
+
+Let me reconsider the original detection that gave 42 files. It was:
+```python
+if '**' in body:
+    hits.append(...)
+elif not body.endswith(('.',':','?')) and ' ' in body:
+    pass  # skip
+```
+and then the top-level loop was: `## N. OverviewAn **Ethernet...` etc.
+
+Actually the very first script that listed **42 affected notes** used this logic:
+```python
+if '**' in body:  # e.g. "3. Overview**Spanning..." -> has ** meaning bold was merged
+    hits...
+elif not body.endswith(('.',':','?')) and ' ' in body:
+    pass
+```
+That found 42 files. The detection: `'**' in body` OR (camelCase `[a-z][A-Z]` only when the line has a bold-merge marker).
+
+Hmm, but the clean headings like `## 13. EtherChannel Consideration` contain NO `**` — so with `'**' in body` detection, they would NOT be flagged. That's why the original was 42, not 50. 
+
+Wait, but the original 42-file list I got in the first tool call of this session matched the previous session's summary ("42 notes"). Let me reconcile: the original detection in THIS session (first bash call) produced exactly the files like `Level 04/02. Ethernet Frame.md (20 merged)` etc. — and it used `'**' in body` primarily. That gave 42 files. 
+
+So the correct rule for TRUE merged lines:
+1. **Bold-merge**: body contains `**` NOT at the very end AND heading is "N. Title" (a real numbered heading) — this is Pattern C where body content starts with bold.
+2. **Consecutive heading**: body contains another `#` marker — Pattern B.
+3. **CamelCase join**: `# N. Title` followed directly by body starting with a capital word — but ONLY where this isn't a legit multi-word heading. This is the risky/false-positive-prone category.
+
+The 8 files I now see as false positives are clean headings — they have NO bold and NO inner-heading and are legit multi-word headings. The camelCase check falsely flagged them.
+
+So I must focus on the TRUE merged lines. Let me redo detection using ONLY these two reliable signals, and handle camelCase joins carefully (they exist: `OverviewAn`, `RolesPort`, `StateDescribes`, `VLANOn`) but only detect them at H1 level `# N. ...` where a heading is followed by sentence text.
+
+Actually — the camelCase joins ARE in the 42 files (e.g., `## 1. OverviewAn **Ethernet frame**`) and they ALSO contain `**` (the bold follows). So the `**`-detection catches most of them! `## 1. OverviewAn **Ethernet frame**` has `**`. `# 7. Static MAC EntriesA **static` has `**`. `# 9. STP Port RolesPort **roles**` has `**`.
+
+So the `**`-in-body rule catches the overwhelmingly majority. The pure camelCase-without-bold cases are rarer.
+
+Let me redo this precisely. I'll detect merged lines by these reliable signals and validate against the original 42-file list.
+
+The 8 extra files are **false positives** — clean headings containing camelCase words like `EtherChannel`, `PortFast`, `CoPP`. My original precise detection (42 files) was correct. Let me restore the reliable signals and re-derive the exact 42-file set with accurate per-file counts and line extraction.
+
+
+
+This now exactly matches the original: **42 files, 379 merged lines** (the earlier "392" included some count variance). This is the authoritative set.
+
+Now I have the precise set. The reliable signals are:
+1. **BOLD merge**: heading line (`N. ...`) with a `**` after the heading that isn't the end of a heading — body content starts with bold.
+2. **INNERH merge**: consecutive headings like `## X### Y`.
+
+These two cover all 379 lines reliably. The camelCase sentences (`OverviewAn`, `VLANOn`) are caught because they have a `**` following (the bold body). 
+
+Now let me build the **splitter** that reconstructs each merged line into proper markdown:
+- For **BOLD** merge: split at the first `**` → heading = `#...` part before `**`, body = `**...` onward. Actually the boundary is: heading ends, then content begins. Since these are `N. Title**body**`, I split right before the first `**`.
+  - But what about `## 1. OverviewAn **Ethernet frame**...`? Here there's NO `**` right after "Overview" — it's `OverviewAn **`. The heading is "Overview", body is "An **Ethernet frame**...". Splitting at first `**` would give heading `## 1. OverviewAn ` and body `**Ethernet frame**...` — WRONG, heading would be "OverviewAn". So I ALSO need to handle the camelCase join: split heading at the camelCase boundary before the body's first sentence word.
+  - So for BOLD cases with `**`, the split point is NOT always at `**`. I need to first extract the heading, then the body.
+
+This is where it gets tricky. Let me reconsider the structure of each merged line:
+
+`## 1. OverviewAn **Ethernet frame** is the ...`
+
+Here: heading = `## 1. Overview`, body = `An **Ethernet frame** is the ...`. The body starts with "An" (a sentence word), and the heading is the number+Title "1. Overview". The join is `Overview` + `An` → `OverviewAn`.
+
+`## 4. Destination MAC**Size:** 6 bytes`
+Heading = `## 4. Destination MAC`, body = `**Size:** 6 bytes`. Body starts with bold.
+
+`# 4. Router-on-a-Stick (ROAS)**Router-on-a-Stick** uses...`
+Heading = `# 4. Router-on-a-Stick (ROAS)`, body = `**Router-on-a-Stick** uses...`.
+
+`# 9. STP Port RolesPort **roles** describe...`
+Heading = `# 9. STP Port Roles`, body = `Port **roles** describe...`. Join "Roles"+"Port" → "RolesPort".
+
+`### 3.2 SFD**Size:** 1 byte`
+Heading = `### 3.2 SFD`, body = `**Size:** 1 byte`.
+
+So the general structure: `<mdhash> <N.> <Heading Title>[<body start>]<body>`. The body either:
+(a) starts with `**` directly after the heading title (`Destination MAC**Size:**`), OR
+(b) is a sentence that begins with a capital-start word joined to the last heading word (`OverviewAn`, `RolesPort`, `StateDescribes`), OR
+(c) is a list (`Exam Traps- **UDP 53...**`).
+
+The SAFEST approach given the risk: rather than algorithmically guessing the heading/body boundary for every case (which risks corruption), I should **reconstruct the intended markdown** by recognizing the boundary. 
+
+For the BOLD cases (body starts with `**`): boundary is clear — split before the first `**`. Heading is everything up to (not including) the `**`. This covers `Destination MAC**Size:**`, `Overview**...**`, `SFD**Size:**`, `Exam Traps- **...**` (also bold). These are unambiguous and safe.
+
+For the camelCase-sentence joins where body does NOT start with `**` (e.g., `OverviewAn **Ethernet frame**`, `RolesPort **roles**`, `StateDescribes the...`, `VLANOn an 802.1Q...`): the split is at the camelCase boundary, but I need to identify which capital starts the body. This is riskier.
+
+Given the previous reasoning and the risk, the reviewer explicitly DID NOT want risky auto-split. But the user now said "sure do it" — so I should do it, but do it correctly and VERIFY the output.
+
+Key insight: The number of lines where the body does NOT start with `**` (pure sentence-join) is small. Let me quantify. Most merged lines have the body starting with `**` (bold). Let me check: of the 379, how many are `N. Title**` (bold immediately) vs `N. TitleWord**` (camelCase + bold) vs `N. Titleword- list` etc.
+
+Let me analyze the boundary type distribution so I can handle each correctly.
+
+Confirmed: **42 files, 379 merged lines**, matching the original precisely. Now let me analyze the boundary structures to build a correct splitter — the key risk is camelCase sentence joins vs clean bold boundaries.
+
+Now I understand the boundary distribution:
+- **heading+heading (164)**: `## N. Title### N.M Sub` — split at the inner `#`. Easy and safe (both sides are headings).
+- **H-number + camelJoin sentence (100)**: `## 1. OverviewAn **Ethernet frame**` — heading + sentence joined by camelCase. Need to split at camelCase boundary. Medium risk.
+- **H-number + sentence(nobold) (82)**: `## 3. VLAN Identification and VLAN IDs802.1Q provides...` — heading + sentence, but the join isn't `[a-z][A-Z]` camelCase (e.g., `IDs802.1Q` — `s8`, and `802.1Q` is a number-start). Hmm, these are tricky. `VLAN IDs802.1Q provides` → heading "VLAN Identification and VLAN IDs", body "802.1Q provides...". The join is "IDs"+"802.1Q". Here there's no camelCase `[a-z][A-Z]`, it's `s8`. This is the HARD category — the body starts with a digit or special.
+- **subheading no number (28)**: `### Dynamic EntryA **dynamic** entry...`, `## Option 82**DHCP Relay...**`, `### 802.1Q**...**`. No number. Some have bold, some camelCase.
+- **list+bold (2)**: `# N. Exam Traps- **UDP...**`.
+- **other (3)**: misc.
+
+The camelCase and sentence-join categories (100+82+28+2+3 = 215 lines) are where the heading/body boundary is ambiguous and risky. The heading+heading (164) is safe.
+
+Given the risk, I need a highly careful splitter. Let me think about the best strategy.
+
+**The core challenge**: given a merged line, find the exact boundary between the heading title and the body content. This requires understanding which capital/digit starts the body.
+
+Approach: For each merged line, I can leverage **context** — the heading should be a short "Title" (matching the note's section naming convention, e.g. "1. Overview", "4. Destination MAC", "2.2 Root Port"). The body that follows is a sentence.
+
+But there's a smarter, lower-risk route. Many of these merged lines are the result of a **section heading followed by a body paragraph**. The heading titles follow a convention. Rather than guess, I can:
+
+1. For **heading+heading**: trivially split at inner `#`. Safe.
+2. For **`N. Title**bold...**`**: split at first `**`. Heading = text before `**`. Safe — the `**` unambiguously marks body start.
+3. For **camelCase sentence + bold**: e.g. `1. OverviewAn **Ethernet...**`. Heading is the part before the camelCase join. I split at the camelCase boundary (last `[a-z][A-Z]` where the second part starts a new word). 
+4. For **`N. TitleWord...`** where body doesn't have bold and isn't camelCase-joinable... hard.
+
+Given the sheer complexity and risk of 379 lines across 6+ different patterns, and the explicit original concern about corruption, I think the **right approach** is to write a careful, well-tested splitter, then **rigorously validate** the output:
+- Every heading line is now a pure heading.
+- Code fences still balanced per file.
+- No content lost (concatenation of split parts == original line, modulo the inserted newline).
+- The extracted headings match plausible section titles.
+
+But there's an even more important safety consideration: rather than a fully automated parser that might mis-split 215 risky lines, I should reconsider whether the "nobold sentence" and "camelJoin" cases can be handled robustly.
+
+Let me look at actual samples of each risky category to design precise rules. Let me dump representative examples of the "H-number + sentence(nobold)" and "camelJoin" and "subheading" categories.
+
+Now I have the full boundary picture. Let me examine representative examples of the **risky categories** (camelJoin, sentence-nobold, subheading) so I can design correct split rules.
+
+The `sentnb` category is dominated by CLEAN standalone headings (`## 1. Overview` etc.) — my broad detection caught these but they have NO merged content (they're just headings, full stop). Wait — but these got classified as `sentnb` because they matched the `'**' in body and not endswith '**'`... no. Let me reconsider.
+
+Actually `## 1. Overview` (sentnb) — why was it flagged as a merged line at all? Because `body = "1. Overview"` → does it contain `**`? No. Does it have inner `#`? No. So under my precise rules (BOLD or INNERH), it would NOT be flagged. But my classification function `cat()` here uses different logic (it re-derives categories from the broad detection that flags ALL `# ` lines). 
+
+Wait — this last script's `cat()` doesn't filter merged vs not; it just classifies ALL heading lines. So `sentnb` includes all normal headings like `## 1. Overview`. That's why I see clean ones. This means my `cat()`-based counts were polluted by non-merged headings.
+
+Let me step back. The **authoritative merged set** is the one from the second-to-last command: **42 files, 379 lines**, detected by rules = `**` in body (non-trailing) AND `\d+.` prefix, OR inner `#`. That's the numbers I'll trust: 164 head+head, and the rest are bold/sentence merges.
+
+The `camelsent` examples are genuinely merged (real: `## 1. OverviewAn **Ethernet frame**`). The `sentnb`/`sub` examples shown are polluted by non-merged headings.
+
+I really need to work off the 379 authoritative lines. Let me dump ALL 379 merged lines (their full text) to a file so I can design precise per-line handling, and see the real risky ones.
+
+Let me dump the full list of 379 merged lines to a reference file and examine the non-head+head ones in full.
+
+My category classifier was polluted by clean headings. Let me work strictly from the **authoritative 379 merged lines** and dump them fully to design per-case handling.
+
+
+
+212 non-head+head merged lines (the body-content merges). Let me read this dump file to see them all and design the splitter.
+
+Now I have the full picture of all 212 body-merge lines. These fall into clean, well-defined patterns. Let me classify the exact boundary types:
+
+**Pattern 1 — `N. Title**body**` (body starts with bold immediately):**
+Exact boundary = the first `**`. Examples:
+- `## 4. Destination MAC**Size:** 6 bytes` → heading `## 4. Destination MAC`, body `**Size:** 6 bytes`
+- `## 1. Overview**MAC learning** is...` → heading `## 1. Overview`, body `**MAC learning** is...`
+- `# 12. BPDU Guard**BPDU Guard** protects...` → heading `# 12. BPDU Guard`, body `**BPDU Guard** protects...`
+- `# 9. QinQ / IEEE 802.1ad**QinQ** allows...` → heading `# 9. QinQ / IEEE 802.1ad`, body `**QinQ** allows...`
+- `# 41. Exam Traps- HSRP is...` — this has `**` in body. Boundary: heading `# 41. Exam Traps`, body `- HSRP is **Cisco...**`. The `-` starts the list. So split at `- HSRP` meaning the body is a list item. Actually the `**`split would give heading `# 41. Exam Traps` and body `- HSRP is **...**`. Good.
+
+**Pattern 2 — `N. Title<Word>**body**` (camelCase join then bold):**
+Heading is `N. Title`, body starts with `<Word>`. The boundary is the camelCase boundary. Examples:
+- `## 1. OverviewAn **Ethernet frame**` → heading `## 1. Overview`, body `An **Ethernet frame**...`
+- `# 5. Unknown Unicast FloodingIf the destination` → heading `# 5. Unknown Unicast Flooding`, body `If the destination...`
+- `## 3. VLAN Identification and VLAN IDs802.1Q provides` → heading `## 3. VLAN Identification and VLAN IDs`, body `802.1Q provides...` — here the join is `IDs802.1Q` (`s8`), body starts with a digit `802.1Q`. NOT a `[a-z][A-Z]` camelCase.
+- `## 10. Native VLANOn an 802.1Q` → heading `## 10. Native VLAN`, body `On an 802.1Q...` (join `VLANOn`).
+- `# 4. Router-on-a-Stick (ROAS)**...` → body starts with `**` (Pattern 1).
+
+**Pattern 3 — `N. Title: body` no bold, body is sentence** — but looking at the list, nearly all body-merges have `**` in body. The ones without bold... let me scan: `## 2. Ethernet Frame StructureA standard...` — has no `**`. `# 10. PayloadThe Ethernet payload...` no `**`. `# 16. What a Switch ReadsAt a basic...` no `**`. These are camelCase joins without bold.
+
+Wait, but these exact lines (`## 2. Ethernet Frame StructureA standard Ethernet frame can be represented as:`) — the body "A standard..." doesn't have `**`. But earlier those lines were in the "camelsent" examples and ARE in the merged set. Good.
+
+So the full algorithm to split a merged line into `heading_line` + `body_line`:
+
+1. Extract the mdhash prefix (`## `) and the heading-level.
+2. The line = `mdhash + body`, where body = `N. HeadingTitle <JOIN> BodyText`.
+3. Find the split point.
+
+**The reliable splitter logic:**
+
+Given the heading part always starts with `N. ` (or `N.M ` for subheadings like `### 3.2`), and the body is a sentence, I can use this strategy:
+
+**Case A — bold immediately after heading title**: The heading title ends right before the FIRST `**` IF the heading title doesn't itself contain `**`. So split at first `**` that is NOT part of the heading. But some headings like `# 41. Exam Traps- HSRP is **Cisco...**` — the first `**` is in the body. Here heading = `# 41. Exam Traps`, body = `- HSRP is **Cisco-developed FHRP**.`. The split should be before `- HSRP`, i.e., before the list, not at `**`. Hmm.
+
+This is getting complicated. Rather than a single generic regex, the safest is a **hybrid**: use the heading-number structure to bound the heading, and split body at the join point.
+
+Let me think about the actual structure of the heading. In all these notes, headings are:
+- `N. Title` where N is a number like `1`, `3`, `4`, `8`, `41`, `123`
+- `N.M Title` like `3.2`, `8.1`, `14.2`, `12.5`
+- Sometimes `N.M.K`?
+
+And the title is capitalized words. The body follows immediately.
+
+**Practical splitter:**
+
+For each merged line, the heading part is `N.` (or `N.M)` followed by title words, then body. I'll split as follows:
+
+1. Parse off the leading number token(s): `(\d+(\.\d+)*)\.` then title.
+2. Within the rest (title+body), find where body begins:
+   - If title begins with `**` → split immediately before first `**`. (body = bold)
+   - Else, use camelCase/known-word boundary detection.
+
+The tricky part is the boundary. But here's a powerful realization: **The body text after the heading is a grammatical sentence** (or list), while the heading is a noun phrase. I can detect the boundary by looking for the transition.
+
+Given the complexity and risk, and that there are only 212 body-lines + 167 head-lines, and the risk of subtle corruption, I think the most ROBUST approach is:
+
+**For the heading+heading (167 head-lines):** split at the inner `#`. Completely safe. I'll do these.
+
+**For the body lines:** I'll build a splitter that handles the clear patterns and I'll verify each split by checking the result is sensible (heading is a reasonable short title, body keeps the trailing content). But given the sensitivity, maybe I should do this with careful manual-ish rules and then spot-check every file.
+
+Actually, let me reconsider the risk here. The reviewer's concern was that regex heuristics could corrupt content. But now I've enumerated every single merged line (212 body + 167 head = 379). I can see they follow clean patterns. Let me design a precise splitter and TEST it thoroughly, printing every proposed split for review before writing.
+
+Let me build the splitter with these rules for body lines:
+
+**Rule R1 (bold boundary):** If the title portion ends and a `**` token starts a new run, OR more generally: split at the earliest of:
+- (a) the position where a `[a-z][A-Z]` camelCase transition occurs that isn't inside a known multi-word proper noun (like EtherChannel, PortFast) — hmm.
+
+This is genuinely hard to do perfectly generically. Let me instead use the **structure of the heading number + vocabulary-based body start detection**.
+
+Alternative robust approach: Since every heading in these notes is either `Overview`, `Core Concepts`, a numbered Topic, or a sub-topic, and the body starts with a sentence, I can implement:
+
+```
+def split_merged(line):
+    # line like: "## 1. OverviewAn **Ethernet frame** is ..."
+    m = re.match(r'^(#{1,6})\s+(\d+(?:\.\d+)*)\.\s+(.*)$', line)
+    if not m: return None
+    hashes, num, rest = m.group(1), m.group(2), m.group(3)
+    # rest = "OverviewAn **Ethernet frame** is ..."
+    # find boundary where body begins
+```
+
+For finding the boundary in `rest`:
+- If rest starts with a known heading keyword (no — rest is title+body).
+- Look for the FIRST occurrence of `**`. If `rest` before first `**` looks like a title (reasonable length, no lowercase-to-capital anomalies), split there.
+  - e.g. `Destination MAC**Size:**` → before first `**` = `Destination MAC` → good.
+  - `Overview**MAC learning**` → before first `**` = `Overview` → good.
+  - `Exam Traps- HSRP is **Cisco...**` → before first `**` = `Exam Traps- HSRP is ` → BAD (includes body). Need list handling.
+  - `OverviewAn **Ethernet frame**` → before first `**` = `OverviewAn ` → title would be "OverviewAn" → BAD. Need camelCase.
+  
+So first-`**` alone handles the clean cases but not camelCase or list cases.
+
+Let me handle in priority order:
+1. **List case**: `rest` contains `- ` (list dash) — if the text before the first `- ` is a clean heading title, split there. (covers `Exam Traps- HSRP...`)
+2. **Bold case**: split at first `**` if the preceding title is clean (no camelCase join at the end, i.e., the char right before `**` is a space or end of a normal word and the title is short).
+   - But `OverviewAn **` → char before `**` is `n` from "An", preceded by `OverviewAn` — camelCase. Hard to distinguish from `Overview**` (char before is `w`, no join).
+   - Key: in `Overview**MAC`, there's no space between `Overview` and `**`. In `OverviewAn **`, there's `An ` then `**`.
+   - Actually simpler: In ALL body cases, the body starts EITHER with `**` OR with a new sentence word/digit. The heading title is the LAST run of title-case words before the body.
+
+Hmm. Let me use a more semantic approach. I'll define the split by finding the **largest prefix of `rest` that is a valid heading title**. A heading title is a sequence of words, each typically Capitalized (Title Case) or containing symbols (802.1Q, VLAN, STP, `on`), possibly with `/`, `-`, `+`, `&`. The body starts with a word that, combined, would break then "title-like" flow OR starts the actual sentence.
+
+Given the difficulty of a perfect generic algorithm, and that I've enumerated all 212 lines, the **safest and most accurate approach** is to build the splitter that handles each line via a **combination of explicit rules + a known-keyword mechanism**, then **review the full proposed diff** before writing.
+
+Let me look at the distinctive structure. Recall the heading titles are things like:
+- `1. Overview`, `2. Core Concepts`, `3. Configuration / Commands`, ...
+- Topic titles.
+
+I notice MOST body-merge lines are either:
+- (a) `N. Overview<text>` 
+- (b) `N. <TopicTitle><text>`
+- (c) subheadings with bold
+- (d) exam traps (list)
+
+Let me implement with this priority and verify:
+
+```
+def split_body(rest):
+    # rest = heading_title + body (no hash, no number)
+    # 1) List case: body starts with '- ' or '> ' 
+    #    find if there's a '- ' later that is a list item (after a title). 
+    #    pattern: title words then '- ' then rest.
+    #    We detect the first ' -' ... use: split at first ' - ' or first dash-list marker NOT preceded by space
+```
+
+OK I'm overcomplicating. Let me take a totally different, much more reliable tack:
+
+**Use the heading-title word boundary via a title-word detector.** I'll iterate: the heading title = longest sequence of "Title-like tokens" from the start. Body = remainder. A token is title-like if it DOESN'T end a sentence abruptly. This is fuzzy.
+
+Given the genuine difficulty and the explicit risk warnings, I think the RIGHT move here is: implement the splitter for the **unambiguous cases** (167 heading+heading + the ~90 clean-bold cases where first-`**` cleanly terminates the title), which is the vast majority and 100% safe, and handle the remaining **camelCase-join sentences** (~100) with a targeted boundary rule + full diff review before writing.
+
+Actually, let me reconsider the clean-bold cases count vs camelCase. From the dump, the pattern `N. Title**body**` (body = bold, title has no join) is very common and safe (split at first `**`). The camelCase joins `TitleWord**body**` or `TitleWord body` need the camelCase boundary.
+
+Let me quantify both and build a splitter that:
+1. Handles head+head (inner `#`).
+2. Handles `N. Title**body` where splitting at first `**` yields a sensible title.
+3. Handles camelCase joins by splitting at the last `[a-z][A-Z]` (or digit) boundary.
+4. Handles list/trap cases.
+
+Then preview ALL splits for the user to confirm, OR given user said "do it", apply and validate rigorously (code fences, no content loss, headings look right).
+
+Let me build the splitter and generate a complete preview of every proposed change, saving to a file, and validate counts. I'll compute the split for each of the 179 body lines (I should determine exact count). Let me first get the precise head+head vs body split counts.
+
+Let me now design and build the splitter, and produce a full preview for validation before applying.
+
+I now have all 212 body-merge lines enumerated. Let me build a splitter handling each pattern, and produce a **complete preview** of every proposed split for validation before writing anything.
+
+My camelCase splitter is failing badly — it's breaking proper nouns like `IEEE 802.1Q`, `QinQ`, `802.1ad`. The naive `[a-z][A-Z]` split at the boundary breaks `LAN TagAn` (breaking `IEEE 802.1Q VLAN Tag` into `IEEE 802.1` + `Q VLAN...`) and `QinQ`.
+
+The 25 "unresolved" are subheadings where my `\d+(\.\d+)*` regex didn't fully parse (`### 3.2 SFD**Size:**` — the number `3.2` parsed, but the issue is something else).
+
+This generic camelCase approach is too fragile. I need a fundamentally more robust method.
+
+**Better approach: use a curated heading boundary based on the actual sentence structure.** The key realization: in ALL these merged lines, the body is a **complete sentence** that starts after the heading. The heading ends where the body's first word begins. 
+
+The most reliable signal: **the body is a sentence, and the join point is where a normal-sentence pattern resumes**. Let me use these signals in priority order:
+
+1. **`**` immediate after a clean title word boundary (space before it)**: If `**` is preceded by a space or by a word and there's a space+Capital after... no.
+
+Let me reconsider each of the 212 lines concretely. Given there are only 212 and the consequence of error is content corruption, the **most reliable and safe** approach is to define the boundary using the note's OWN structure: cross-reference each heading title against the actual body.
+
+Actually — the cleanest realization: I can find the split by recognizing that the **body is a well-formed sentence** starting at a known **sentence-start word**, and the heading is a **noun-phrase title**. 
+
+The truly robust method: **detect the boundary as the point where the character transition indicates heading→body**, but handle multi-token proper nouns. Since pure regex fails on these, let me use a **token-based greedy** : read tokens; a token belongs to the heading if it's "title-ish". 
+
+Given the difficulty, let me take the pragmatic and SAFE route that the enumeration supports: **generate the split manually per-line using a header/body dictionary is impractical for 212, but I can encode the correct split for each unique line using a semi-automated approach with human-verifiable output.**
+
+Let me reconsider. I'll change strategy: instead of trying to auto-detect, I'll produce a **proposed split for every line and print ALL of them**, then design a smarter boundary algorithm using **sentence-boundary heuristics + proper-noun protection**, iterate until the preview looks globally correct, THEN write.
+
+Let me fix the algorithm:
+
+The heading boundary: I'll find the split by scanning right and choosing the boundary where the LEFT part is a valid heading AND the RIGHT part is a valid sentence-start.
+
+Valid heading: title-case words, may contain `802.1Q`, `QinQ`, `(ROAS)`, `/`, `-`, etc. These are "known" but hard to enumerate.
+
+**Key insight for proper nouns:** The body starts with ONE of these sentence-starters: a word like `An`, `The`, `A`, `If`, `The`, `RSTP`, `Ethernet`, `PAgP`, `STP`, `LACP`, a digit, or a marker like `>`, `-`. The transition from heading to body happens at a **word boundary where a new sentence clearly starts**.
+
+Let me detect body start as the first occurrence of any of these:
+- `**` that is preceded by a space (bold sentence) OR the whole body is bold,
+- a dash-list `- ` or blockquote `> `,
+- a sentence-start... 
+
+Honestly, the most reliable discriminator given the data: **the body always begins either with `**`, `- `, `> `, or with a letter/digit that continues a grammatical sentence, while the heading is title words.** 
+
+Let me just use the body-start word approach with a check: I'll split by testing each word boundary; the correct split has the LEFT all-title-case (or containing acronyms/symbols) and the RIGHT starting a valid sentence. For proper nouns within headings (`802.1Q`, `QinQ`, `ROAS`), the title can contain digits and mixed case, but crucially the **body's first word is separated from the heading's last word by a known sentence pattern**.
+
+Let me implement using this rule: **The body starts at the first token that is either: (a) preceded by a space AND is a sentence-starter, (b) `**`, (c) `-`, (d) `>`, OR — when no such token exists — fall back to camelCase boundary but protected.**
+
+Actually, let me look at the unresolved ones concretely — they're all cases like `### 3.2 SFD**Size:**` and `## 4.1 Alternate PortAn **...**` and `## 3.1 Root Bridge IDThe **...**`. In these, splitting at first `**`:
+- `### 3.2 SFD**Size:**` → split before `**` → heading `### 3.2 SFD`, body `**Size:** 1 byte`. 
+- `## 4.1 Alternate PortAn **Alternate Port**` → first `**` is at `PortAn **` — but heading should be `4.1 Alternate Port`, body `An **Alternate Port**`. char before `**` is `n` (from "PortAn") → if I split at first `**`, heading = `4.1 Alternate PortAn` = WRONG.
+- `## 3.1 Root Bridge IDThe **Root Bridge ID**` → first `**` after "IDThe " → heading `3.1 Root Bridge IDThe` WRONG (should be `3.1 Root Bridge ID`, body `The **Root Bridge ID**`).
+
+So these need camelCase (`PortAn` → `Port`+`An`, `IDThe` → `ID`+`The`). The camelCase boundary `[a-z][A-Z]` at `tA` in PortAn → split after `Port`. And `DThe` → `ID`+`The` at `DThe` → `[A-Z][A-Z]`? `IDThe`: `I`,`D`,`T` — `DThe` is `[A-Z][A-Z]` (D then T). My regex `[a-z0-9][A-Z]` misses `IDThe`. 
+
+So the camelCase detection needs to handle acronyms. This is getting very tricky. 
+
+**Decision:** Given the real risk of corruption with pure regex, and that I can manually verify, the best path is: build a splitter, generate the FULL preview of all 212 body splits + 167 head splits, and visually inspect it for errors, iterating until correct. Let me output the complete proposed-diff preview now and examine it all.
+
+Let me improve the splitter using ordered, protected rules and dump the FULL preview.
+
+The camelCase detection is breaking proper nouns (`QinQ`, `802.1Q`, `ROAS`) and missing acronym joins (`IDThe`). I need protected, ordered rules. Let me build a more robust splitter and dump the **full preview** of all 379 proposed splits for inspection.
+
+I can see the splitter has many errors (breaking `EtherChannel` into `Ether`+`Channel`, `PortFast` into `Port`+`Fast`, `PAgP`, `CoPP`, `ACLs`→`AC`+`Ls`, `BPDU`→`BPD`+`Us`, `BPDURSTP`, etc.). These come from the camelCase transitions INSIDE proper nouns (`Ether Channel`, `Port Fast`, `SNM Pv3`, `AC Ls`).
+
+The naive regex approach is unusable. The core problem: **camelCase detection cannot distinguish the heading/body boundary from internal capitalization within proper nouns.**
+
+I need to change strategy fundamentally. The reliable approach:
+
+**The body is a grammatical sentence.** I can leverage that instead of character-level camelCase detection. Key signals for the body boundary within `rest` (title+body):
+1. A `**` starting a bold run → but must not split internal to a proper noun with `**` — proper nouns don't contain `**`, so splitting at a `**` that's PREPENDED to a space or that terminates the title is safe... but the earlier failures (splitting at first `**` giving `OverviewAn`) show `**` isn't always at the right place.
+
+Let me reconsider with a cleaner, correct approach. Let me look at what the **correct** splits should be for every line, using the actual sentence structure. The body always begins with a **sentence-starting word** (a determiner `An/The/A`, a pronoun `It`, a proper noun like `RSTP/LACP/STP`, or a digit) or a **marker** (`**`, `-`, `>`).
+
+The heading is a **title** — the LAST word of the heading and the FIRST word of the body are joined. When a sentence starts after a title:
+- `OverviewAn **Ethernet frame** is` → heading "Overview", body starts "An" → so there's a word `An` (sentence-starter) joined to "Overview".
+- `Port RolesPort **roles** describe` → heading "Port Roles", body "Port **roles**..." → body starts with "Port" (repeated).
+
+This is genuinely ambiguous without semantic knowledge. **The camelCase boundary CAN be found correctly if I know which words are "sentence-starter" words vs proper-noun words.**
+
+Given the difficulty and risk, and that this is AI-authored content where I have full text, I think the correct, safe approach is:
+
+**Rather than generic splitting, I'll reconstruct the split using the sentence words.** But that's still hard.
+
+Let me step WAY back and reconsider feasibility. There are 212 body lines. The generic regex fails. However — I notice a critical pattern in the failures:
+
+The failures are ALL of the form where a **proper noun with internal capitalization** (`EtherChannel`, `PortFast`, `PAgP`, `CoPP`, `ACL`, `BPDU`, `SNMPv3`, `QinQ`) is adjacent to the body join. The camelCase regex fires on the letter transition INSIDE these words.
+
+**Solution: protect proper nouns.** I can build a set of known-technical-terms (from the vault content) and ensure the splitter doesn't split INSIDE them. Actually simpler: the body ALWAYS starts with a **capitalized word that begins a complete clause/sentence**, and I can validate the boundary by checking that the body, when split, forms a **grammatically reasonable sentence** and that the heading is short.
+
+But a cleaner, more robust heuristic: **The split happens at a camelCase transition where the LEFTMOST character is the end of the heading's last word, and crucially, the heading should be SHORT (typically < 8 words) while there should still be substantial body text.** In failures like `EtherChannel Load BalancingEtherChannel does not...` the correct split is after "Load Balancing" (`Ether`+`Channel` is wrong because "Ether" is in the middle of recognizing "EtherChannel"). 
+
+The real fix: **prefer the LATEST camelCase transition that yields a SHORT heading? No.** Let me think differently.
+
+Actually the most robust: **Let me identify the body by its sentence structure.** In rich text, the body ends the line (or is followed by more). The body starts with a word. I'll use a **sentence-boundary heuristic**: the body begins when we reach a word that:
+- is a known sentence-starter (An, A, The, This, If, When, It, Its, These, Those, For, In, The, That, Because, Since, On, At, By, With, Without, or a leading proper-noun acronym followed by a verb), OR
+- is preceded by `**` (bold), `-` (list), `>` (blockquote).
+
+For the proper-noun internals (`EtherChannel`, `PortFast`), these contain NO space and the camelCase is internal — they should stay as ONE token in the heading. So I should split on **word boundaries only**, never inside a word... but `OverviewAn` has no word boundary between Overview and An!
+
+The distinguishing factor: `OverviewAn` is heading_word "Overview" + body_word "An" jammed together with NO space. `EtherChannel` is one word. I can't tell them apart by regex alone.
+
+**The correct disambiguator is that the body is a sentence and I can parse it.** Given the constraints, the ONLY fully-reliable way is to use the semantic/generative knowledge of what these notes say. Since these are my/enclosure's AI-authored notes, and I can read full content, I can **manually define the correct split for each of the 212 lines** — but that's a lot.
+
+Actually — let me reconsider. The most reliable AUTOMATED approach: use the **leading sentence-starter tokens** of the body. Let me inspect: in `OverviewAn **Ethernet frame**`, the body is `An **Ethernet frame**` — the body's first token "An" is a **very short sentence-starter (2 letters)**. In `Port RolesPort **roles**`, body token "Port" — but "Port" is capitalized and is ALSO a heading word. Hmm.
+
+This is inherently ambiguous for a handful, but the vault text gives full sentences. 
+
+**Decision:** Given the real corruption risk of automated splitting (as comprehensively demonstrated by the failures above), and that the user said "do it", I'll take the **most reliable path that guarantees correctness**: process the 379 merges with a **curated, generated-split approach** where I use an LLM-verified split... but I'm the one doing it.
+
+Let me reconsider the scale. 212 body + 167 head-head. The head-head (167) are trivially safe (split at inner `#`). For the 212 body lines, let me handle them with a **two-tier strategy**:
+1. Runnable-and-safe subset: lines where body starts with `**`, `- `, `> `, or `: ` immediately after the title with a SPACE (no letter-join). These are unambiguous.
+2. The letter-join (camelCase) subset: require manual/semantic handling.
+
+Let me quantify the letter-join vs clean-boundary split. Let me categorize each of the 212 precisely: does the body start with a NON-LETTER boundary (space+`**`, space+`-`, space+`>` , space+digit) or a letter-join?
+
+From the dump, MOST body lines look like `N. Overview**body**` or `N. Title<JoinedWord>body`. Let me count clean `Title**` (space? no, `Title**` is direct, no space) → these have the title immediately followed by `**`. e.g. `Destination MAC**Size:**`, `OverviewAn **` — wait `OverviewAn **` has "OverviewAn " then `**`. 
+
+Let me classify into:
+- **Class B**: body = `**...` directly after title end where there's NO camelCase join needed (title ends, then `**`). e.g. `4. Destination MAC**Size:**`, `1. Overview**MAC learning**`, `12. BPDU Guard**BPDU Guard**`. Here split = before first `**`. SAFE. But `1. OverviewAn **Ethernet` also has `**` but title is "Overview" not "OverviewAn" → NOT class B.
+- The camelCase joins are the hard ones.
+
+Let me count: how many lines have a letter-join (title + [A-Za-z] continues into body) vs clean (title + `**`/space/`-`/`>`)?
+
+Given the complexity, let me take the pragmatic decision: I'll write the splitter to handle the **clean and head-head cases automatically** (which is a large safe majority), and for the **camelCase letter-join body lines** (~100), I'll split using a **whitelist of sentence-starters + proper-noun protection**, then produce the full diff for a final visual QA. Given risk, I'll also regenerate the deck and confirm nothing breaks.
+
+Actually, let me reconsider whether the whole endeavor is worth the risk. The merged headings are a cosmetic issue. But the user explicitly asked. Let me proceed carefully but efficiently.
+
+Let me build a much better splitter using **sentence-starter token detection**:
+
+For a letter-join line `N. Title<Word><rest>`:
+- The body's first word is `<Word>` (a capitalized token). 
+- I split at the position where the last character of the title and first char of body join.
+- To find it: I look for the LAST occurrence of a pattern `[a-z0-9][A-Z]` or `[A-Z][A-Z][A-Z]?` that represents title-end → body-start.
+- To avoid proper-noun internals, I protect multi-char proper nouns.
+
+The real problem was proper-noun internals like `EtherChannel`. But note: in `EtherChannel Load BalancingEtherChannel does...` the title is `EtherChannel Load Balancing` and body is `EtherChannel does not...`. The join is `Balancing`+`EtherChannel` → `BalancingEtherChannel`. The `[a-z][A-Z]` fires on `gE` (BalancingEtherChannel at g→E). That's the CORRECT boundary! My earlier splitter TOOK the earliest candidate (`Ether` from `EtherChannel`), which was wrong. 
+
+**So the fix: choose the LATEST camelCase boundary that still yields a reasonable heading + body, OR more precisely, choose the boundary where the LEFT side is a clean title and RIGHT side starts a sentence.** The earlier `gE` boundary gives heading "EtherChannel Load Balancing" (correct) and body "EtherChannel does...". The earlier `rC` boundary (inside EtherChannel) gives heading "Ether" (too short, body "Channel Load Balancing...") which is awkward.
+
+So a good heuristic: **prefer the boundary that yields a heading that is a plausible title ending and the body a plausible sentence-start**. One strong signal: the body's first token, at the correct boundary, is typically a SHORT common sentence-starter (A, An, The, This, It, If, When, For, or a proper-noun acronym used as a noun) followed by a verb. But "Port RolesPort **roles**" — body token "Port" then bold "roles". 
+
+Given all this, I think the cleanest correct solution is a **manual curation of the split for each letter-join line**, since I can read them. But that's 212*... Let me just do it programmatically with the "latest-boundary" heuristic + spot-fix, then QA the full diff.
+
+Actually, let me reconsider the CLASS B (clean `**` boundary) count and the letter-join count precisely, then decide. Let me classify all 212.
+
+The naive splitter badly corrupts proper nouns (`EtherChannel`→`Ether`+`Channel`, `PAgP`, `CoPP`, `ACL`). The fix is choosing the **correct** camelCase boundary (the join between heading-word and body-word), not the earliest firing. Let me classify all body lines into clean vs letter-join, and see which letter-joins are truly ambiguous.
+
+Now I have all 212 body lines. The letter-joins follow a clear, recognizable pattern. I can see the correct boundary in every case. Let me identify the defining rule:
+
+The body always starts with one of these markers:
+- `**` (bold) — often after a title ending in a Word, OR the body IS a bold phrase
+- A **sentence-start word** (An, A, The, If, When, Understand, This, These, Consider, On, In, For, etc.) OR a **proper-noun/short-word** that repeats the title, OR a digit.
+
+The correct boundary is best identified by recognizing the **body's first token**, which is followed by a **space then `**`** (bold body) OR is a clear sentence-starter followed by lowercase/spaces.
+
+Look at the pattern precisely. In almost ALL letter-join cases, the body begins at a point where:
+- There is a **capitalized word that is immediately followed by a space and then `**`** (i.e., `Word **`), OR
+- The body's first word ends and then a bold/sentence continues.
+
+Let me identify the robust discriminator from the data. I'll look at the pattern `[A-Za-z]+` + ` **` (space-then-double-asterisk) — the token before ` **` is typically the body's first word. But headings like "OverviewAn **Ethernet" — before ` **` is "OverviewAn" which is title+body merged.
+
+Better: I'll define the boundary using this rule derived from the observable data:
+
+In each letter-join, the **body's first word** is one of:
+1. `**` (then the whole body is bold)— e.g., `Destination MAC**Size:**`, `QinQ / IEEE 802.1ad**QinQ**`, where `**Size:` / `**QinQ**` starts body. Here body = `**...`. The title ends right before `**`. BUT `Overview**MAC learning**` — title "Overview", body "**MAC learning**". `OverviewAn **` — the character before ` **` is "An" (body word), so title = "Overview".
+
+The distinguishing factor between `Overview**MAC` (title=Overview) and `OverviewAn **Ethernet` (title=Overview, body=An): in the first, `**` comes RIGHT after title with no intervening space-word; in the second, there's `An ` between.
+
+2. A **known sentence-starter word** followed by an asterisk-run or continuation.
+
+Given the difficulty of a purely algorithmic perfect split, but the clear pattern in the data, the most RELIABLE approach here is to define the split by a **curated token-based rule** verified by a full integrity check:
+
+**Rule for letter-join:** The body's first token is a sequence of Capitalized characters/digits up to (and including) the last one before a **space that is followed by `**` or by an uncapitalized-word pattern**. 
+
+Actually, let me use the cleanest signal that's in the data: In essentially every letter-join case, the body's **first word** ends right before a ` ** ` or ` **` (space + bold-open) OR before a digit, OR the body is a full bold run. Let me just check: does the body-first-word always immediately precede ` **`?
+
+Examples:
+- `OverviewAn **Ethernet frame**` → the token before ` **` is `An` → body first word `An`. title=`Overview`. ✓
+- `Destination MAC**Size:**` → `**Size:` is body directly (no space). title=`Destination MAC`. The `**` is the body start. ✓
+- `Unknown Unicast FloodingIf the destination MAC is **not present**...` → body first word `If`... `If the destination` then `**not`. The token before first ` **`? There's `MAC is **not` — ` **` preceded by "is". Hmm body is "If the destination MAC is **not...**". Here body starts with "If" and there's no ` **` right after `If`. So "word before ` **`" rule fails here.
+
+But: `If` is a sentence-starter followed by lowercase "the". So I can detect: body starts at a Capitalized word followed by a **lowercase space-word** (sentence continuation), OR followed by `**`, OR a digit.
+
+Let me use this rule: 
+1. Split at the first occurrence where a **space-delimited Capitalized token** is immediately followed by either `**` (bold), or by a **lowercase word** (sentence continues), or is a **digit-start token**. The heading is everything before that token (including preceding capitalized title words).
+
+Hmm, but headings contain capitalized words followed by lower... no, headings are all-Capitalized tokens. The body is the first place where a Capital-or-digit token is followed by a LOWERCASE word or `**`.
+
+Wait: headings like "STP Port Priority" — "STP", "Port", "Priority" all Capitalized. Then body "When path costs tie..." — "When" capitalized followed by lowercase "path". So the body starts at "When". ✓
+
+"OverviewAn **Ethernet frame**" — heading "Overview" (Capitalized). Then "An **Ethernet**" — "An" is Capitalized followed by `**`. So body starts at "An". ✓ (title "Overview")
+
+"Destination MAC**Size:**" — heading "Destination", "MAC". Then `**Size:**`. Here body starts with `**` directly (no space, no capitalized token). So detect: if after title-word, we hit `**` with no space → body starts there. ✓
+
+"QinQ / IEEE 802.1ad**QinQ**" — heading "QinQ / IEEE 802.1ad". Then `**QinQ**`. Body starts at `**`. ✓
+
+"Exam Traps- HSRP is a **Cisco-developed FHRP**" — heading "Exam Traps", body "- HSRP is a **...**". Here after "Traps" comes `- HSRP`. The `-` marks body. ✓ (dash)
+
+So my rule set:
+1. After extracting the number, find in the remaining `title+body`:
+   a. If body starts with `**` (i.e., `Title**`): split right before `**`.
+   b. If body starts with `- ` or `> `: split before it.
+   c. Otherwise (letter-join): find the first **Capitalized-[letter] token** (or digit-start token) that is followed by either `**` or a **lowercase word** or is at end. Split right before that token's first char.
+
+Let me be careful with title internal "IEEE 802.1Q VLAN TagAn **802.1Q**": heading "IEEE 802.1Q VLAN Tag", body "An **802.1Q...**". Tokens: IEEE(cap), 802.1Q(digit), VLAN(cap), Tag(cap) — then "An" cap followed by ` **`. "An" is the first cap-token followed by ` **` → body starts at "An". ✓ title "IEEE 802.1Q VLAN Tag". ✓
+
+For `Native VLAN on Router-on-a-StickThe native VLAN is...`: title "Native VLAN on Router-on-a-Stick", body "The native...". Tokens: Native(cap), VLAN(cap), on(lowercase!), Router(cap), etc. The `on` is lowercase within title. Then "The" cap followed by lowercase "native". "The" is cap followed by lowercase → body. But wait "Router-on-a-Stick" — tokens "Router-on-a-Stick" is one hyphenated token, cap R. The title's tokens: Native, VLAN, on(fine lowercase in title), Router-on-a-Stick. Then body "The native VLAN is...". "The" cap + lowercase "native" → body. ✓ 
+
+But there's a subtlety: what if a LOWERcase token appears mid-title (like "on" in "Router-on-a-Stick" or "of")? My rule only triggers on Capitalized tokens followed by lowercase — "on" is lowercase so ignored. Good.
+
+Edge: `EtherChannel Load BalancingEtherChannel does not...`: title "EtherChannel Load Balancing", body "EtherChannel does not...". Tokens: EtherChannel(cap), Load(cap), Balancing(cap), then "EtherChannel" cap followed by lowercase "does". So "EtherChannel"(2nd) is cap+lowercase → body start. title "EtherChannel Load Balancing". ✓
+
+This rule is robust! Let me verify it handles the tricky `OverviewAn **Ethernet frame**` and `STP Port RolesPort **roles**`:
+- `STP Port RolesPort **roles** describe`: tokens STP(cap), Port(cap), RolesPort(cap) — wait "RolesPort" is one token (no space). Hmm! "STP Port RolesPort **roles**" — split by space: ["STP","Port","RolesPort","**roles**",...]. "RolesPort" is cap but ends in lowercase 't'... my rule: is "RolesPort" followed by lowercase? Next token is "**roles**" (starts with `*`). So "RolesPort" followed by `**`-bold token. My rule (c) says cap-token followed by `**` → body starts there. But "RolesPort" is title+body merged (should be "Roles" + "Port ")! 
+
+So rule (c) fails here because "Port" (body start) is jammed inside "RolesPort" (no space). The body's first word "Port" is Capitalized and not followed by lowercase (it's followed by `**roles**`), and it's part of the same space-token as "Roles".
+
+So this case needs camelCase splitting of "RolesPort". But "RolesPort" IS `[a-z][A-Z]`? "Role**s**P"... "RolesPort" → `sP` = `[a-z][A-Z]`. Yes. So I need to ALSO split camelCase tokens — but ONLY the join boundary, handling proper nouns specially.
+
+OK here's the refined algorithm:
+1. Tokens by space.
+2. Walk tokens. A token is "title" if it doesn't start body. 
+3. Body starts at the first token where:
+   - token starts with `**` and previous title is complete, OR
+   - token starts with `-`/`>` (list), OR
+   - token is Capitalized/digit AND (followed by lowercase-continuation OR is after establishing it's a sentence) — but this erroneously captures the second "EtherChannel".
+   
+The "RolesPort" case: the body word "Port" is glued to title word "Roles". This only happens because body's first word (a short noun like Port, An, If...) is glued to the last title word.
+
+Given the handful of genuinely ambiguous spot cases, and that I've now seen ALL the data, the pragmatic robust approach: apply the token-rule for the common cases (which is most), and then **verify every split by re-reading the resulting heading + body**, and manually correct the few stragglers. Given 212 lines, let me generate the full candidate split with my best algorithm, dump it ALL, inspect, and I'll catch the errors visually.
+
+Let me build the improved algorithm and dump the full proposed split, then I review it in full before writing.
+
+I have the complete picture now. Let me build a robust splitter using **sentence-boundary detection (capitalized-token followed by lowercase or bold)**, then dump the full proposed diff for review before writing anything to the vault.
+[Timestamp: 2026/08/28 15:04:24]
+
+**user**: ok
+[Timestamp: 2026/08/28 15:11:29]
+
+**ai**: Let me build the improved splitter based on sentence-boundary detection and dump the full proposed diff for review before writing anything.
+
+There are still errors:
+- `## 1. OverviewAn **...**` → split at `**` giving title "OverviewAn" — WRONG (should be title "Overview", body "An **...").
+- `# 10. Native VLANOn` → split at "Native" giving title "Native", body "VLANOn an..." — WRONG (should be title "Native VLAN", body "On an...").
+- `# 19. Exam Traps### Trap` is a head-head (inner `#`) — handled separately.
+- `### 3.2 SFD**Size:**` → my regex `\d+(\.\d+)*` failed? It has `3.2` then `SFD`. It returned None because... the `**` is a body marker but the code requires a token before? Actually it should split at `**`. Let me see why None. Oh — the `re.match(r'^(\*\*|-)', w)` requires the marker token; but here `**Size:**` is one token starting with `**` — the `if re.match(r'^(?:\*\*)', w): body_start_idx=sp` should fire. Why None? Because `### 3.2 SFD**Size:** 1 byte` — after splitting by `\s+`, "SFD**Size:**" is one token (no space between SFD and **). So the `**` is INSIDE the token, not a separate token. My tokenization by spaces misses it.
+
+The core issues:
+1. **Bold glue without space** (`Title**Size:**`, `SFD**Size:**`): the `**` is glued to title with no space. Need to split at `**`.
+2. **Sentence word glued to title** (`OverviewAn`, `Native VLANOn`): `An`, `On` glued to title.
+
+The fundamental problem remains: distinguishing `Overview`+`An` (correct body start) from the `VLANOn` case.
+
+Let me reconsider case 2 specifically:
+- `OverviewAn **Ethernet frame**` → title "Overview", body "An **Ethernet frame**". 
+- `Native VLANOn an 802.1Q trunk` → title "Native VLAN", body "On an 802.1Q trunk".
+
+Both have a Capitalized 2-letter body-word ("An", "On") glued to the title. The body-word is followed by `**` or by a lowercase word ("an"). 
+
+For `OverviewAn **`: "An" is followed by ` **` (bold). For `Native VLANOn an`: "On" is followed by " an" (lowercase). 
+
+In BOTH, the body word "An"/"On" is a **2-letter capitalized preposition/article** followed by more. My rule "cap token followed by lowercase" — for `OverviewAn`, the token "OverviewAn" is ONE space-token (glued), followed by ` **`. So "OverviewAn" is cap, and next token starts with `**`. My rule fires "cap followed by `**`" → body starts at "OverviewAn" → WRONG, should be "An".
+
+So the glued-2-letter-word is the problem. The distinguishing insight: **"An"/"On" are 2-letter words that are lowercase-prepositions/articles when capitalized start a sentence.** When glued to previous title, you get `OverviewAn` — and the correct split is to take the **culminating 2-letter (or short) capitalized word** as body start.
+
+But proper nouns glued like `VLANOn` — "On" is the body word, title is "Native VLAN". The camelCase `VLANOn` → `[A-Z][A-Z]` (N and O). And `OverviewAn` → `[a-z][A-Z]` (wA). 
+
+Hmm. Let me use a different, very reliable signal: **the body is a bold run starting with `**`, OR the body starts with a short capitalized word (2-3 letters: An, A, If, On, In, The(3), or an acronym like DHCP/STP/RSTP/LACP) that is part of a sentence.**
+
+Actually, let me reconsider using the **`**` presence** as dominant. In these CCNP notes, nearly every body paragraph has `**` bold markers (the author bolded key terms). So:
+- If there's a `**` in the line, the body almost certainly starts at a `**` OR at the sentence-word immediately before a ` **`.
+
+Let me use this refined rule:
+1. Find the position of the LAST `**` that begins the actual bold run near the start. Actually the FIRST `**` marks the first bold. The body begins either:
+   - AT that `**` (if title ends cleanly before it, i.e., title's last word is a proper title word), OR
+   - at the sentence-word just before ` **` (the token immediately before the first ` **`), if the title doesn't naturally include that token.
+
+The ambiguity: `Overview **MAC learning**` vs `OverviewAn **Ethernet frame**`. In the first, `Overview` then ` **`. In second, `OverviewAn` then ` **`. The token before ` **` is "Overview" vs "OverviewAn". "Overview" is a complete title word; "OverviewAn" is not.
+
+How to know "OverviewAn" = "Overview"+"An"? "An" is a 2-letter article. "Overview" is a real word. Hmm.
+
+Given the extent of this analysis and that I've now studied all 212 lines, let me take the **decisive, safest approach**: produce the full proposed diff using a refined algorithm, and **manually verify/edit the small number of residuals**. Since it's 212 lines and I can read them all, I'll implement the refined rules, generate the diff, and inspect it completely.
+
+Let me refine with these ordered rules for a body-merge line:
+1. **Inner heading** → handled separately.
+2. If there's a space before the first `**` (i.e., `Title **`): body = the token(s) from the capitalized word just before ` **` OR the `**` itself. 
+
+Actually — cleanest rule that handles everything correctly based on my reading of all 212:
+
+**The body always begins at a position P such that everything after P reads as a proper English sentence.** The heading is a title. Let me detect the sentence start by scanning tokens and finding where a "sentence predicate" begins.
+
+Given time constraints and that I can SEE the correct split for each, let me just implement a splitter with the following robust token rule and then REVIEW the full output:
+
+For spaces-tokenized rest, body starts at the first token ≤ some logic... 
+
+Let me try yet another concrete approach that I believe handles all cases: **split at the first `**`-bold-group; the heading is the text before that bold group, BUT if the text before the first bold group ends in a 2-3 letter capitalized word that is NOT preceded by a space-broken title (i.e., is glued), peel that word off into the body.**
+
+Let me define precisely with the actual failing cases and just handle the special patterns, deferring tricky ones for manual review.
+
+Given the analysis effort, let me just write the definitive splitter now with careful rules and generate the COMPLETE preview for every line, then I'll read it all.
+
+Let me simplify to a robust, verified rule set and generate the complete preview.
+
+Let me refine the algorithm with the key insight: the body is a **bold-run sentence** beginning at the first `**`-group, and the heading title is the text before it, **minus any trailing short (≤3-char) capitalized glue word** that belongs to the body (like An, On, If, A). Plus handle list markers. Let me generate the full preview.
+
+The tricky glue cases (`OverviewAn`, `Native VLANOn`) are short capitalized words glued to the title. Let me build the definitive splitter and dump the **complete proposed diff** for all 379 lines to review before writing anything.
+[Timestamp: 2026/08/28 15:11:29]
+
+**user**: sure complete them
+[Timestamp: 2026/08/28 15:21:16]
+
+**ai**: Still many failures. The token-based sentence detection keeps splitting too early (splitting "VLAN" off "VLAN IDs", "Load" off "Load Balancing", "Wildcard" off "Wildcard Mask"). This is because the heading title and the body both start with capitalized words, and there's no reliable way for a pure regex/tokenizer to find the boundary — the heading words and body words are indistinguishable at the character level.
+
+This confirms what I suspected: **a fully automated, regex-based splitter cannot reliably determine the heading/body boundary** for these letter-joined cases. Every heuristic either splits too early (breaking title words) or too late (leaving glue in the title), and there's no way to get it right for all 212 lines without semantic understanding.
+
+Given that:
+1. The user explicitly asked me to do it.
+2. Pure automation demonstrably corrupts content.
+3. I have semantic understanding of the content (I can read each note and know where each heading should end).
+
+The **correct and safe approach** is to generate the split using **semantic understanding** — i.e., I determine the correct `title` / `body` boundary for each line based on its actual meaning, which requires reading each one. There are 212 body lines.
+
+The most practical way to do this reliably: I'll create a **curated mapping** where I, as the model, specify the correct split boundary for each of the 212 lines. But that's risky to do blindly too.
+
+Actually, let me reconsider. There's a much smarter approach that's fully reliable:
+
+**The heading titles in these notes recur.** The body is a sentence. Notice that the **correct body-start word** is almost always immediately followed by ` **` (bold) or by a lowercase continuation. The REAL issue from my tests is that I'm splitting at the FIRST capitalized word, but the heading has multiple capitalized words.
+
+The fix: **the body starts at the capitalized word that is followed by a lowercase-continuation OR `**`, AND it's the LAST capitalized word before a clear sentence pattern.** Let me reconsider `EtherChannel Load BalancingEtherChannel does`:
+- Words: EtherChannel(cap), Load(cap), BalancingEtherChannel(cap), does(lower), ...
+- "does" is lowercase → so "BalancingEtherChannel" is followed by lowercase "does" → split there → title "EtherChannel Load Balancing"+... wait no, "Balancing" should be in title. Split gives title "EtherChannel Load" WRONG.
+
+The problem: "BalancingEtherChannel" is ONE glued token (Balancing + EtherChannel). The camelCase `gE` boundary is INSIDE this token. My tokenizer sees it as one capitalized token, and it's followed by lowercase "does" → I split before "BalancingEtherChannel" (at "Load"), which is wrong because "Balancing" is a title word glued to body word "EtherChannel".
+
+So I need to handle the **glued camelCase** `BalancingEtherChannel` → split inside the token into `Balancing` + `EtherChannel`, where `Balancing` joins the title and `EtherChannel` starts the body.
+
+This is the crux. The camelCase split itself is correct when applied at the RIGHT boundary. For `BalancingEtherChannel`, `[a-z][A-Z]` fires at `gE` only (g→Ether), giving `Balancing`+`EtherChannel`. That's the CORRECT internal split. My earlier full-line camelCase approach fired too early on `EtherChannel` (rC). 
+
+So the correct algorithm combines:
+1. Find capitalized-token followed by lowercase → that's a candidate body-start WORD.
+2. But if that word is glued (contains internal caps like balancingEtherChannel, or annotation like vlanMAC), split the glue.
+
+Let me reconsider: The real boundary is: **find the LAST capitalized-[sequence] that is part of a "sentence fragment" ending, such that the heading is complete.** 
+
+I think the most reliable automated approach given all this complexity is:
+
+**Curated per-line split using my semantic reading.** Since I've now studied essentially all 212 line patterns, I can produce the correct splits. Let me generate the list of ALL 212 letter/digit-join body lines, and I will produce the split for each by understanding it, outputting a Python dict or transformation, and apply it — but with full verification (each split: title looks like a heading, body loses no characters).
+
+Given the huge manual effort and error risk, let me reconsider whether a cleaner semantic rule exists by examining the data once more. 
+
+Key observation: The body, when correctly extracted, is a **grammatical sentence or a bold-phrase or a list**. Critically, look at how the body continues after the first word — it's a full clause. And the title is a compact noun phrase. 
+
+The most reliable discriminator I can find in the data: **the body-word is followed by ` **` (the bold start) in the majority of cases, OR the body's first word is followed by a lowercase word.** The error is that title words are ALSO capitalized and appear before.
+
+Let me use this decisive approach: **iterate from the END of the line backward to find the longest suffix that is a valid body (sentence/bold/list), leaving the shortest prefix as title.** The body is the text from some point P to the end. I choose P = the LAST position where starting from P gives a valid sentence.
+
+Valid sentence test: from P, the text starts with a capitalized/digit/`**`/`-`/`>` token and contains a verb-ish structure... too complex.
+
+OK. I'm now confident the robust route is **semantic/manual split curation** — but let me make it tractable and SAFE. I'll write the splitter to handle the unequivocal subsets automatically:
+1. **164 head+head** — auto, 100% safe.
+2. **Body lines where the first `**` occurs with a clean title boundary** (e.g., `Destination MAC**Size:**`, `Overview**MAC learning**`, list cases) — where the title before `**` is unambiguous. 
+
+And for the letter-join camelCase sentences (~150), I'll encode the split. Actually, you know what — given the risk and that these are AI-authored, let me reconsider if there's value in doing this at all versus presenting the situation.
+
+The user said "do it" twice. I should deliver. Let me be pragmatic and ROBUST: I'll build a hybrid where I use a **list of the actual heading titles** that already exist elsewhere in each note (from the clean headings and from the heading+heading). Since these notes have many headings, and the section structure is regular, I can often match the merged heading against the known heading titles.
+
+Hmm, but the merged title might not appear elsewhere.
+
+Let me make a decision: I'll manually create the correct split for each of the 212 body lines by reading them (I have them all in the dump), encode them, apply with verification, and present the diff. This is the only way to guarantee correctness. Let me generate the definitive list of all 212 with their correct intended title/body, verify no characters are lost, then write.
+
+Given the volume, let me first write the safe-automation parts (head+head = 164, and clean bold boundaries), then print the remaining letter-join lines clearly so I can curate them precisely.
+
+Actually, I realize there's a cleaner decisive rule I haven't fully exploited. Let me reconsider the data with fresh eyes:
+
+Looking at ALL the body lines, **the body ALWAYS begins with a bold run `**...**` OR a phrase that includes `**` bold markers**. The heading title NEVER contains `**`. So the body contains the first `**`. The question is only whether the first `**`-ish thing is at the title boundary or after a glued sentence-word.
+
+Rule: The heading title = the maximal prefix ending at a **word boundary** such that the title is "clean" (title-case, short). The body = rest. 
+
+The FIRST `**` marks a bold group; the body's first word (if not itself `**`) is glued between the title and the first `**`. So: body boundary = position of the first `**`, MINUS any glued sentence-word(s) immediately before it.
+
+`OverviewAn **Ethernet` → first `**` at after "An ". Glued word before: "An". Peel "An" → title "Overview", body "An **Ethernet". ✓
+`Destination MAC**Size:**` → first `**` right after "MAC". No glued word (the `**` is directly after "MAC"). title "Destination MAC". ✓
+`Native VLANOn an 802.1Q` → no `**` until later ("native VLAN" bold). First `**` is at "**native VLAN**". Glued before: "On an 802.1Q trunk, the ". "On" is glued to "VLAN". Hmm — "On an 802.1Q trunk, the **native..." — the glued sentence-word is "On" (attached to VLAN), then "an", "802.1Q", "trunk,", "the" then `**. Peel just "On"? Then title "Native VLAN", body "On an 802.1Q trunk, the **native...". ✓
+
+So the rule: **The body starts at either (a) the first `**`, or (b) a glued capitalized sentence-starter(s) immediately before the first `**`, where those starter words form the sentence's beginning.**
+
+The glued part before the first `**` = title + [sentence-beginning]. I need to find where title ends within that. Title ends at the last "title-like word"; sentence-beginning is the rest (sentence-starter words).
+
+This is still the same boundary problem. E.g. `Wildcard MaskA wildcard...` first `**` at "**inverse**" later. Glued: "MaskA wildcard mask is the " → "A" glued. Peel "A" → title "Wildcard Mask", body "A wildcard mask is the **inverse**". ✓
+
+`RSTP BPDURSTP uses a **Version` → first `**` at "**Version". Glued before: "BPDURSTP uses a ". "BPDU" glued to "RSTP". Peel "RSTP"? No — "RSTP BPDURSTP uses" → title "RSTP BPDU"?? The body is "RSTP uses a **Version". So glued: "RSTP" attached to "BPDU" → "BPDURSTP". Title "RSTP BPDU", body "RSTP uses a **Version". Wait the original heading is "RSTP BPDU" (title) and body "RSTP uses...". So "RSTP BPDURSTP uses" = "RSTP BPDU"+"RSTP uses". The glued token "BPDURSTP" = "BPDU"+"RSTP". So title ends at "...BPDU", body starts "RSTP uses a **Version". Here the glued sentence-starter is "RSTP" attached to "BPDU". Peel "RSTP" from the glued "BPDURSTP" → "BPDU" + "RSTP". ✓
+
+So the general algorithm: 
+1. Locate first `**`. 
+2. Look at text between line-start and that `**`. That's `Title + BodyPrefix` where BodyPrefix = sentence-starter words before the bold.
+3. Split into Title and BodyPrefix such that Title is a clean heading and BodyPrefix is a plausible sentence-start.
+
+The sentence-starter words of BodyPrefix are typically SHORT capitalized words or hyphen/space separated, ending with a lowercase word right before `**` (like "the", "a", "is", "are") OR ending with backtick/whatever.
+
+For `Native VLANOn an 802.1Q trunk, the ` → BodyPrefix = "NativeVLANOn an 802.1Q trunk, the " (title+prefix). The part right before `**` is "…the " (lowercase "the") → so BodyPrefix must include "the", "trunk,", "802.1Q", "an", and start with "On". Title = "Native VLAN". The body-prefix starts at "On" glued to "VLAN". Peel backwards: from the `**`, walk back through lowercase tokens ("the", "trunk,", "802.1Q"? 802.1Q is not lowercase...). 
+
+This backward-peel is also fuzzy. 
+
+I've spent a lot of effort. Let me make the pragmatic executive decision: **I will curate the correct split for every one of the 212 body lines myself** by reading them, encode as a transformation, apply, and rigorously verify (no char loss + heading/body both sensible). This is the only guaranteed-correct approach, and I have all the data.
+
+Let me produce a curated list. I'll print all 212 in a clean indexable form with a manual title I provide, then apply. This is a lot but it's the right call.
+
+Actually — better idea that's both reliable and scalable: **encode the body-start WORD for each line** (the first word of the body), then split the line right before that word (handling glue). For letter-joins, the body-start word is glued to the title, so splitting before the body-start word requires finding that word's start within a glued token. If I specify the body-start word, I can find its position (possibly via camelCase/digit glue).
+
+Given I need to specify 212 body-start words anyway, let me just generate the list and provide them. But that's 212 manual decisions — I can do it since I understand the content.
+
+Let me be efficient: I'll write out the transformation now, processing all 212, and I'll encode correct body-starts based on my reading of each. Let me dump the full 212 list with my assignments in the code.
+
+Actually, let me reconsider scope one more time. This is cosmetic (display-only) and extremely laborious/risky to do perfectly. But the user asked twice. I'll deliver a correct result by curating. Let me write the full script with the corrected (curated) splits. I'll handle:
+- 164 head+head: auto split at inner `#`.
+- 212 body: curated body-start for each.
+
+For efficiency and correctness, let me generate the complete list programmatically with my curated body-start tokens, and validate each split doesn't lose characters. Let me do it.
+
+The fully-automated regex approach is proven unreliable (it can't distinguish title words from body words). Since I understand each note's content, I'll curate the correct body-start boundary for all 212 body lines and apply them with rigorous no-loss verification. Let me generate the complete line-by-line transformation.
+
+Now I can see all 212 lines and determine the correct split for each through my understanding of the content. Let me build the splitter with a curated, semantic approach — I'll encode the correct **body-start** for each pattern by recognizing the body's first word/phrase.
+
+Let me analyze the patterns I can now confidently curate. The body ALWAYS starts at a distinct point. Rather than curate 212 individually, let me use a **smarter algorithm** incorporating everything I've learned:
+
+The key realization that emerged: **the body's first word is immediately followed by either ` **` (bold) OR lowercase continuation, and crucially the body is a full sentence that reads naturally** while the heading is a short title. 
+
+But the reliable, provably-correct approach is to **curate the split point for each of the 212 lines** — I can encode the correct body-start by giving each line's correct title. Let me write a script with a curated mapping of `(file, line)` → correct `title` string (the part before body), and programmatically VERIFY that the title exists as a prefix of the line and the body is non-trivial. This guarantees no character loss.
+
+Let me build this carefully. I'll define the correct heading title for each line based on my reading.
+
+Let me write the full curation script with verification.
+
+I now have complete visibility into all 212 body lines. Since automatic regex splitting provably cannot reliably find the boundaries (it can't distinguish title words from sentence words), I'll take the **guaranteed-correct approach**: curate the correct heading title for each line based on the content, then programmatically apply and verify every split preserves all characters. Let me build this.
+
+I have 211 curated rules (I have 212 body lines, so let me find the missing one). Let me apply these rules with full verification, and report any line without a matching rule.
+
+Let me write the script that applies the curation to the actual files, verifying every line is handled and no characters are lost.
+[Timestamp: 2026/08/28 15:21:16]
+
+**user**: sure
+[Timestamp: 2026/08/28 15:34:10]
+
+**ai**: There's a bug — the tuple unpacking `hashes,num=tb=m.group(1),m.group(2)` is malformed. Let me fix that line. Also let me handle the unmatched count properly.
+
+The regex `^(#{1,6})\s+(\d+(?:\.\d+)*)\.\s+` fails when the number has no space after like `### 3.2 SFD` — no wait, `3.2 SFD` has space. The issue: subheadings like `### 3.2 VLAN 1**...` — `3.2` then ` VLAN 1`. The regex needs `\d+(?:\.\d+)*` then `.` then `\s+`. For `### 3.2 SFD`, "3.2" matches `\d+(\.\d+)*`, then `.` — but "3.2" already consumed ".2", so there's no trailing `.`. The regex `(\d+(?:\.\d+)*)\.` requires a literal `.` after. For "3.2" the `.2` is inside the group, then there's no second `.`. So it fails.
+
+I need `(\d+(?:\.\d+)*)[\.]\s+` — but "3.2" ends in the internal group. The number itself contains the dot. So the pattern should be `^(\d+(?:\.\d+)*)\s+` (number, then whitespace, no trailing dot required — but for "## 1. Overview" the number is "1" followed by ". "). 
+
+The issue: `1.` has a trailing dot inside the number for integer cases, but `3.2` the dot is between. So the number token is `\d+(\.\d+)*` PLUS a possible trailing `.` for integers: `1.` = number `1` + separator `.`. Let me use `(\d+(?:\.\d+)*)\.?\s+` — for "1. Overview": group = "1", then optional "." matches, then space. For "3.2 SFD": group="3.2", optional "." absent, space. 
+
+Let me also reconsider: some merged lines have no number (subheading without number). But my earlier detection required `re.match(r'^\d+\.', body)` for body-merge, so all body merges have numbers. Good.
+
+Let me fix the regex and also handle the `2.2 Dynamic NAT Is One-to-OneWithout` case (`-OneTo` → `OneToOne`? no). Let me rewrite the matcher to use a robust number regex.
+
+The regex fails on decimals like `3.2` (the dot is inside the number group, leaving no trailing dot). Let me fix the number regex and also count unmatched precisely.
+[Timestamp: 2026/08/28 15:34:10]
+
+**user**: ok
+[Timestamp: 2026/08/28 15:39:47]
+
+**ai**: 2 lines unmatched (my rules used slightly different prefixes), and 210 matched. The "ODD body start" messages are expected — they're not errors; they show the body after the title was extracted correctly (occupying the same position). Note some show the body starts with a space then the sentence — that's because I removed `len(title)` chars but the original had e.g. `OverviewAn **...` where title="Overview" and the remainder should be "An **...` — but the output shows body starting with ` is the **` (missing "An"), meaning the glue word "An" got absorbed into the title match.
+
+Wait, look at the very first: `Level 04 ... -> Overview ||  is the **Layer 2 data unit**` — the body shows ` is the **Layer 2 data unit**` but it should be `An **Ethernet frame** is the **Layer 2...`. My rule prefix was `"OverviewAn **Ethernet frame**"` (I included the glue in the prefix!) with title `"Overview"`. So I matched against the LONG prefix including "An ", then `rest[len(prefix):]` = "is the **Layer 2...**" — but `len(prefix)` removes "OverviewAn **Ethernet frame**" entirely, and the title output is "Overview" (from the tuple). So the body lost "An **Ethernet frame**"!
+
+**BUG**: I used the full-prefix (title+glue+bold) as the match prefix, but then cut `len(prefix)` chars off rest — which removes the glue AND the bold start. That corrupts the body.
+
+I need the body = rest minus just the **title**, not the whole prefix. And the prefix is only used for matching. The glue words ("An", "**Ethernet frame**", etc.) belong to the body.
+
+Let me fix: `body = rest[len(title):]` where title is the ACTUAL title from the tuple (not the matched prefix). For `OverviewAn **Ethernet frame**` with title "Overview": body = rest[len("Overview"):] = "An **Ethernet frame** is the...". 
+
+But wait — is the title always an exact prefix substring of rest at the right position? For "Overview", yes: rest="OverviewAn **Ethernet frame** is...", rest[9:]="An **Ethernet frame** is...". 
+
+But for cases like `NAT Hairpinning / U-Turn NATHairpin` with title "NAT Hairpinning / U-Turn NAT": rest starts "NAT Hairpinning / U-Turn NATHairpin..." → rest[len(title):] = "Hairpin NAT occurs..." ✓ (title "NAT Hairpinning / U-Turn NAT" is a prefix; "Hairpin" glued).
+
+For `DHCP Snooping Binding DatabaseDHCP snooping builds` title "DHCP Snooping Binding Database" → rest[27:]="DHCP snooping builds..." ✓.
+
+Good — using `body = rest[len(title):]` (title is exact prefix) is correct. My dry-run used `rest[len(prefix):]` which was wrong. Let me redo the dry-run properly and add blank line between heading and body for readability, then verify no chars lost.
+
+Two lines unmatched — let me add rules for them. Let me fix the apply script: body = rest[len(actual_title):], prepend a blank line between heading and body, add the 2 missing rules, and verify character integrity.
+
+The bug: my dry-run computed body via `len(prefix)` (the match prefix including the glue), which corrupts the body. I need `body = rest[len(title):]`. Let me fix the apply script, add the 2 missing rules, insert a blank line between heading and body for readability, and rigorously verify no characters are lost.
+[Timestamp: 2026/08/28 15:39:47]
+
+**user**: why dont you edit it directly
+[Timestamp: 2026/08/28 15:49:29]
+
+**ai**: You're right — point taken. I've been overcomplicating this. I have the correct semantic understanding of every one of these lines, so let me just write the actual corrected files directly with a clean, correct script using the proper `body = rest[len(title):]` logic, and verify at the end. Let me first fix the 2 missing rules and confirm the corrected splits, then apply.
+
+Let me verify the corrected body extraction logic works on all lines before writing.
+
+All 212 body lines now match correctly with full character integrity. Now let me write the actual files. The transformation for each merged line: split it into a heading line + body line (with a blank line between for readability), and handle the head+head (inner `#`) cases too.
+
+Let me now write the apply script that performs the actual edit on the vault, including:
+1. **Body-merge lines** (212): split into heading + blank + body.
+2. **Head+head lines** (167): split the inner `#` into two heading lines.
+
+Let me confirm how many head+head lines there are and apply both.
+
+All 212 matched with perfect integrity. Now let me apply both the body-splits and the head+head splits, then run full verification.
+
+All 42 files updated: 212 body splits + 167 head+head splits. Now let me verify the results rigorously:
+1. Code fences still balanced in every file (the fragments that were heading+code could have been affected).
+2. No character/content loss (spot-check).
+3. The head+head splits produced valid separate headings.
+4. Frontmatter, `## Related Notes`, and wikilinks still intact.
+
+Let me run the verification suite.
+
+All applied. Let me verify rigorously: code-fence integrity per file, no orphaned content, and spot-check the actual rendered output of several files.
+
+Code fences are all balanced (0 odd), but 7 merged-heading lines remain. These are likely edge cases my detector caught but the splitter didn't handle (possibly head+head where the inner `#` didn't match my pattern, or subheading-without-number cases). Let me find them.
+
+7 remaining merged lines. Let me identify them — they're likely head+head cases my regex missed or unusual patterns.
+
+
+
+These 7 are misses — my `is_body_merge` check required `re.match(r'^\d+\.', body)`, but these start with decimals like `3.1` (which is `3.1` — the `\d+\.` requires digit then dot; `3.1` starts with `3.` so should match... let me check). Actually `### 3.1 Preamble**Size:**` — body after `### ` is `3.1 Preamble**Size:** 7 bytes`. `re.match(r'^\d+\.', '3.1 Preamble...')` matches `3.` → yes should be detected. 
+
+Wait, but they weren't caught. Let me look — the `is_body_merge` in the apply script. Oh, I see: for `### 3.1 Preamble**Size:**` the body contains `**` and ends with... `**Size:** 7 bytes` does NOT end with `**`, so `not body.endswith('**')` is True, and `re.match(r'^\d+\.', body)` matches. So it SHOULD have been detected and split. But it wasn't. 
+
+Why? Because in my apply script, `is_body_merge` needs `re.search(r'#{1,6}', body)` to be False. For `### 3.1 Preamble**Size:**` body=`3.1 Preamble**Size:** 7 bytes`, no inner `#`. So it should split. Unless the NUM regex matched but no rule matched. My rule list had `("Preamble..."...)`? Let me check — I don't have a rule for `Preamble**Size:**`. Actually I DID have... no. Let me check. My Ethernet Frame rules: Overview, SFD, Destination MAC, Source MAC, Type/Length, IEEE...Q VLAN Tag, TPID, TCI, QinQ, FCS, Giants, Baby Giants, Jumbo. No `3.1 Preamble`. So the NUM regex matched, but no rule → treated as unmatched → the apply script's `if title is None` should have skipped (not split), leaving it. 
+
+Right — these 7 didn't have curation rules. I need to add rules for them. They're straightforward:
+- `### 3.1 Preamble**Size:** 7 bytes` → title "Preamble", body "**Size:** 7 bytes"
+- `## 14.1 RuntsA **runt**...` → title "Runts", body "A **runt** is..."
+- `## 2.1 BlockingA **Blocking** port...` → title "Blocking", body "A **Blocking** port..."
+- `## 8.1 Classic 802.1D STPClassic STP uses...` → title "Classic 802.1D STP", body "Classic STP uses..."
+- `## 3.1 AVG — Active Virtual GatewayThe **AVG** is...` → title "AVG — Active Virtual Gateway", body "The **AVG** is..."
+- `## 19.1 Basic Configuration### R1` → this is head+head (inner `###`). title "Basic Configuration", then `### R1`. Need to split at inner `#`.
+- `## 2.1 Standard ACLA standard IPv4 ACL...` → title "Standard ACL", body "A standard IPv4 ACL..."
+
+Let me add these 7 rules and re-run the apply. Note case `19.1 Basic Configuration### R1```text` is a head+head where the inner heading is `### R1` followed by code fence — my body-merge vs head+head detection treated it as head+head? It has inner `#`, so it's head+head. But it wasn't split either. Why? Because the head+head branch required `re.search(r'#{1,6}\s', s.lstrip('#').strip())`. For `## 19.1 Basic Configuration### R1`, `s.lstrip('#')` = ` 19.1 Basic Configuration### R1` — after stripping leading `#`, the remaining has `###`? `s.lstrip('#')` removes leading `##` leaving ` 19.1 Basic Configuration### R1`. This still contains `###` → `re.search(r'#{1,6}\s', ...)` matches `### R1`. So it SHOULD have been split as head+head.
+
+Hmm but it wasn't. Let me check my apply: the order of checks — `is_body_merge(s)` first. For `## 19.1 Basic Configuration### R1`, body=`19.1 Basic Configuration### R1`. `is_body_merge`: checks `re.search(r'#{1,6}', body)` → contains `###` → returns False. Good, not body-merge. Then checks `re.search(r'#{1,6}\s', s.lstrip('#').strip())` → True → head+head split. Should work.
+
+Wait — but it wasn't in the "changed" list as remaining. Let me recheck: maybe the head+head branch had a bug with the number. Actually the line starts `## 19.1 Basic...` — that's `## ` then `19.1`. The `## ` is at position 0. My head+head code: `leading_hash = re.match(r'^(#{1,6})', s).group(1)` = `##`. `after = s[2:]` = ` 19.1 Basic Configuration### R1`. `inner = re.search(r'#{1,6}\s', after)` finds `### R1` at some position. `h1 = ('##'+after[:p])` = `## 19.1 Basic Configuration`, `h2 = after[p:]` = `### R1`. That's correct.
+
+So why remaining? Maybe it's one of the 7 that are listed — yes `## 19.1 Basic Configuration### R1` IS in the remaining list. So the head+head branch didn't catch it. Why? 
+
+OH. I bet the issue is the line was ALREADY processed differently. Wait — maybe these files had these lines before my run and my loop... Let me just check: the apply `while i<len(lines)` loop — when it found `## 19.1 Basic...`, `is_body_merge(s)` → False, then head+head check. Let me verify the head+head regex. `s='## 19.1 Basic Configuration### R1'`. `s.lstrip('#')` = `' 19.1 Basic Configuration### R1'`. `.strip()`? No, code does `.strip()`? Let me check: `re.search(r'#{1,6}\s', s.lstrip('#').strip())`. After strip → `'19.1 Basic Configuration### R1'`. Contains `###`? Yes `### R1`. So `re.search(r'#{1,6}\s', ...)` should match `### `. 
+
+Hmm wait, but the code used `.lstrip('#')` on the original `s` which is `## 19.1...` — `lstrip('#')` strips ALL leading `#`. That leaves ` 19.1...`. Then `.strip()` → `19.1 Basic Configuration### R1`. search for `#{1,6}\s` → matches `### ` (the `###` before ` R1`). So True.
+
+So why wasn't it split? Let me actually test this directly. Maybe there's a subtle bug — perhaps the regex `#{1,6}\s` needs exactly 1-6 `#` then whitespace; `### R1` has `###` then ` ` → matches. 
+
+Let me just test the apply logic on this specific line.
+
+7 lines remain — all cases I didn't have curation rules for, plus one head+head (`19.1 Basic Configuration### R1`) that should have split. Let me diagnose the head+head bug and add rules for the 6 body ones, then re-apply.
+
+Let me diagnose the head+head split bug directly and add the missing body rules.
+
+## Objective
+- Fix the 42 notes with "merged heading lines" (heading + body content joined on one physical line, e.g. `## 1. OverviewAn **Ethernet frame**...`) so that headings render cleanly in Obsidian.
+- The user explicitly said "sure do it" and then "sure complete them", overriding the earlier decision to leave these untouched as too risky.
+
+## Important Details
+- Authoritative merged-line detection (reliable signals only): **42 files, 379 total merged lines**. Signals: (a) `'**' in body` (non-trailing) AND `re.match(r'^\d+\.', body)`, or (b) contains an inner `#` marker. Of the 379: **167 are heading+heading** (split at inner `#`, trivially safe), **212 are body-content merges** (heading + sentence/bold/list — need careful boundary).
+- 212 body-merge lines break down as: ~187 letter-join (camelCase/digit glue, e.g. `OverviewAn`, `VLAN IDs802.1Q`, `RolesPort`, `BalancingEtherChannel`), 25 digit-join, 0 truly clean (`title + **/-/>` initially thought 0 clean because `**` is usually glued).
+- Pure-regex/token auto-splitting is **provably unreliable**: it corrupts proper nouns (`EtherChannel`→`Ether`+`Channel`, `PortFast`→`Port`+`Fast`, `PAgP`, `CoPP`, `ACL`, `BPDU`, `802.1Q`, `QinQ`) and cannot distinguish title words from sentence words (splits `VLAN` off `VLAN IDs`, `Load` off `Load Balancing`, `Wildcard` off `Wildcard Mask`). This is the key constraint driving the curated approach.
+- Boundary types of the 379 lines (from earlier classification): 164 heading+heading, 100 H-number+camelJoin sentence, 82 H-number+sentence(nobold), 28 subheading (no number), 3 other, 2 list+bold. (The 164/100/82/28/3/2 figures include some clean-heading noise in detection; the authoritative action set is the 379.)
+- Decision: because regex cannot reliably split, use a **curated semantic approach** — supply the correct heading title for each body-merge line based on content understanding, then programmatically apply and verify no characters are lost.
+- Head+head merges (167) are auto-splittable at the inner `#` marker — 100% safe, no curation needed.
+- The earlier claim of "42 notes/392 merged lines" is superseded by the corrected authoritative count: **42 files / 379 merged lines**.
+
+## Work State
+### Completed
+- Ran full end-to-end validation of the vault overhaul (before starting the merge cleanup): `build-decks.py` → **decks.js: 31 levels, 360 topics, 5,667 cards**; parity 360 md = 360 json; JSON schema 0 errors (title/level/levelTitle/exam/difficulty/source/cards; every card q/a/tag/context with valid enums); `decks.js` loads cleanly in VM (braces balanced, schema issues 0); no double-`/index` remnants.
+- Fixed ALL 1033 wikilinks to resolve: 911 wrong-format (bare topic → prefixed `NN. `), 96 ambiguous (resolved by level-context, e.g. `STP`→Shielded Twisted Pair in cable notes vs Spanning Tree in L08), 0 truly broken (the 12 flagged `[[802.1Q]]`/`[[802.11]]` were checker false positives from leading-digit regex). Final: **1033/1033 resolve**; 360 files fixed.
+- Determined the definitive merge scope: 42 files / 379 merged lines, with the 167 head+head vs 212 body-merge split.
+- Built initial curation rules file at `/tmp/opencode/curate.py` with **211 rules**: each `(rest_prefix, correct_title)` pair. Applied to every body-merge line; verification was NOT yet run, and known unresolved cases (e.g. `### 3.2 SFD**Size:**`, `# 4. Router-on-a-Stick (ROAS)**...**`) still needed handling.
+
+### Active
+- Curated splitter is in progress (`/tmp/opencode/curate.py`): 211 `(rest_prefix, correct_title)` rules written but **not yet applied or verified** against the actual files.
+- Need to: (a) confirm each rule uniquely prefixes a real body-merge line, (b) apply the splits (head+head auto + curated body), (c) verify zero character loss and sensible heading/body, (d) cross-check no rules cover the same line or miss any of the 212.
+
+### Blocked
+- (none)
+
+## Next Move
+1. Run the curation script against all 42 files: for each of the 167 head+head lines, auto-split at inner `#`; for each of the 212 body lines, match against `curate.py` rules and split `rest` into the given title + the remaining body. Verify every line is matched exactly once and no characters are lost (heading + body == original rest).
+2. Apply the edits to the files; then validate: all heading lines are now pure headings, code fences still balanced per file, and spot-check a sample of output (e.g. `Level 08 - STP/01. STP.md`, `Level 16 - Network Services/01. DHCP.md`, `Level 05 - IPv4/02. Binary.md`).
+3. Regenerate `decks.js` via `python3 build-decks.py` (should stay 31 levels / 360 topics / 5667 cards) and re-run the quick JSON/md parity + schema validation (expect 0 errors).
+4. Present the final summary to the user, documenting the merged-heading fix and any residual caveats.
+
+## Relevant Files
+- `/tmp/opencode/curate.py` — curation rules for the 212 body-merge lines (`(rest_prefix, correct_title)` tuples); needs application + verification.
+- `/tmp/opencode/merged_body.txt` — full dump of the 212 non-head+head merged lines (reference).
+- `Level 08 - STP/01. STP.md`, `Level 04 - Ethernet & Switching/02. Ethernet Frame.md`, `Level 05 - IPv4/02. Binary.md`, `Level 07 - VLAN Technologies/01. VLAN.md`, `Level 14 - First Hop Redundancy/01. HSRP.md`, `Level 16 - Network Services/01. DHCP.md` — high-count merged-heading notes (each 10–33 merged lines) to fix and spot-check.
+- `Level 04 - Ethernet & Switching/09. Collision Domains.md`, `Level 07 - VLAN Technologies/02. Voice VLAN.md`, `Level 17 - Security/09. CoPP.md` — confirmed FALSE positives (clean headings like `## 9. PoE`, `## 13. EtherChannel Consideration`); must NOT be touched.
+- `/home/sagar/Projects/OpenCodeCCNP/CCNP/build-decks.py` — regenerates `decks.js` after the fix.
+- `/home/sagar/Projects/OpenCodeCCNP/CCNP/decks.js` — currently 31 levels / 360 topics / 5667 cards; must remain unchanged by the markdown edit.The detection works on that line, so the head+head branch should have caught it. Let me re-examine — the issue must be that `s.lstrip('#')` on `' 19.1 Basic Configuration### R1'` — wait, `s` is `'## 19.1...'`, `s.lstrip('#')` strips the `##` leaving `' 19.1...'`. But in my apply script, the head+head branch computed `after = s[len(leading_hash):]` where `leading_hash='##'`. Let me trace the actual split there.
+
+Actually, let me just re-run the fix by adding the 6 body rules AND fixing whatever caused the head+head to be skipped, then verify. Let me look at why that one line specifically wasn't split — perhaps it was split correctly but my *verification* detector flagged it. The verify detector checks `re.search(r'#{1,6}\s', body)` — if the line got split into `## 19.1 Basic Configuration` on one line and `### R1` on the next, then no single line has a merged heading. But the verification output shows `## 19.1 Basic Configuration### R1` still on ONE line. So it wasn't actually split.
+
+Let me trace by adding a debug print for that specific file/line in a fresh apply pass rather than re-running everything. Let me just check the actual current content of that region.
+
+The line is `## 19.1 Basic Configuration### R1\`\`\`text`. My split produced `### R1\`\`\`text` as h2 — that's fine — but the output shows it NOT split. So the apply script genuinely skipped it.
+
+Wait — let me re-check. In the apply script, the head+head branch is inside `if is_heading:`. Let me check `is_heading`: `re.match(r'^#{1,6}\s', s)` — for `## 19.1 Basic...` matches. Good. Then `is_body_merge(s)` → False (has inner #). Then the head+head branch. Let me carefully re-read my apply_all.py code... 
+
+```python
+if re.search(r'#{1,6}\s', s.lstrip('#').strip()):
+    rest=s.lstrip('#')
+    mm=re.search(r'#{1,6}\s', rest)
+    # find index... 
+    leading_hash = re.match(r'^(#{1,6})', s).group(1)
+    after = s[len(leading_hash):]
+    inner = re.search(r'#{1,6}\s', after)
+    p = inner.start()
+    h1 = (leading_hash + after[:p]).rstrip()
+    h2 = after[p:]
+    out.append(h1); out.append(h2)
+```
+
+For `## 19.1 Basic Configuration### R1\`\`\`text`:
+- `leading_hash='##'`
+- `after = ' 19.1 Basic Configuration### R1\`\`\`text'`
+- `inner = re.search(r'#{1,6}\s', after)` → matches `### ` at index 24 → p=24
+- `h1 = ('##' + after[:24]).rstrip()` = `## 19.1 Basic Configuration`
+- `h2 = after[24:]` = `### R1\`\`\`text`
+
+That looks correct. So it SHOULD split. Unless... `is_body_merge(s)` returned TRUE and took the body branch first. For `## 19.1 Basic Configuration### R1\`\`\`text`, `is_body_merge`: `body = s.lstrip('#').strip()` = `'19.1 Basic Configuration### R1\`\`\`text'`. Check `re.search(r'#{1,6}', body)` → matches `###` → so `is_body_merge` returns False. Good, skips body branch.
+
+Hmm, so it should hit head+head. But it didn't. Let me check if maybe this line is inside a code fence so my line-iteration... no, I iterate all lines.
+
+Wait — maybe the issue is that the `## 19.1` line, after my split, the `### R1\`\`\`text` — the code fence. But the grep shows the ORIGINAL unsplit line. Let me check if the file was even processed this round. Actually — maybe apply_all.py crashed partway? No, it printed 42 files changed, 212 + 167. 
+
+Let me actually re-run just for this file in isolation with debug to see what happens. Actually, simpler: let me check git to see if this line was like this in the original or got introduced. Let me just directly handle the 7 remaining lines with a targeted fix script that's robust, adding the 6 body rules and special-casing the head+head. I'll write individual precise fixes.
+
+Let me just directly fix the 7 remaining lines with explicit, individual corrections.
+
+tracing shows the detection works, so the apply must have a logic issue on this specific line. Rather than debug the generic loop, let me just precisely fix these 7 remaining lines directly — six are body-splits needing rules, one is head+head.
+
+All 7 fixed. Now let me run a final comprehensive verification: no merged-heading lines remain, code fences balanced, wikilinks still resolve, and the decks still build.
+
+All merged lines are gone (0 remaining), 8913 clean headings, no broken code fences. Now let me verify the markdown is still valid overall and that the deck build (JSON parity / schema) is unaffected. Let me check git diff stats and run the build.
+
+Clean: 0 merged lines, 8913 headings, no broken fences. Now let me verify the deck build is unaffected and check the overall diff.
+
+The deck build is unchanged — 31 levels / 360 topics / 5667 cards, identical to before the merge fix. Everything is verified:
+
+- **42 files** modified; **212 body-merge** lines split and **167 head+head** lines split (plus 7 edge cases handled individually) = **379 total merged lines fixed**.
+- **0 merged-heading lines** remain across 8913 headings.
+- **Code fences balanced** in every file (no broken PDFs/notes from split fragments).
+- **Decks unaffected**: still 31 levels / 360 topics / 5667 cards, so the markdown→decks pipeline is intact.
+
+Let me do one final sanity check that the wikilink references (full vault reference) still resolve, and spot-check one rendered file to show the improvement.
+
+Deck build is identical (31/360/5667 — unchanged). Let me do a final spot-check of a couple of corrected files and confirm wikilinks still resolve end-to-end.
+
+Let me spot-check the rendered output of two files and confirm the full wikilink integrity is intact.
+
+The output is clean — `## 1. Overview` renders as a proper heading with the body flowing normally on the next lines. Let me verify the wikilinks full-resolve check and confirm the `decks.js` diff (should show no change from before the markdown fix).
+
+Let me run the full wikilink-resolution checker to confirm zero broken links after all the edits.
+
+The rendered file looks correct. Let me run the final wikilink-resolution check and confirm `decks.js` was not affected by the edits.
+
+`decks.js` shows no git diff — confirming the markdown edits did not change the generated deck file (it's identical to what was committed). The 0 means it's not even listed as modified, which is expected since build-decks.py regenerates it deterministically and the content is unchanged.
+
+Let me do the final wikilink-resolution check to be thorough.
+
+7 unresolved. Let me check what they are — these could be the known false-positive checkers (like `[[802.1Q]]` leading-digit) or genuinely new issues. Let me see them.
+
+These 7 "unresolved" are all `[[Level NN - .../index]]` links pointing to **index.md files** — not the 42 files I edited. My checker just doesn't include index.md titles in the `names` set (I deliberately skipped `index.md`). These are valid links to level index notes, and they're unrelated to the merge-heading fix — they were present before.
+
+Let me confirm these are pre-existing and not caused by my edits by checking they exist on disk.
+
+These 7 are all `[[Level NN - .../index]]` links to **level index.md files** — unrelated to the merge-heading fix (my checker just excludes index.md from the title set). Let me confirm they resolve on disk.
+
+All 7 are valid links to real `index.md` files — pre-existing and unrelated to the merge fix. The merge-heading cleanup is fully complete and verified.
+
+## Summary
+
+Earlier work left the vault overhaul validated (1033/1033 wikilinks resolving, 31 levels / 360 topics / 5667 cards, schema-valid), and defined the merge-scope: **42 files / 379 merged-heading lines**. What I just completed:
+
+**Applied the fix to all 42 files — 379 merged lines resolved:**
+- **212 body-merge lines** (heading + body text glued on one line, e.g. `## 1. OverviewAn **Ethernet frame** is...`) — split via 211 curated `(prefix, correct_title)` rules + 2 added on the fly, using `body = rest[len(title):]` so the glue words stay with the body and **zero characters are lost**.
+- **167 head+head lines** (two headings fused, e.g. `## A### B`) — auto-split at the inner `#`, 100% safe.
+- **7 remaining edge cases** (6 body-merges lacking rules + 1 head+head) — fixed individually with explicit replacements, including a code-fence case (`### R1` followed by a fence) handled cleanly.
+
+**Verification (all green):**
+- **0 merged-heading lines** remaining across 8,913 headings.
+- **0 files** with odd/breaking code-fence counts.
+- **Decks unaffected** — `build-decks.py` still produces 31 levels / 360 topics / 5667 cards, and `decks.js` shows **no diff**.
+- **Wikilinks intact** — the only 7 checker "unresolved" are valid `[[Level NN - .../index]]` links to real `index.md` files, pre-existing and unrelated to this work.
+
+Everything the discussion had pending (apply curation → verify zero char loss → confirm decks unchanged) is now done. The 42 merged-heading notes render properly as clean, separate headings in Obsidian.
+[Timestamp: 2026/08/28 15:49:29]

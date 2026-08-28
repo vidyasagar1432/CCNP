@@ -11,14 +11,14 @@
             "id": "9ee289856649cea9",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "split-diff-view",
               "state": {
-                "file": "Level 08 - STP/06. Root Bridge.md",
-                "mode": "source",
-                "source": false
+                "aFile": "Level 17 - Security/12. Infrastructure Security.md",
+                "bFile": "Level 17 - Security/12. Infrastructure Security.md",
+                "aRef": ""
               },
-              "icon": "lucide-file",
-              "title": "06. Root Bridge"
+              "icon": "diff",
+              "title": "Diff: 12. Infrastructure Security  (Working Tree)"
             }
           }
         ]
@@ -216,8 +216,10 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "7d89de05ca9fb5db",
+  "active": "9ee289856649cea9",
   "lastOpenFiles": [
+    "Level 08 - STP/01. STP.md",
+    "Level 08 - STP/06. Root Bridge.md",
     "Level 08 - STP/07. Port Roles.md",
     "Level 08 - STP/08. Port States.md",
     "Level 08 - STP/13. Loop Guard.md",
@@ -225,10 +227,8 @@
     "Level 08 - STP/03. PVST+.md",
     "Level 08 - STP/11. BPDU Guard.md",
     "Level 08 - STP/04. Rapid PVST+.md",
-    "Level 08 - STP/01. STP.md",
     "Level 08 - STP/02. RSTP.md",
     "Level 08 - STP/05. MST.md",
-    "Level 08 - STP/06. Root Bridge.md",
     "Level 08 - STP/10. PortFast.md",
     "00. MOC - CCNP Study Map.md",
     "Level 09 - Routing Fundamentals/03. Metrics.md",
