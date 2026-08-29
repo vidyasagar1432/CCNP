@@ -2950,15 +2950,6 @@
     {
       "providerId": "20f1e404-0006-478e-803d-e523437c9b10",
       "info": {
-        "id": "openrouter/allenai/olmo-3-32b-think",
-        "displayName": "OpenRouter/Olmo 3 32B Think"
-      },
-      "configuredModelId": "ab9d91de-22a0-4996-b836-79067a32f156",
-      "configuredAt": 1787901353743
-    },
-    {
-      "providerId": "20f1e404-0006-478e-803d-e523437c9b10",
-      "info": {
         "id": "openrouter/~openai/gpt-latest",
         "displayName": "OpenRouter/OpenAI GPT Latest"
       },
@@ -3729,15 +3720,6 @@
       },
       "configuredModelId": "63c3b405-8cde-484f-ae1f-b9b8610b2011",
       "configuredAt": 1787901353855
-    },
-    {
-      "providerId": "20f1e404-0006-478e-803d-e523437c9b10",
-      "info": {
-        "id": "openrouter/arcee-ai/virtuoso-large",
-        "displayName": "OpenRouter/Virtuoso Large"
-      },
-      "configuredModelId": "856dad78-c025-45a2-a0e2-494132c5ecfc",
-      "configuredAt": 1787901353856
     },
     {
       "providerId": "20f1e404-0006-478e-803d-e523437c9b10",

@@ -27,15 +27,16 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Level 09 - Routing Fundamentals/12. Dynamic Routing.md",
+                "file": "Level 11 - EIGRP/01. DUAL.md",
                 "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "12. Dynamic Routing"
+              "title": "01. DUAL"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       },
       {
         "id": "00800c293e289829",
@@ -191,7 +192,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Glossary/Forwarding.md",
+                "file": "Level 11 - EIGRP/01. DUAL.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -232,6 +233,9 @@
   },
   "active": "7d89de05ca9fb5db",
   "lastOpenFiles": [
+    "Glossary/Dynamic Routing.md",
+    "Level 09 - Routing Fundamentals/12. Dynamic Routing.md",
+    "Glossary/Forwarding.md",
     "Glossary/Git.md",
     "Glossary/Gratuitous ARP.md",
     "Glossary/Glossary.md",
@@ -255,9 +259,6 @@
     "Glossary/SSO.md",
     "Glossary/Wireshark.md",
     "Glossary/Telemetry.md",
-    "Glossary/IP SLA.md",
-    "Glossary/ERSPAN.md",
-    "Glossary/SPAN.md",
     "Glossary/DR",
     "Glossary",
     "fix_glued.py",
