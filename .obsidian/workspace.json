@@ -233,6 +233,9 @@
   },
   "active": "7d89de05ca9fb5db",
   "lastOpenFiles": [
+    "check_html_vue.py",
+    "Level 11 - EIGRP/How EIGRP Works.html",
+    "copilot/copilot-conversations/agent__create_a_single_html_file_in_Level_11_EIGRP_that@20260829_231542.md",
     "Glossary/Dynamic Routing.md",
     "Level 09 - Routing Fundamentals/12. Dynamic Routing.md",
     "Glossary/Forwarding.md",
@@ -257,8 +260,6 @@
     "Glossary/Redundant Supervisors.md",
     "Glossary/NSF.md",
     "Glossary/SSO.md",
-    "Glossary/Wireshark.md",
-    "Glossary/Telemetry.md",
     "Glossary/DR",
     "Glossary",
     "fix_glued.py",
@@ -267,7 +268,6 @@
     "copilot/projects",
     "Level 28 - Cisco IOS and IOS XE/11. Device-Level Security Hardening.json",
     "Level 28 - Cisco IOS and IOS XE/10. YANG & RESTCONF.json",
-    "Level 28 - Cisco IOS and IOS XE/09. IOS XE Architecture (Linux-based).json",
-    "Level 27 - High Availability/08. Redundancy Design & Best Practices.json"
+    "Level 28 - Cisco IOS and IOS XE/09. IOS XE Architecture (Linux-based).json"
   ]
 }
