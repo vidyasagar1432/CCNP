@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Route Redistribution Works — Deep Dive</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --panel: #111c34;
+    --card: #1e293b;
+    --card-2: #16233d;
+    --text: #f8fafc;
+    --muted: #94a3b8;
+    --blue: #38bdf8;
+    --blue-dim: #0c4a6e;
+    --green: #34d399;
+    --green-dim: #064e3b;
+    --amber: #fbbf24;
+    --amber-dim: #78350f;
+    --red: #f87171;
+    --red-dim: #7f1d1d;
+    --violet: #a78bfa;
+    --violet-dim: #4c1d95;
+    --border: #334155;
+    --hover: #263449;
+    --code-bg: #0b1220;
+  }
+  #app[data-theme="light"] {
+    --bg: #f1f5f9;
+    --panel: #ffffff;
+    --card: #ffffff;
+    --card-2: #f8fafc;
+    --text: #0f172a;
+    --muted: #64748b;
+    --blue: #0284c7;
+    --blue-dim: #bae6fd;
+    --green: #059669;
+    --green-dim: #d1fae5;
+    --amber: #d97706;
+    --amber-dim: #fef3c7;
+    --red: #dc2626;
+    --red-dim: #fee2e2;
+    --violet: #7c3aed;
+    --violet-dim: #ede9fe;
+    --border: #cbd5e1;
+    --hover: #e2e8f0;
+    --code-bg: #0b1220;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; }
+  #app { max-width: 1040px; margin: 0 auto; padding: 20px 18px 60px; }
+
+  /* ---------- Header ---------- */
+  header {
+    position: sticky; top: 0; z-index: 30;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 12px 16px; margin-bottom: 18px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  header h1 { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .lv-badge { background: var(--blue-dim); color: var(--blue); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .exam-badge { background: var(--violet-dim); color: var(--violet); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .head-actions { display: flex; align-items: center; gap: 8px; }
+  .btn {
+    padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--card); color: var(--text); cursor: pointer; font-size: 0.82rem; font-weight: 600;
+    transition: background 0.15s;
+  }
+  .btn:hover { background: var(--hover); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn.primary { background: var(--blue); border-color: var(--blue); color: #04222e; }
+  .btn.primary:hover { filter: brightness(1.1); background: var(--blue); }
+  .btn.green { background: var(--green); border-color: var(--green); color: #04241a; }
+  .btn.amber { background: var(--amber); border-color: var(--amber); color: #3a2400; }
+  .btn.red { background: var(--red); border-color: var(--red); color: #3f0a0a; }
+
+  /* ---------- Nav ---------- */
+  nav {
+    position: sticky; top: 62px; z-index: 20;
+    display: flex; gap: 6px; overflow-x: auto; padding: 8px 2px; margin-bottom: 18px;
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+    backdrop-filter: blur(4px); border-radius: 10px;
+  }
+  nav a {
+    text-decoration: none; white-space: nowrap; font-size: 0.76rem; font-weight: 600;
+    color: var(--muted); padding: 6px 11px; border: 1px solid var(--border); border-radius: 999px;
+    background: var(--panel);
+  }
+  nav a:hover { color: var(--text); border-color: var(--blue); }
+
+  /* ---------- Sections ---------- */
+  section { margin-bottom: 30px; scroll-margin-top: 130px; }
+  .sec-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .sec-num {
+    min-width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center;
+    font-weight: 800; font-size: 0.9rem; color: var(--panel);
+  }
+  .sec-num.bl { background: var(--blue); } .sec-num.gr { background: var(--green); }
+  .sec-num.am { background: var(--amber); } .sec-num.rd { background: var(--red); }
+  .sec-num.vi { background: var(--violet); }
+  .sec-head h2 { font-size: 1.25rem; }
+  .sec-sub { color: var(--muted); font-size: 0.88rem; margin-bottom: 14px; }
+
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px 18px; margin-bottom: 14px;
+  }
+  .card h3 { font-size: 1rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .card p { margin-bottom: 8px; }
+  .card ul, .card ol { padding-left: 20px; margin-bottom: 8px; }
+  .card li { margin-bottom: 4px; }
+
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+
+  .callout {
+    border-radius: 10px; padding: 12px 14px; margin: 12px 0; font-size: 0.9rem;
+    border: 1px solid var(--border); background: var(--card-2);
+  }
+  .callout.b { border-left: 4px solid var(--blue); }
+  .callout.g { border-left: 4px solid var(--green); }
+  .callout.a { border-left: 4px solid var(--amber); }
+  .callout.r { border-left: 4px solid var(--red); }
+  .callout.v { border-left: 4px solid var(--violet); }
+  .callout strong { color: var(--text); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 10px 0; }
+  th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--card-2); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  tr:nth-child(even) td { background: color-mix(in srgb, var(--card-2) 55%, transparent); }
+
+  code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .inline-code { background: var(--card-2); border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px; font-size: 0.85em; }
+  pre {
+    background: var(--code-bg); color: #dbeafe; border-radius: 10px; padding: 14px 16px;
+    overflow-x: auto; font-size: 0.8rem; line-height: 1.5; margin: 10px 0; border: 1px solid var(--border);
+  }
+  pre .dim { color: #64748b; }
+  pre .hl { color: #fbbf24; font-weight: 700; }
+
+  .chip {
+    display: inline-flex; align-items: center; gap: 5px; padding: 2px 10px; border-radius: 999px;
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.02em; white-space: nowrap;
+  }
+  .chip.succ { background: var(--green-dim); color: var(--green); }
+  .chip.warn { background: var(--amber-dim); color: var(--amber); }
+  .chip.down { background: var(--red-dim); color: var(--red); }
+  .chip.info { background: var(--blue-dim); color: var(--blue); }
+  .chip.fs   { background: var(--violet-dim); color: var(--violet); }
+
+  .keyval { display: flex; gap: 16px; flex-wrap: wrap; margin: 8px 0; }
+  .kv { background: var(--card-2); border: 1px solid var(--border); border-radius: 10px; padding: 8px 14px; font-size: 0.84rem; }
+  .kv b { display: block; color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 2px; }
+
+  /* ---------- Chains ---------- */
+  .chain { display: flex; align-items: stretch; gap: 6px; flex-wrap: wrap; margin: 12px 0; }
+  .chain .c {
+    background: var(--card-2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 12px; font-size: 0.8rem; text-align: center; flex: 1; min-width: 110px; font-weight: 600;
+  }
+  .chain .c.arw { border: none; background: none; color: var(--muted); flex: 0 0 auto; font-size: 1.1rem; font-weight: 800; min-width: 24px; padding: 8px 0; }
+  .chain .c i { display: block; font-style: normal; color: var(--muted); font-weight: 400; font-size: 0.72rem; margin-top: 2px; }
+
+  /* ---------- Calculators & duels ---------- */
+  .calc-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+  .calc-row label { font-size: 0.84rem; font-weight: 600; display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 220px; }
+  .calc-row input[type=range] { width: 100%; accent-color: var(--blue); }
+  .calc-row .val { color: var(--blue); font-family: ui-monospace, monospace; font-weight: 700; }
+  select {
+    background: var(--card-2); color: var(--text); border: 1px solid var(--border);
+    border-radius: 8px; padding: 7px 10px; font-size: 0.86rem; font-weight: 600; cursor: pointer;
+  }
+  .duel-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 10px 0; font-size: 0.88rem; }
+  .duel-row b { color: var(--blue); }
+  .verdict {
+    border-radius: 10px; padding: 12px 16px; font-weight: 700; font-size: 0.95rem; margin-top: 10px;
+    border: 1px solid var(--border);
+  }
+  .verdict.fs  { background: var(--green-dim); color: var(--green); border-color: var(--green); }
+  .verdict.eq  { background: var(--amber-dim); color: var(--amber); border-color: var(--amber); }
+  .verdict.no  { background: var(--red-dim); color: var(--red); border-color: var(--red); }
+  .big-num { font-size: 1.4rem; font-weight: 800; color: var(--blue); font-family: ui-monospace, monospace; }
+
+  /* ---------- Simulation ---------- */
+  .step-log { max-height: 260px; overflow-y: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--code-bg); padding: 12px 14px; }
+  .step-log .s { font-family: ui-monospace, monospace; font-size: 0.78rem; color: #93c5fd; padding: 3px 0; border-bottom: 1px dashed #1e3a5f; display: flex; gap: 8px; }
+  .step-log .s:last-child { border-bottom: none; }
+  .step-log .s .n { color: #64748b; min-width: 18px; }
+  .step-log .s.active { color: #fbbf24; background: rgba(251,191,36,0.08); margin: 0 -14px; padding: 3px 14px; }
+  .step-log .s.final { color: #34d399; font-weight: 700; }
+  .sima { min-height: 150px; }
+  .topology {
+    display: flex; align-items: stretch; gap: 12px; flex-wrap: wrap; margin: 14px 0;
+  }
+  .router-box {
+    border: 2px solid var(--blue); border-radius: 12px; padding: 12px 16px; text-align: center;
+    background: var(--card-2); min-width: 120px; display: flex; flex-direction: column; justify-content: center; gap: 4px;
+  }
+  .router-box .name { font-weight: 800; font-size: 0.95rem; }
+  .router-box .sub { font-size: 0.72rem; color: var(--muted); }
+  .router-box.ospf { border-color: var(--green); }
+  .router-box.eigrp { border-color: var(--amber); }
+
+  /* ---------- Flowchart ---------- */
+  .tree { display: flex; flex-direction: column; align-items: center; gap: 0; padding: 10px 0; }
+  .t-node {
+    border-radius: 10px; padding: 8px 16px; font-size: 0.84rem; font-weight: 700; text-align: center;
+    min-width: 210px; max-width: 340px;
+  }
+  .t-node.pass { background: var(--green-dim); color: var(--green); border: 1px solid var(--green); }
+  .t-node.act  { background: var(--amber-dim); color: var(--amber); border: 1px solid var(--amber); }
+  .t-node.q    { background: var(--blue-dim); color: var(--blue); border: 1px solid var(--blue); }
+  .t-node.no   { background: var(--red-dim); color: var(--red); }
+  .t-arrow { color: var(--muted); font-size: 1rem; padding: 2px 0; line-height: 1; }
+  .t-split { display: flex; gap: 26px; justify-content: center; margin-top: 6px; }
+  .t-split .branch { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .t-labeled { display: flex; align-items: center; gap: 8px; }
+  .t-labeled .lab { color: var(--muted); font-size: 0.72rem; font-weight: 700; }
+
+  /* ---------- Traps ---------- */
+  .trap-card { cursor: pointer; user-select: none; transition: border-color 0.15s; }
+  .trap-card:hover { border-color: var(--red); }
+  .trap-card .t { font-weight: 700; font-size: 0.92rem; display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+  .trap-card .t .hint { color: var(--red); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; opacity: 0.8; }
+  .trap-card.flipped { border-color: var(--red); background: var(--red-dim); border-width: 1.5px; }
+  .trap-card .ans { margin-top: 10px; border-top: 1px dashed var(--border); padding-top: 10px; font-size: 0.88rem; }
+
+  /* ---------- Quiz ---------- */
+  .q-card { border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; background: var(--card); }
+  .q-card .qtext { font-weight: 700; margin-bottom: 10px; font-size: 0.93rem; }
+  .opt { display: block; width: 100%; text-align: left; padding: 8px 12px; margin: 5px 0; border-radius: 8px; cursor: pointer; font-size: 0.86rem; border: 1px solid var(--border); background: var(--card-2); color: var(--text); }
+  .opt:hover:not(:disabled) { border-color: var(--blue); }
+  .opt.picked { border-color: var(--blue); background: var(--blue-dim); font-weight: 700; }
+  .opt.correct { border-color: var(--green); background: var(--green-dim); }
+  .opt.wrong { border-color: var(--red); background: var(--red-dim); }
+  .opt:disabled { cursor: default; opacity: 0.9; }
+  .q-why { margin-top: 8px; font-size: 0.84rem; color: var(--muted); }
+  .q-why b { color: var(--text); }
+  .score-bar { display: flex; align-items: center; gap: 12px; margin: 12px 0; flex-wrap: wrap; }
+  .score-meter { flex: 1; height: 10px; background: var(--card-2); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; min-width: 160px; }
+  .score-meter div { height: 100%; background: var(--green); transition: width 0.3s; }
+
+  /* ---------- Checklist ---------- */
+  .check-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; margin-bottom: 4px; font-size: 0.88rem; cursor: pointer; }
+  .check-item:hover { background: var(--hover); }
+  .check-item input { accent-color: var(--green); width: 16px; height: 16px; cursor: pointer; }
+  .check-item.done { color: var(--muted); text-decoration: line-through; }
+  .check-item a { color: var(--text); text-decoration: none; }
+  .check-item a:hover { color: var(--blue); text-decoration: underline; }
+  .prog { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .prog .meter { flex: 1; height: 10px; background: var(--card-2); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
+  .prog .meter div { height: 100%; background: var(--green); transition: width 0.3s; }
+
+  footer { margin-top: 30px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.82rem; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  footer a { color: var(--blue); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  .pill-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+  .pill { padding: 6px 12px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; border: 1px solid var(--border); background: var(--card-2); }
+
+  @media print {
+    header, nav, .btn, .sim-controls, footer .no-print { display: none !important; }
+    body { background: #fff; }
+    * { color: #111 !important; background: #fff !important; border-color: #ccc !important; }
+  }
+</style>
+</head>
+<body>
+<div id="app" :data-theme="theme">
+
+  <!-- ================= HEADER ================= -->
+  <header>
+    <h1>
+      <span class="lv-badge">Level 13</span>
+      How Route Redistribution Works
+      <span class="exam-badge">ENCOR 350-401</span>
+    </h1>
+    <div class="head-actions">
+      <a class="btn" href="../index.html">Flashcards</a>
+      <button class="btn" @click="toggleTheme">{{ theme === 'dark' ? 'Light' : 'Dark' }} mode</button>
+    </div>
+  </header>
+
+  <!-- ================= NAV ================= -->
+  <nav>
+    <a href="#overview">1 · What is Redistribution</a>
+    <a href="#scenarios">2 · Protocol Pairs</a>
+    <a href="#seed">3 · Seed Metrics</a>
+    <a href="#ad">4 · Administrative Distance</a>
+    <a href="#tags">5 · Route Tags</a>
+    <a href="#filtering">6 · Filtering</a>
+    <a href="#loops">7 · Loop Prevention</a>
+    <a href="#design">8 · Design Rules</a>
+    <a href="#commands">9 · Commands</a>
+    <a href="#traps">10 · Traps</a>
+    <a href="#quiz">11 · Quiz</a>
+    <a href="#plan">12 · Checklist</a>
+  </nav>
+
+  <!-- ================= 1. WHAT IS REDISTRIBUTION ================= -->
+  <section id="overview">
+    <div class="sec-head"><div class="sec-num bl">1</div><h2>What is Route Redistribution?</h2></div>
+    <div class="card">
+      <p>
+        <b>Route redistribution</b> injects routes from one routing protocol domain into another
+        at a <b>boundary router</b> (ASBR / redistribution point). Enterprises must redistribute when a
+        network runs multiple protocols — the classic example is OSPF in the campus and EIGRP in the
+        WAN, or either IGP feeding a provider over <b>BGP</b>.
+      </p>
+      <div class="grid2">
+        <div class="callout b">
+          <strong>Why redistribute</strong><br>
+          Routing protocols do not talk to each other natively. Redistribution is the bridge — but the
+          <b>metrics, AD values and route semantics do not translate</b>. You must seed metrics, watch
+          administrative distances, and filter to survive.
+        </div>
+        <div class="callout g">
+          <strong>The three mechanical problems</strong><br>
+          1) <b>Seed metrics</b> — the receiving protocol needs a metric it understands.<br>
+          2) <b>Administrative distance</b> — AD decides conflicts, and redistribution creates them.<br>
+          3) <b>Loops</b> — two-way redistributing without filters feeds routes back into themselves.
+        </div>
+      </div>
+      <h3>The redistribution checklist — every good design answers these</h3>
+      <div class="chain">
+        <div class="c">Seed metrics set?<i>EIGRP needs the 5-tuple, OSPF cost, BGP MED</i></div>
+        <div class="c arw">→</div>
+        <div class="c">Only wanted routes?<i>route-map + prefix-list at the boundary</i></div>
+        <div class="c arw">→</div>
+        <div class="c">Origins marked?<i>route tags / BGP communities</i></div>
+        <div class="c arw">→</div>
+        <div class="c">Return path denied?<i>deny your own tag — break the feedback loop</i></div>
+        <div class="c arw">→</div>
+        <div class="c">AD predictable?<i>know which source wins each conflict</i></div>
+      </div>
+      <div class="callout r">
+        <strong>Exam trap:</strong> redistribution is <b>not symmetric by default</b>. Configuring
+        OSPF → EIGRP on one router gives you reachability in exactly one direction. The reverse
+        direction needs its own `redistribute` command with its own seed metric.
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 2. PROTOCOL PAIRS ================= -->
+  <section id="scenarios">
+    <div class="sec-head"><div class="sec-num bl">2</div><h2>The Three Protocol Scenarios</h2></div>
+    <div class="sec-sub">Pick a scenario. These are the three redistribution combinations ENCOR actually tests.</div>
+
+    <div class="pill-list">
+      <button v-for="(s, i) in scenarios" :key="s.key" class="pill btn"
+        :class="activeScenario === i ? 'primary' : ''" @click="pickScenario(i)">{{ s.name }}</button>
+    </div>
+
+    <div v-if="currentScenario" class="card">
+      <h3>{{ currentScenario.name }} <span class="chip info" style="margin-left:6px;">{{ currentScenario.roleTxt }}</span></h3>
+      <div class="keyval">
+        <div class="kv"><b>Seed metric</b>{{ currentScenario.seed }}</div>
+        <div class="kv"><b>Origin</b>{{ currentScenario.originTxt }}</div>
+        <div class="kv"><b>MED / metric</b>{{ currentScenario.medTxt }}</div>
+      </div>
+      <pre><span class="hl"># {{ currentScenario.cmdTxt }}</span>
+{{ currentScenario.config }}</pre>
+      <ul>
+        <li v-for="(f, fi) in currentScenario.facts" :key="fi">{{ f }}</li>
+      </ul>
+      <div class="callout a"><strong>Exam trap:</strong> {{ currentScenario.trap }}</div>
+    </div>
+  </section>
+
+  <!-- ================= 3. SEED METRICS ================= -->
+  <section id="seed">
+    <div class="sec-head"><div class="sec-num am">3</div><h2>Seed Metrics</h2></div>
+    <div class="sec-sub">Every redistributed route enters the receiving protocol with a seed metric. EIGRP is the dangerous one — no default exists.</div>
+
+    <div class="card">
+      <h3>What does each protocol expect?</h3>
+      <table>
+        <tr><th>Protocol</th><th>Default seed</th><th>Effect if untouched</th></tr>
+        <tr><td><b>EIGRP</b></td><td>None</td><td>Routes <b>not advertised</b> — invisible</td></tr>
+        <tr><td>OSPF</td><td><span class="inline-code">auto-cost</span> / 20 external</td><td>E1/E2 with default cost</td></tr>
+        <tr><td>BGP</td><td>MED = 0</td><td>Provider prefers 0 — attractive!</td></tr>
+        <tr><td>RIP</td><td>metric 1</td><td>Routes appear at 1 hop</td></tr>
+        <tr><td>IS-IS</td><td>0</td><td>metric 0</td></tr>
+      </table>
+      <div class="callout r">
+        <strong>Exam trap:</strong> <b>EIGRP has no default seed metric</b>. `redistribute ospf 1` without
+        a metric or default-metric silently drops every route — this is the number-one redistribution
+        exam point. OSPF and BGP always produce something; EIGRP produces nothing.
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Seed explorer</h3>
+      <p>Pick a receiving protocol to see its seed, the failure mode, and the command that fixes it.</p>
+      <div class="pill-list">
+        <button v-for="p in seedProtos" :key="p" class="pill btn"
+          :class="activeSeed === p ? 'primary' : ''" @click="activeSeed = p">{{ p }}</button>
+      </div>
+      <div v-if="seedInfo" class="keyval">
+        <div class="kv"><b>Receiving protocol</b>{{ seedInfo.proto }}</div>
+        <div class="kv"><b>Seed metric</b>{{ seedInfo.seed }}</div>
+        <div class="kv"><b>Failure mode</b>{{ seedInfo.effect }}</div>
+      </div>
+      <pre v-if="seedInfo">{{ seedInfo.cmd }}</pre>
+      <div class="callout b" style="font-size:0.84rem;"><strong>Tip:</strong> {{ seedInfo.tip }}</div>
+    </div>
+
+    <div class="card">
+      <h3>The EIGRP five-part seed — live calculator</h3>
+      <p style="font-size:0.86rem;">
+        The seed is <span class="inline-code">metric BANDWIDTH DELAY RELIABILITY LOAD MTU</span>.
+        Slide bandwidth and delay to see what the seed becomes as a classic EIGRP composite metric:
+      </p>
+      <div class="calc-row">
+        <label>Bandwidth (kbps)
+          <input type="range" min="64" max="1000000" step="1" v-model.number="seedBw">
+          <span class="val">{{ seedBw }} kbps</span>
+        </label>
+        <label>Delay (µs / 10)
+          <input type="range" min="1" max="10000" step="1" v-model.number="seedDly">
+          <span class="val">{{ seedDly }}</span>
+        </label>
+      </div>
+      <div class="keyval">
+        <div class="kv"><b>Your 5-tuple</b>metric {{ seedBw }} {{ seedDly }} 255 1 1500</div>
+        <div class="kv"><b>Composite result</b><span class="big-num">{{ seedMetric.toLocaleString() }}</span></div>
+      </div>
+      <p style="font-size:0.8rem; color:var(--muted);">
+        Formula used: 256 × ( 10,000,000 / bandwidth + delay/10 ). Setting a seed far from your real
+        link characteristics produces ugly metrics — tune the 5-tuple to mirror reality.
+      </p>
+    </div>
+  </section>
+
+  <!-- ================= 4. ADMINISTRATIVE DISTANCE ================= -->
+  <section id="ad">
+    <div class="sec-head"><div class="sec-num gr">4</div><h2>Administrative Distance</h2></div>
+    <div class="sec-sub">When two protocols know the same prefix, AD picks the winner before any metric comparison. Redistribution multiplies these conflicts.</div>
+
+    <div class="grid2">
+      <div class="card">
+        <h3>Default ADs — memorize</h3>
+        <table>
+          <tr><th>Source</th><th>AD</th></tr>
+          <tr><td>Connected</td><td>0</td></tr>
+          <tr><td>Static</td><td>1</td></tr>
+          <tr><td>eBGP</td><td>20</td></tr>
+          <tr><td>EIGRP internal</td><td>90</td></tr>
+          <tr><td>OSPF</td><td>110</td></tr>
+          <tr><td>IS-IS</td><td>115</td></tr>
+          <tr><td>RIP</td><td>120</td></tr>
+          <tr><td>EIGRP external</td><td>170</td></tr>
+          <tr><td>iBGP</td><td>200</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h3>AD duel — who wins?</h3>
+        <p style="font-size:0.86rem;">Pick two sources for the same prefix and see which one the RIB installs.</p>
+        <div class="duel-row">
+          <select v-model="adA">
+            <option v-for="s in adSources" :key="s.id" :value="s.id">{{ s.name }}</option>
+          </select>
+          <b>vs</b>
+          <select v-model="adB">
+            <option v-for="s in adSources" :key="s.id" :value="s.id">{{ s.name }}</option>
+          </select>
+        </div>
+        <div class="verdict" :class="adVerdict.cls"><span v-if="adVerdict.tie">TIE —</span> {{ adVerdict.text }}</div>
+        <div class="callout r">
+          <strong>AD beats metric. Always.</strong> A redistributed route with an amazing metric still
+          loses to any lower-AD source. EIGRP external (170) loses to OSPF (110) — the classic
+          redistribution surprise.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>The internal vs external trap</h3>
+      <p>
+        <span class="inline-code">redistribute ospf 1</span> creates <b>EIGRP external</b> routes with
+        AD <b>170</b>. If the same prefix also exists as an <b>EIGRP internal</b> route (AD 90), the
+        internal one wins and the redistributed copy is ignored entirely. Reverse direction: OSPF
+        (110) beats an EIGRP-external copy.
+      </p>
+      <pre>router ospf 1
+ distance 120 10.0.0.1 0.0.0.0 ACL-OSPF-LOW   <span class="dim">! give the real source a lower AD</span>
+router eigrp CAMPUS
+ address-family ipv4 unicast autonomous-system 100
+  topology base
+   distance eigrp 90 200                          <span class="dim">! internal / external separately</span></pre>
+      <p style="font-size:0.86rem;">
+        Priority order when designing redistribution: <b>1) existence (filtering) → 2) AD → 3) metric</b>.
+        Filter first, then align ADs deliberately instead of relying on defaults.
+      </p>
+    </div>
+  </section>
+
+  <!-- ================= 5. ROUTE TAGS ================= -->
+  <section id="tags">
+    <div class="sec-head"><div class="sec-num gr">5</div><h2>Route Tags</h2></div>
+    <div class="sec-sub">Tags label routes as they enter a protocol so downstream routers can identify origin and apply policy. Tags survive redistribution boundaries.</div>
+
+    <div class="card">
+      <h3>Tag fields per protocol</h3>
+      <table>
+        <tr><th>Protocol</th><th>Tag field</th></tr>
+        <tr><td>OSPF</td><td>External route tag (E1/E2 only, 32-bit)</td></tr>
+        <tr><td>EIGRP</td><td>Route tag (32-bit)</td></tr>
+        <tr><td>RIP</td><td>Route tag (16-bit)</td></tr>
+        <tr><td>BGP</td><td>Community — the tag analog (ASN:value)</td></tr>
+      </table>
+      <div class="callout a">
+        <strong>Exam trap:</strong> OSPF carries tags <b>only on external routes (E1/E2)</b>. Internal
+        OSPF routes have no tag field — if you need to mark internal routes, redistribute them or use
+        another mechanism.
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Tag lifecycle — animated</h3>
+      <p>Press play and watch a tag travel from the OSPF boundary, through EIGRP, and stop the route from bouncing back.</p>
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:12px;">
+        <button class="btn green" @click="playTags" :disabled="tagRunning">▶ Play tag flow</button>
+        <button class="btn" @click="resetTags" :disabled="!tagRunning && tagSteps.length === 0">Reset</button>
+        <span class="chip info" v-if="tagRunning">running…</span>
+      </div>
+      <div class="step-log sima">
+        <div class="s" :class="{ 'active': i === tagSteps.length - 1 && tagRunning }" v-for="(s, i) in tagSteps" :key="i">
+          <span class="n">{{ i + 1 }}.</span><span>{{ s }}</span>
+        </div>
+        <div class="s" v-if="tagSteps.length === 0"><span class="n" style="color:var(--muted)">Tag flow idle — press Play.</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Config: set at entry, match downstream, deny on return</h3>
+      <pre>route-map ENABLE-TAG permit 10
+ match ip address prefix-list OSPF-ONLY
+ set tag 100
+
+router eigrp CAMPUS
+ address-family ipv4 unicast autonomous-system 100
+  topology base
+   redistribute ospf 1 route-map ENABLE-TAG</pre>
+      <p>Downstream, match the tag to apply policy — or to <b>deny the return path</b> (the loop-prevention backbone, section 7):</p>
+      <pre>route-map CATCH-TAG permit 10
+ match tag 100
+ set metric 10000 100 255 1 1500</pre>
+      <h3>Route tag vs BGP community</h3>
+      <table>
+        <tr><th>Aspect</th><th>Route tag</th><th>BGP community</th></tr>
+        <tr><td>Scope</td><td>Single numeric field (32-bit)</td><td>4-byte ASN:value</td></tr>
+        <tr><td>Where</td><td>IGP routes</td><td>BGP path attribute</td></tr>
+        <tr><td>Purpose</td><td>Origin / policy marker</td><td>Richer policy + transitive</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ================= 6. FILTERING ================= -->
+  <section id="filtering">
+    <div class="sec-head"><div class="sec-num am">6</div><h2>Filtering</h2></div>
+    <div class="sec-sub">Filtering decides which routes cross the boundary. Blind redistribution creates loops, black holes and metric surprises.</div>
+
+    <div class="card">
+      <h3>Filter placement</h3>
+      <table>
+        <tr><th>Filter</th><th>Command</th><th>Direction</th></tr>
+        <tr><td>Route-map</td><td><span class="inline-code">redistribute ospf 1 route-map RM</span></td><td>at redistribution</td></tr>
+        <tr><td>Distribute-list (EIGRP)</td><td><span class="inline-code">distribute-list ACL in/out</span></td><td>per protocol</td></tr>
+        <tr><td>Distribute-list (OSPF)</td><td><span class="inline-code">distribute-list ACL in</span></td><td><b>OSPF in only</b></td></tr>
+        <tr><td>Prefix-list in route-map</td><td><span class="inline-code">match ip address prefix-list PL</span></td><td>selection</td></tr>
+      </table>
+      <div class="callout r">
+        <strong>Exam trap:</strong> OSPF distribute-lists on Cisco IOS are <b>`in` only</b> — there is no
+        `distribute-list … out` for OSPF. The standard tool for redistribution filtering is the
+        <b>route-map</b> attached to the `redistribute` command.
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>The route-map pattern (recommended)</h3>
+      <pre>ip prefix-list ALLOWED seq 10 permit 10.10.0.0/16 le 24
+ip prefix-list ALLOWED seq 20 permit 192.168.0.0/24
+
+route-map FILTER-REDIST permit 10
+ match ip address prefix-list ALLOWED
+ set metric 10000 100 255 1 1500
+
+router eigrp CAMPUS
+ address-family ipv4 unicast autonomous-system 100
+  topology base
+   redistribute ospf 1 route-map FILTER-REDIST</pre>
+      <div class="chain">
+        <div class="c">Prefix matches permit?<i>route-map evaluates sequences in order</i></div>
+        <div class="c arw">→</div>
+        <div class="c">Yes → allowed + set actions<i>seed metric, tag, MED</i></div>
+        <div class="c arw">→</div>
+        <div class="c">No more sequences<i>implicit deny at the end</i></div>
+        <div class="c arw">→</div>
+        <div class="c">Route dropped<i>not redistributed</i></div>
+      </div>
+      <div class="callout g">
+        <strong>Implicit deny:</strong> a route-map ends with an <b>implicit deny</b>. Anything that
+        matches no permit sequence is silently dropped at the boundary. This is a feature — use it to
+        make your allow-list explicit.
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Direction gotcha — local, not neighbor</h3>
+      <p>
+        Filter direction is measured on the <b>local</b> router:
+      </p>
+      <ul>
+        <li><span class="inline-code">redistribute ospf 1 route-map RM</span> filters what <b>enters EIGRP locally</b>.</li>
+        <li><span class="inline-code">neighbor … route-map RM out</span> (BGP) filters what <b>leaves to a peer</b>.</li>
+      </ul>
+      <p style="font-size:0.86rem;">Misplaced direction = routes slip straight through your policy. Verify with <span class="inline-code">show route-map</span> counters.</p>
+    </div>
+  </section>
+
+  <!-- ================= 7. LOOP PREVENTION ================= -->
+  <section id="loops">
+    <div class="sec-head"><div class="sec-num rd">7</div><h2>Loop Prevention</h2></div>
+    <div class="sec-sub">The classic failure: routes leave OSPF into EIGRP, come back into OSPF as externals, then bounce again — inflating metrics and flapping the RIB.</div>
+
+    <div class="card">
+      <h3>The experiment</h3>
+      <div class="topology">
+        <div class="router-box ospf"><div class="name">OSPF</div><div class="sub">AD 110 · area 0</div></div>
+        <div class="router-box"><div class="name">R1</div><div class="sub">boundary · tags + seed</div></div>
+        <div class="router-box eigrp"><div class="name">EIGRP</div><div class="sub">AD int 90 / ext 170</div></div>
+        <div class="router-box"><div class="name">R2</div><div class="sub">boundary · back into OSPF</div></div>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:12px;">
+        <button class="btn red" :class="{ primary: loopMode === 'blind' }" @click="setLoopMode('blind')">Two-way blind redistribute</button>
+        <button class="btn green" :class="{ primary: loopMode === 'tags' }" @click="setLoopMode('tags')">Tag-based deny</button>
+        <button class="btn" @click="runLoop" :disabled="loopRunning">▶ Run simulation</button>
+        <button class="btn" @click="resetLoop" :disabled="!loopRunning && loopSteps.length === 0">Reset</button>
+      </div>
+      <div class="keyval">
+        <div class="kv"><b>Mode</b>{{ loopMode === 'tags' ? 'Tag-based deny (loop broken)' : 'Blind two-way (loop expected)' }}</div>
+        <div class="kv"><b>Route metric</b>{{ loopMetric.toLocaleString() }} <span style="color:var(--muted);">(illustrative)</span></div>
+      </div>
+      <div class="verdict" :class="loopVerdict.cls" style="margin-top:0;">
+        {{ loopVerdict.label }} — {{ loopVerdict.takeaway }}
+      </div>
+      <div class="step-log" style="margin-top:12px;">
+        <div class="s" :class="{ 'active': i === loopSteps.length - 1 && loopRunning, 'final': !loopRunning && loopSteps.length > 0 && i === loopSteps.length - 1 }" v-for="(s, i) in loopSteps" :key="i">
+          <span class="n">{{ i + 1 }}.</span><span>{{ s }}</span>
+        </div>
+        <div class="s" v-if="loopSteps.length === 0"><span class="n" style="color:var(--muted)">Simulation idle — pick a mode, then press Run.</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>The defenses, ranked</h3>
+      <table>
+        <tr><th>Defense</th><th>How</th><th>Strength</th></tr>
+        <tr><td><b>Route tags</b></td><td>tag at entry; deny the tag going back</td><td>strongest</td></tr>
+        <tr><td>Filters</td><td>deny own prefixes at each boundary</td><td>standard</td></tr>
+        <tr><td>Single boundary router</td><td>one redistribution point — no feedback pair</td><td>simplest</td></tr>
+        <tr><td>AD tuning</td><td>make one source win predictably</td><td>situational</td></tr>
+      </table>
+      <p style="font-size:0.86rem;">
+        Symptoms of a loop: routes with <b>metrics larger than expected</b>, routes <b>flapping</b>
+        between protocols (AD flip), one side losing routes entirely, and BGP origin `?` everywhere.
+      </p>
+    </div>
+  </section>
+
+  <!-- ================= 8. DESIGN RULES ================= -->
+  <section id="design">
+    <div class="sec-head"><div class="sec-num vi">8</div><h2>Redistribution Design Rules</h2></div>
+    <div class="sec-sub">Run your design through this flow before you write any config. It never lets a loop in.</div>
+
+    <div class="card">
+      <div class="tree">
+        <div class="t-node q">Is there exactly one boundary router between the two domains?</div>
+        <div class="t-split">
+          <div class="branch">
+            <div class="t-labeled"><span class="lab">YES</span><span class="t-arrow">↓</span></div>
+            <div class="t-node pass">Cleanest design — no feedback pair, predictable metrics</div>
+            <div class="t-arrow">↓</div>
+            <div class="t-node q">Are seed metrics set on both directions?</div>
+            <div class="t-split">
+              <div class="branch">
+                <div class="t-labeled"><span class="lab">NO</span><span class="t-arrow">↓</span></div>
+                <div class="t-node no">Routes silently dropped (EIGRP) / MED 0 (BGP) — fix seeds first</div>
+              </div>
+              <div class="branch">
+                <div class="t-labeled"><span class="lab">YES</span><span class="t-arrow">↓</span></div>
+                <div class="t-node pass">Functional — add tags + filters to harden</div>
+              </div>
+            </div>
+          </div>
+          <div class="branch">
+            <div class="t-labeled"><span class="lab">NO</span><span class="t-arrow">↓</span></div>
+            <div class="t-node q">Symmetric filters on BOTH boundary routers?</div>
+            <div class="t-split">
+              <div class="branch">
+                <div class="t-labeled"><span class="lab">NO</span><span class="t-arrow">↓</span></div>
+                <div class="t-node no">LOOP RISK — stop. Add filters before anything else</div>
+              </div>
+              <div class="branch">
+                <div class="t-labeled"><span class="lab">YES</span><span class="t-arrow">↓</span></div>
+                <div class="t-node q">Routes tagged at entry, tag denied on return?</div>
+                <div class="t-split">
+                  <div class="branch">
+                    <div class="t-labeled"><span class="lab">NO</span><span class="t-arrow">↓</span></div>
+                    <div class="t-node act">Working but fragile — add tags for deterministic loop breaking</div>
+                  </div>
+                  <div class="branch">
+                    <div class="t-labeled"><span class="lab">YES</span><span class="t-arrow">↓</span></div>
+                    <div class="t-node pass">Loop-free design — ship it</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="callout v">
+        <strong>Quick review:</strong> worst practice = two-way blind redistribute. Best practice =
+        tags at entry + deny on return + route-map filters + deliberate ADs.
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 9. COMMANDS ================= -->
+  <section id="commands">
+    <div class="sec-head"><div class="sec-num bl">9</div><h2>Command Viewer</h2></div>
+    <div class="card">
+      <div class="pill-list">
+        <button v-for="c in commands" :key="c.key" class="pill btn" :class="activeCmd === c.key ? 'primary' : ''" @click="activeCmd = c.key">{{ c.label }}</button>
+      </div>
+      <div v-if="activeCommand">
+        <p style="font-size:0.84rem; color:var(--muted);">{{ activeCommand.tagline }}</p>
+        <pre>{{ activeCommand.cmd }}<span class="dim">
+{{ activeCommand.output }}</span></pre>
+        <div class="callout b" style="font-size:0.84rem;"><strong>What to look at:</strong> {{ activeCommand.read }}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 10. TRAPS ================= -->
+  <section id="traps">
+    <div class="sec-head"><div class="sec-num rd">10</div><h2>Exam Traps — flip to reveal</h2></div>
+    <div class="sec-sub">Click any card to flip it. These are the redistribution questions people get wrong on ENCOR.</div>
+    <div class="grid2">
+      <div v-for="(t, i) in traps" :key="i" class="card trap-card" :class="{ flipped: trapOpen[i] }" @click="trapOpen[i] = !trapOpen[i]">
+        <div class="t">
+          <span>{{ i + 1 }}. {{ t.q }}</span>
+          <span class="hint">{{ trapOpen[i] ? '▲' : 'REVEAL' }}</span>
+        </div>
+        <div v-if="trapOpen[i]" class="ans">{{ t.a }}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 11. SUMMARY + QUIZ ================= -->
+  <section id="quiz">
+    <div class="sec-head"><div class="sec-num gr">11</div><h2>One-Minute Summary &amp; Self-Test</h2></div>
+
+    <div class="card">
+      <h3>Redistribution in 60 seconds</h3>
+      <pre>Scenario 1  OSPF → EIGRP : seed REQUIRED (BW delay rel load MTU) — else routes vanish.
+Scenario 2  OSPF → BGP    : network → origin i · redistribute → origin ? · MED = OSPF metric.
+Scenario 3  EIGRP → BGP   : no seed needed · MED default 0 (attractive!) · filter external routes.
+
+Seed metrics:  EIGRP no default · OSPF cost (subnets + metric-type!) · BGP MED 0.
+
+AD:  Connected 0 · Static 1 · eBGP 20 · EIGRP int 90 · OSPF 110 · IS-IS 115
+     RIP 120 · EIGRP ext 170 · iBGP 200 — lower wins, AD beats metric.
+
+Tags: set at entry → match downstream → deny the tag on the return path.
+      OSPF carries tags on external routes only. BGP analog = community.
+
+Filtering: route-map on redistribute · implicit deny at the end ·
+           OSPF distribute-list is in-only · direction is local.
+
+Loop prevention: one boundary router · or tags + symmetric filters both edges.
+The worst possible answer = two-way blind redistribute.</pre>
+    </div>
+
+    <div class="card">
+      <h3>Mini quiz — {{ quizQuestions.length }} questions</h3>
+      <div class="score-bar">
+        <span class="chip info" v-if="!quizDone">Answer all {{ quizQuestions.length }} to submit</span>
+        <span v-else>
+          <b style="color:var(--green); font-size:1.05rem;">{{ quizScore }} / {{ quizQuestions.length }}</b>
+          <span style="color:var(--muted);"> ({{ Math.round(quizScore / quizQuestions.length * 100) }}%)</span>
+        </span>
+        <div class="score-meter"><div :style="{ width: quizPct + '%' }"></div></div>
+        <button v-if="quizDone" class="btn primary" @click="resetQuiz">Retake (reshuffle)</button>
+      </div>
+
+      <div v-for="(q, qi) in quizQuestions" :key="qi" class="q-card">
+        <div class="qtext">{{ qi + 1 }}. {{ q.q }}</div>
+        <button v-for="(o, oi) in q.options" :key="oi" class="opt"
+          :class="{
+            'picked': q.picked === oi,
+            'correct': quizDone && o.text === q.answerText,
+            'wrong': quizDone && q.picked === oi && o.text !== q.answerText
+          }"
+          :disabled="quizDone"
+          @click="q.picked = oi">
+          {{ ['A','B','C','D'][oi] }}. {{ o.text }}
+        </button>
+        <div v-if="quizDone" class="q-why"><b>Why:</b> {{ q.why }}</div>
+      </div>
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
+        <button class="btn primary" @click="submitQuiz" :disabled="quizDone || answeredCount < quizQuestions.length">
+          {{ answeredCount < quizQuestions.length ? 'Answer all questions first (' + answeredCount + '/' + quizQuestions.length + ')' : 'Submit answers' }}
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 12. CHECKLIST ================= -->
+  <section id="plan">
+    <div class="sec-head"><div class="sec-num vi">12</div><h2>Study Checklist</h2></div>
+    <div class="card">
+      <div class="prog">
+        <span style="font-size:0.85rem; font-weight:700;">{{ doneCount }} / {{ planItems.length }} notes reviewed</span>
+        <div class="meter"><div :style="{ width: doneCount / planItems.length * 100 + '%' }"></div></div>
+      </div>
+      <div v-for="(item, i) in planItems" :key="item.file" class="check-item" :class="{ done: done[i] }">
+        <input type="checkbox" :checked="done[i]" @change="toggleDone(i)">
+        <a :href="item.file" target="_blank">{{ item.label }}</a>
+      </div>
+      <p style="font-size:0.8rem; color:var(--muted); margin-top:8px;">Progress is saved in your browser. After reviewing, drill the deck from the Flashcards button in the header.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span>Level 13 · Route Redistribution — built from [[01. OSPF to EIGRP]], [[02. OSPF to BGP]], [[03. EIGRP to BGP]], [[08. Loop Prevention]] and the rest of the level notes.</span>
+    <span><a href="Route Redistribution Overview.md">← Back to Level 13 overview</a></span>
+  </footer>
+</div>
+
+<script src="../vue.global.prod.js"></script>
+<script>
+(function () {
+  "use strict";
+  const { createApp, ref, computed } = Vue;
+
+  const LS = { theme: "ccnp.redist.theme", done: "ccnp.redist.done", quizbest: "ccnp.redist.quizbest" };
+  function loadJSON(key, fb) { try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fb; } catch { return fb; } }
+  function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+  function shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+  createApp({
+    setup() {
+      // ---------------- theme ----------------
+      const theme = ref(loadJSON(LS.theme, "dark"));
+      function toggleTheme() { theme.value = theme.value === "dark" ? "light" : "dark"; save(LS.theme, theme.value); }
+
+      // ---------------- scenarios (3 protocol pairs) ----------------
+      const scenarios = [
+        {
+          key: "ospf2eigrp", name: "OSPF → EIGRP", roleTxt: "enterprise WAN",
+          seed: "REQUIRED — routes not advertised without it",
+          originTxt: "External in EIGRP (AD 170)",
+          medTxt: "n/a — EIGRP composite",
+          cmdTxt: "redistribute ospf 1 metric 1000 100 255 1 1500",
+          config: `router eigrp CAMPUS
+ address-family ipv4 unicast autonomous-system 100
+  topology base
+   redistribute ospf 1 metric 1000 100 255 1 1500`,
+          facts: [
+            "EIGRP has no default seed metric — routes are simply not advertised without one.",
+            "OSPF cost does not map to the EIGRP composite — you must supply bandwidth/delay.",
+            "All redistributed OSPF routes become EIGRP EXTERNAL routes (AD 170).",
+            "Redistribute only what you want: use a route-map (match + seed) instead of a blanket redistribute.",
+            "Bidirectional redistribution: each direction needs its own seed on its own router."
+          ],
+          trap: "The five seed values are bandwidth (kbps), delay (µs/10), reliability (255 = perfect), load (1 = idle), MTU (bytes). Missing the seed = missing routes."
+        },
+        {
+          key: "ospf2bgp", name: "OSPF → BGP", roleTxt: "advertise to a provider",
+          seed: "MED defaults to 0 — dangerously attractive",
+          originTxt: "? (incomplete) with redistribute · i with network",
+          medTxt: "Inherits the OSPF metric unless overridden",
+          cmdTxt: "redistribute ospf 1 metric 100",
+          config: `router bgp 65001
+ redistribute ospf 1 metric 100`,
+          facts: [
+            "`network` statements need the prefix already in the BGP table — origin becomes i (IGP).",
+            "`redistribute` injects regardless of prior BGP entries — origin becomes ? (incomplete).",
+            "External OSPF routes should be filtered: don't re-advertise provider-learned routes back to the provider.",
+            "`redistribute ospf match internal external 1 external 2` selects which OSPF types enter BGP.",
+            "A route-map can set MED, communities and local-pref on the way in."
+          ],
+          trap: "Origin beats MED in BGP best-path order. The classic ENCOR contrast: network → origin i (0, preferred), redistribute → origin ? (2)."
+        },
+        {
+          key: "eigrp2bgp", name: "EIGRP → BGP", roleTxt: "internal EIGRP to the provider",
+          seed: "None required — unlike OSPF → EIGRP",
+          originTxt: "? with redistribute · i with network",
+          medTxt: "set metric 200 or default 0",
+          cmdTxt: "redistribute eigrp 100 metric 200",
+          config: `router bgp 65001
+ redistribute eigrp 100 metric 200`,
+          facts: [
+            "No special seed metric is needed for EIGRP → BGP — BGP just uses MED / default metric.",
+            "EIGRP internal routes redistribute normally; external ones should be filtered to avoid loops.",
+            "The EIGRP composite metric is opaque to BGP — treat it as a meaningless MED and set your own.",
+            "`network` statements give precise prefix control and origin i."
+          ],
+          trap: "MED default 0 is so attractive to providers you should always set a metric. And never re-advertise EIGRP-external routes into BGP without filtering — that is how feedback loops start."
+        }
+      ];
+      const activeScenario = ref(0);
+      const currentScenario = computed(() => scenarios[activeScenario.value]);
+      function pickScenario(i) { activeScenario.value = i; }
+
+      // ---------------- seed metrics explorer ----------------
+      const seedProtos = ["EIGRP", "OSPF", "BGP", "RIP", "IS-IS"];
+      const activeSeed = ref("EIGRP");
+      const SEED_INFO = {
+        EIGRP: {
+          proto: "EIGRP", seed: "BW delay reliability load MTU (5-tuple)",
+          effect: "No default — redistributed routes are NOT advertised",
+          cmd: `router eigrp CAMPUS
+ address-family ipv4 unicast autonomous-system 100
+  topology base
+   default-metric 10000 100 255 1 1500`,
+          tip: "Use `default-metric` to seed every redistributed source at once, or `metric` on the redistribute line for one source."
+        },
+        OSPF: {
+          proto: "OSPF", seed: "Cost (auto-cost / 20 external)",
+          effect: "Appears as E1/E2 external with the default cost",
+          cmd: `router ospf 1
+ default-metric 50
+ redistribute eigrp 100 subnets
+   metric 75
+   metric-type 1`,
+          tip: "Without `subnets` only classful routes redistribute — CIDR subnets are lost. `metric-type 2` is the default; `metric-type 1` accumulates cost across the AS."
+        },
+        BGP: {
+          proto: "BGP", seed: "MED (default 0)",
+          effect: "MED 0 reads as 'preferred' to providers",
+          cmd: `router bgp 65001
+ redistribute ospf 1 metric 100`,
+          tip: "Set a positive MED for redistributed routes (or equal MEDs on both egress routers) to avoid asymmetric inbound flows."
+        },
+        RIP: {
+          proto: "RIP", seed: "Metric 1 (16 = unreachable)",
+          effect: "Routes appear with metric 1",
+          cmd: "router rip\n redistribute ospf 1 metric 3",
+          tip: "RIP's 16-hop limit still applies after redistribution — a route redistributed from a deep OSPF domain can exceed it."
+        },
+        "IS-IS": {
+          proto: "IS-IS", seed: "Metric 0",
+          effect: "Routes appear with metric 0 — over-attractive",
+          cmd: "router isis\n redistribute ospf 1 metric 10",
+          tip: "IS-IS seeds default to 0; always set a real metric so redistributed routes are not preferred over everything native."
+        }
+      };
+      const seedInfo = computed(() => SEED_INFO[activeSeed.value]);
+
+      // ---------------- EIGRP 5-tuple calculator ----------------
+      const seedBw = ref(10000);
+      const seedDly = ref(100);
+      const seedMetric = computed(() => Math.round(256 * (10000000 / seedBw.value + seedDly.value / 10)));
+
+      // ---------------- AD duel ----------------
+      const adSources = [
+        { id: "connected", name: "Connected", ad: 0 },
+        { id: "static", name: "Static", ad: 1 },
+        { id: "ebgp", name: "eBGP", ad: 20 },
+        { id: "eigrp-int", name: "EIGRP internal", ad: 90 },
+        { id: "ospf", name: "OSPF", ad: 110 },
+        { id: "isis", name: "IS-IS", ad: 115 },
+        { id: "rip", name: "RIP", ad: 120 },
+        { id: "eigrp-ext", name: "EIGRP external", ad: 170 },
+        { id: "ibgp", name: "iBGP", ad: 200 }
+      ];
+      const adA = ref("eigrp-ext");
+      const adB = ref("ospf");
+      const adVerdict = computed(() => {
+        const a = adSources.find(s => s.id === adA.value);
+        const b = adSources.find(s => s.id === adB.value);
+        if (!a || !b) return { cls: "eq", tie: true, text: "Select two sources" };
+        if (a.ad === b.ad) return { cls: "eq", tie: true, text: "TIE at AD " + a.ad + " — the metric decides next." };
+        const w = a.ad < b.ad ? a : b;
+        return {
+          cls: w.ad < 100 ? "fs" : "eq",
+          tie: false,
+          text: w.name + " wins (AD " + w.ad + " < " + (w === a ? b.ad : a.ad) + ") — installed regardless of metric."
+        };
+      });
+
+      // ---------------- tag flow animation ----------------
+      const tagSteps = ref([]);
+      const tagRunning = ref(false);
+      let tagTimer = null, tagToken = 0;
+      const TAG_SEQ = [
+        "R1 redistributes OSPF → EIGRP with route-map ENABLE-TAG: match OSPF ranges, set tag 100",
+        "10.0.0.0/8 leaves OSPF carrying tag 100 — its origin is now readable downstream",
+        "R2 receives the route in EIGRP as EXTERNAL, tag 100 attached",
+        "Downstream policy uses match tag 100 to apply consistent seeds, filters or AD",
+        "At the EIGRP → OSPF boundary, route-map DENY-TAG-100 denies match tag 100",
+        "10.0.0.0/8 is NOT re-advertised into OSPF — the loop is broken at the return path",
+        "Result: OSPF-origin prefixes can never bounce back into OSPF through EIGRP"
+      ];
+      function playTags() {
+        if (tagRunning.value) return;
+        tagSteps.value = []; tagRunning.value = true;
+        const tid = ++tagToken; let i = 0;
+        const tick = () => {
+          if (tagToken !== tid) return;
+          if (i < TAG_SEQ.length) { tagSteps.value.push(TAG_SEQ[i]); i++; tagTimer = setTimeout(tick, 900); }
+          else tagRunning.value = false;
+        };
+        tick();
+      }
+      function resetTags() { tagToken++; clearTimeout(tagTimer); tagRunning.value = false; tagSteps.value = []; }
+
+      // ---------------- loop-prevention simulator ----------------
+      const loopMode = ref("blind");
+      const loopSteps = ref([]);
+      const loopRunning = ref(false);
+      let loopTimer = null, loopToken = 0;
+      const BLIND_SEQ = [
+        "R1 redistributes OSPF → EIGRP — seed 1000/100/255/1/1500",
+        "10.0.0.0/8 enters EIGRP on R1 as EXTERNAL (AD 170)",
+        "R2 learns 10.0.0.0/8 from R1 over EIGRP",
+        "R2 redistributes EIGRP → OSPF (no filters!)",
+        "10.0.0.0/8 re-enters OSPF as E1/E2 external — ORIGIN wiped",
+        "R1 hears the 'new' OSPF route back (AD 110 beats EIGRP external 170)…",
+        "…and redistributes it into EIGRP again — the metric inflates every pass",
+        "LOOP — RIB flaps, metrics climb, route origin destroyed"
+      ];
+      const TAG_SEQ_SAFE = [
+        "R1 redistributes OSPF → EIGRP with route-map: set tag 100",
+        "10.0.0.0/8 enters EIGRP carrying tag 100",
+        "R2 receives the tagged external route in EIGRP",
+        "R2's EIGRP → OSPF redistribution uses DENY-TAG-100: deny match tag 100",
+        "10.0.0.0/8 is NOT re-advertised into OSPF",
+        "Loop broken — OSPF-origin prefixes can never bounce back"
+      ];
+      const loopVerdict = computed(() => loopMode.value === "tags"
+        ? { cls: "fs", label: "LOOP PREVENTED", takeaway: "tag 100 denied at the return path — deterministic, no feedback." }
+        : { cls: "no", label: "LOOP DETECTED", takeaway: "two-way blind redistribution re-injects routes as externals — metric inflates, RIB flaps, origin wiped." });
+      const loopMetric = computed(() => {
+        if (loopMode.value !== "blind") return 100;
+        const passes = Math.min(Math.floor(loopSteps.value.length / 3), 5);
+        return 100 * Math.pow(16, passes);
+      });
+      function setLoopMode(m) { if (loopRunning.value) return; loopMode.value = m; resetLoop(); }
+      function runLoop() {
+        if (loopRunning.value) return;
+        loopSteps.value = []; loopRunning.value = true;
+        const seq = loopMode.value === "tags" ? TAG_SEQ_SAFE : BLIND_SEQ;
+        const tid = ++loopToken; let i = 0;
+        const tick = () => {
+          if (loopToken !== tid) return;
+          if (i < seq.length) { loopSteps.value.push(seq[i]); i++; loopTimer = setTimeout(tick, 850); }
+          else loopRunning.value = false;
+        };
+        tick();
+      }
+      function resetLoop() { loopToken++; clearTimeout(loopTimer); loopRunning.value = false; loopSteps.value = []; }
+
+      // ---------------- commands ----------------
+      const activeCmd = ref("protocols");
+      const activeCommand = computed(() => commands.find(c => c.key === activeCmd.value));
+      const commands = [
+        {
+          key: "protocols", label: "Protocols", cmd: "show ip protocols",
+          tagline: "The redistribution summary: sources, seed metrics and distances."
+          , output: `Routing Protocol is "eigrp 100"
+  Redistributing: ospf 1 (metric 1000, 100, 255, 1, 1500)
+  Distance: internal 90 external 170
+Routing Protocol is "ospf 1"
+  Redistributing: eigrp 100 (metric 75, metric-type 1)
+  Routing for Networks: 10.0.0.0`
+          , read: "Confirm every direction has a seed: a redistribute line without (metric …) on EIGRP means routes are being dropped. Also spot distance overrides here."
+        },
+        {
+          key: "routemap", label: "Route-map", cmd: "show route-map",
+          tagline: "Sequence counters — proves the filter is matching what you think."
+          , output: `route-map FILTER-REDIST, permit, sequence 10
+  Match clauses:
+    ip address prefix-lists: ALLOWED
+  Set clauses:
+    metric 10000 100 255 1 1500
+  Policy routing matches: 0 packets, 0 bytes
+  Routing Protocol matches: 3 routes, 0 denied`
+          , read: "'Routing Protocol matches' counts routes the route-map acted on. 0 matches while routes exist = wrong match clause or wrong prefix-list."
+        },
+        {
+          key: "prefixlist", label: "Prefix-list", cmd: "show ip prefix-list detail",
+          tagline: "Per-entry hit counters for the selection tool."
+          , output: `ip prefix-list ALLOWED:
+  count: 2, range entries: 1, sequences: 10-20, refcount: 3
+  seq 10 permit 10.10.0.0/16 le 24 (hit count: 5)
+  seq 20 permit 192.168.0.0/24 (hit count: 2)`
+          , read: "Rising hit counts = routes matching. A seq with 0 hits while it should be used points at a too-narrow prefix or wrong le/ge range."
+        },
+        {
+          key: "route", label: "Routing table", cmd: "show ip route 10.0.0.0",
+          tagline: "Which source won — and the AD that decided it."
+          , output: `Routing entry for 10.0.0.0/8
+  Known via "ospf 1", distance 110, metric 75, type extern 2
+  Last update from 10.0.1.2 on GigabitEthernet0/0
+  Routing Descriptor Blocks:
+  * 10.0.1.2, from 10.0.1.2, via GigabitEthernet0/0`
+          , read: "'Known via' shows protocol + AD. O EX / D EX prefixes are redistributed; if the 'wrong' source wins, it is usually AD (110 OSPF beat 170 EIGRP external)."
+        },
+        {
+          key: "bgp", label: "BGP table", cmd: "show ip bgp 10.0.0.0",
+          tagline: "MED, origin and path — the redistribution fingerprints."
+          , output: `BGP routing table entry for 10.0.0.0/8
+  Paths: (1 available, best #1)
+  Not advertised to any peer
+  Path #1: (via ospf 1) from 0.0.0.0, origin incomplete, metric 100, localpref 100
+    Next hop 10.0.1.2, metric 100`
+          , read: "origin incomplete = ? = came from redistribute. metric 100 = the MED you set. Both are the fingerprints exam questions ask about."
+        },
+        {
+          key: "ospfdb", label: "OSPF DB", cmd: "show ip ospf database external",
+          tagline: "External LSAs with their route tags visible."
+          , output: `    Type-5 AS External Link States
+
+Link ID         ADV Router      Age  Seq#       Tag
+10.0.0.0        10.0.1.2        42   0x80000001  100
+192.168.0.0     10.0.1.2        55   0x80000002  0`
+          , read: "Tag column = your origin marker. Tag 100 says 'this came in from EIGRP'. OSPF internal LSAs never show tags — only externals carry them."
+        },
+        {
+          key: "eigrptopo", label: "EIGRP topo", cmd: "show ip eigrp topology",
+          tagline: "External routes and tags on the EIGRP side."
+          , output: `EIGRP-IPv4 Topology Table for AS(100)/ID(10.0.0.1)
+Codes: P - Passive, A - Active, U - Update, Q - Query, R - Reply
+
+P 10.0.0.0/8, 1 successors, FD is 28160, tag is 100
+   1 epoch 1
+   via 10.0.1.2 (28160/2560), Gi0/0, R2, tag is 100`
+          , read: "tag is 100 confirms the origin marker arrived with the route. External routes appear as D EX in the routing table (AD 170)."
+        },
+        {
+          key: "debug", label: "Flap trace", cmd: "debug ip routing",
+          tagline: "On-demand — see a route flip between protocols in real time."
+          , output: `RT: add 10.0.0.0/8 via 10.0.1.2, ospf metric [110/75]
+RT: add 10.0.0.0/8 via 10.0.2.2, eigrp metric [170/28160]
+RT: delete 10.0.0.0/8 via 10.0.2.2, eigrp metric [170/28160]`
+          , read: "Both protocols announcing the same prefix, flipping as AD toggles between 110 and 170 = the redistribution loop signature. Fix with tag-based deny + filters."
+        }
+      ];
+
+      // ---------------- traps ----------------
+      const trapOpen = ref([]);
+      const traps = [
+        { q: "'redistribute ospf 1' into EIGRP — routes appear?", a: "NO. EIGRP has no default seed metric. Without `metric` or `default-metric`, redistributed routes are silently not advertised." },
+        { q: "OSPF redistribute only classful?", a: "Yes, unless you add the `subnets` keyword. Without it, non-classful (CIDR) prefixes never cross the boundary." },
+        { q: "MED 0 — attractive or not?", a: "Attractive! BGP MED default is 0, and providers prefer lower MED. Set a positive MED on redistributed routes." },
+        { q: "`redistribute` vs `network` — origin?", a: "redistribute → origin ? (incomplete). network → origin i (IGP). In BGP best-path, i (0) beats ? (2)." },
+        { q: "Do OSPF E2 external costs accumulate?", a: "No. E2 keeps the seed cost flat across the AS (default). E1 accumulates cost as it crosses — use metric-type 1 when you want accumulation." },
+        { q: "EIGRP external (170) vs OSPF (110) for the same prefix?", a: "OSPF wins. AD beats metric, always. That surprise preference is the classic redistribution side-effect." },
+        { q: "Same prefix: EIGRP internal vs EIGRP external copy?", a: "Internal (AD 90) wins; the redistributed external copy (AD 170) is ignored. Your redistributed route may exist in the topology table yet never be used." },
+        { q: "Route-map: what happens to unmatched routes?", a: "Implicit deny at the end. Anything not matching a permit sequence is dropped at the boundary — that is the allow-list behavior you rely on." },
+        { q: "OSPF distribute-list directions?", a: "`in` only on Cisco IOS. There is no distribute-list … out for OSPF — use a route-map on redistribute instead." },
+        { q: "`in` vs `out` — measured on whose router?", a: "The local one. `redistribute … route-map RM` filters what enters EIGRP locally; `neighbor … route-map RM out` filters BGP updates leaving to a peer." },
+        { q: "Do OSPF internal routes carry tags?", a: "No. OSPF tags ride only on external (E1/E2) routes. Internal LSAs have no tag field in IOS." },
+        { q: "The canonical loop-prevention answer?", a: "Tag routes at entry + deny the tag on the return path (plus symmetric filters if more than one boundary router). One boundary router avoids the loop entirely — the worst answer is two-way blind redistribute." }
+      ];
+
+      // ---------------- quiz ----------------
+      const baseQuestions = [
+        { q: "Which protocol silently drops redistributed routes unless a seed metric is given?", options: ["OSPF", "EIGRP", "BGP", "IS-IS"], answer: 1, why: "EIGRP has no default seed metric. OSPF uses a default cost (20 external), BGP uses MED 0, IS-IS uses 0." },
+        { q: "What does the OSPF `subnets` keyword do on a redistribute command?", options: ["Sets the cost for external routes", "Allows redistribution of all prefixes, not just classful ones", "Converts E1 routes to E2", "Enables route tagging"], answer: 1, why: "Without `subnets` only classful networks redistribute — CIDR subnets are lost." },
+        { q: "The EIGRP seed metric order is:", options: ["Delay, bandwidth, reliability, load, MTU", "Bandwidth, delay, reliability, load, MTU", "Bandwidth, delay, load, reliability, MTU", "Reliability, load, MTU, bandwidth, delay"], answer: 1, why: "metric BW DELAY RELIABILITY LOAD MTU — e.g. metric 10000 100 255 1 1500." },
+        { q: "Which OSPF external metric type accumulates cost as it crosses the AS?", options: ["E1", "E2", "Both", "Neither"], answer: 0, why: "E1 accumulates (metric-type 1). E2 is the default and stays flat." },
+        { q: "`redistribute ospf 1` under BGP marks the origin attribute as:", options: ["i (IGP)", "e (EGP)", "? (incomplete)", "The origin is not set"], answer: 2, why: "redistribute → origin ?. `network` statements → origin i." },
+        { q: "For a BGP `network` statement to advertise a prefix, the prefix must:", options: ["Be a classful network", "Already exist in the BGP table", "Be tagged with a community", "Have a MED above 0"], answer: 1, why: "network matches what is already in the BGP table — it does not inject. redistribute injects regardless." },
+        { q: "The default BGP MED for redistributed routes is:", options: ["100", "0 — very attractive to providers", "255", "Always inherited from the IGP"], answer: 1, why: "MED defaults to 0. Providers prefer lower MED, so unset MEDs look great — set your own metric." },
+        { q: "The same prefix arrives from OSPF (AD 110) and EIGRP external (AD 170). Which wins?", options: ["EIGRP external — it has the lower metric", "OSPF — lower AD wins", "They load-balance", "The one with the higher metric"], answer: 1, why: "AD beats metric. 110 < 170, so OSPF wins regardless of metrics." },
+        { q: "EIGRP internal vs external administrative distance:", options: ["90 / 170", "170 / 90", "90 / 90", "110 / 170"], answer: 0, why: "Internal 90, external 170. A redistributed route is external and loses to OSPF's 110." },
+        { q: "A route-map ends with:", options: ["An explicit permit all", "An implicit deny — unmatched routes are dropped", "Nothing — filtering needs a separate ACL", "An automatic route tag"], answer: 1, why: "Implicit deny at the end of every route-map. Only matched permit sequences redistribute." },
+        { q: "Route tags are attached to redistributed routes with:", options: ["set tag at the redistribution boundary", "match tag 100", "redistribute … route-tag", "default-tag 100"], answer: 0, why: "`set tag 100` in the boundary route-map. `match tag` is used downstream to act on them." },
+        { q: "Canonical redistribution loop prevention:", options: ["Redistribute both ways with maximum routes", "Tag at entry + deny the tag on the return path (or use one boundary router)", "Lower all administrative distances", "Use only one protocol everywhere"], answer: 1, why: "Tags at entry + deny on return breaks the feedback loop deterministically. One boundary router avoids it entirely." }
+      ];
+      const quizQuestions = ref(shuffle(baseQuestions).map(q => ({ ...q, options: shuffle(q.options).map(t => ({ text: t })), answerText: q.options[q.answer], picked: null })));
+      const quizDone = ref(false);
+      const answeredCount = computed(() => quizQuestions.value.filter(q => q.picked !== null).length);
+      const quizScore = computed(() => quizQuestions.value.filter(q => q.picked !== null && q.options[q.picked].text === q.answerText).length);
+      const quizPct = computed(() => Math.round(quizScore.value / quizQuestions.value.length * 100));
+      function submitQuiz() { quizDone.value = true; const best = loadJSON(LS.quizbest, 0); if (quizScore.value > best) save(LS.quizbest, quizScore.value); }
+      function resetQuiz() { quizQuestions.value = shuffle(baseQuestions).map(q => ({ ...q, options: shuffle(q.options).map(t => ({ text: t })), answerText: q.options[q.answer], picked: null })); quizDone.value = false; }
+
+      // ---------------- checklist ----------------
+      const planItems = [
+        { file: "Route Redistribution Overview.md", label: "Route Redistribution Overview — the level map" },
+        { file: "01. OSPF to EIGRP.md", label: "01 · OSPF to EIGRP — seed requirement, external routes" },
+        { file: "02. OSPF to BGP.md", label: "02 · OSPF to BGP — network vs redistribute, origin" },
+        { file: "03. EIGRP to BGP.md", label: "03 · EIGRP to BGP — no seed needed, MED" },
+        { file: "04. Seed Metrics.md", label: "04 · Seed Metrics — EIGRP 5-tuple, OSPF subnets, MED" },
+        { file: "05. Administrative Distance.md", label: "05 · Administrative Distance — AD beats metric" },
+        { file: "06. Route Tags.md", label: "06 · Route Tags — set/match, OSPF external only" },
+        { file: "07. Filtering.md", label: "07 · Filtering — route-maps, implicit deny, direction" },
+        { file: "08. Loop Prevention.md", label: "08 · Loop Prevention — tag + deny, single boundary" }
+      ];
+      const done = ref(loadJSON(LS.done, {}));
+      const doneCount = computed(() => Object.values(done.value).filter(Boolean).length);
+      function toggleDone(i) { done.value[i] = !done.value[i]; save(LS.done, done.value); }
+
+      return {
+        theme, toggleTheme,
+        scenarios, activeScenario, currentScenario, pickScenario,
+        seedProtos, activeSeed, seedInfo,
+        seedBw, seedDly, seedMetric,
+        adSources, adA, adB, adVerdict,
+        tagSteps, tagRunning, playTags, resetTags,
+        loopMode, loopSteps, loopRunning, loopVerdict, loopMetric, setLoopMode, runLoop, resetLoop,
+        activeCmd, activeCommand, commands,
+        trapOpen, traps,
+        quizQuestions, quizDone, quizScore, quizPct, answeredCount, submitQuiz, resetQuiz,
+        planItems, done, doneCount, toggleDone
+      };
+    }
+  }).mount("#app");
+})();
+</script>
+</body>
+</html>

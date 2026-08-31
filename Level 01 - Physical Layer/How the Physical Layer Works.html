@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How the Physical Layer Works — Deep Dive</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --panel: #111c34;
+    --card: #1e293b;
+    --card-2: #16233d;
+    --text: #f8fafc;
+    --muted: #94a3b8;
+    --blue: #38bdf8;
+    --blue-dim: #0c4a6e;
+    --green: #34d399;
+    --green-dim: #064e3b;
+    --amber: #fbbf24;
+    --amber-dim: #78350f;
+    --red: #f87171;
+    --red-dim: #7f1d1d;
+    --violet: #a78bfa;
+    --violet-dim: #4c1d95;
+    --border: #334155;
+    --hover: #263449;
+    --code-bg: #0b1220;
+  }
+  #app[data-theme="light"] {
+    --bg: #f1f5f9;
+    --panel: #ffffff;
+    --card: #ffffff;
+    --card-2: #f8fafc;
+    --text: #0f172a;
+    --muted: #64748b;
+    --blue: #0284c7;
+    --blue-dim: #bae6fd;
+    --green: #059669;
+    --green-dim: #d1fae5;
+    --amber: #d97706;
+    --amber-dim: #fef3c7;
+    --red: #dc2626;
+    --red-dim: #fee2e2;
+    --violet: #7c3aed;
+    --violet-dim: #ede9fe;
+    --border: #cbd5e1;
+    --hover: #e2e8f0;
+    --code-bg: #0b1220;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; }
+  #app { max-width: 1040px; margin: 0 auto; padding: 20px 18px 60px; }
+  header { position: sticky; top: 0; z-index: 30; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .lv-badge { background: var(--blue-dim); color: var(--blue); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .exam-badge { background: var(--violet-dim); color: var(--violet); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .head-actions { display: flex; align-items: center; gap: 8px; }
+  .btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: background 0.15s; }
+  .btn:hover { background: var(--hover); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn.primary { background: var(--blue); border-color: var(--blue); color: #04222e; }
+  .btn.primary:hover { filter: brightness(1.1); background: var(--blue); }
+  .btn.green { background: var(--green); border-color: var(--green); color: #04241a; }
+  nav { position: sticky; top: 62px; z-index: 20; display: flex; gap: 6px; overflow-x: auto; padding: 8px 2px; margin-bottom: 18px; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(4px); border-radius: 10px; }
+  nav a { text-decoration: none; white-space: nowrap; font-size: 0.76rem; font-weight: 600; color: var(--muted); padding: 6px 11px; border: 1px solid var(--border); border-radius: 999px; background: var(--panel); }
+  nav a:hover { color: var(--text); border-color: var(--blue); }
+  section { margin-bottom: 30px; scroll-margin-top: 130px; }
+  .sec-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .sec-num { min-width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; font-weight: 800; font-size: 0.9rem; color: var(--panel); }
+  .sec-num.bl { background: var(--blue); } .sec-num.gr { background: var(--green); } .sec-num.am { background: var(--amber); } .sec-num.rd { background: var(--red); } .sec-num.vi { background: var(--violet); }
+  .sec-head h2 { font-size: 1.25rem; }
+  .sec-sub { color: var(--muted); font-size: 0.88rem; margin-bottom: 14px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; margin-bottom: 14px; }
+  .card h3 { font-size: 1rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .card p { margin-bottom: 8px; }
+  .card ul, .card ol { padding-left: 20px; margin-bottom: 8px; }
+  .card li { margin-bottom: 4px; }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+  .callout { border-radius: 10px; padding: 12px 14px; margin: 12px 0; font-size: 0.9rem; border: 1px solid var(--border); background: var(--card-2); }
+  .callout.b { border-left: 4px solid var(--blue); } .callout.g { border-left: 4px solid var(--green); } .callout.a { border-left: 4px solid var(--amber); } .callout.r { border-left: 4px solid var(--red); } .callout.v { border-left: 4px solid var(--violet); }
+  .callout strong { color: var(--text); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 10px 0; }
+  th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--card-2); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  tr:nth-child(even) td { background: color-mix(in srgb, var(--card-2) 55%, transparent); }
+  pre { background: var(--code-bg); color: #dbeafe; border-radius: 10px; padding: 14px 16px; overflow-x: auto; font-size: 0.8rem; line-height: 1.5; margin: 10px 0; border: 1px solid var(--border); }
+  pre .dim { color: #64748b; }
+  .chip { display: inline-flex; align-items: center; gap: 5px; padding: 2px 10px; border-radius: 999px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.02em; white-space: nowrap; }
+  .chip.succ { background: var(--green-dim); color: var(--green); } .chip.warn { background: var(--amber-dim); color: var(--amber); } .chip.down { background: var(--red-dim); color: var(--red); } .chip.info { background: var(--blue-dim); color: var(--blue); }
+  .keyval { display: flex; gap: 16px; flex-wrap: wrap; margin: 8px 0; }
+  .kv { background: var(--card-2); border: 1px solid var(--border); border-radius: 10px; padding: 8px 14px; font-size: 0.84rem; flex: 1; min-width: 140px; }
+  .kv b { display: block; color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 2px; }
+  .pill-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+  .pill { padding: 6px 12px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; border: 1px solid var(--border); background: var(--card-2); cursor: pointer; }
+  .pill.active { border-color: var(--blue); background: var(--blue-dim); color: var(--blue); }
+  .bar-row { display: grid; grid-template-columns: 110px 1fr 48px; align-items: center; gap: 8px; margin: 6px 0; font-size: 0.82rem; }
+  .bar-row .bl { font-weight: 600; }
+  .bar { height: 10px; background: var(--card-2); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
+  .bar div { height: 100%; border-radius: 999px; transition: width 0.3s; }
+  .trap-card { cursor: pointer; user-select: none; transition: border-color 0.15s; }
+  .trap-card:hover { border-color: var(--red); }
+  .trap-card .t { font-weight: 700; font-size: 0.92rem; display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+  .trap-card .t .hint { color: var(--red); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; opacity: 0.8; }
+  .trap-card.flipped { border-color: var(--red); background: var(--red-dim); border-width: 1.5px; }
+  .trap-card .ans { margin-top: 10px; border-top: 1px dashed var(--border); padding-top: 10px; font-size: 0.88rem; }
+  .q-card { border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; background: var(--card); }
+  .q-card .qtext { font-weight: 700; margin-bottom: 10px; font-size: 0.93rem; }
+  .opt { display: block; width: 100%; text-align: left; padding: 8px 12px; margin: 5px 0; border-radius: 8px; cursor: pointer; font-size: 0.86rem; border: 1px solid var(--border); background: var(--card-2); color: var(--text); }
+  .opt:hover:not(:disabled) { border-color: var(--blue); }
+  .opt.picked { border-color: var(--blue); background: var(--blue-dim); font-weight: 700; }
+  .opt.correct { border-color: var(--green); background: var(--green-dim); }
+  .opt.wrong { border-color: var(--red); background: var(--red-dim); }
+  .opt:disabled { cursor: default; opacity: 0.9; }
+  .q-why { margin-top: 8px; font-size: 0.84rem; color: var(--muted); }
+  .q-why b { color: var(--text); }
+  .score-bar { display: flex; align-items: center; gap: 12px; margin: 12px 0; flex-wrap: wrap; }
+  .score-meter { flex: 1; height: 10px; background: var(--card-2); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; min-width: 160px; }
+  .score-meter div { height: 100%; background: var(--green); transition: width 0.3s; }
+  .check-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; margin-bottom: 4px; font-size: 0.88rem; cursor: pointer; }
+  .check-item:hover { background: var(--hover); }
+  .check-item input { accent-color: var(--green); width: 16px; height: 16px; cursor: pointer; }
+  .check-item.done { color: var(--muted); text-decoration: line-through; }
+  .check-item a { color: var(--text); text-decoration: none; }
+  .check-item a:hover { color: var(--blue); text-decoration: underline; }
+  .prog { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .prog .meter { flex: 1; height: 10px; background: var(--card-2); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
+  .prog .meter div { height: 100%; background: var(--green); transition: width 0.3s; }
+  footer { margin-top: 30px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.82rem; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  footer a { color: var(--blue); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+  .port-box { background: var(--card-2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; text-align: center; min-width: 140px; }
+  .port-box .pname { font-size: 0.78rem; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
+  .port-box .pval { font-size: 1.1rem; font-weight: 800; }
+  .port-box .pval.ok { color: var(--green); } .port-box .pval.warn { color: var(--amber); } .port-box .pval.bad { color: var(--red); }
+  .slider-row { display: flex; align-items: center; gap: 12px; margin: 8px 0; }
+  .slider-row label { font-size: 0.84rem; font-weight: 600; min-width: 100px; }
+  .slider-row input[type=range] { flex: 1; accent-color: var(--blue); }
+  .slider-row .val { color: var(--blue); font-family: ui-monospace, monospace; font-weight: 700; min-width: 60px; text-align: right; }
+  .chain { display: flex; align-items: stretch; gap: 6px; flex-wrap: wrap; margin: 12px 0; }
+  .chain .c { background: var(--card-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 0.8rem; text-align: center; flex: 1; min-width: 110px; font-weight: 600; }
+  .chain .c.arw { border: none; background: none; color: var(--muted); flex: 0 0 auto; font-size: 1.1rem; font-weight: 800; min-width: 24px; padding: 8px 0; }
+  @media print { header, nav, .btn, footer .no-print { display: none !important; } body { background: #fff; } * { color: #111 !important; background: #fff !important; border-color: #ccc !important; } }
+</style>
+</head>
+<body>
+<div id="app" :data-theme="theme">
+
+  <!-- HEADER -->
+  <header>
+    <h1><span class="lv-badge">Level 01</span> How the Physical Layer Works <span class="exam-badge">ENCOR 350-401</span></h1>
+    <div class="head-actions">
+      <a class="btn" href="../index.html">Flashcards</a>
+      <button class="btn" @click="toggleTheme">{{ theme === 'dark' ? 'Light' : 'Dark' }} mode</button>
+    </div>
+  </header>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#media">1 · Media</a>
+    <a href="#utp">2 · UTP</a>
+    <a href="#fiber">3 · Fiber</a>
+    <a href="#standards">4 · Standards</a>
+    <a href="#duplex">5 · Duplex &amp; Auto-Neg</a>
+    <a href="#mtu">6 · MTU</a>
+    <a href="#connectors">7 · Connectors</a>
+    <a href="#transceivers">8 · Transceivers</a>
+    <a href="#patch">9 · Patch Panels</a>
+    <a href="#commands">10 · Commands</a>
+    <a href="#traps">11 · Traps</a>
+    <a href="#quiz">12 · Quiz</a>
+    <a href="#plan">13 · Checklist</a>
+  </nav>
+
+  <!-- 1. MEDIA OVERVIEW -->
+  <section id="media">
+    <div class="sec-head"><div class="sec-num bl">1</div><h2>Transmission Media — the four families</h2></div>
+    <div class="card">
+      <p>Every physical network link uses one of four media families. Click one to see how it compares on distance, speed, security, and noise immunity.</p>
+      <div class="pill-list">
+        <button v-for="m in mediaList" :key="m.key" class="pill btn" :class="mediaActive === m.key ? 'active' : ''" @click="mediaActive = m.key">{{ m.label }}</button>
+      </div>
+      <div v-if="mediaInfo">
+        <div class="keyval">
+          <div class="kv"><b>Max reach</b>{{ mediaInfo.reach }}</div>
+          <div class="kv"><b>EMI immunity</b>{{ mediaInfo.emi }}</div>
+          <div class="kv"><b>Security</b>{{ mediaInfo.security }}</div>
+          <div class="kv"><b>Cost trend</b>{{ mediaInfo.cost }}</div>
+        </div>
+        <div style="margin:10px 0;">
+          <div class="bar-row"><span class="bl">Speed</span><div class="bar"><div :style="{ width: mediaInfo.speedBar + '%', background: 'var(--green)' }"></div></div><span>{{ mediaInfo.speedLabel }}</span></div>
+          <div class="bar-row"><span class="bl">Distance</span><div class="bar"><div :style="{ width: mediaInfo.distBar + '%', background: 'var(--blue)' }"></div></div><span>{{ mediaInfo.distLabel }}</span></div>
+          <div class="bar-row"><span class="bl">Noise immunity</span><div class="bar"><div :style="{ width: mediaInfo.emiBar + '%', background: 'var(--amber)' }"></div></div><span>{{ mediaInfo.emiLabel }}</span></div>
+        </div>
+        <div class="callout b" style="font-size:0.84rem;"><strong>Key idea:</strong> {{ mediaInfo.keyIdea }}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. UTP DEEP DIVE -->
+  <section id="utp">
+    <div class="sec-head"><div class="sec-num gr">2</div><h2>UTP — Unshielded Twisted Pair</h2></div>
+    <div class="card">
+      <p>UTP is the most common copper LAN cable — four twisted pairs cancel EMI via differential signaling. Click a category to see what it supports.</p>
+      <div class="pill-list">
+        <button v-for="c in categoryList" :key="c.key" class="pill btn" :class="catActive === c.key ? 'active' : ''" @click="catActive = c.key">{{ c.key }}</button>
+      </div>
+      <div v-if="catInfo">
+        <div class="keyval">
+          <div class="kv"><b>Rating</b>{{ catInfo.mhz }}</div>
+          <div class="kv"><b>Pairs used</b>{{ catInfo.pairs }}</div>
+          <div class="kv"><b>Top speed</b>{{ catInfo.speed }}</div>
+          <div class="kv"><b>Max distance</b>{{ catInfo.dist }}</div>
+        </div>
+        <div class="callout a" style="font-size:0.84rem;"><strong>Exam note:</strong> {{ catInfo.note }}</div>
+      </div>
+      <div class="callout g" style="font-size:0.84rem;"><strong>The 100-meter rule:</strong> 90 m horizontal cable + 10 m patch/user cables = 100 m total. This applies to all twisted-pair Ethernet regardless of category.</div>
+    </div>
+    <div class="card">
+      <h3>UTP vs STP at a glance</h3>
+      <table>
+        <tr><th>Aspect</th><th>UTP (U/UTP)</th><th>STP (F/UTP, S/FTP)</th></tr>
+        <tr><td>Shield</td><td>None</td><td>Foil/braid around pairs or bundle</td></tr>
+        <tr><td>EMI rejection</td><td>Good (twisting only)</td><td>Excellent (shield reference plane)</td></tr>
+        <tr><td>Grounding</td><td>Not required</td><td><b>Must</b> be grounded (one end) — unshielded = antenna</td></tr>
+        <tr><td>Distance</td><td>100 m (same budget)</td><td>100 m (shield fixes noise, not attenuation)</td></tr>
+        <tr><td>Use case</td><td>Default for offices</td><td>Industrial, noisy DC, EMC-strict sites</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- 3. FIBER DEEP DIVE -->
+  <section id="fiber">
+    <div class="sec-head"><div class="sec-num am">3</div><h2>Fiber — Single-mode vs Multimode</h2></div>
+    <div class="card">
+      <p>Fiber carries light through glass via total internal reflection. SMF (9 µm core, laser) for long haul; MMF (50/62.5 µm, VCSEL/LED) for campus/DC short runs.</p>
+      <div class="pill-list">
+        <button v-for="f in fiberList" :key="f.key" class="pill btn" :class="fiberActive === f.key ? 'active' : ''" @click="fiberActive = f.key">{{ f.label }}</button>
+      </div>
+      <div v-if="fiberInfo">
+        <div class="keyval">
+          <div class="kv"><b>Core</b>{{ fiberInfo.core }}</div>
+          <div class="kv"><b>Light source</b>{{ fiberInfo.source }}</div>
+          <div class="kv"><b>Color</b>{{ fiberInfo.color }}</div>
+          <div class="kv"><b>Reach</b>{{ fiberInfo.reach }}</div>
+        </div>
+        <div style="margin:10px 0;">
+          <div class="bar-row"><span class="bl">Core size</span><div class="bar"><div :style="{ width: fiberInfo.coreBar + '%', background: 'var(--violet)' }"></div></div><span>{{ fiberInfo.coreLabel }}</span></div>
+          <div class="bar-row"><span class="bl">Max distance</span><div class="bar"><div :style="{ width: fiberInfo.distBar + '%', background: 'var(--blue)' }"></div></div><span>{{ fiberInfo.distLabel }}</span></div>
+          <div class="bar-row"><span class="bl">Module cost</span><div class="bar"><div :style="{ width: fiberInfo.costBar + '%', background: 'var(--amber)' }"></div></div><span>{{ fiberInfo.costLabel }}</span></div>
+        </div>
+        <div class="callout b" style="font-size:0.84rem;"><strong>Trap:</strong> {{ fiberInfo.trap }}</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Power budget basics</h3>
+      <p>Each connector ≈ 0.5 dB loss, each splice ≈ 0.1–0.3 dB, plus fiber attenuation (MMF ≤3.5 dB/km @850 nm; SMF ≤0.4 dB/km @1310 nm). If total loss exceeds receiver sensitivity, the link fails.</p>
+    </div>
+  </section>
+
+  <!-- 4. ETHERNET STANDARDS -->
+  <section id="standards">
+    <div class="sec-head"><div class="sec-num vi">4</div><h2>Ethernet Standards &amp; Naming</h2></div>
+    <div class="card">
+      <h3>Naming convention builder</h3>
+      <p class="sec-sub">The pattern: <b>&lt;speed&gt;&lt;BASE&gt;&lt;media&gt;</b>. Click a media suffix to see what it means.</p>
+      <div style="font-size:1.2rem; font-weight:800; margin:10px 0;">1000 <span style="color:var(--muted);">BASE</span><span style="color:var(--blue);">{{ suffixRef }}</span></div>
+      <div class="pill-list">
+        <button v-for="s in suffixList" :key="s.key" class="pill btn" :class="suffixRef === s.key ? 'active' : ''" @click="suffixRef = s.key">{{ s.key }}</button>
+      </div>
+      <div v-if="suffixInfo">
+        <div class="keyval">
+          <div class="kv"><b>Meaning</b>{{ suffixInfo.meaning }}</div>
+          <div class="kv"><b>Examples</b>{{ suffixInfo.examples }}</div>
+          <div class="kv"><b>Notes</b>{{ suffixInfo.notes }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Key standards table</h3>
+      <table>
+        <tr><th>Standard</th><th>Speed</th><th>Media</th><th>Max reach</th></tr>
+        <tr><td>10BASE-T</td><td>10 Mbps</td><td>Cat 3+ UTP</td><td>100 m</td></tr>
+        <tr><td>100BASE-TX</td><td>100 Mbps</td><td>Cat 5 UTP (2 pair)</td><td>100 m</td></tr>
+        <tr><td>1000BASE-T</td><td>1 Gbps</td><td>Cat 5e UTP (4 pair)</td><td>100 m</td></tr>
+        <tr><td>1000BASE-SX</td><td>1 Gbps</td><td>MMF (850 nm)</td><td>220–550 m</td></tr>
+        <tr><td>1000BASE-LX</td><td>1 Gbps</td><td>MMF/SMF (1300 nm)</td><td>550 m / 5 km</td></tr>
+        <tr><td>10GBASE-T</td><td>10 Gbps</td><td>Cat 6a UTP</td><td>100 m</td></tr>
+        <tr><td>10GBASE-SR</td><td>10 Gbps</td><td>MMF (850 nm)</td><td>300 m (OM3)</td></tr>
+        <tr><td>10GBASE-LR</td><td>10 Gbps</td><td>SMF (1310 nm)</td><td>10 km</td></tr>
+        <tr><td>40GBASE-SR4</td><td>40 Gbps</td><td>MMF parallel MPO</td><td>100 m (OM3)</td></tr>
+        <tr><td>40GBASE-LR4</td><td>40 Gbps</td><td>SMF CWDM LC</td><td>10 km</td></tr>
+        <tr><td>100GBASE-CR4</td><td>100 Gbps</td><td>Twinax DAC</td><td>~5 m</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- 5. DUPLEX & AUTO-NEGOTIATION -->
+  <section id="duplex">
+    <div class="sec-head"><div class="sec-num rd">5</div><h2>Duplex &amp; Auto-Negotiation Simulator</h2></div>
+    <div class="card">
+      <h3>Auto-negotiation mismatch simulator</h3>
+      <p class="sec-sub">Pick a mode for each port. Watch what happens when one side is forced and the other auto — the classic duplex mismatch trap.</p>
+      <div style="display:flex; gap:20px; flex-wrap:wrap; margin:12px 0;">
+        <div class="port-box">
+          <div class="pname">Port A (switch)</div>
+          <div class="pill-list" style="justify-content:center;">
+            <button v-for="m in autoModes" :key="'a-'+m" class="pill btn" :class="portA === m ? 'active' : ''" @click="portA = m">{{ m === 'auto' ? 'Auto' : m === '100M' ? '100 Mbps' : '1 Gbps' }}</button>
+          </div>
+        </div>
+        <div class="port-box">
+          <div class="pname">Port B (host)</div>
+          <div class="pill-list" style="justify-content:center;">
+            <button v-for="m in autoModes" :key="'b-'+m" class="pill btn" :class="portB === m ? 'active' : ''" @click="portB = m">{{ m === 'auto' ? 'Auto' : m === '100M' ? '100 Mbps' : '1 Gbps' }}</button>
+          </div>
+        </div>
+      </div>
+      <div class="keyval">
+        <div class="port-box">
+          <div class="pname">Port A result</div>
+          <div class="pval" :class="autoResult.aSpeed === 'No link' ? 'bad' : autoResult.aDuplex === 'Half' ? 'warn' : 'ok'">{{ autoResult.aSpeed }}<br><span style="font-size:0.85rem;">{{ autoResult.aDuplex }}-duplex</span></div>
+        </div>
+        <div class="port-box">
+          <div class="pname">Port B result</div>
+          <div class="pval" :class="autoResult.bSpeed === 'No link' ? 'bad' : autoResult.bDuplex === 'Half' ? 'warn' : 'ok'">{{ autoResult.bSpeed }}<br><span style="font-size:0.85rem;">{{ autoResult.bDuplex }}-duplex</span></div>
+        </div>
+      </div>
+      <div v-if="autoResult.warning" class="callout r" style="font-size:0.84rem;"><strong>{{ autoResult.warningTitle }}:</strong> {{ autoResult.warning }}</div>
+      <div v-else class="callout g" style="font-size:0.84rem;"><strong>Link status:</strong> {{ autoResult.okMsg }}</div>
+    </div>
+  </section>
+
+  <!-- 6. MTU EXPLORER -->
+  <section id="mtu">
+    <div class="sec-head"><div class="sec-num bl">6</div><h2>MTU Explorer</h2></div>
+    <div class="card">
+      <p>MTU is the largest L3 payload a link accepts. Drag the slider to see the resulting frame size and the usable payload inside common tunnel encodings.</p>
+      <div class="slider-row">
+        <label>MTU</label>
+        <input type="range" :min="576" :max="9000" step="1" v-model.number="mtuValue">
+        <span class="val">{{ mtuValue }} B</span>
+      </div>
+      <div class="keyval" style="margin-top:12px;">
+        <div class="kv" :style="{ borderLeft: '4px solid ' + mtuColor }"><b>Frame (untrunked)</b>{{ mtuValue + 18 }} bytes</div>
+        <div class="kv" :style="{ borderLeft: '4px solid ' + mtuColor }"><b>Frame (802.1Q)</b>{{ mtuValue + 22 }} bytes</div>
+      </div>
+      <table style="margin-top:10px;">
+        <tr><th>Tunnel</th><th>Overhead</th><th>Max inner MTU</th><th>Notes</th></tr>
+        <tr><td>GRE</td><td>24 B</td><td :class="mtuValue - 24 > 0 ? '' : 'bad'">{{ Math.max(0, mtuValue - 24) }} B</td><td>20 IP + 4 GRE header</td></tr>
+        <tr><td>VXLAN</td><td>≈50 B</td><td :class="mtuValue - 50 > 0 ? '' : 'bad'">{{ Math.max(0, mtuValue - 50) }} B</td><td>8 VXLAN + 20 outer IP + 14 outer ETH</td></tr>
+        <tr><td>PPPoE</td><td>8 B</td><td>{{ Math.max(0, mtuValue - 8) }} B</td><td>Common on DSL/broadband WAN</td></tr>
+        <tr><td>802.1Q trunk</td><td>4 B</td><td>{{ mtuValue + 4 }} B (frame)</td><td>Inner MTU stays 1500; outer frame grows</td></tr>
+      </table>
+      <div v-if="mtuValue > 1500" class="callout a" style="font-size:0.84rem;"><strong>Jumbo frames:</strong> MTU above 1500. All switches in the path must support jumbo end-to-end — partial jumbo silently drops large frames.</div>
+      <div v-if="mtuValue <= 1500" class="callout g" style="font-size:0.84rem;"><strong>Standard Ethernet MTU.</strong> Default 1500 B is universal; IPv6 never fragments — relies on PMTUD + ICMPv6 Packet Too Big.</div>
+    </div>
+  </section>
+
+  <!-- 7. CONNECTORS -->
+  <section id="connectors">
+    <div class="sec-head"><div class="sec-num gr">7</div><h2>Connectors</h2></div>
+    <div class="card">
+      <p>Connectors attach cable to the device/transceiver. Choose wrong or mix single-mode/multimode pigtails and you get "no light / no link." Click a connector type to explore.</p>
+      <div class="pill-list">
+        <button v-for="c in connList" :key="c.key" class="pill btn" :class="connActive === c.key ? 'active' : ''" @click="connActive = c.key">{{ c.key }}</button>
+      </div>
+      <div v-if="connInfo">
+        <div class="keyval">
+          <div class="kv"><b>Media</b>{{ connInfo.media }}</div>
+          <div class="kv"><b>Typical use</b>{{ connInfo.use }}</div>
+          <div class="kv"><b>Notes</b>{{ connInfo.notes }}</div>
+        </div>
+        <div class="callout a" style="font-size:0.84rem;"><strong>Trap:</strong> {{ connInfo.trap }}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. TRANSCEIVERS -->
+  <section id="transceivers">
+    <div class="sec-head"><div class="sec-num am">8</div><h2>Transceivers — pluggable modules</h2></div>
+    <div class="card">
+      <p>A transceiver converts the switch's electrical signal to optical (or different electrical). Click a module to see its specs.</p>
+      <div class="pill-list">
+        <button v-for="t in transList" :key="t.key" class="pill btn" :class="transActive === t.key ? 'active' : ''" @click="transActive = t.key">{{ t.key }}</button>
+      </div>
+      <div v-if="transInfo">
+        <div class="keyval">
+          <div class="kv"><b>Speed</b>{{ transInfo.speed }}</div>
+          <div class="kv"><b>Connector</b>{{ transInfo.connector }}</div>
+          <div class="kv"><b>Typical reach</b>{{ transInfo.reach }}</div>
+          <div class="kv"><b>Key detail</b>{{ transInfo.detail }}</div>
+        </div>
+        <div class="callout r" style="font-size:0.84rem;"><strong>Common failure:</strong> {{ transInfo.failure }}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. PATCH PANELS -->
+  <section id="patch">
+    <div class="sec-head"><div class="sec-num vi">9</div><h2>Patch Panel Budget Calculator</h2></div>
+    <div class="card">
+      <p>Patch panels are the structured-cabling termination point. The total copper Ethernet budget is 100 m: horizontal (panel → wall) + patch cables (panel → switch, wall → device). Drag to adjust.</p>
+      <div class="slider-row">
+        <label>Horizontal</label>
+        <input type="range" :min="0" :max="100" step="1" v-model.number="patchHorizontal">
+        <span class="val">{{ patchHorizontal }} m</span>
+      </div>
+      <div class="slider-row">
+        <label>Patch cables</label>
+        <input type="range" :min="0" :max="20" step="1" v-model.number="patchCables">
+        <span class="val">{{ patchCables }} m</span>
+      </div>
+      <div class="keyval" style="margin-top:12px;">
+        <div class="kv" :style="{ borderLeft: '4px solid ' + patchBudgetColor }"><b>Total</b>{{ patchHorizontal + patchCables }} m / 100 m</div>
+        <div class="kv"><b>Status</b>{{ patchBudgetOk ? 'Within budget' : 'Over budget — exceeds 100 m!' }}</div>
+      </div>
+      <div class="callout b" style="font-size:0.84rem;"><strong>Best practice:</strong> Keep horizontal ≤90 m, patch cables ≤10 m. Label every port. Use LLDP/CDP to auto-discover the logical neighbor behind each patch.</div>
+    </div>
+  </section>
+
+  <!-- 10. COMMANDS -->
+  <section id="commands">
+    <div class="sec-head"><div class="sec-num bl">10</div><h2>Command Viewer</h2></div>
+    <div class="card">
+      <div class="pill-list">
+        <button v-for="c in commands" :key="c.key" class="pill btn" :class="activeCmd === c.key ? 'active' : ''" @click="activeCmd = c.key">{{ c.label }}</button>
+      </div>
+      <div v-if="activeCommand">
+        <p style="font-size:0.84rem; color:var(--muted);">{{ activeCommand.tagline }}</p>
+        <pre>{{ activeCommand.cmd }}<span class="dim">
+{{ activeCommand.output }}</span></pre>
+        <div class="callout b" style="font-size:0.84rem;"><strong>What to look at:</strong> {{ activeCommand.read }}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11. TRAPS -->
+  <section id="traps">
+    <div class="sec-head"><div class="sec-num rd">11</div><h2>Exam Traps — flip to reveal</h2></div>
+    <div class="sec-sub">Click any card to flip it.</div>
+    <div class="grid2">
+      <div v-for="(t, i) in traps" :key="i" class="card trap-card" :class="{ flipped: trapOpen[i] }" @click="trapOpen[i] = !trapOpen[i]">
+        <div class="t"><span>{{ i + 1 }}. {{ t.q }}</span><span class="hint">{{ trapOpen[i] ? '&#9650;' : 'REVEAL' }}</span></div>
+        <div v-if="trapOpen[i]" class="ans">{{ t.a }}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12. QUIZ -->
+  <section id="quiz">
+    <div class="sec-head"><div class="sec-num gr">12</div><h2>One-Minute Summary &amp; Self-Test</h2></div>
+    <div class="card">
+      <h3>Physical Layer in 60 seconds</h3>
+      <pre>Media families:  UTP (4 twisted pairs, 100 m, cheap) → STP (shielded, noisy environments, must ground)
+                 Fiber SMF (9 µm, laser, 10 km+, yellow jacket) vs MMF (50 µm, VCSEL, 300–550 m, aqua)
+                 Wireless (RF, shared medium, 2.4/5/6 GHz, 1/6/11 non-overlapping)
+
+UTP categories:  Cat5 100 MHz → Cat5e (gigabit) → Cat6 (10GBASE-T ≤55 m) → Cat6a (10GBASE-T 100 m) → Cat8 (25/40G ≤30 m)
+Auto-MDIX makes straight/crossover irrelevant; 1000BASE-T = FDX only (4 pairs, no HDX mode).
+
+Standards naming: <speed>BASE<media> — T=copper, S=short fiber, L=long fiber, E=extended, C=copper twinax, K=backplane
+Encoding: 8B/10B (1G) → 64B/66B (10G+) → parallel lanes for 40/100G (SR4/LR4)
+
+Duplex: FDX = simultaneous TX/RX (modern); HDX = CSMA/CD one-at-a-time (hubs, 10/100)
+Auto-neg: if one side forced → auto side defaults to HDX (no FLP) → MISMATCH → late collisions.
+1G is FDX-only: no HDX fallback possible.
+
+MTU: default 1500 B (L3 payload). Frame = MTU + 18 (untrunked) / +22 (802.1Q).
+IPv6 never fragments; PMTUD + ICMPv6 Packet Too Big.
+Tunnel overhead: GRE −24 B (1476), PPPoE −8 B (1492), VXLAN −50 B (~1450).
+
+Connectors: RJ-45 (copper), LC (SFP/SFP+ fiber, most common), SC (legacy panels), MPO (QSFP 40/100G parallel)
+Transceivers: SFP 1G, SFP+ 10G, SFP28 25G, QSFP+ 40G, QSFP28 100G — SR=850nm MM, LR=1310nm SM
+DOM reads laser TX/RX power from the module, not the fiber.
+
+Patch panels: 90 m horizontal + 10 m patch = 100 m budget. Label, LLDP, polarity through fiber panels.
+Media conversion: L1 electrical↔optical, transparent to L2 — but fiber has no PoE.</pre>
+    </div>
+    <div class="card">
+      <h3>Mini quiz — {{ quizQuestions.length }} questions</h3>
+      <div class="score-bar">
+        <span class="chip info" v-if="!quizDone">Answer all {{ quizQuestions.length }} to submit</span>
+        <span v-else><b style="color:var(--green); font-size:1.05rem;">{{ quizScore }} / {{ quizQuestions.length }}</b> <span style="color:var(--muted);">({{ Math.round(quizScore / quizQuestions.length * 100) }}%)</span></span>
+        <div class="score-meter"><div :style="{ width: quizPct + '%' }"></div></div>
+        <button v-if="quizDone" class="btn primary" @click="resetQuiz">Retake (reshuffle)</button>
+      </div>
+      <div v-for="(q, qi) in quizQuestions" :key="qi" class="q-card">
+        <div class="qtext">{{ qi + 1 }}. {{ q.q }}</div>
+        <button v-for="(o, oi) in q.options" :key="oi" class="opt" :class="{ 'picked': q.picked === oi, 'correct': quizDone && o.text === q.answerText, 'wrong': quizDone && q.picked === oi && o.text !== q.answerText }" :disabled="quizDone" @click="q.picked = oi">{{ ['A','B','C','D'][oi] }}. {{ o.text }}</button>
+        <div v-if="quizDone" class="q-why"><b>Why:</b> {{ q.why }}</div>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
+        <button class="btn primary" @click="submitQuiz" :disabled="quizDone || answeredCount < quizQuestions.length">{{ answeredCount < quizQuestions.length ? 'Answer all questions first (' + answeredCount + '/' + quizQuestions.length + ')' : 'Submit answers' }}</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13. CHECKLIST -->
+  <section id="plan">
+    <div class="sec-head"><div class="sec-num vi">13</div><h2>Study Checklist</h2></div>
+    <div class="card">
+      <div class="prog">
+        <span style="font-size:0.85rem; font-weight:700;">{{ doneCount }} / {{ planItems.length }} notes reviewed</span>
+        <div class="meter"><div :style="{ width: doneCount / planItems.length * 100 + '%' }"></div></div>
+      </div>
+      <div v-for="(item, i) in planItems" :key="item.file" class="check-item" :class="{ done: done[i] }">
+        <input type="checkbox" :checked="done[i]" @change="toggleDone(i)">
+        <a :href="item.file" target="_blank">{{ item.label }}</a>
+      </div>
+      <p style="font-size:0.8rem; color:var(--muted); margin-top:8px;">Progress is saved in your browser.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span>Level 01 · Physical Layer — built from all 12 level notes.</span>
+    <span><a href="Physical Layer Overview.md">&larr; Back to Level 01 overview</a></span>
+  </footer>
+</div>
+
+<script src="../vue.global.prod.js"></script>
+<script>
+(function () {
+  "use strict";
+  const { createApp, ref, computed } = Vue;
+
+  const LS = { theme: "ccnp.phys.theme", done: "ccnp.phys.done", quizbest: "ccnp.phys.quizbest" };
+  function loadJSON(key, fb) { try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fb; } catch { return fb; } }
+  function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+  function shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+  createApp({
+    setup() {
+      const theme = ref(loadJSON(LS.theme, "dark"));
+      function toggleTheme() { theme.value = theme.value === "dark" ? "light" : "dark"; save(LS.theme, theme.value); }
+
+      // ---- media explorer ----
+      const mediaActive = ref("utp");
+      const mediaList = [{ key: "utp", label: "UTP" }, { key: "stp", label: "STP" }, { key: "fiber", label: "Fiber" }, { key: "rf", label: "Wireless RF" }];
+      const MEDIA = {
+        utp:   { reach: "100 m (90 m + 10 m patch)", emi: "Good (twisting cancels)", security: "Physical access required", cost: "Cheapest", speedBar: 60, speedLabel: "Up to 10G", distBar: 20, distLabel: "100 m", emiBar: 60, emiLabel: "Good", keyIdea: "UTP is the default office copper cable — cheap, familiar, and limited to 100 m. Cat 5e for gigabit, Cat 6a for 10G." },
+        stp:   { reach: "100 m (same budget as UTP)", emi: "Excellent (foil/braid shield)", security: "Physical access required", cost: "Moderate premium", speedBar: 60, speedLabel: "Up to 10G", distBar: 20, distLabel: "100 m", emiBar: 95, emiLabel: "Excellent", keyIdea: "STP adds a shield to reject EMI/RFI — use in industrial noisy environments. The shield MUST be grounded (one end) or it becomes an antenna." },
+        fiber: { reach: "100 m to 120+ km", emi: "Complete (glass — no EMI)", security: "Physical tap required (detectable)", cost: "Higher (modules + fiber)", speedBar: 100, speedLabel: "Up to 400G+", distBar: 100, distLabel: "120 km+", emiBar: 100, emiLabel: "Immune", keyIdea: "Fiber carries light through glass — immune to EMI, huge bandwidth, very long reach. SMF for WAN/long-haul, MMF for campus/DC short runs." },
+        rf:    { reach: "Varies (10 m to 100+ m)", emi: "Shared medium — susceptible", security: "Anyone in range can listen", cost: "Moderate (APs + WLC)", speedBar: 40, speedLabel: "Up to ~9.6G (Wi-Fi 7)", distBar: 30, distLabel: "10–100 m", emiBar: 20, emiLabel: "Low", keyIdea: "Wireless replaces cables with RF — shared medium, interference-prone, but provides mobility. AP uplinks remain wired." }
+      };
+      const mediaInfo = computed(() => MEDIA[mediaActive.value]);
+
+      // ---- UTP category explorer ----
+      const catActive = ref("5e");
+      const categoryList = [{ key: "5" }, { key: "5e" }, { key: "6" }, { key: "6a" }, { key: "7" }, { key: "8" }];
+      const CATS = {
+        "5":  { mhz: "100 MHz", pairs: "2 pairs (100BASE-TX) / 4 pairs (1000BASE-T)", speed: "100 Mbps (1000BASE-T needs 5e)", dist: "100 m", note: "Cat 5 is superseded; 100 MHz but gigabit needs the tighter Cat 5e specs." },
+        "5e": { mhz: "100 MHz", pairs: "4 pairs (1000BASE-T)", speed: "1 Gbps (1000BASE-T)", dist: "100 m", note: "Cat 5e is still 100 MHz (same as Cat 5) but adds stricter crosstalk specs for gigabit. Most deployed cabling today." },
+        "6":  { mhz: "250 MHz", pairs: "4 pairs", speed: "1 Gbps; 10GBASE-T up to 55 m", dist: "100 m (55 m for 10G)", note: "Cat 6 supports 10G but only to 55 m — not the full 100 m. For full 10G, use Cat 6a." },
+        "6a": { mhz: "500 MHz", pairs: "4 pairs", speed: "10GBASE-T", dist: "100 m", note: "Cat 6a is the full 10G copper standard — 500 MHz, 100 m reach. The 10G data center copper answer." },
+        "7":  { mhz: "600 MHz", pairs: "4 pairs (shielded)", speed: "10G+", dist: "100 m", note: "Cat 7 is fully shielded (S/FTP). Rarely deployed; Cat 6a achieves the same with less cost and complexity." },
+        "8":  { mhz: "2000 MHz", pairs: "4 pairs (shielded)", speed: "25/40GBASE-T", dist: "30 m", note: "Cat 8 is for short data-center runs only (≤30 m). Very high bandwidth but limited reach." }
+      };
+      const catInfo = computed(() => CATS[catActive.value]);
+
+      // ---- fiber explorer ----
+      const fiberActive = ref("mm");
+      const fiberList = [{ key: "mm", label: "Multimode (MMF)" }, { key: "sm", label: "Single-mode (SMF)" }];
+      const FIBERS = {
+        mm: { core: "50 or 62.5 µm", source: "LED / VCSEL", color: "Aqua (OM3/OM4), Grey (OM1/OM2)", reach: "100–550 m", coreBar: 100, coreLabel: "50–62.5 µm", distBar: 15, distLabel: "≤550 m", costBar: 30, costLabel: "Low", trap: "Multimode distance limits are modal dispersion-based, not loss-based. OM3 supports 10G to 300 m; OM4 to 550 m. Color: aqua = OM3/OM4 — a frequent exam question." },
+        sm:  { core: "~9 µm", source: "Laser (DFB/Fabry-Pérot)", color: "Yellow (OS1/OS2)", reach: "10 km – 120+ km", coreBar: 10, coreLabel: "9 µm", distBar: 100, distLabel: "120 km+", costBar: 70, costLabel: "Higher", trap: "Single-mode distance is loss-based (attenuation + power budget), not dispersion-limited. OM5 is 50 µm laser-optimized WDM — NOT 'newer single-mode.' Don't confuse them." }
+      };
+      const fiberInfo = computed(() => FIBERS[fiberActive.value]);
+
+      // ---- naming convention ----
+      const suffixRef = ref("T");
+      const suffixList = [{ key: "T" }, { key: "S" }, { key: "L" }, { key: "E" }, { key: "C" }, { key: "K" }, { key: "F" }, { key: "R" }];
+      const SUFFIXES = {
+        T: { meaning: "Twisted pair (copper UTP/STP)", examples: "1000BASE-T, 10GBASE-T", notes: "Max 100 m; Cat 5e for 1G, Cat 6a for 10G" },
+        S: { meaning: "Short-range multimode fiber", examples: "1000BASE-SX, 10GBASE-SR, 40GBASE-SR4", notes: "850 nm, OM3/OM4, 100–550 m" },
+        L: { meaning: "Long-range (single-mode or multi)", examples: "1000BASE-LX, 10GBASE-LR", notes: "1310 nm, SMF, 5–10 km" },
+        E: { meaning: "Extended reach", examples: "10GBASE-ER", notes: "SMF, up to 40 km" },
+        C: { meaning: "Copper twinax (Direct Attach Cable)", examples: "100GBASE-CR4", notes: "≤5–7 m, no optics, cheapest DC option" },
+        K: { meaning: "Backplane (chip-to-chip inside chassis)", examples: "10GBASE-KR", notes: "No cable — on the switch fabric backplane" },
+        F: { meaning: "Fiber variant (legacy 100M)", examples: "100BASE-FX", notes: "Legacy 100 Mbps fiber, MMF, up to 2 km" },
+        R: { meaning: "64B/66B encoding (modern)", examples: "10GBASE-SR, 40GBASE-SR4, 100GBASE-LR4", notes: "Encodes 64 bits into 66 for clock recovery — more efficient than 8B/10B" }
+      };
+      const suffixInfo = computed(() => SUFFIXES[suffixRef.value]);
+
+      // ---- duplex / auto-neg simulator ----
+      const portA = ref("auto");
+      const portB = ref("auto");
+      const autoModes = ["auto", "100M", "1G"];
+      const autoResult = computed(() => {
+        const a = portA.value, b = portB.value;
+        if (a === "auto" && b === "auto") {
+          return { aSpeed: "1 Gbps", aDuplex: "Full", bSpeed: "1 Gbps", bDuplex: "Full", warning: null, warningTitle: "", okMsg: "Both auto — negotiate to 1 Gbps full-duplex." };
+        }
+        if (a !== "auto" && b !== "auto") {
+          if (a === b) {
+            const s = a === "1G" ? "1 Gbps" : "100 Mbps";
+            return { aSpeed: s, aDuplex: "Full", bSpeed: s, bDuplex: "Full", warning: null, warningTitle: "", okMsg: "Both forced to matching settings — link up, full-duplex." };
+          }
+          return { aSpeed: "No link", aDuplex: "—", bSpeed: "No link", bDuplex: "—", warning: "Speed mismatch: port A advertises " + (a === "1G" ? "1G" : "100M") + " but port B expects " + (b === "1G" ? "1G" : "100M") + ". No link is established.", warningTitle: "No link", okMsg: "" };
+        }
+        // One forced, one auto
+        const forced = a !== "auto" ? { mode: a, side: "a" } : { mode: b, side: "b" };
+        const forcedSpeed = forced.mode === "1G" ? "1 Gbps" : "100 Mbps";
+        const autoDuplex = forced.mode === "1G" ? "Full" : "Half";
+        const autoSide = forced.side === "a" ? "b" : "a";
+        const result = { aSpeed: "", aDuplex: "", bSpeed: "", bDuplex: "", warning: null, warningTitle: "", okMsg: "" };
+        if (forced.side === "a") {
+          result.aSpeed = forcedSpeed; result.aDuplex = "Full";
+          result.bSpeed = forcedSpeed; result.bDuplex = autoDuplex;
+        } else {
+          result.bSpeed = forcedSpeed; result.bDuplex = "Full";
+          result.aSpeed = forcedSpeed; result.aDuplex = autoDuplex;
+        }
+        if (autoDuplex === "Half") {
+          result.warning = "The auto side (" + autoSide + ") defaults to half-duplex — it sees fast link pulses at the negotiated speed but no FLP for duplex, so it picks half. Expect late collisions and CRC errors.";
+          result.warningTitle = "Duplex mismatch";
+        } else {
+          result.okMsg = "1 Gbps is FDX-only — no half-duplex fallback. Both sides get full-duplex.";
+        }
+        return result;
+      });
+
+      // ---- MTU explorer ----
+      const mtuValue = ref(1500);
+      const mtuColor = computed(() => mtuValue.value <= 1500 ? "var(--green)" : mtuValue.value < 9000 ? "var(--amber)" : "var(--violet)");
+
+      // ---- connectors ----
+      const connActive = ref("LC");
+      const connList = [{ key: "RJ-45" }, { key: "LC" }, { key: "SC" }, { key: "MPO" }, { key: "ST/FC" }];
+      const CONNS = {
+        "RJ-45": { media: "UTP/STP copper (Cat 3–8)", use: "10/100/1000/10GBASE-T Ethernet", notes: "8P8C; gigabit uses all 4 pairs", trap: "RJ-45 vs RJ-48: identical face but different keying. RJ-48 is used for T1/E1 WAN circuits — same connector, different use." },
+        "LC":    { media: "Single-mode and multimode fiber", use: "Nearly all SFP/SFP+ fiber runs; SFP28 25G", notes: "Duplex, small form factor (SFF); A/B polarity", trap: "SFP and SFP+ have the identical LC footprint — the module determines speed (1G vs 10G), not the connector. Wrong pigtail (SM vs MM) causes huge loss." },
+        "SC":    { media: "Fiber (duplex)", use: "Legacy patch panels, older equipment", notes: "Push-pull latching; larger than LC", trap: "SC is being replaced by LC in new deployments. Know both for exam — SC still appears in legacy topology questions." },
+        "MPO":   { media: "Multi-fiber (8/12/24 fibers)", use: "40GBASE-SR4, 100GBASE-SR4, 400G parallel", notes: "Parallel optics — polarity keys are critical", trap: "40G SR4 = MPO-12 (parallel), but 40G LR4 = LC duplex (CWDM over one pair). Don't mix them — the exam loves this distinction." },
+        "ST/FC": { media: "Fiber", use: "Legacy LAN (ST), legacy telecom (FC)", notes: "ST = bayonet twist-lock; FC = threaded screw-on", trap: "ST/FC are legacy connectors — you'll see them in old topologies but new deployments use LC/MPO exclusively." }
+      };
+      const connInfo = computed(() => CONNS[connActive.value]);
+
+      // ---- transceivers ----
+      const transActive = ref("SFP");
+      const transList = [{ key: "SFP" }, { key: "SFP+" }, { key: "SFP28" }, { key: "QSFP+" }, { key: "QSFP28" }, { key: "DAC" }];
+      const TRANS = {
+        "SFP":   { speed: "100M–1G", connector: "LC duplex (or RJ-45 copper)", reach: "100 m–10 km", detail: "1000BASE-SX (MM, 850 nm, 550 m) or 1000BASE-LX (SM, 1310 nm, 5 km)", failure: "A 1G SFP in a 10G slot runs at 1G only — the module caps the speed. SR uses 850 nm MMF; LX uses 1310 nm SMF." },
+        "SFP+":  { speed: "10G", connector: "LC duplex", reach: "300 m (SR) to 40 km (ER)", detail: "10GBASE-SR (MM, 850 nm) or 10GBASE-LR (SM, 1310 nm, 10 km)", failure: "Wrong wavelength = no link even with light. 850 nm SR on SMF won't work; 1310 nm LR on MMF needs mode-conditioning patch." },
+        "SFP28": { speed: "25G", connector: "LC duplex", reach: "100 m (MM) to 10 km (SM)", detail: "25GBASE-SR (MMF, 850 nm) or 25GBASE-LR (SMF)", failure: "Same footprint as SFP/SFP+ — speed determined by module, not the slot. Dirty connectors = high loss, CRC errors." },
+        "QSFP+": { speed: "4×10G = 40G", connector: "MPO-12 (SR4 parallel) or LC duplex (LR4 CWDM)", reach: "100 m (SR4) to 10 km (LR4)", detail: "SR4 = 4 parallel fibers via MPO; LR4 = 4 lambdas over one LC duplex pair", failure: "SR4 vs LR4 use different connectors (MPO vs LC). Never mix them — the exam tests this frequently." },
+        "QSFP28": { speed: "4×25G = 100G", connector: "MPO-12 (SR4) or LC duplex (LR4)", reach: "100 m (SR4) to 10 km (LR4)", detail: "Same MPO/LC split as QSFP+ but at 100G.", failure: "100G uses the same QSFP form factor — module and connector must match. DOM reads laser power from the module, not the fiber." },
+        "DAC":   { speed: "25G or 100G (varies)", connector: "Twinax copper (no optics)", reach: "≤5–7 m", detail: "Direct Attach Cable — copper twinax with built-in SFP/QSFP ends, no separate optics needed", failure: "DAC is the cheapest short-reach option but limited to rack-to-rack. No DOM (no optics to monitor). Cannot exceed ~7 m." }
+      };
+      const transInfo = computed(() => TRANS[transActive.value]);
+
+      // ---- patch panel budget ----
+      const patchHorizontal = ref(70);
+      const patchCables = ref(6);
+      const patchBudgetOk = computed(() => patchHorizontal.value + patchCables.value <= 100);
+      const patchBudgetColor = computed(() => patchBudgetOk.value ? "var(--green)" : "var(--red)");
+
+      // ---- commands ----
+      const activeCmd = ref("show-if");
+      const activeCommand = computed(() => commands.find(c => c.key === activeCmd.value));
+      const commands = [
+        { key: "show-if", label: "Show interfaces", tagline: "Verify speed, duplex, errors on copper/fiber ports.",
+          cmd: `show interfaces GigabitEthernet0/1
+show interfaces status
+show interfaces counters errors`,
+          output: `GigabitEthernet0/1 is up, line protocol is up
+  Hardware is ISR4331-GE, address is aabb.cc00.0100
+  Full-duplex, 1000 Mb/s, link type is auto, media type is RJ45
+  input rate 1.2 Mbps, output rate 850 Kbps
+  0 input errors, 0 CRC, 0 frame, 0 overrun
+  0 late collisions, 0 deferred
+
+Port       Name               Status    Vlan   Duplex  Speed  Type
+Gi0/1      To-PC-01           connected 10     a-full  a-1000 RJ45
+Gi0/24     To-Dist-1          connected trunk  a-full  a-1000 SFP`,
+          read: "a-full/a-1000 = auto-negotiated full-duplex at 1G. If you see a-half on a gig port, that's a bug or misconfiguration — 1G is FDX-only. Late collisions = duplex mismatch signature on 10/100." },
+        { key: "transceiver", label: "Transceiver / DOM", tagline: "Read optical power, temperature, wavelength from SFP modules.",
+          cmd: `show interface TenGigabitEthernet1/0/1 transceiver
+show interface transceiver detail`,
+          output: `If device is supported transceiver detail is available
+
+Tslot 1/0/1
+  transceiver is present
+  type is 10GBASE-SR
+  name is CISCO
+  part number is SFP-10G-SR
+  serial number is AZS12345678
+  connector is LC
+  wavelength(nm) is 850
+  nominal bitrate is 10300 Mb/S
+  RX Power:  -14.2 dBm (min -17.4, max -1.0)
+  TX Power:  -7.3 dBm  (min -11.1, max -1.0)`,
+          read: "RX power near sensitivity threshold (-17.4 dBm) means marginal link — clean connectors first, then check fiber type and module. DOM reads module diagnostics, not the fiber itself." },
+        { key: "troubleshoot", label: "L1 troubleshooting", tagline: "Start-of-link fault isolation for copper and fiber.",
+          cmd: `# Copper: check for duplex mismatch
+show interfaces | include (duplex|collision|CRC|runts)
+
+# Fiber: module present? TX/RX sane?
+show interface transceiver | include "(Wavelength|Tx Power|Rx Power)"
+
+# Physical: is the port errdisabled?
+show interfaces status errdisabled`,
+          output: `# Duplex mismatch symptoms on port Gi0/5:
+Gi0/5 is up, line protocol is up
+  Half-duplex, 100 Mb/s
+  847 late collisions, 2341 CRC, 1092 runts
+
+# Fiber on Te1/0/1 — low RX:
+  RX Power:  -16.8 dBm (min -17.4, max -1.0)  ← near threshold!
+
+# errdisabled port:
+Gi0/12                      errdisabled  10     auto    auto   SFP`,
+          read: "Late collisions + runts = classic duplex mismatch (10/100). Low RX power = dirty connectors or wrong fiber type. Errdisable on fiber = unsupported/counterfeit module or wrong wavelength." },
+        { key: "mtu", label: "MTU verify", tagline: "Check and test MTU across a path.",
+          cmd: `show interfaces | include MTU
+ping 10.0.0.1 size 1472 df-bit    # test 1500 MTU path
+ping 10.0.0.1 size 9000 df-bit    # jumbo test`,
+          output: `Vlan10 is up, line protocol is up
+  MTU 1500 bytes, BW 1000000 Kbit
+Tunnel0 is up, line protocol is up
+  MTU 1476 bytes (GRE overhead subtracted)
+
+Ping 10.0.0.1: 1472 data bytes
+Reply from 10.0.0.1: bytes=1472 time=1ms TTL=254
+
+Ping 10.0.0.1: 9000 data bytes
+Reply from 10.0.0.2: DF bit set. Destination Unreachable.` ,
+          read: "MTU 1500 is the default. Tunnel interfaces subtract overhead (GRE: 1476, PPPoE: 1492). If jumbo ping fails but standard works, a link in the path doesn't support jumbo — check every switch." }
+      ];
+
+      // ---- traps ----
+      const trapOpen = ref([]);
+      const traps = [
+        { q: "\"STP\" in the exam always means spanning tree.", a: "No. STP is also Shielded Twisted Pair (cable). Read for the word \"cable\" vs \"protocol\" — same acronym, different context." },
+        { q: "Cat 5 and Cat 5e have different MHz ratings.", a: "No. Both are rated at 100 MHz. Cat 5e adds stricter crosstalk specs for gigabit support — the MHz rating didn't change, the spec quality did." },
+        { q: "Fiber is always faster than copper.", a: "No. Speed depends on the protocol/module, not the medium. Fiber's real advantages are distance and EMI immunity — a 1G fiber link is not faster than a 10G copper link." },
+        { q: "Aqua fiber jacket means single-mode.", a: "No. Aqua = OM3/OM4 multimode fiber. Single-mode is yellow (OS1/OS2). This is a frequent color-code exam question." },
+        { q: "SFP and SFP+ have different connector sizes.", a: "No. They have identical LC duplex footprints — the module determines speed (1G vs 10G), not the connector. A 1G SFP in a 10G slot yields 1G." },
+        { q: "40G SR4 and 40G LR4 use the same connector.", a: "No. SR4 = MPO-12 parallel fibers; LR4 = LC duplex CWDM (4 lambdas over one duplex pair). Different connectors — the exam loves this." },
+        { q: "Unshielded STP cable is fine — the shield is optional.", a: "No. An ungrounded shield becomes an antenna — it collects and injects noise, making things worse than no shield. Ground one end to avoid ground loops." },
+        { q: "Forcing speed 100 on one side, auto on the other → both full-duplex.", a: "No. The auto side defaults to half-duplex — it sees fast link pulses at 100M but no FLP for duplex. Classic duplex mismatch: late collisions, CRC errors." },
+        { q: "1000BASE-T supports half-duplex.", a: "No. 1G is full-duplex only — there is no half-duplex mode. CSMA/CD doesn't exist at gigabit speed. Forcing 1G duplex full is redundant but harmless." },
+        { q: "Default Ethernet MTU is 1500 bytes including the frame header.", a: "No. MTU = 1500 B is the L3 payload only. The full frame adds 18 B (header + FCS) untrunked, or 22 B with 802.1Q tag." },
+        { q: "IPv6 routers fragment packets like IPv4.", a: "No. IPv6 never fragments in transit — the source uses PMTUD (Path MTU Discovery) and ICMPv6 Packet Too Big. Routers just drop packets that are too large." },
+        { q: "Media converters are switches.", a: "No. Media converters are L1 electrical↔optical devices — no MAC learning, no VLAN, no routing. They're transparent to L2. Also: fiber has no PoE — devices behind converters need separate power." }
+      ];
+
+      // ---- quiz ----
+      const baseQuestions = [
+        { q: "UTP max segment length (including patch cables):", options: ["90 m", "100 m", "150 m", "500 m"], answer: 1, why: "The 100-meter rule: 90 m horizontal + 10 m patch cables = 100 m total for all twisted-pair Ethernet." },
+        { q: "1000BASE-T uses how many pairs:", options: ["1 pair", "2 pairs", "3 pairs", "4 pairs"], answer: 3, why: "1000BASE-T uses all four pairs bidirectionally with echo cancellation. 100BASE-TX only uses 2 pairs." },
+        { q: "Single-mode fiber core diameter:", options: ["9 µm", "50 µm", "62.5 µm", "125 µm"], answer: 0, why: "Single-mode has a ~9 µm core — small enough to support only one propagation mode (light path)." },
+        { q: "OM3 multimode max 10G reach:", options: ["100 m", "300 m", "550 m", "2 km"], answer: 1, why: "OM3 supports 10GBASE-SR to 300 m. OM4 extends that to 550 m. Both are aqua-jacketed." },
+        { q: "SFP and SFP+ differ in:", options: ["Connector size and footprint", "Speed rating (1G vs 10G)", "Fiber type they support", "Both A and B"], answer: 1, why: "Same LC duplex footprint — the module determines speed. A 1G SFP works at 1G in a 10G slot." },
+        { q: "10GBASE-SR uses:", options: ["SMF at 1310 nm", "MMF at 850 nm", "UTP Cat 6a", "Twinax DAC"], answer: 1, why: "SR = short range, multimode fiber, 850 nm wavelength, up to 300 m on OM3." },
+        { q: "Duplex mismatch symptoms appear on:", options: ["The full-duplex end only", "The half-duplex end only", "Both ends equally", "Neither — it's silent"], answer: 1, why: "Late collisions appear on the half-duplex end. CRC errors/runts appear on the full-duplex end (which sees corrupted frames from B's collisions)." },
+        { q: "Forcing speed 100 on one side, other auto → auto side gets:", options: ["100 Mbps full-duplex", "100 Mbps half-duplex", "10 Mbps full-duplex", "Auto-negotiation fails completely"], answer: 1, why: "The auto side sees FLP at 100M but no FLP for duplex → defaults to half. Classic duplex mismatch." },
+        { q: "Default Ethernet MTU:", options: ["512 bytes", "1500 bytes", "9000 bytes", "65535 bytes"], answer: 1, why: "1500 B is the standard L3 payload limit. The frame adds 18 B (untrunked) or 22 B (802.1Q)." },
+        { q: "GRE tunnel overhead:", options: ["8 B", "24 B", "50 B", "100 B"], answer: 1, why: "GRE adds 20 B outer IP + 4 B GRE header = 24 B. Inner MTU on a GRE tunnel should be 1476." },
+        { q: "Most common fiber connector for SFP/SFP+ runs:", options: ["RJ-45", "SC", "LC", "MPO"], answer: 2, why: "LC duplex is the standard small form-factor connector for SFP/SFP+ fiber modules." },
+        { q: "STP cable shield grounding rule:", options: ["Both ends grounded", "One end grounded", "No grounding needed", "Shield is optional"], answer: 1, why: "Ground one end (typically the switch/patch panel side) to avoid ground loops. Ungrounded shield = antenna." }
+      ];
+      const quizQuestions = ref(shuffle(baseQuestions).map(q => ({ ...q, options: shuffle(q.options).map(t => ({ text: t })), answerText: q.options[q.answer], picked: null })));
+      const quizDone = ref(false);
+      const answeredCount = computed(() => quizQuestions.value.filter(q => q.picked !== null).length);
+      const quizScore = computed(() => quizQuestions.value.filter(q => q.picked !== null && q.options[q.picked].text === q.answerText).length);
+      const quizPct = computed(() => Math.round(quizScore.value / quizQuestions.value.length * 100));
+      function submitQuiz() { quizDone.value = true; const best = loadJSON(LS.quizbest, 0); if (quizScore.value > best) save(LS.quizbest, quizScore.value); }
+      function resetQuiz() { quizQuestions.value = shuffle(baseQuestions).map(q => ({ ...q, options: shuffle(q.options).map(t => ({ text: t })), answerText: q.options[q.answer], picked: null })); quizDone.value = false; }
+
+      // ---- checklist ----
+      const planItems = [
+        { file: "Physical Layer Overview.md", label: "Physical Layer Overview — the level map" },
+        { file: "01. Cables/01. UTP.md", label: "01 · UTP — categories, 100 m rule, auto-MDIX" },
+        { file: "01. Cables/02. STP.md", label: "02 · STP — shield types, grounding" },
+        { file: "01. Cables/03. Fiber.md", label: "03 · Fiber — SMF vs MMF, OM classes, power budget" },
+        { file: "01. Cables/04. Wireless.md", label: "04 · Wireless — RF as medium, interference, EIRP" },
+        { file: "02. Ethernet/01. Standards.md", label: "05 · Standards — naming convention, PCS/PMA/PMD" },
+        { file: "02. Ethernet/02. Duplex.md", label: "06 · Duplex — HDX vs FDX, auto-neg, mismatch" },
+        { file: "02. Ethernet/03. Speed.md", label: "07 · Speed — speed ladder 10M–400G, NBASE-T" },
+        { file: "02. Ethernet/04. MTU.md", label: "08 · MTU — 1500 default, fragmentation, tunnel overhead" },
+        { file: "03. Connectors.md", label: "09 · Connectors — RJ-45, LC, SC, MPO, polarity" },
+        { file: "04. Transceivers.md", label: "10 · Transceivers — SFP/SFP+/QSFP, SR vs LR, DOM" },
+        { file: "05. Patch Panels.md", label: "11 · Patch Panels — structured cabling, 90+10 m budget" },
+        { file: "06. Media Conversion.md", label: "12 · Media Conversion — L1 copper↔fiber, PoE gap" }
+      ];
+      const done = ref(loadJSON(LS.done, {}));
+      const doneCount = computed(() => Object.values(done.value).filter(Boolean).length);
+      function toggleDone(i) { done.value[i] = !done.value[i]; save(LS.done, done.value); }
+
+      return {
+        theme, toggleTheme,
+        mediaActive, mediaList, mediaInfo,
+        catActive, categoryList, catInfo,
+        fiberActive, fiberList, fiberInfo,
+        suffixRef, suffixList, suffixInfo,
+        portA, portB, autoModes, autoResult,
+        mtuValue, mtuColor,
+        connActive, connList, connInfo,
+        transActive, transList, transInfo,
+        patchHorizontal, patchCables, patchBudgetOk, patchBudgetColor,
+        activeCmd, activeCommand, commands,
+        trapOpen, traps,
+        quizQuestions, quizDone, quizScore, quizPct, answeredCount, submitQuiz, resetQuiz,
+        planItems, done, doneCount, toggleDone
+      };
+    }
+  }).mount("#app");
+})();
+</script>
+</body>
+</html>

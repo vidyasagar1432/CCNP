@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Networking Works — Deep Dive</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --panel: #111c34;
+    --card: #1e293b;
+    --card-2: #16233d;
+    --text: #f8fafc;
+    --muted: #94a3b8;
+    --blue: #38bdf8;
+    --blue-dim: #0c4a6e;
+    --green: #34d399;
+    --green-dim: #064e3b;
+    --amber: #fbbf24;
+    --amber-dim: #78350f;
+    --red: #f87171;
+    --red-dim: #7f1d1d;
+    --violet: #a78bfa;
+    --violet-dim: #4c1d95;
+    --border: #334155;
+    --hover: #263449;
+    --code-bg: #0b1220;
+  }
+  #app[data-theme="light"] {
+    --bg: #f1f5f9;
+    --panel: #ffffff;
+    --card: #ffffff;
+    --card-2: #f8fafc;
+    --text: #0f172a;
+    --muted: #64748b;
+    --blue: #0284c7;
+    --blue-dim: #bae6fd;
+    --green: #059669;
+    --green-dim: #d1fae5;
+    --amber: #d97706;
+    --amber-dim: #fef3c7;
+    --red: #dc2626;
+    --red-dim: #fee2e2;
+    --violet: #7c3aed;
+    --violet-dim: #ede9fe;
+    --border: #cbd5e1;
+    --hover: #e2e8f0;
+    --code-bg: #0b1220;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; }
+  #app { max-width: 1040px; margin: 0 auto; padding: 20px 18px 60px; }
+
+  header {
+    position: sticky; top: 0; z-index: 30;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 12px 16px; margin-bottom: 18px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  header h1 { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .lv-badge { background: var(--blue-dim); color: var(--blue); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .exam-badge { background: var(--violet-dim); color: var(--violet); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .head-actions { display: flex; align-items: center; gap: 8px; }
+  .btn {
+    padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--card); color: var(--text); cursor: pointer; font-size: 0.82rem; font-weight: 600;
+    transition: background 0.15s;
+  }
+  .btn:hover { background: var(--hover); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn.primary { background: var(--blue); border-color: var(--blue); color: #04222e; }
+  .btn.primary:hover { filter: brightness(1.1); background: var(--blue); }
+  .btn.green { background: var(--green); border-color: var(--green); color: #04241a; }
+
+  nav {
+    position: sticky; top: 62px; z-index: 20;
+    display: flex; gap: 6px; overflow-x: auto; padding: 8px 2px; margin-bottom: 18px;
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+    backdrop-filter: blur(4px); border-radius: 10px;
+  }
+  nav a {
+    text-decoration: none; white-space: nowrap; font-size: 0.76rem; font-weight: 600;
+    color: var(--muted); padding: 6px 11px; border: 1px solid var(--border); border-radius: 999px;
+    background: var(--panel);
+  }
+  nav a:hover { color: var(--text); border-color: var(--blue); }
+
+  section { margin-bottom: 30px; scroll-margin-top: 130px; }
+  .sec-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .sec-num {
+    min-width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center;
+    font-weight: 800; font-size: 0.9rem; color: var(--panel);
+  }
+  .sec-num.bl { background: var(--blue); } .sec-num.gr { background: var(--green); }
+  .sec-num.am { background: var(--amber); } .sec-num.rd { background: var(--red); }
+  .sec-num.vi { background: var(--violet); }
+  .sec-head h2 { font-size: 1.25rem; }
+  .sec-sub { color: var(--muted); font-size: 0.88rem; margin-bottom: 14px; }
+
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px 18px; margin-bottom: 14px;
+  }
+  .card h3 { font-size: 1rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .card p { margin-bottom: 8px; }
+  .card ul, .card ol { padding-left: 20px; margin-bottom: 8px; }
+  .card li { margin-bottom: 4px; }
+
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+
+  .callout {
+    border-radius: 10px; padding: 12px 14px; margin: 12px 0; font-size: 0.9rem;
+    border: 1px solid var(--border); background: var(--card-2);
+  }
+  .callout.b { border-left: 4px solid var(--blue); }
+  .callout.g { border-left: 4px solid var(--green); }
+  .callout.a { border-left: 4px solid var(--amber); }
+  .callout.r { border-left: 4px solid var(--red); }
+  .callout.v { border-left: 4px solid var(--violet); }
+  .callout strong { color: var(--text); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 10px 0; }
+  th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--card-2); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  tr:nth-child(even) td { background: color-mix(in srgb, var(--card-2) 55%, transparent); }
+
+  code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  pre {
+    background: var(--code-bg); color: #dbeafe; border-radius: 10px; padding: 14px 16px;
+    overflow-x: auto; font-size: 0.8rem; line-height: 1.5; margin: 10px 0; border: 1px solid var(--border);
+  }
+  pre .dim { color: #64748b; }
+
+  .chip {
+    display: inline-flex; align-items: center; gap: 5px; padding: 2px 10px; border-radius: 999px;
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.02em; white-space: nowrap;
+  }
+  .chip.succ { background: var(--green-dim); color: var(--green); }
+  .chip.warn { background: var(--amber-dim); color: var(--amber); }
+  .chip.down { background: var(--red-dim); color: var(--red); }
+  .chip.info { background: var(--blue-dim); color: var(--blue); }
+
+  .keyval { display: flex; gap: 16px; flex-wrap: wrap; margin: 8px 0; }
+  .kv { background: var(--card-2); border: 1px solid var(--border); border-radius: 10px; padding: 8px 14px; font-size: 0.84rem; flex: 1; min-width: 140px; }
+  .kv b { display: block; color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 2px; }
+
+  .chain { display: flex; align-items: stretch; gap: 6px; flex-wrap: wrap; margin: 12px 0; }
+  .chain .c {
+    background: var(--card-2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 12px; font-size: 0.8rem; text-align: center; flex: 1; min-width: 110px; font-weight: 600;
+  }
+  .chain .c.arw { border: none; background: none; color: var(--muted); flex: 0 0 auto; font-size: 1.1rem; font-weight: 800; min-width: 24px; padding: 8px 0; }
+  .chain .c i { display: block; font-style: normal; color: var(--muted); font-weight: 400; font-size: 0.72rem; margin-top: 2px; }
+
+  .pill-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+  .pill { padding: 6px 12px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; border: 1px solid var(--border); background: var(--card-2); }
+  .pill.active { border-color: var(--blue); background: var(--blue-dim); color: var(--blue); }
+
+  .bar-row { display: grid; grid-template-columns: 100px 1fr 48px; align-items: center; gap: 8px; margin: 6px 0; font-size: 0.82rem; }
+  .bar-row .bl { font-weight: 600; }
+  .bar { height: 10px; background: var(--card-2); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
+  .bar div { height: 100%; border-radius: 999px; transition: width 0.3s; }
+
+  .sorter-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0; padding: 8px 10px; background: var(--card-2); border: 1px solid var(--border); border-radius: 8px; font-size: 0.84rem; align-items: center; }
+  .sorter-row .task { flex: 1; min-width: 180px; }
+  .sorter-row .task b { color: var(--muted); font-size: 0.72rem; text-transform: uppercase; margin-right: 4px; }
+  .sorter-row button { padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; font-size: 0.78rem; font-weight: 600; }
+  .sorter-row button:hover { border-color: var(--blue); }
+  .sorter-row button.correct { border-color: var(--green); background: var(--green-dim); color: var(--green); }
+  .sorter-row button.wrong { border-color: var(--red); background: var(--red-dim); color: var(--red); }
+  .sorter-row .why { font-size: 0.78rem; color: var(--muted); margin-left: 8px; }
+
+  .trap-card { cursor: pointer; user-select: none; transition: border-color 0.15s; }
+  .trap-card:hover { border-color: var(--red); }
+  .trap-card .t { font-weight: 700; font-size: 0.92rem; display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+  .trap-card .t .hint { color: var(--red); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; opacity: 0.8; }
+  .trap-card.flipped { border-color: var(--red); background: var(--red-dim); border-width: 1.5px; }
+  .trap-card .ans { margin-top: 10px; border-top: 1px dashed var(--border); padding-top: 10px; font-size: 0.88rem; }
+
+  .q-card { border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; background: var(--card); }
+  .q-card .qtext { font-weight: 700; margin-bottom: 10px; font-size: 0.93rem; }
+  .opt { display: block; width: 100%; text-align: left; padding: 8px 12px; margin: 5px 0; border-radius: 8px; cursor: pointer; font-size: 0.86rem; border: 1px solid var(--border); background: var(--card-2); color: var(--text); }
+  .opt:hover:not(:disabled) { border-color: var(--blue); }
+  .opt.picked { border-color: var(--blue); background: var(--blue-dim); font-weight: 700; }
+  .opt.correct { border-color: var(--green); background: var(--green-dim); }
+  .opt.wrong { border-color: var(--red); background: var(--red-dim); }
+  .opt:disabled { cursor: default; opacity: 0.9; }
+  .q-why { margin-top: 8px; font-size: 0.84rem; color: var(--muted); }
+  .q-why b { color: var(--text); }
+  .score-bar { display: flex; align-items: center; gap: 12px; margin: 12px 0; flex-wrap: wrap; }
+  .score-meter { flex: 1; height: 10px; background: var(--card-2); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; min-width: 160px; }
+  .score-meter div { height: 100%; background: var(--green); transition: width 0.3s; }
+
+  .check-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; margin-bottom: 4px; font-size: 0.88rem; cursor: pointer; }
+  .check-item:hover { background: var(--hover); }
+  .check-item input { accent-color: var(--green); width: 16px; height: 16px; cursor: pointer; }
+  .check-item.done { color: var(--muted); text-decoration: line-through; }
+  .check-item a { color: var(--text); text-decoration: none; }
+  .check-item a:hover { color: var(--blue); text-decoration: underline; }
+  .prog { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .prog .meter { flex: 1; height: 10px; background: var(--card-2); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
+  .prog .meter div { height: 100%; background: var(--green); transition: width 0.3s; }
+
+  footer { margin-top: 30px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.82rem; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  footer a { color: var(--blue); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  @media print {
+    header, nav, .btn, footer .no-print { display: none !important; }
+    body { background: #fff; }
+    * { color: #111 !important; background: #fff !important; border-color: #ccc !important; }
+  }
+</style>
+</head>
+<body>
+<div id="app" :data-theme="theme">
+
+  <!-- ================= HEADER ================= -->
+  <header>
+    <h1>
+      <span class="lv-badge">Level 00</span>
+      How Networking Works
+      <span class="exam-badge">ENCOR 350-401</span>
+    </h1>
+    <div class="head-actions">
+      <a class="btn" href="../index.html">Flashcards</a>
+      <button class="btn" @click="toggleTheme">{{ theme === 'dark' ? 'Light' : 'Dark' }} mode</button>
+    </div>
+  </header>
+
+  <!-- ================= NAV ================= -->
+  <nav>
+    <a href="#overview">1 · Networking</a>
+    <a href="#types">2 · Network Types</a>
+    <a href="#models">3 · C/S vs P2P</a>
+    <a href="#components">4 · Components &amp; Planes</a>
+    <a href="#arch">5 · Architecture</a>
+    <a href="#design">6 · Design Principles</a>
+    <a href="#commands">7 · Commands</a>
+    <a href="#traps">8 · Traps</a>
+    <a href="#quiz">9 · Quiz</a>
+    <a href="#plan">10 · Checklist</a>
+  </nav>
+
+  <!-- ================= 1. WHAT IS NETWORKING ================= -->
+  <section id="overview">
+    <div class="sec-head"><div class="sec-num bl">1</div><h2>What is Networking?</h2></div>
+    <div class="card">
+      <p>
+        <b>Networking</b> is the practice of connecting two or more computing devices so they can
+        exchange data, share resources, and communicate. A network is defined <b>not by the number
+        of devices</b> but by the ability to transmit and receive information between endpoints
+        using agreed-upon standards and protocols.
+      </p>
+      <div class="callout b">
+        <strong>Key idea — memorize</strong><br>
+        Networking enables resource sharing (files, printers, compute, storage) and communication
+        (email, voice, video, web) between endpoints regardless of location — locally via a <b>LAN</b>
+        or across sites via a <b>WAN</b>. The Internet is a network of networks; not every network is
+        the Internet.
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>What a network needs — 5 building blocks</h3>
+      <div class="grid2">
+        <div>
+          <ul>
+            <li><b>Endpoints / hosts</b> — PCs, servers, phones, IoT; originate or consume traffic.</li>
+            <li><b>Transmission media</b> — copper (UTP/STP), fiber (single-mode/multimode), or RF (wireless).</li>
+            <li><b>Intermediary devices</b> — switches, routers, firewalls, APs that move/secure data.</li>
+          </ul>
+        </div>
+        <div>
+          <ul>
+            <li><b>Protocols</b> — rules for formatting, addressing, and delivering (TCP/IP, Ethernet, 802.11).</li>
+            <li><b>Addressing</b> — MAC (L2) and IP (L3) identifiers that let packets find the right destination.</li>
+          </ul>
+          <div class="callout a" style="font-size:0.84rem;"><strong>What networking must solve</strong> — connecting heterogeneous devices; addressing &amp; naming; path determination; reliability &amp; error recovery; security; management &amp; monitoring. All solved together via layering (OSI model).</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Duplex modes — interactive explorer</h3>
+      <p class="sec-sub">Click a mode to see how data flows, where it's used, and exam tips.</p>
+      <div class="pill-list">
+        <button v-for="m in duplexModes" :key="m.key" class="pill btn" :class="duplexActive === m.key ? 'active' : ''" @click="duplexActive = m.key">{{ m.label }}</button>
+      </div>
+      <div v-if="duplexInfo">
+        <div class="keyval">
+          <div class="kv"><b>Direction</b>{{ duplexInfo.dir }}</div>
+          <div class="kv"><b>When</b>{{ duplexInfo.when }}</div>
+          <div class="kv"><b>Example</b>{{ duplexInfo.example }}</div>
+        </div>
+        <div class="callout b" style="font-size:0.84rem;"><strong>Exam tip:</strong> {{ duplexInfo.tip }}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 2. NETWORK TYPES ================= -->
+  <section id="types">
+    <div class="sec-head"><div class="sec-num gr">2</div><h2>Network Types</h2></div>
+    <div class="card">
+      <p>Networks are classified by <b>geographic scope</b> (PAN → LAN → MAN → WAN), by <b>transmission medium</b>
+      (WLAN, SAN), or by <b>who controls connectivity</b> (VPN). A single enterprise uses almost all at once.</p>
+      <div class="pill-list">
+        <button v-for="s in scopeList" :key="s.key" class="pill btn" :class="scopeActive === s.key ? 'active' : ''" @click="scopeActive = s.key">{{ s.key }}</button>
+      </div>
+      <div v-if="scopeInfo">
+        <div class="keyval">
+          <div class="kv"><b>Scope</b>{{ scopeInfo.scope }}</div>
+          <div class="kv"><b>Key tech</b>{{ scopeInfo.tech }}</div>
+          <div class="kv"><b>Example</b>{{ scopeInfo.example }}</div>
+        </div>
+        <div style="margin: 10px 0;">
+          <div class="bar-row"><span class="bl">Cost</span><div class="bar"><div :style="{ width: scopeInfo.cost * 20 + '%', background: 'var(--red)' }"></div></div><span>{{ scopeInfo.cost }}/5</span></div>
+          <div class="bar-row"><span class="bl">Speed</span><div class="bar"><div :style="{ width: scopeInfo.speed * 20 + '%', background: 'var(--green)' }"></div></div><span>{{ scopeInfo.speed }}/5</span></div>
+          <div class="bar-row"><span class="bl">Latency</span><div class="bar"><div :style="{ width: scopeInfo.latency * 20 + '%', background: 'var(--amber)' }"></div></div><span>{{ scopeInfo.latency }}/5</span></div>
+          <div class="bar-row"><span class="bl">Control</span><div class="bar"><div :style="{ width: scopeInfo.control * 20 + '%', background: 'var(--blue)' }"></div></div><span>{{ scopeInfo.control }}/5</span></div>
+        </div>
+        <div class="callout g" style="font-size:0.84rem;"><strong>Exam tip:</strong> {{ scopeInfo.tip }}</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Special-purpose types — at a glance</h3>
+      <div class="keyval">
+        <div class="kv"><b>WLAN</b>Same scope as LAN but RF (802.11) — AP/WLC managed; shared medium, more interference and security exposure vs wired.</div>
+        <div class="kv"><b>SAN</b>Dedicated block-level storage network (Fibre Channel / iSCSI) — separate from user/data LAN; optimized for throughput &amp; low latency.</div>
+        <div class="kv"><b>VPN</b>Logical encrypted tunnel over existing network (site-to-site IPsec, remote SSL/IPsec) — gives confidentiality, integrity, and private addressing overlay without owning physical links.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 3. CLIENT-SERVER vs P2P ================= -->
+  <section id="models">
+    <div class="sec-head"><div class="sec-num am">3</div><h2>Client-Server vs Peer-to-Peer</h2></div>
+    <div class="card">
+      <h3>Client-Server request flow</h3>
+      <div class="chain">
+        <div class="c">Client needs a service<i>DNS, HTTP, DHCP…</i></div>
+        <div class="c arw">&rarr;</div>
+        <div class="c">DNS query — resolves server address</div>
+        <div class="c arw">&rarr;</div>
+        <div class="c">TCP handshake to server port</div>
+        <div class="c arw">&rarr;</div>
+        <div class="c">Client sends request<i>HTTP GET, DHCP Discover…</i></div>
+        <div class="c arw">&rarr;</div>
+        <div class="c">Server processes &amp; replies</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Side-by-side comparison</h3>
+      <table>
+        <tr><th>Factor</th><th>Client-Server</th><th>Peer-to-Peer</th></tr>
+        <tr><td>Control</td><td>Centralized on server</td><td>Distributed / equal peers</td></tr>
+        <tr><td>Security</td><td>Central auth, audit, patching</td><td>Weak / none by default</td></tr>
+        <tr><td>Scalability</td><td>Cluster + load balancer</td><td>Organic; each new peer adds capacity &amp; load</td></tr>
+        <tr><td>SPOF risk</td><td>Server — mitigate with HA cluster</td><td>No central SPOF, but peers may be offline</td></tr>
+        <tr><td>Enterprise verdict</td><td>Default choice for manageability</td><td>Restricted to specific use cases (updates, caching, blockchain)</td></tr>
+      </table>
+      <div class="callout v" style="font-size:0.84rem;"><strong>ENCOR twist:</strong> BGP/OSPF "peers" are equal control-plane partners — the word "peer" there means <em>adjacency relationship</em>, not application model. That distinction between data-plane C/S and control-plane peering is a recurring theme.</div>
+    </div>
+
+    <div class="card">
+      <h3>Scenario classifier — click to guess</h3>
+      <p class="sec-sub">Pick <b>C/S</b> or <b>P2P</b> for each scenario. Correct answers highlight green.</p>
+      <div class="sorter-row" v-for="(s, i) in csScenarios" :key="i">
+        <div class="task"><span style="font-weight:700; color:var(--muted); font-size:0.72rem;">{{ i + 1 }}.</span> {{ s.q }}</div>
+        <button :class="csGuess[i] === 'cs' && csGuess[i] === s.right ? 'correct' : csGuess[i] === 'cs' && s.right !== 'cs' ? 'wrong' : ''" @click="pickCs(i, 'cs')">C/S</button>
+        <button :class="csGuess[i] === 'p2p' && csGuess[i] === s.right ? 'correct' : csGuess[i] === 'p2p' && s.right !== 'p2p' ? 'wrong' : ''" @click="pickCs(i, 'p2p')">P2P</button>
+        <span v-if="csGuess[i]" class="why">{{ csGuess[i] === s.right ? '&#10003; Correct' : '&#10007; ' + (s.right === 'cs' ? 'Client-Server' : 'Peer-to-Peer') }} — {{ s.why }}</span>
+      </div>
+      <div v-if="csPickedCount > 0" style="margin-top:10px;"><span class="chip" :class="csScore === csPickedCount ? 'succ' : 'warn'">{{ csScore }} / {{ csPickedCount }} correct</span> <button v-if="csPickedCount === csScenarios.length" class="btn" @click="resetCs">Reset</button></div>
+    </div>
+  </section>
+
+  <!-- ================= 4. COMPONENTS & PLANES ================= -->
+  <section id="components">
+    <div class="sec-head"><div class="sec-num vi">4</div><h2>Network Components &amp; the Three Planes</h2></div>
+    <div class="card">
+      <h3>Devices by layer</h3>
+      <table>
+        <tr><th>Device</th><th>Layer</th><th>Core Job</th></tr>
+        <tr><td>Hub (legacy)</td><td>L1</td><td>Repeats signal to all ports — one collision domain; avoid.</td></tr>
+        <tr><td>Switch</td><td>L2 / L3</td><td>MAC forwarding (CAM), VLANs, microsegmentation; L3 switches route VLANs (FIB).</td></tr>
+        <tr><td>Router</td><td>L3</td><td>Path selection by IP (RIB/CEF), interconnects networks, NAT/filtering.</td></tr>
+        <tr><td>Wireless AP</td><td>L2</td><td>Bridges 802.11 RF frames onto the wired LAN.</td></tr>
+        <tr><td>Firewall</td><td>L3–L7</td><td>Stateful session tracking, policy enforcement, NAT/VPN/IPS.</td></tr>
+        <tr><td>Load balancer</td><td>L4–L7</td><td>Distributes flows across a server farm; health checks.</td></tr>
+        <tr><td>WLC</td><td>Mgmt/Ctrl</td><td>Centralizes AP config, RF management, roaming.</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>The three planes — key ENCOR concept</h3>
+      <div class="keyval">
+        <div class="kv"><b>Data Plane</b>User packet forwarding path — runs on ASICs/TCAM; measured in pps/fib. <em>Example:</em> switching fabric, CAM table, FIB.</div>
+        <div class="kv"><b>Control Plane</b>Decides <em>how</em> to forward — builds routing/forwarding tables. <em>Example:</em> OSPF/EIGRP/BGP, ARP/ND, STP.</div>
+        <div class="kv"><b>Management Plane</b>How we administer the box — SSH, SNMP, syslog, NTP, NetFlow, RESTCONF/NETCONF, SDN controller.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Plane sorter — classify the task</h3>
+      <p class="sec-sub">Click Data, Control, or Management for each task. Green = correct.</p>
+      <div class="sorter-row" v-for="(t, i) in planeTasks" :key="i">
+        <div class="task"><span style="font-weight:700; color:var(--muted); font-size:0.72rem;">{{ i + 1 }}.</span> {{ t.task }}</div>
+        <button v-for="p in planeOptions" :key="p" :class="planeGuess[i] === p && planeGuess[i] === t.right ? 'correct' : planeGuess[i] === p && t.right !== p ? 'wrong' : ''" @click="pickPlane(i, p)">{{ p }}</button>
+        <span v-if="planeGuess[i]" class="why">{{ planeGuess[i] === t.right ? '&#10003; Correct' : '&#10007; ' + t.right }} — {{ t.why }}</span>
+      </div>
+      <div v-if="planePickedCount > 0" style="margin-top:10px;"><span class="chip" :class="planeScore === planePickedCount ? 'succ' : 'warn'">{{ planeScore }} / {{ planePickedCount }} correct</span> <button v-if="planePickedCount === planeTasks.length" class="btn" @click="resetPlane">Reset</button></div>
+    </div>
+  </section>
+
+  <!-- ================= 5. ENTERPRISE ARCHITECTURE ================= -->
+  <section id="arch">
+    <div class="sec-head"><div class="sec-num rd">5</div><h2>Enterprise Network Architecture</h2></div>
+    <div class="card">
+      <h3>Hierarchical model — click a layer</h3>
+      <div class="pill-list">
+        <button v-for="t in tierList" :key="t.key" class="pill btn" :class="tierActive === t.key ? 'active' : ''" @click="tierActive = t.key">{{ t.label }}</button>
+      </div>
+      <div v-if="tierInfo">
+        <div class="keyval">
+          <div class="kv"><b>Role</b>{{ tierInfo.role }}</div>
+          <div class="kv"><b>Devices</b>{{ tierInfo.devices }}</div>
+          <div class="kv"><b>Policy?</b>{{ tierInfo.policy }}</div>
+        </div>
+        <div class="callout a" style="font-size:0.84rem;"><strong>Trap:</strong> {{ tierInfo.trap }}</div>
+      </div>
+      <div class="callout b" style="font-size:0.84rem; margin-top:10px;"><strong>Collapsed core</strong> merges core + distribution for smaller sites — it is a valid, common design, not a mistake.</div>
+    </div>
+
+    <div class="card">
+      <h3>Modular blocks</h3>
+      <div class="grid2">
+        <div v-for="b in blockCards" :key="b.title" class="kv" style="border-left: 4px solid var(--blue);">
+          <b>{{ b.title }}</b>{{ b.desc }}
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Traffic flow direction</h3>
+      <div class="keyval">
+        <div class="kv"><b>North-South</b>Client → server (to DC/WAN), crosses the hierarchy — shaped by campus design.</div>
+        <div class="kv"><b>East-West</b>Server ↔ server within the DC — high volume, very low latency, shapes spine-leaf DC designs.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 6. DESIGN PRINCIPLES ================= -->
+  <section id="design">
+    <div class="sec-head"><div class="sec-num bl">6</div><h2>Network Design Principles</h2></div>
+    <div class="card">
+      <h3>The five pillars</h3>
+      <div class="grid2">
+        <div v-for="p in principleCards" :key="p.key" class="kv" :style="{ borderLeft: '4px solid ' + p.color }">
+          <b>{{ p.title }}</b>{{ p.desc }}
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Anti-pattern matchmaker — which principle is violated?</h3>
+      <p class="sec-sub">Click the principle each anti-pattern violates. Green = correct.</p>
+      <div class="sorter-row" v-for="(a, i) in antiScenarios" :key="i">
+        <div class="task"><span style="font-weight:700; color:var(--muted); font-size:0.72rem;">{{ i + 1 }}.</span> {{ a.q }}</div>
+        <button v-for="pr in principleOptions" :key="pr.key" :class="antiGuess[i] === pr.key && antiGuess[i] === a.right ? 'correct' : antiGuess[i] === pr.key && a.right !== pr.key ? 'wrong' : ''" @click="pickAnti(i, pr.key)">{{ pr.short }}</button>
+        <span v-if="antiGuess[i]" class="why">{{ antiGuess[i] === a.right ? '&#10003; Correct' : '&#10007; ' + a.rightLabel }} — {{ a.why }}</span>
+      </div>
+      <div v-if="antiPickedCount > 0" style="margin-top:10px;"><span class="chip" :class="antiScore === antiPickedCount ? 'succ' : 'warn'">{{ antiScore }} / {{ antiPickedCount }} correct</span> <button v-if="antiPickedCount === antiScenarios.length" class="btn" @click="resetAnti">Reset</button></div>
+    </div>
+
+    <div class="card">
+      <h3>Supporting design rules</h3>
+      <ul>
+        <li><b>Hierarchy</b> — three-tier modules give consistent behavior &amp; isolation.</li>
+        <li><b>Modularity</b> — change one block without touching the rest.</li>
+        <li><b>80/20 vs 20/80</b> — with centralized DC apps, most traffic crosses to core (20/80); determines where VLANs/switches live.</li>
+        <li><b>Convergence speed &gt; raw reconfiguration speed</b> for most outages.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================= 7. COMMANDS ================= -->
+  <section id="commands">
+    <div class="sec-head"><div class="sec-num gr">7</div><h2>Command Viewer</h2></div>
+    <div class="card">
+      <div class="pill-list">
+        <button v-for="c in commands" :key="c.key" class="pill btn" :class="activeCmd === c.key ? 'active' : ''" @click="activeCmd = c.key">{{ c.label }}</button>
+      </div>
+      <div v-if="activeCommand">
+        <p style="font-size:0.84rem; color:var(--muted);">{{ activeCommand.tagline }}</p>
+        <pre>{{ activeCommand.cmd }}<span class="dim">
+{{ activeCommand.output }}</span></pre>
+        <div class="callout b" style="font-size:0.84rem;"><strong>What to look at:</strong> {{ activeCommand.read }}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 8. TRAPS ================= -->
+  <section id="traps">
+    <div class="sec-head"><div class="sec-num rd">8</div><h2>Exam Traps — flip to reveal</h2></div>
+    <div class="sec-sub">Click any card to flip it. These are the networking-basics questions people get wrong on ENCOR.</div>
+    <div class="grid2">
+      <div v-for="(t, i) in traps" :key="i" class="card trap-card" :class="{ flipped: trapOpen[i] }" @click="trapOpen[i] = !trapOpen[i]">
+        <div class="t">
+          <span>{{ i + 1 }}. {{ t.q }}</span>
+          <span class="hint">{{ trapOpen[i] ? '&#9650;' : 'REVEAL' }}</span>
+        </div>
+        <div v-if="trapOpen[i]" class="ans">{{ t.a }}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 9. QUIZ ================= -->
+  <section id="quiz">
+    <div class="sec-head"><div class="sec-num am">9</div><h2>One-Minute Summary &amp; Self-Test</h2></div>
+
+    <div class="card">
+      <h3>Networking Basics in 60 seconds</h3>
+      <pre>Network = 2+ devices exchanging data via agreed standards — size is irrelevant.
+A network needs: endpoints, media, intermediary devices, protocols, addressing.
+
+Scope (smallest → largest):  PAN (~10 m) → LAN (building) → MAN (city) → WAN (global/carrier).
+Special: WLAN = RF-based LAN (802.11); SAN = dedicated block-level storage net (FC/iSCSI);
+         VPN = encrypted logical tunnel over another network (IPsec/SSL).
+
+Models: Client-Server (centralized server, enterprise default) vs Peer-to-Peer (equal peers, no SPOF but weak security).
+BGP/OSPF "peers" = control-plane adjacency — different from application-layer P2P.
+
+Devices:  Hub = L1 | Switch = L2/L3 (CAM/FIB) | Router = L3 (RIB) | AP = L2 (RF bridge)
+          Firewall = L3-L7 (stateful) | LB = L4-L7 | WLC = mgmt/control
+
+Three planes:
+  Data    = packet forwarding (ASIC/TCAM/CAM/FIB)
+  Control = routing/forwarding table build (OSPF, STP, ARP)
+  Mgmt    = admin access (SSH, SNMP, syslog, NetFlow, RESTCONF)
+
+Architecture: Core (fast, no policy) → Distribution (policy/QoS/ACL/HSRP) → Access (ports/VLANs/PoE).
+Collapsed core = core+distribution merged (small site).
+
+Design pillars: Fault Tolerance | Scalability | QoS | Security | Manageability.
+Anti-patterns: policy in core, single gateway in HA pair, flat L2 campus, no management VLAN separation.</pre>
+    </div>
+
+    <div class="card">
+      <h3>Mini quiz — {{ quizQuestions.length }} questions</h3>
+      <div class="score-bar">
+        <span class="chip info" v-if="!quizDone">Answer all {{ quizQuestions.length }} to submit</span>
+        <span v-else>
+          <b style="color:var(--green); font-size:1.05rem;">{{ quizScore }} / {{ quizQuestions.length }}</b>
+          <span style="color:var(--muted);"> ({{ Math.round(quizScore / quizQuestions.length * 100) }}%)</span>
+        </span>
+        <div class="score-meter"><div :style="{ width: quizPct + '%' }"></div></div>
+        <button v-if="quizDone" class="btn primary" @click="resetQuiz">Retake (reshuffle)</button>
+      </div>
+
+      <div v-for="(q, qi) in quizQuestions" :key="qi" class="q-card">
+        <div class="qtext">{{ qi + 1 }}. {{ q.q }}</div>
+        <button v-for="(o, oi) in q.options" :key="oi" class="opt"
+          :class="{
+            'picked': q.picked === oi,
+            'correct': quizDone && o.text === q.answerText,
+            'wrong': quizDone && q.picked === oi && o.text !== q.answerText
+          }"
+          :disabled="quizDone"
+          @click="q.picked = oi">
+          {{ ['A','B','C','D'][oi] }}. {{ o.text }}
+        </button>
+        <div v-if="quizDone" class="q-why"><b>Why:</b> {{ q.why }}</div>
+      </div>
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
+        <button class="btn primary" @click="submitQuiz" :disabled="quizDone || answeredCount < quizQuestions.length">
+          {{ answeredCount < quizQuestions.length ? 'Answer all questions first (' + answeredCount + '/' + quizQuestions.length + ')' : 'Submit answers' }}
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 10. CHECKLIST ================= -->
+  <section id="plan">
+    <div class="sec-head"><div class="sec-num vi">10</div><h2>Study Checklist</h2></div>
+    <div class="card">
+      <div class="prog">
+        <span style="font-size:0.85rem; font-weight:700;">{{ doneCount }} / {{ planItems.length }} notes reviewed</span>
+        <div class="meter"><div :style="{ width: doneCount / planItems.length * 100 + '%' }"></div></div>
+      </div>
+      <div v-for="(item, i) in planItems" :key="item.file" class="check-item" :class="{ done: done[i] }">
+        <input type="checkbox" :checked="done[i]" @change="toggleDone(i)">
+        <a :href="item.file" target="_blank">{{ item.label }}</a>
+      </div>
+      <p style="font-size:0.8rem; color:var(--muted); margin-top:8px;">Progress is saved in your browser. After reviewing, drill the deck from the Flashcards button in the header.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span>Level 00 · Networking Basics — built from all seven level notes.</span>
+    <span><a href="Networking Basics Overview.md">&larr; Back to Level 00 overview</a></span>
+  </footer>
+</div>
+
+<script src="../vue.global.prod.js"></script>
+<script>
+(function () {
+  "use strict";
+  const { createApp, ref, computed } = Vue;
+
+  const LS = { theme: "ccnp.netbas.theme", done: "ccnp.netbas.done", quizbest: "ccnp.netbas.quizbest" };
+  function loadJSON(key, fb) { try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fb; } catch { return fb; } }
+  function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+  function shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+  createApp({
+    setup() {
+      // ---------------- theme ----------------
+      const theme = ref(loadJSON(LS.theme, "dark"));
+      function toggleTheme() { theme.value = theme.value === "dark" ? "light" : "dark"; save(LS.theme, theme.value); }
+
+      // ---------------- duplex explorer ----------------
+      const duplexActive = ref("full");
+      const duplexModes = [
+        { key: "simplex", label: "Simplex" },
+        { key: "half", label: "Half-duplex" },
+        { key: "full", label: "Full-duplex" }
+      ];
+      const DUPLEX = {
+        simplex: { dir: "One direction only", when: "Broadcast TV, legacy one-way sensors", example: "Traditional radio broadcast, sensor telemetry", tip: "Simplex means send-only or receive-only — never both. Frequently tested as a contrast to duplex modes." },
+        half:    { dir: "One direction at a time, not simultaneously", when: "Legacy hub-based Ethernet, walkie-talkies", example: "10BASE2 thinnet, early shared-media hubs", tip: "Half-duplex on Ethernet means collisions happen — hubs create one collision domain. CSMA/CD manages the shared medium." },
+        full:    { dir: "Both directions simultaneously", when: "Modern switched Ethernet (every port is a collision domain)", example: "Gigabit switch ports, fiber links, modern Wi-Fi (802.11ax)", tip: "Modern Ethernet is full-duplex — no collisions, no CSMA/CD. A common exam trap is claiming modern switched Ethernet is half-duplex." }
+      };
+      const duplexInfo = computed(() => DUPLEX[duplexActive.value]);
+
+      // ---------------- network scope explorer ----------------
+      const scopeActive = ref("LAN");
+      const scopeList = [
+        { key: "PAN" }, { key: "LAN" }, { key: "MAN" }, { key: "WAN" }
+      ];
+      const SCOPES = {
+        PAN: { scope: "~1–10 meters, one person", tech: "Bluetooth, USB, IR, UWB", example: "Wireless earbuds to phone, smartwatch sync", cost: 1, speed: 2, latency: 1, control: 5, tip: "Personal range — one user, one device cluster. Usually not an enterprise focus, but know the classification." },
+        LAN: { scope: "Building or campus", tech: "Switched Ethernet (IEEE 802.3)", example: "Office access-layer switches, server VLAN", cost: 2, speed: 5, latency: 1, control: 5, tip: "Owner-operated, high bandwidth (Gbps), low latency. The dominant LAN technology is switched Ethernet." },
+        MAN: { scope: "City-scale (km to tens of km)", tech: "Metro Ethernet, ring networks", example: "City fiber ring connecting branch offices", cost: 3, speed: 3, latency: 3, control: 3, tip: "Between LAN and WAN — carrier or city-owned. Metro Ethernet and ring topologies are the classic MAN answers." },
+        WAN: { scope: "Intercity / global", tech: "MPLS, leased lines, SD-WAN, DSL/cable, LTE/5G", example: "MPLS VPN between offices across countries", cost: 5, speed: 2, latency: 5, control: 1, tip: "Carrier-provided; higher cost and latency. SLA (availability, delay, jitter, loss) matters. Don't say 'the Internet is a WAN' — the Internet is a network of networks." }
+      };
+      const scopeInfo = computed(() => SCOPES[scopeActive.value]);
+
+      // ---------------- client-server vs P2P classifier ----------------
+      const csScenarios = [
+        { q: "A browser loads https://mail.company.com", right: "cs", why: "Browser (client) requests a web page from a centralized HTTP server." },
+        { q: "Two office PCs share a folder via Windows workgroup", right: "p2p", why: "Windows workgroups are peer-to-peer: each PC shares and consumes without a dedicated server." },
+        { q: "A DHCP client gets an IP address from a server", right: "cs", why: "DHCP is a classic client-server service: client sends Discover, server responds with Offer." },
+        { q: "BitTorrent peers pass file pieces to each other", right: "p2p", why: "Each BitTorrent peer both uploads and downloads — no central server holds the file." },
+        { q: "An iBGP neighbor relationship between two routers", right: "p2p", why: "Routing protocol 'peers' are equal control-plane partners — P2P adjacency behavior even inside a C/S network." },
+        { q: "An NMS polls switches via SNMP", right: "cs", why: "NMS (client/manager) polls switch agents (servers) — classic client-server management model." }
+      ];
+      const csGuess = ref({});
+      const csPickedCount = computed(() => Object.keys(csGuess.value).length);
+      const csScore = computed(() => Object.keys(csGuess.value).filter(i => csGuess.value[i] === csScenarios[i].right).length);
+      function pickCs(i, v) { if (!csGuess.value[i]) csGuess.value[i] = v; }
+      function resetCs() { csGuess.value = {}; }
+
+      // ---------------- plane sorter ----------------
+      const planeTasks = [
+        { task: "OSPF builds the routing table", right: "Control", why: "Routing protocols decide how to forward — control plane." },
+        { task: "Forwarding a frame using the CAM table (ASIC)", right: "Data", why: "Hardware-based packet forwarding — data plane." },
+        { task: "SSH login to configure the switch", right: "Management", why: "Administrative access — management plane." },
+        { task: "STP elects the root bridge", right: "Control", why: "STP loop-prevention logic builds the forwarding topology — control plane." },
+        { task: "CEF switching a packet via FIB", right: "Data", why: "Express forwarding on the hardware path — data plane." },
+        { task: "NetFlow export to a collector", right: "Management", why: "Traffic telemetry for monitoring/analysis — management plane." },
+        { task: "SNMP trap sent to the NMS", right: "Management", why: "SNMP is an admin/monitoring protocol — management plane." },
+        { task: "ARP resolves a neighbor MAC address", right: "Control", why: "ARP/ND build the L2-to-L3 mapping used by forwarding — control plane." }
+      ];
+      const planeOptions = ["Data", "Control", "Management"];
+      const planeGuess = ref({});
+      const planePickedCount = computed(() => Object.keys(planeGuess.value).length);
+      const planeScore = computed(() => Object.keys(planeGuess.value).filter(i => planeGuess.value[i] === planeTasks[i].right).length);
+      function pickPlane(i, v) { if (!planeGuess.value[i]) planeGuess.value[i] = v; }
+      function resetPlane() { planeGuess.value = {}; }
+
+      // ---------------- tier explorer ----------------
+      const tierActive = ref("access");
+      const tierList = [
+        { key: "core", label: "Core" },
+        { key: "distribution", label: "Distribution" },
+        { key: "access", label: "Access" }
+      ];
+      const TIERS = {
+        core:         { role: "High-speed backbone — fast convergence, no policy", devices: "Core switches / routers, L3 spine switches", policy: "No — core must stay fast and clean", trap: "Applying QoS, ACLs, or other policy in the core violates design principles — policy belongs in distribution." },
+        distribution: { role: "Routing between VLANs, policy enforcement, aggregation of access layers", devices: "L3 switches (routers), HSRP/VRRP gateways", policy: "Yes — QoS marking, ACLs, first-hop redundancy all live here", trap: "First-hop redundancy (HSRP/VRRP) belongs in distribution. Putting it at access or core is a classic exam wrong answer." },
+        access:       { role: "Endpoint connectivity — ports, PoE, VLAN assignment", devices: "L2/L3 switches, wireless APs, IP phones", policy: "Light only — port security, 802.1X, VLAN assignment", trap: "Access should stay simple: ports + VLANs + light security. Complex policy at access adds fragility without benefit." }
+      };
+      const tierInfo = computed(() => TIERS[tierActive.value]);
+
+      const blockCards = [
+        { title: "Campus Core / Distribution / Access", desc: "User connectivity across the three-tier hierarchy." },
+        { title: "Server Farm (Data Center)", desc: "Servers, storage, firewalls, load balancers — hosts east-west flows." },
+        { title: "WAN Edge", desc: "MPLS, Internet, SD-WAN; connects to branch/remote sites." },
+        { title: "Internet Edge / DMZ", desc: "Firewalls, DMZ tiers; sits between outside and inside zones." },
+        { title: "Remote Access / VPN", desc: "Terminates user VPNs (SSL/IPsec); placed in DMZ for security." },
+        { title: "Branch Office", desc: "Smaller campus replica; destination of VPN/DMVPN from HQ." }
+      ];
+
+      // ---------------- design principles ----------------
+      const principleCards = [
+        { key: "fault", title: "Fault Tolerance", desc: "No SPOF; fast convergence via dual devices + HA protocols (RSTP, HSRP/VRRP, NSF/SSO).", color: "var(--red)" },
+        { key: "scal", title: "Scalability", desc: "Hierarchical modular design grows without redesign; address summarization room to grow.", color: "var(--blue)" },
+        { key: "qos",  title: "QoS", desc: "Classify, mark, queue — voice/video first. Predictable delay/jitter/loss under congestion.", color: "var(--amber)" },
+        { key: "sec",  title: "Security", desc: "Defense-in-depth: segmentation (VLAN/VRF/SGT), 802.1X, encrypted management, device hardening.", color: "var(--green)" },
+        { key: "mgmt", title: "Manageability & Automation", desc: "Centralized control (DNA Center/ISE), model-driven APIs (NETCONF/RESTCONF), telemetry baselines.", color: "var(--violet)" }
+      ];
+      const principleOptions = [
+        { key: "fault", short: "Fault Tolerance" },
+        { key: "scal", short: "Scalability" },
+        { key: "qos",  short: "QoS" },
+        { key: "sec",  short: "Security" },
+        { key: "mgmt", short: "Manageability" }
+      ];
+
+      const antiScenarios = [
+        { q: "Redundant uplinks with no EtherChannel or STP tuning", right: "fault", rightLabel: "Fault Tolerance", why: "Loops and broadcast storms collapse the network — redundancy without control-plane convergence is worse than nothing." },
+        { q: "Two switches but only one default gateway for the VLAN", right: "fault", rightLabel: "Fault Tolerance", why: "Gateway is a SPOF; need HSRP/VRRP so the second switch can take over." },
+        { q: "Only a perimeter ACL, no segmentation or 802.1X", right: "sec", rightLabel: "Security", why: "One perimeter rule is not defense-in-depth — need layered controls, segmentation, and device hardening." },
+        { q: "Flat L2 campus with no route summarization", right: "scal", rightLabel: "Scalability", why: "Giant broadcast domain, black-hole tagging — flat L2 cannot scale without redesign." },
+        { q: "Voice calls lag during congestion; no queues configured", right: "qos", rightLabel: "QoS", why: "Without classification and priority queuing, voice competes equally with bulk data — unacceptable latency." },
+        { q: "Box-by-box config with no central baseline or API", right: "mgmt", rightLabel: "Manageability", why: "Human error, inconsistent state, slow changes — modern networks need centralized, model-driven automation." }
+      ];
+      const antiGuess = ref({});
+      const antiPickedCount = computed(() => Object.keys(antiGuess.value).length);
+      const antiScore = computed(() => Object.keys(antiGuess.value).filter(i => antiGuess.value[i] === antiScenarios[i].right).length);
+      function pickAnti(i, v) { if (!antiGuess.value[i]) antiGuess.value[i] = v; }
+      function resetAnti() { antiGuess.value = {}; }
+
+      // ---------------- commands ----------------
+      const activeCmd = ref("host");
+      const activeCommand = computed(() => commands.find(c => c.key === activeCmd.value));
+      const commands = [
+        {
+          key: "host", label: "Host tools", tagline: "Verify identity and connectivity from a PC/server.",
+          cmd: `ipconfig /all              # Windows — IP, MAC, default gateway, DNS
+ip addr                     # Linux/macOS equivalent
+ping 10.0.0.1               # verify L3 reachability
+traceroute 10.0.0.1         # see the path packets take`,
+          output: `Windows IP Configuration
+
+   Host Name . . . . . . . . . . . . : WORKSTATION-01
+   Primary Dns Suffix  . . . . . . . : corp.example.com
+   IPv4 Address. . . . . . . . . . . : 10.1.10.55
+   Subnet Mask . . . . . . . . . . . : 255.255.255.0
+   Default Gateway . . . . . . . . . : 10.1.10.254
+
+Pinging 10.0.0.1 with 32 bytes of data:
+Reply from 10.0.0.1: bytes=32 time=1ms TTL=255`,
+          read: "Default gateway must match the HSRP/VRRP virtual IP on the distribution switch — if it's wrong, traffic can't leave the subnet."
+        },
+        {
+          key: "access", label: "Access switch", tagline: "Basic port configuration and portfast for endpoints.",
+          cmd: `enable
+configure terminal
+vlan 10
+ name Users
+!
+interface GigabitEthernet0/1
+ switchport mode access
+ switchport access vlan 10
+ spanning-tree portfast
+ no shutdown`,
+          output: `Switch(config)# vlan 10
+Switch(config-vlan)# name Users
+Switch(config)# int gi0/1
+Switch(config-if)# switchport mode access
+Switch(config-if)# switchport access vlan 10
+Switch(config-if)# spanning-tree portfast
+Switch(config-if)# no shutdown
+%LINK-5-CHANGED: Interface GigabitEthernet0/1, changed state to up`,
+          read: "Portfast skips Listening/Learning on access ports (endpoints, not other switches) — prevents a workstation from momentarily blocking traffic on link-up."
+        },
+        {
+          key: "trunk", label: "Trunk uplink", tagline: "Carry multiple VLANs to distribution via 802.1Q trunk + EtherChannel.",
+          cmd: `interface GigabitEthernet0/24
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,99
+ channel-group 1 mode active`,
+          output: `Switch(config)# int gi0/24
+Switch(config-if)# switchport trunk encapsulation dot1q
+Switch(config-if)# switchport mode trunk
+Switch(config-if)# switchport trunk allowed vlan 10,20,30,99
+Switch(config-if)# channel-group 1 mode active
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Port-channel1, changed state to up`,
+          read: "Limit trunk allowed VLANs to only what's needed — native VLAN 99 (unused) should be tagged or removed from all trunks to avoid VLAN-hopping attacks."
+        },
+        {
+          key: "dist", label: "Distribution / SVI", tagline: "Layer 3 default gateway with HSRP first-hop redundancy.",
+          cmd: `interface Vlan10
+ ip address 10.1.10.1 255.255.255.0
+ standby 10 ip 10.1.10.254
+ standby 10 priority 110
+ standby 10 preempt
+ no shutdown`,
+          output: `Switch(config)# int vlan 10
+Switch(config-if)# ip address 10.1.10.1 255.255.255.0
+Switch(config-if)# standby 10 ip 10.1.10.254
+Switch(config-if)# standby 10 priority 110
+Switch(config-if)# standby 10 preempt
+%HSRP-5-STATECHANGE: Vlan10 Grp 10 state Active -> Active
+Switch(config-if)# no shutdown`,
+          read: "HSRP priority 110 + preempt = this switch becomes active for VLAN 10. Standby peer gets default 100; clients use the virtual IP 10.1.10.254 as their default gateway."
+        },
+        {
+          key: "planes", label: "Plane view", tagline: "Verify data, control, and management planes with show commands.",
+          cmd: `show ip route                  # control plane — RIB
+show ip cef                    # data plane — FIB/CEF
+show interfaces status         # L2 state
+line vty 0 4
+ transport input ssh            # management plane — SSH only`,
+          output: `Codes: C - connected, O - OSPF, B - BGP
+
+Gateway of last resort is 10.0.0.1
+C    10.1.10.0/24 is directly connected, Vlan10
+O    10.1.20.0/24 [110/20] via 10.1.10.2, 00:12:34, Vlan10
+B    172.16.0.0/16 [20/0] via 10.0.0.2, 01:23:45
+
+CEF: Prefix               Next Hop
+10.1.10.0/24            receive
+10.1.20.0/24            10.1.10.2
+172.16.0.0/16           10.0.0.2`,
+          read: "show ip route = control plane (RIB, built by OSPF/BGP). show ip cef = data plane (FIB, used for fast hardware switching). SSH in line vty = management plane access."
+        }
+      ];
+
+      // ---------------- traps ----------------
+      const trapOpen = ref([]);
+      const traps = [
+        { q: "\"Network\" means \"Internet\"?", a: "No. A network is any 2+ devices exchanging data. The Internet is a network of networks — one very large example, but not the definition." },
+        { q: "A network must be big to be a \"network\".", a: "No. Two devices exchanging data is a network. Size is irrelevant to the definition." },
+        { q: "Modern switched Ethernet is half-duplex.", a: "No. Modern switched Ethernet is full-duplex — no collisions, no CSMA/CD. Only legacy hub-based Ethernet was half-duplex." },
+        { q: "A WLAN is a separate network topology.", a: "No. WLAN is a transmission classification (RF), not a topology. It still uses star/logical topology — just wireless media." },
+        { q: "SAN and NAS are the same thing.", a: "No. SAN = block-level storage over a dedicated network (Fibre Channel/iSCSI). NAS = file-level storage over the regular LAN/IP. Frequently tested." },
+        { q: "The Internet is a WAN.", a: "No. The Internet is a network of networks. A WAN is one type of network (e.g., an ISP backbone). Don't conflate the two." },
+        { q: "Servers are just bigger PCs.", a: "No. A server is defined by its role (serving requests), not its hardware. Clients can also be servers — role is protocol/port-specific." },
+        { q: "BGP/OSPF 'peers' means the same as file-sharing P2P.", a: "No. Routing protocol peers are equal control-plane partners (adjacency relationship). Application-layer P2P is a data-plane architectural model. Same word, different meaning." },
+        { q: "STP and OSPF belong to the data plane.", a: "No. Both are control plane — they build the forwarding topology/table. Data plane = actual packet forwarding via ASIC/TCAM. SSH/SNMP = management plane." },
+        { q: "QoS makes the internet faster.", a: "No. QoS reorders and prioritizes existing capacity — it doesn't create bandwidth. It prevents congestion-sensitive traffic (voice/video) from being starved." },
+        { q: "Two identical switches = full redundancy.", a: "Not enough. The control plane must converge too — HSRP/VRRP for gateways, RSTP for loops, NSF/SSO for supervisor failover. Physical redundancy alone doesn't guarantee uptime." },
+        { q: "Policy belongs in the core layer.", a: "No. Core = fast and clean, no policy. Distribution owns QoS marking, ACLs, first-hop redundancy. Putting policy in the core slows convergence and adds complexity." }
+      ];
+
+      // ---------------- quiz ----------------
+      const baseQuestions = [
+        { q: "A \"network\" is defined by:", options: ["Number of devices connected", "The ability of 2+ devices to exchange data via agreed standards", "Physical size of the cabling", "Being connected to the Internet"], answer: 1, why: "A network is defined by the ability to transmit/receive using agreed standards — size and device count are irrelevant." },
+        { q: "Legacy hub-based Ethernet is:", options: ["Full-duplex", "Simultaneous both ways", "Half-duplex", "Simplex"], answer: 2, why: "Hubs create one collision domain; stations take turns — classic half-duplex behavior managed by CSMA/CD." },
+        { q: "Correct scope order (smallest to largest):", options: ["LAN < PAN < WAN < MAN", "PAN < LAN < MAN < WAN", "WAN < MAN < LAN < PAN", "PAN < LAN < WAN < MAN"], answer: 1, why: "PAN (~10 m) < LAN (building) < MAN (city) < WAN (global) — the geographic hierarchy." },
+        { q: "As geographic scope grows, what generally happens?", options: ["Cost decreases and control increases", "Speed improves and latency drops", "Cost rises, latency increases, and control decreases", "Bandwidth doubles per tier"], answer: 2, why: "WANs are carrier-provided — you trade cost, latency, and control for geographic reach." },
+        { q: "SAN vs NAS:", options: ["SAN = file-level over LAN; NAS = block-level over dedicated net", "SAN = block-level over dedicated network; NAS = file-level over regular LAN/IP", "They are identical technologies", "SAN is wireless storage; NAS is wired"], answer: 1, why: "SAN uses dedicated block-level networks (Fibre Channel/iSCSI); NAS serves files over standard IP/Ethernet." },
+        { q: "A VPN provides:", options: ["A dedicated physical leased line", "An encrypted logical tunnel over an existing network", "Faster bandwidth guarantees", "A new LAN physical topology"], answer: 1, why: "VPNs overlay encrypted tunnels on existing infrastructure (Internet/MPLS) — confidentiality and private addressing without owning the links." },
+        { q: "In client-server, who listens passively and waits?", options: ["The client", "The server", "Both equally", "Neither — it's broadcast"], answer: 1, why: "Servers listen for requests; clients initiate. That asymmetry is the defining characteristic of C/S." },
+        { q: "An example of a P2P application model:", options: ["HTTP web application", "DHCP", "BitTorrent file sharing", "DNS resolution"], answer: 2, why: "BitTorrent peers both upload and download — no central server holds the file, the definition of P2P." },
+        { q: "OSPF building the routing table belongs to which plane?", options: ["Data plane", "Control plane", "Management plane", "Application plane"], answer: 1, why: "Routing protocols decide how to forward — they build the control-plane tables (RIB). ASIC/TCAM forwarding = data plane." },
+        { q: "STP and OSPF both belong to:", options: ["Data plane", "Management plane", "Control plane", "Forwarding plane"], answer: 2, why: "Both build the forwarding topology/table — STP for L2 loops, OSPF for L3 routes. Both are control-plane protocols." },
+        { q: "QoS marking, ACLs, and first-hop redundancy belong in which layer?", options: ["Core", "Distribution", "Access", "WAN edge"], answer: 1, why: "Distribution owns policy: QoS marking, ACLs, HSRP/VRRP. Core stays clean; access stays simple." },
+        { q: "With centralized DC apps, most user traffic:", options: ["Stays local to the access VLAN (80/20)", "Crosses to the core/DC (20/80)", "Is always peer-to-peer", "Never crosses a router"], answer: 1, why: "The 20/80 rule: centralized apps mean most traffic heads to the DC via the core — shapes VLAN/switch placement." }
+      ];
+      const quizQuestions = ref(shuffle(baseQuestions).map(q => ({ ...q, options: shuffle(q.options).map(t => ({ text: t })), answerText: q.options[q.answer], picked: null })));
+      const quizDone = ref(false);
+      const answeredCount = computed(() => quizQuestions.value.filter(q => q.picked !== null).length);
+      const quizScore = computed(() => quizQuestions.value.filter(q => q.picked !== null && q.options[q.picked].text === q.answerText).length);
+      const quizPct = computed(() => Math.round(quizScore.value / quizQuestions.value.length * 100));
+      function submitQuiz() { quizDone.value = true; const best = loadJSON(LS.quizbest, 0); if (quizScore.value > best) save(LS.quizbest, quizScore.value); }
+      function resetQuiz() { quizQuestions.value = shuffle(baseQuestions).map(q => ({ ...q, options: shuffle(q.options).map(t => ({ text: t })), answerText: q.options[q.answer], picked: null })); quizDone.value = false; }
+
+      // ---------------- checklist ----------------
+      const planItems = [
+        { file: "Networking Basics Overview.md", label: "Networking Basics Overview — the level map" },
+        { file: "01. What is Networking.md", label: "01 · What is Networking — definitions, building blocks, duplex modes" },
+        { file: "02. Network Types (LAN, WAN, MAN, PAN, WLAN, SAN, VPN).md", label: "02 · Network Types — scope, WLAN, SAN, VPN" },
+        { file: "03. Client-Server.md", label: "03 · Client-Server — roles, request flow, services table" },
+        { file: "04. Peer-to-Peer.md", label: "04 · Peer-to-Peer — advantages, disadvantages, routing peers" },
+        { file: "05. Network Components.md", label: "05 · Network Components — devices by layer, three planes" },
+        { file: "06. Enterprise Network Architecture.md", label: "06 · Enterprise Architecture — three-tier, modular blocks" },
+        { file: "07. Network Design Principles.md", label: "07 · Design Principles — five pillars, anti-patterns" }
+      ];
+      const done = ref(loadJSON(LS.done, {}));
+      const doneCount = computed(() => Object.values(done.value).filter(Boolean).length);
+      function toggleDone(i) { done.value[i] = !done.value[i]; save(LS.done, done.value); }
+
+      return {
+        theme, toggleTheme,
+        duplexActive, duplexModes, duplexInfo,
+        scopeActive, scopeList, scopeInfo,
+        csScenarios, csGuess, csPickedCount, csScore, pickCs, resetCs,
+        planeTasks, planeOptions, planeGuess, planePickedCount, planeScore, pickPlane, resetPlane,
+        tierActive, tierList, tierInfo, blockCards,
+        principleCards, principleOptions,
+        antiScenarios, antiGuess, antiPickedCount, antiScore, pickAnti, resetAnti,
+        activeCmd, activeCommand, commands,
+        trapOpen, traps,
+        quizQuestions, quizDone, quizScore, quizPct, answeredCount, submitQuiz, resetQuiz,
+        planItems, done, doneCount, toggleDone
+      };
+    }
+  }).mount("#app");
+})();
+</script>
+</body>
+</html>

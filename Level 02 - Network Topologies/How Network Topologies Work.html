@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Network Topologies Work — Level 02</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1923;--surface:#182635;--card:#1e2d3d;--border:#2a3a4a;
+  --text:#e0e6ed;--muted:#8899aa;--accent:#3b82f6;--accent2:#10b981;
+  --red:#ef4444;--yellow:#f59e0b;--purple:#8b5cf6;--cyan:#06b6d4;
+  --orange:#f97316;--pink:#ec4899;
+}
+[data-theme="light"]{
+  --bg:#f0f4f8;--surface:#ffffff;--card:#f8fafc;--border:#d1d9e0;
+  --text:#1a2332;--muted:#5a6a7a;--accent:#2563eb;--accent2:#059669;
+  --red:#dc2626;--yellow:#d97706;--purple:#7c3aed;--cyan:#0891b2;
+  --orange:#ea580c;--pink:#db2777;
+}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;line-height:1.65;padding:0;margin:0}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 24px 80px}
+
+/* sticky header */
+.hdr{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;backdrop-filter:blur(8px)}
+.hdr h1{font-size:1.15rem;margin:0;white-space:nowrap}
+.hdr .badges{display:flex;gap:6px;flex-wrap:wrap}
+.badge{font-size:.7rem;padding:3px 8px;border-radius:6px;font-weight:600;white-space:nowrap}
+.b-lvl{background:var(--accent);color:#fff}.b-exam{background:var(--purple);color:#fff}
+.b-fc{background:var(--cyan);color:#fff;cursor:pointer;text-decoration:none}
+.hdr .spacer{flex:1}
+.tbtn{background:var(--card);border:1px solid var(--border);color:var(--text);padding:5px 12px;border-radius:6px;cursor:pointer;font-size:.8rem}
+
+/* nav */
+.nav{display:flex;flex-wrap:wrap;gap:6px;margin:18px 0;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:10px}
+.nav-btn{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:.78rem;transition:all .15s}
+.nav-btn:hover,.nav-btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* section */
+.sec{margin:20px 0;padding:20px 24px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
+.sec h2{font-size:1.1rem;margin:0 0 14px;display:flex;align-items:center;gap:8px}
+.sec h2 .ico{font-size:1.1rem}
+.sec h3{font-size:.95rem;margin:14px 0 8px;color:var(--accent)}
+
+/* topology selector */
+.topo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin:12px 0}
+.topo-card{background:var(--card);border:2px solid var(--border);border-radius:8px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .2s}
+.topo-card:hover{border-color:var(--accent)}
+.topo-card.sel{border-color:var(--accent);background:rgba(59,130,246,.12)}
+.topo-card .tname{font-weight:700;font-size:.85rem;margin-top:4px}
+.topo-card .ticon{font-size:1.6rem}
+
+/* topology detail */
+.topo-detail{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;margin:12px 0}
+.topo-detail h3{margin:0 0 8px;color:var(--accent)}
+.topo-detail .props{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin:10px 0}
+.prop-item{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 12px}
+.prop-item .pl{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.prop-item .pv{font-size:.9rem;font-weight:600;margin-top:2px}
+
+/* formula */
+.formula-box{background:var(--card);border:1px solid var(--accent);border-radius:8px;padding:16px 20px;margin:12px 0;text-align:center}
+.formula-box .expr{font-size:1.3rem;font-weight:700;color:var(--accent);margin:8px 0}
+.slider-row{display:flex;align-items:center;gap:12px;margin:12px 0;flex-wrap:wrap}
+.slider-row input[type=range]{flex:1;min-width:120px;accent-color:var(--accent)}
+.slider-row .val{font-size:1.1rem;font-weight:700;color:var(--accent);min-width:50px;text-align:center}
+.result-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin:12px 0}
+.result-item{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px;text-align:center}
+.result-item .rv{font-size:1.4rem;font-weight:700;color:var(--accent)}
+.result-item .rl{font-size:.72rem;color:var(--muted);margin-top:2px}
+
+/* comparison table */
+.cmp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+@media(max-width:600px){.cmp-grid{grid-template-columns:1fr}}
+.cmp-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px}
+.cmp-card h4{margin:0 0 8px;font-size:.9rem;color:var(--accent)}
+.cmp-card .cmp-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:.82rem}
+.cmp-card .cmp-row:last-child{border-bottom:none}
+
+/* layer blocks */
+.layer-stack{display:flex;flex-direction:column;gap:0;margin:12px 0}
+.layer-block{padding:14px 16px;border:1px solid var(--border);font-size:.88rem}
+.layer-block:first-child{border-radius:8px 8px 0 0}
+.layer-block:last-child{border-radius:0 0 8px 8px}
+.layer-block .lname{font-weight:700;font-size:.9rem}
+.layer-block .ldesc{color:var(--muted);font-size:.8rem;margin-top:3px}
+
+/* campus blocks */
+.campus-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.85rem}
+.campus-table th{text-align:left;padding:8px 10px;background:var(--card);border:1px solid var(--border);font-size:.78rem;text-transform:uppercase;color:var(--muted)}
+.campus-table td{padding:8px 10px;border:1px solid var(--border)}
+.campus-table tr:hover{background:var(--card)}
+
+/* trap cards */
+.trap-list{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.trap{background:var(--card);border-left:3px solid var(--yellow);border-radius:0 6px 6px 0;padding:10px 14px;font-size:.85rem}
+.trap strong{color:var(--yellow)}
+
+/* pills */
+.pill{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.72rem;font-weight:600;margin:2px}
+.pill-green{background:rgba(16,185,129,.15);color:var(--accent2)}
+.pill-red{background:rgba(239,68,68,.15);color:var(--red)}
+.pill-blue{background:rgba(59,130,246,.15);color:var(--accent)}
+.pill-purple{background:rgba(139,92,246,.15);color:var(--purple)}
+.pill-orange{background:rgba(249,115,22,.15);color:var(--orange)}
+
+/* command viewer */
+.cmd-tabs{display:flex;flex-wrap:wrap;gap:4px;margin:10px 0}
+.cmd-tab{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:5px;cursor:pointer;font-size:.78rem;transition:all .12s}
+.cmd-tab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.cmd-block{background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin:10px 0;font-family:'Fira Code',monospace;font-size:.82rem;line-height:1.6;overflow-x:auto;white-space:pre;color:#c9d1d9}
+
+/* quiz */
+.quiz-q{margin:14px 0;padding:14px;background:var(--card);border-radius:8px;border:1px solid var(--border)}
+.quiz-q h4{margin:0 0 8px;font-size:.88rem}
+.quiz-q .qnum{color:var(--accent);font-weight:700;margin-right:6px}
+.quiz-opts{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.quiz-opt{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 12px;cursor:pointer;font-size:.84rem;transition:all .15s}
+.quiz-opt:hover{border-color:var(--accent);background:rgba(59,130,246,.08)}
+.quiz-opt.chosen{border-color:var(--accent);background:rgba(59,130,246,.15)}
+.quiz-opt.correct{border-color:var(--accent2);background:rgba(16,185,129,.15)}
+.quiz-opt.wrong{border-color:var(--red);background:rgba(239,68,68,.15)}
+.quiz-btn{margin:12px 0;padding:10px 24px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:.88rem;font-weight:600;transition:background .15s}
+.quiz-btn:hover{filter:brightness(1.15)}
+.quiz-btn:disabled{opacity:.45;cursor:default}
+.quiz-score{margin:12px 0;padding:14px;background:var(--card);border-radius:8px;border:1px solid var(--accent);font-weight:600}
+
+/* checklist */
+.chk-list{display:flex;flex-direction:column;gap:6px;margin:12px 0}
+.chk-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:all .15s;font-size:.86rem}
+.chk-item:hover{border-color:var(--accent)}
+.chk-item.done{opacity:.55}
+.chk-box{width:18px;height:18px;border:2px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.7rem;flex-shrink:0}
+.chk-item.done .chk-box{background:var(--accent2);border-color:var(--accent2);color:#fff}
+
+/* callout */
+.callout{padding:12px 16px;border-radius:8px;margin:10px 0;font-size:.85rem}
+.callout-info{background:rgba(59,130,246,.1);border-left:3px solid var(--accent)}
+.callout-warn{background:rgba(245,158,11,.1);border-left:3px solid var(--yellow)}
+.callout-tip{background:rgba(16,185,129,.1);border-left:3px solid var(--accent2)}
+</style>
+</head>
+<body>
+<div id="app" :data-theme="theme">
+
+<!-- HEADER -->
+<div class="hdr">
+  <h1>🔀 How Network Topologies Work</h1>
+  <div class="badges">
+    <span class="badge b-lvl">Level 02</span>
+    <span class="badge b-exam">ENCOR 350-401</span>
+    <a class="badge b-fc" href="../Flashcards/Level 02 — Network Topologies.html">Flashcards</a>
+  </div>
+  <div class="spacer"></div>
+  <button class="tbtn" @click="theme=theme==='dark'?'light':'dark'">
+    {{ theme==='dark' ? '☀️ Light' : '🌙 Dark' }}
+  </button>
+</div>
+
+<div class="wrap">
+
+<!-- NAV -->
+<div class="nav">
+  <button class="nav-btn" :class="{on:sec===s.id}" v-for="s in sections" :key="s.id" @click="sec=s.id">
+    {{ s.icon }} {{ s.label }}
+  </button>
+</div>
+
+<!-- 1. TOPOLOGY SELECTOR -->
+<div class="sec" v-show="sec==='selector'" id="topo-selector">
+  <h2><span class="ico">🌐</span> Topology Selector</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">Click any topology to explore its properties, pros, cons, and exam tips.</p>
+  <div class="topo-grid">
+    <div class="topo-card" v-for="(t,i) in topos" :key="i" :class="{sel:selectedTopo===i}" @click="selectedTopo=i">
+      <div class="ticon">{{ t.icon }}</div>
+      <div class="tname">{{ t.name }}</div>
+    </div>
+  </div>
+  <div class="topo-detail" v-if="selectedTopo!==null">
+    <h3>{{ topos[selectedTopo].icon }} {{ topos[selectedTopo].name }}</h3>
+    <p style="font-size:.88rem;margin-bottom:10px">{{ topos[selectedTopo].desc }}</p>
+    <div class="props">
+      <div class="prop-item" v-for="(p,j) in topos[selectedTopo].props" :key="j">
+        <div class="pl">{{ p.label }}</div>
+        <div class="pv">{{ p.value }}</div>
+      </div>
+    </div>
+    <div style="margin-top:12px">
+      <h3 style="margin-bottom:6px;font-size:.88rem">Pros</h3>
+      <div v-for="(pr,j) in topos[selectedTopo].pros" :key="'p'+j" style="font-size:.82rem;margin:3px 0">
+        <span class="pill pill-green">✓</span> {{ pr }}
+      </div>
+      <h3 style="margin:10px 0 6px;font-size:.88rem">Cons</h3>
+      <div v-for="(co,j) in topos[selectedTopo].cons" :key="'c'+j" style="font-size:.82rem;margin:3px 0">
+        <span class="pill pill-red">✗</span> {{ co }}
+      </div>
+      <div class="callout callout-warn" style="margin-top:10px" v-if="topos[selectedTopo].trap">
+        <strong>Exam Trap:</strong> {{ topos[selectedTopo].trap }}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. MESH LINK CALCULATOR -->
+<div class="sec" v-show="sec==='mesh'" id="mesh-calc">
+  <h2><span class="ico">🔗</span> Mesh Link Calculator</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:6px">Full mesh formula: <strong>N(N−1)/2</strong> links for N nodes.</p>
+  <div class="slider-row">
+    <span style="font-size:.84rem">Nodes (N):</span>
+    <input type="range" min="2" max="20" v-model.number="meshN">
+    <span class="val">{{ meshN }}</span>
+  </div>
+  <div class="formula-box">
+    <div>Full Mesh Links</div>
+    <div class="expr">{{ meshN }} × {{ meshN-1 }} / 2 = {{ meshLinks }}</div>
+  </div>
+  <div class="result-grid">
+    <div class="result-item">
+      <div class="rv">{{ meshLinks }}</div>
+      <div class="rl">Links Needed</div>
+    </div>
+    <div class="result-item">
+      <div class="rv">{{ meshN > 1 ? (meshN*(meshN-1)/2 > 200 ? '∞' : 'Yes') : '—' }}</div>
+      <div class="rl">Practical?</div>
+    </div>
+    <div class="result-item">
+      <div class="rv">{{ meshN >= 4 && meshN <= 6 ? 'Ideal' : meshN <= 3 ? 'Small' : 'Partial' }}</div>
+      <div class="rl">Recommendation</div>
+    </div>
+  </div>
+  <div class="callout callout-info" v-if="meshN > 8">
+    <strong>Reality Check:</strong> A full mesh of {{ meshN }} nodes needs {{ meshLinks }} links — that's why production networks use <strong>partial mesh</strong> or <strong>spine-leaf</strong> instead.
+  </div>
+  <div class="callout callout-tip" v-if="meshN <= 6">
+    <strong>Exam Tip:</strong> The formula <code>N(N-1)/2</code> is a common calculation question. 4 nodes → 6 links, 5 nodes → 10 links.
+  </div>
+</div>
+
+<!-- 3. HUB VS SWITCH -->
+<div class="sec" v-show="sec==='hubswitch'" id="hub-switch">
+  <h2><span class="ico">⚡</span> Hub vs Switch Behavior</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">Star topology with a hub = logical bus. Star with a switch = microsegmented. Pick a center device to see the difference.</p>
+  <div class="topo-grid" style="grid-template-columns:repeat(3,1fr)">
+    <div class="topo-card" :class="{sel:centerDev==='hub'}" @click="centerDev='hub'">
+      <div class="ticon">📡</div>
+      <div class="tname">Hub (L1)</div>
+    </div>
+    <div class="topo-card" :class="{sel:centerDev==='switch'}" @click="centerDev='switch'">
+      <div class="ticon">🔲</div>
+      <div class="tname">Switch (L2)</div>
+    </div>
+    <div class="topo-card" :class="{sel:centerDev==='router'}" @click="centerDev='router'">
+      <div class="ticon">🌐</div>
+      <div class="tname">Router (L3)</div>
+    </div>
+  </div>
+  <div class="topo-detail" v-if="centerDev">
+    <h3>{{ centerDev==='hub' ? '📡 Hub Center' : centerDev==='switch' ? '🔲 Switch Center' : '🌐 Router Center' }}</h3>
+    <div class="props" style="grid-template-columns:1fr 1fr">
+      <div class="prop-item">
+        <div class="pl">Collision Domain</div>
+        <div class="pv">{{ hubSwitchData.centerDev==='hub' ? '1 (all nodes)' : hubSwitchData.centerDev==='switch' ? '1 per port' : 'Isolated per interface' }}</div>
+      </div>
+      <div class="prop-item">
+        <div class="pl">Duplex</div>
+        <div class="pv">{{ hubSwitchData.centerDev==='hub' ? 'Half-duplex (CSMA/CD)' : 'Full-duplex' }}</div>
+      </div>
+      <div class="prop-item">
+        <div class="pl">MAC Learning</div>
+        <div class="pv">{{ hubSwitchData.centerDev==='hub' ? 'No — floods all frames' : 'Yes — builds forwarding table' }}</div>
+      </div>
+      <div class="prop-item">
+        <div class="pl">Broadcast Domain</div>
+        <div class="pv">{{ hubSwitchData.centerDev==='router' ? 'Separate per interface' : '1 (all ports)' }}</div>
+      </div>
+      <div class="prop-item">
+        <div class="pl">Security</div>
+        <div class="pv">{{ hubSwitchData.centerDev==='hub' ? 'All traffic visible to everyone' : hubSwitchData.centerDev==='switch' ? 'Per-port isolation possible' : 'Full subnet isolation' }}</div>
+      </div>
+      <div class="prop-item">
+        <div class="pl">Failure Impact</div>
+        <div class="pv">{{ hubSwitchData.centerDev==='hub' ? 'One break can segment the bus' : 'Only the bad link' }}</div>
+      </div>
+    </div>
+    <div class="callout callout-warn" style="margin-top:12px">
+      <strong>Key Exam Trap:</strong> Star wiring with a <strong>hub</strong> = physical star but <strong>logical bus</strong> (same collision domain). Star wiring with a <strong>switch</strong> = physical star and <strong>logical star</strong> (per-port collision domains).
+    </div>
+  </div>
+</div>
+
+<!-- 4. THREE-TIER LAYERS -->
+<div class="sec" v-show="sec==='tiers'" id="three-tier">
+  <h2><span class="ico">🏗️</span> Hierarchical Layer Responsibilities</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">The three-tier model: Core → Distribution → Access. Click a layer to explore its role, what runs there, and exam traps.</p>
+  <div class="topo-grid" style="grid-template-columns:repeat(3,1fr)">
+    <div class="topo-card" :class="{sel:tierLayer==='core'}" @click="tierLayer='core'" style="border-color:var(--red)">
+      <div class="ticon">🔴</div>
+      <div class="tname">Core</div>
+      <div style="font-size:.72rem;color:var(--muted)">Fast Transport</div>
+    </div>
+    <div class="topo-card" :class="{sel:tierLayer==='dist'}" @click="tierLayer='dist'" style="border-color:var(--yellow)">
+      <div class="ticon">🟡</div>
+      <div class="tname">Distribution</div>
+      <div style="font-size:.72rem;color:var(--muted)">Policy & Routing</div>
+    </div>
+    <div class="topo-card" :class="{sel:tierLayer==='access'}" @click="tierLayer='access'" style="border-color:var(--accent2)">
+      <div class="ticon">🟢</div>
+      <div class="tname">Access</div>
+      <div style="font-size:.72rem;color:var(--muted)">Endpoint Connectivity</div>
+    </div>
+  </div>
+  <div class="topo-detail" v-if="tierLayer">
+    <h3>{{ tierData.icon }} {{ tierData.name }} Layer</h3>
+    <p style="font-size:.88rem;margin-bottom:10px">{{ tierData.desc }}</p>
+    <div class="props" style="grid-template-columns:1fr 1fr">
+      <div class="prop-item">
+        <div class="pl">Primary Role</div>
+        <div class="pv">{{ tierData.role }}</div>
+      </div>
+      <div class="prop-item">
+        <div class="pl">Typical Device</div>
+        <div class="pv">{{ tierData.device }}</div>
+      </div>
+      <div class="prop-item">
+        <div class="pl">What Runs There</div>
+        <div class="pv">{{ tierData.what }}</div>
+      </div>
+      <div class="prop-item">
+        <div class="pl">Key Rule</div>
+        <div class="pv">{{ tierData.rule }}</div>
+      </div>
+    </div>
+    <div class="callout callout-warn" style="margin-top:10px">
+      <strong>Trap:</strong> {{ tierData.trap }}
+    </div>
+  </div>
+
+  <!-- two-tier vs three-tier comparison -->
+  <h3 style="margin-top:16px">Two-Tier (Collapsed Core) vs Three-Tier</h3>
+  <div class="cmp-grid">
+    <div class="cmp-card" style="border-top:3px solid var(--cyan)">
+      <h4 style="color:var(--cyan)">Two-Tier (Collapsed Core)</h4>
+      <div class="cmp-row"><span>Layers</span><span>Access + Collapsed Core</span></div>
+      <div class="cmp-row"><span>Distribution</span><span>Merged into Core</span></div>
+      <div class="cmp-row"><span>Cost</span><span>Lower</span></div>
+      <div class="cmp-row"><span>Scale</span><span>Small/branch sites</span></div>
+      <div class="cmp-row"><span>SPOF</span><span>Collapsed core pair</span></div>
+      <div class="cmp-row"><span>HSRP/VRRP</span><span>Required for HA</span></div>
+    </div>
+    <div class="cmp-card" style="border-top:3px solid var(--accent)">
+      <h4 style="color:var(--accent)">Three-Tier (Hierarchical)</h4>
+      <div class="cmp-row"><span>Layers</span><span>Access + Distribution + Core</span></div>
+      <div class="cmp-row"><span>Distribution</span><span>Separate policy layer</span></div>
+      <div class="cmp-row"><span>Cost</span><span>Higher</span></div>
+      <div class="cmp-row"><span>Scale</span><span>Large campus, multi-building</span></div>
+      <div class="cmp-row"><span>SPOF</span><span>Core or distribution</span></div>
+      <div class="cmp-row"><span>Summarization</span><span>Dist → Core</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 5. SPINE-LEAF -->
+<div class="sec" v-show="sec==='spineleaf'" id="spine-leaf">
+  <h2><span class="ico">🏢</span> Spine-Leaf (Clos) Architecture</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:6px">Modern data-center fabric: every leaf ↔ every spine. No leaf-leaf or spine-spine links. All uplinks ECMP — no STP blocking.</p>
+  <div class="slider-row">
+    <span style="font-size:.84rem">Spine count:</span>
+    <input type="range" min="1" max="8" v-model.number="spines">
+    <span class="val">{{ spines }}</span>
+    <span style="font-size:.84rem;margin-left:16px">Leaf count:</span>
+    <input type="range" min="1" max="12" v-model.number="leaves">
+    <span class="val">{{ leaves }}</span>
+  </div>
+  <div class="result-grid" style="grid-template-columns:repeat(4,1fr)">
+    <div class="result-item">
+      <div class="rv">{{ spines * leaves }}</div>
+      <div class="rl">Total Links</div>
+    </div>
+    <div class="result-item">
+      <div class="rv">{{ spines }}</div>
+      <div class="rl">Paths per Leaf</div>
+    </div>
+    <div class="result-item">
+      <div class="rv">3</div>
+      <div class="rl">Hops (leaf→leaf)</div>
+    </div>
+    <div class="result-item">
+      <div class="rv">{{ spines >= 2 ? 'ECMP' : 'Single' }}</div>
+      <div class="rl">Load Balance</div>
+    </div>
+  </div>
+  <div class="callout callout-info">
+    <strong>Scaling Rule:</strong> Add spines → more paths per leaf (capacity). Add leaves → more endpoints (total bandwidth). Spine count = ECMP paths = bandwidth per leaf.
+  </div>
+
+  <h3>Spine-Leaf vs Traditional Tree</h3>
+  <div class="cmp-grid">
+    <div class="cmp-card" style="border-top:3px solid var(--orange)">
+      <h4 style="color:var(--orange)">Traditional Tree</h4>
+      <div class="cmp-row"><span>Hop Count</span><span>Variable, grows</span></div>
+      <div class="cmp-row"><span>Link Util</span><span>Core bottleneck</span></div>
+      <div class="cmp-row"><span>East-West</span><span>Slow</span></div>
+      <div class="cmp-row"><span>Loop Control</span><span>STP blocking</span></div>
+      <div class="cmp-row"><span>Scaling</span><span>Redesign at core</span></div>
+    </div>
+    <div class="cmp-card" style="border-top:3px solid var(--accent2)">
+      <h4 style="color:var(--accent2)">Spine-Leaf</h4>
+      <div class="cmp-row"><span>Hop Count</span><span>Fixed ≤3-4</span></div>
+      <div class="cmp-row"><span>Link Util</span><span>All uplinks ECMP</span></div>
+      <div class="cmp-row"><span>East-West</span><span>Fast, predictable</span></div>
+      <div class="cmp-row"><span>Loop Control</span><span>ECMP / routed fabric</span></div>
+      <div class="cmp-row"><span>Scaling</span><span>Add spines/leaves</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 6. ENTERPRISE CAMPUS -->
+<div class="sec" v-show="sec==='campus'" id="enterprise-campus">
+  <h2><span class="ico">🏛️</span> Enterprise Campus Blocks</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">The campus isn't one topology — it assembles hierarchy, star, mesh, and modules into a resilient whole. Click any block to learn more.</p>
+  <div class="topo-grid" style="grid-template-columns:repeat(auto-fill,minmax(120px,1fr))">
+    <div class="topo-card" :class="{sel:campusBlock===b.id}" v-for="b in campusBlocks" :key="b.id" @click="campusBlock=b.id">
+      <div class="ticon">{{ b.icon }}</div>
+      <div class="tname">{{ b.name }}</div>
+    </div>
+  </div>
+  <div class="topo-detail" v-if="campusBlock">
+    <h3>{{ campusData.icon }} {{ campusData.name }}</h3>
+    <p style="font-size:.88rem;margin-bottom:10px">{{ campusData.desc }}</p>
+    <div class="props" style="grid-template-columns:1fr 1fr">
+      <div class="prop-item">
+        <div class="pl">Topology</div>
+        <div class="pv">{{ campusData.topo }}</div>
+      </div>
+      <div class="prop-item">
+        <div class="pl">HA Strategy</div>
+        <div class="pv">{{ campusData.ha }}</div>
+      </div>
+      <div class="prop-item">
+        <div class="pl">Typical Devices</div>
+        <div class="pv">{{ campusData.devices }}</div>
+      </div>
+      <div class="prop-item">
+        <div class="pl">Exam Tip</div>
+        <div class="pv">{{ campusData.tip }}</div>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:16px">Full Campus Reference Table</h3>
+  <table class="campus-table">
+    <tr><th>Block</th><th>Role</th><th>Topology</th><th>Redundancy</th></tr>
+    <tr v-for="b in campusBlocks" :key="b.id+'-t'">
+      <td>{{ b.icon }} {{ b.name }}</td>
+      <td>{{ b.role }}</td>
+      <td><span class="pill pill-blue">{{ b.topoShort }}</span></td>
+      <td>{{ b.haShort }}</td>
+    </tr>
+  </table>
+</div>
+
+<!-- 7. TOPOLOGY EVOLUTION -->
+<div class="sec" v-show="sec==='evolution'" id="evolution">
+  <h2><span class="ico">📈</span> Topology Evolution Timeline</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">How network topologies evolved from legacy to modern designs.</p>
+  <div style="display:flex;flex-direction:column;gap:0">
+    <div v-for="(e,i) in evolution" :key="i" style="display:flex;gap:12px;align-items:stretch">
+      <div style="display:flex;flex-direction:column;align-items:center;width:30px">
+        <div style="width:12px;height:12px;border-radius:50%;background:var(--accent);margin-top:6px"></div>
+        <div v-if="i<evolution.length-1" style="flex:1;width:2px;background:var(--border)"></div>
+      </div>
+      <div style="flex:1;padding:0 0 16px">
+        <div style="font-weight:700;font-size:.88rem;color:var(--accent)">{{ e.era }}</div>
+        <div style="font-weight:600;font-size:.84rem;margin:2px 0">{{ e.topo }}</div>
+        <div style="font-size:.82rem;color:var(--muted)">{{ e.note }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 8. HYBRID COMBINATIONS -->
+<div class="sec" v-show="sec==='hybrid'" id="hybrid">
+  <h2><span class="ico">🧩</span> Hybrid Topology Combinations</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">Real networks are almost always hybrids. Select a combination to see where it appears and key design rules.</p>
+  <div class="topo-grid" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr))">
+    <div class="topo-card" :class="{sel:hybridSel===h.id}" v-for="h in hybrids" :key="h.id" @click="hybridSel=h.id">
+      <div class="ticon">{{ h.icon }}</div>
+      <div class="tname">{{ h.name }}</div>
+    </div>
+  </div>
+  <div class="topo-detail" v-if="hybridSel">
+    <h3>{{ hybridData.icon }} {{ hybridData.name }}</h3>
+    <p style="font-size:.88rem;margin-bottom:10px">{{ hybridData.desc }}</p>
+    <div class="props" style="grid-template-columns:1fr 1fr">
+      <div class="prop-item">
+        <div class="pl">Components</div>
+        <div class="pv">{{ hybridData.components }}</div>
+      </div>
+      <div class="prop-item">
+        <div class="pl">Where Used</div>
+        <div class="pv">{{ hybridData.where }}</div>
+      </div>
+      <div class="prop-item">
+        <div class="pl">Key Rule</div>
+        <div class="pv">{{ hybridData.rule }}</div>
+      </div>
+      <div class="prop-item">
+        <div class="pl">Failure Handling</div>
+        <div class="pv">{{ hybridData.failure }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 9. RING RESILIENCE -->
+<div class="sec" v-show="sec==='ring'" id="ring-resilience">
+  <h2><span class="ico">🔄</span> Ring Topology: Single vs Dual Ring</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">Token Ring used single/dual rings. Toggle ring mode to see failure behavior and modern metro ring equivalents.</p>
+  <div class="topo-grid" style="grid-template-columns:1fr 1fr">
+    <div class="topo-card" :class="{sel:ringMode==='single'}" @click="ringMode='single'">
+      <div class="ticon">⭕</div>
+      <div class="tname">Single Ring</div>
+    </div>
+    <div class="topo-card" :class="{sel:ringMode==='dual'}" @click="ringMode='dual'">
+      <div class="ticon">🔁</div>
+      <div class="tname">Dual Ring (FDDI)</div>
+    </div>
+  </div>
+  <div class="topo-detail" v-if="ringMode">
+    <h3>{{ ringMode==='single' ? '⭕ Single Ring' : '🔁 Dual Counter-Rotating Ring' }}</h3>
+    <div class="props" style="grid-template-columns:1fr 1fr">
+      <div class="prop-item">
+        <div class="pl">Technology</div>
+        <div class="pv">{{ ringMode==='single' ? 'Token Ring (802.5), 4/16 Mbps' : 'FDDI, 100 Mbps' }}</div>
+      </div>
+      <div class="prop-item">
+        <div class="pl">Access Method</div>
+        <div class="pv">Token Passing (deterministic, no collisions)</div>
+      </div>
+      <div class="prop-item">
+        <div class="pl">On Cable Break</div>
+        <div class="pv">{{ ringMode==='single' ? 'Entire ring goes down — no recovery' : 'Traffic reverses on backup ring — self-heals' }}</div>
+      </div>
+      <div class="prop-item">
+        <div class="pl">Modern Equivalent</div>
+        <div class="pv">Metro Ethernet rings (SONET/SDH ring protection)</div>
+      </div>
+    </div>
+    <div class="callout callout-warn" style="margin-top:10px">
+      <strong>Exam Trap:</strong> Token Ring uses <strong>token passing</strong>, NOT CSMA/CD. Physical layout can be star (MAU wiring) but the <strong>logic</strong> is a ring. Never say "collisions in a token ring."
+    </div>
+  </div>
+</div>
+
+<!-- 10. KEY DESIGN RULES -->
+<div class="sec" v-show="sec==='rules'" id="design-rules">
+  <h2><span class="ico">📐</span> Key Design Rules</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">Universal topology design principles that appear on the exam.</p>
+  <div class="trap-list">
+    <div class="trap" v-for="(r,i) in designRules" :key="i">
+      <strong>Rule {{ i+1 }}:</strong> {{ r }}
+    </div>
+  </div>
+</div>
+
+<!-- 11. COMMANDS -->
+<div class="sec" v-show="sec==='cmds'" id="commands">
+  <h2><span class="ico">⌨️</span> Configuration Commands</h2>
+  <div class="cmd-tabs">
+    <button class="cmd-tab" :class="{on:activeCmd===c.id}" v-for="c in commands" :key="c.id" @click="activeCmd=c.id">
+      {{ c.label }}
+    </button>
+  </div>
+  <div class="cmd-block">{{ activeCommand.config }}</div>
+  <div class="callout callout-info" v-if="activeCommand.note" style="margin-top:8px">
+    <strong>Note:</strong> {{ activeCommand.note }}
+  </div>
+</div>
+
+<!-- 12. TRAPS -->
+<div class="sec" v-show="sec==='traps'" id="traps">
+  <h2><span class="ico">⚠️</span> Exam Traps</h2>
+  <div class="trap-list">
+    <div class="trap" v-for="(t,i) in traps" :key="i">
+      <strong>{{ t.tag }}:</strong> {{ t.text }}
+    </div>
+  </div>
+</div>
+
+<!-- 13. QUIZ -->
+<div class="sec" v-show="sec==='quiz'" id="quiz">
+  <h2><span class="ico">📝</span> Quiz</h2>
+  <div v-if="!quizDone">
+    <div class="quiz-q" v-for="(q,qi) in quizQuestions" :key="qi">
+      <h4><span class="qnum">Q{{ qi+1 }}.</span> {{ q.q }}</h4>
+      <div class="quiz-opts">
+        <div class="quiz-opt" v-for="(o,oi) in q.opts" :key="oi"
+             :class="{chosen:q.ans===oi}"
+             @click="q.ans=oi">
+          {{ o.text }}
+        </div>
+      </div>
+    </div>
+    <button class="quiz-btn" :disabled="!allQuizAnswered" @click="submitQuiz">Submit Answers</button>
+  </div>
+  <div v-else>
+    <div class="quiz-score">
+      Score: {{ quizScore }} / {{ quizQuestions.length }}
+      ({{ Math.round(quizScore/quizQuestions.length*100) }}%)
+    </div>
+    <div class="quiz-q" v-for="(q,qi) in quizQuestions" :key="qi">
+      <h4>
+        <span class="qnum">Q{{ qi+1 }}.</span> {{ q.q }}
+        <span v-if="q.ans===q.correct" style="color:var(--accent2);margin-left:8px">✓ Correct</span>
+        <span v-else style="color:var(--red);margin-left:8px">✗ Wrong — Answer: {{ q.opts[q.correct].text }}</span>
+      </h4>
+      <div class="quiz-opts">
+        <div class="quiz-opt" v-for="(o,oi) in q.opts" :key="oi"
+             :class="{correct:oi===q.correct,wrong:q.ans===oi&&oi!==q.correct}">
+          {{ o.text }}
+        </div>
+      </div>
+    </div>
+    <button class="quiz-btn" @click="resetQuiz" style="margin-top:12px">Retry Quiz</button>
+  </div>
+</div>
+
+<!-- 14. CHECKLIST -->
+<div class="sec" v-show="sec==='checklist'" id="checklist">
+  <h2><span class="ico">✅</span> Study Checklist</h2>
+  <div class="chk-list">
+    <div class="chk-item" v-for="(c,i) in checklist" :key="i" :class="{done:c.done}" @click="c.done=!c.done;saveChecklist()">
+      <div class="chk-box">{{ c.done ? '✓' : '' }}</div>
+      <span>{{ c.text }}</span>
+    </div>
+  </div>
+  <div style="margin-top:10px;font-size:.84rem;color:var(--muted)">
+    {{ doneCount }} / {{ checklist.length }} complete
+  </div>
+</div>
+
+</div><!-- wrap -->
+</div><!-- app -->
+
+<script src="../vue.global.prod.js"></script>
+<script>
+(function(){
+  const {createApp,ref,reactive,computed,watch} = Vue;
+  createApp({
+    setup(){
+      const theme = ref(localStorage.getItem('ccnp.topo.theme')||'dark');
+      const sec = ref('selector');
+      watch(theme,v=>localStorage.setItem('ccnp.topo.theme',v));
+
+      const sections = [
+        {id:'selector',label:'Selector',icon:'🌐'},
+        {id:'mesh',label:'Mesh Calc',icon:'🔗'},
+        {id:'hubswitch',label:'Hub vs Switch',icon:'⚡'},
+        {id:'tiers',label:'Hierarchy',icon:'🏗️'},
+        {id:'spineleaf',label:'Spine-Leaf',icon:'🏢'},
+        {id:'campus',label:'Campus',icon:'🏛️'},
+        {id:'evolution',label:'Evolution',icon:'📈'},
+        {id:'hybrid',label:'Hybrid',icon:'🧩'},
+        {id:'ring',label:'Ring',icon:'🔄'},
+        {id:'rules',label:'Design Rules',icon:'📐'},
+        {id:'cmds',label:'Commands',icon:'⌨️'},
+        {id:'traps',label:'Traps',icon:'⚠️'},
+        {id:'quiz',label:'Quiz',icon:'📝'},
+        {id:'checklist',label:'Checklist',icon:'✅'}
+      ];
+
+      /* ========== TOPOLOGY SELECTOR ========== */
+      const selectedTopo = ref(null);
+      const topos = [
+        {name:'Bus',icon:'➖',desc:'All devices share a single coaxial cable backbone. Every frame travels the entire cable. One shared collision domain, one broadcast domain. Legacy — 10BASE2/10BASE5.',
+         props:[{label:'Collision Domain',value:'1 (all nodes)'},{label:'Broadcast Domain',value:'1'},{label:'Failure Mode',value:'Cable break = entire segment down'},{label:'Bandwidth',value:'Shared 10 Mbps'},{label:'Status',value:'Legacy (replaced by star)'},{label:'Access Method',value:'CSMA/CD'}],
+         pros:['Cheap cabling','Simple concept','Terminators absorb reflections'],
+         cons:['Single point of failure','Poor fault isolation','All traffic visible (security risk)','Half-duplex only','Cannot scale'],
+         trap:'Bus = one collision domain AND one broadcast domain. A cable break kills the entire bus. Don\'t confuse bus with logical L3 structures.'},
+        {name:'Star',icon:'⭐',desc:'Every device connects point-to-point to a central hub/switch. Physical foundation of modern Ethernet wiring. Behavior depends on center device: hub = shared, switch = microsegmented.',
+         props:[{label:'Collision Domain',value:'Hub: 1 all / Switch: 1 per port'},{label:'Broadcast Domain',value:'1 (unless router center)'},{label:'Failure Mode',value:'Bad cable = only that host'},{label:'SPOF',value:'Central device'},{label:'Duplex',value:'Hub: half / Switch: full'},{label:'Wiring',value:'Point-to-point to center'}],
+         pros:['Fault isolation (bad cable = one host)','Easy adds/moves','Scalable, predictable','Full-duplex with switch','VLAN segmentation possible'],
+         cons:['Central device is SPOF','More cabling than bus/ring','Hub center = logical bus','Requires redundant pair for HA'],
+         trap:'Star wiring + hub = physical star but logical bus (same collision domain). Star is not automatic full duplex — that depends on the center being a switch.'},
+        {name:'Ring',icon:'⭕',desc:'Devices connected in a closed loop. Frames travel one direction via token passing (Token Ring/FDDI). Physical layout can be star (MAU wiring), but logic is a ring. Deterministic access — no collisions.',
+         props:[{label:'Access Method',value:'Token Passing (deterministic)'},{label:'Speeds',value:'4/16 Mbps (Token Ring), 100 Mbps (FDDI)'},{label:'Physical Layout',value:'Star (MAU) with ring logic'},{label:'Failure',value:'Single ring: break = entire ring down'},{label:'Dual Ring',value:'FDDI: self-heals via backup ring'},{label:'Collisions',value:'None (token passing)'}],
+         pros:['No collisions (token passing)','Deterministic delay','FDDI dual ring self-heals','No bandwidth contention under light load'],
+         cons:['One break kills single ring','Hard to add/remove nodes','Expensive, complex','Legacy — replaced by Ethernet','Low speeds (4/16 Mbps)'],
+         trap:'Ring = token-passing media access, NOT CSMA/CD. Physical layout can be star; the logic is a ring. Never mention "collisions in a token ring."'},
+        {name:'Mesh',icon:'🕸️',desc:'Nodes interconnected with direct links — full mesh (every node to every other) or partial mesh (selected pairs). Most redundancy and path diversity; link cost is the trade-off.',
+         props:[{label:'Full Mesh Links',value:'N(N-1)/2'},{label:'Redundancy',value:'Every pair (full) / Some pairs (partial)'},{label:'L2 Control',value:'STP + EtherChannel'},{label:'L3 Control',value:'ECMP (equal-cost multipath)'},{label:'Scaling',value:'Full mesh impractical >6 nodes'},{label:'Example',value:'DC spine-leaf, WAN partial mesh'}],
+         pros:['Maximum redundancy','Multiple paths (fault tolerance)','Lower hop count/latency','Load balancing (ECMP)','No single point of failure'],
+         cons:['Link count grows fast: N(N-1)/2','Expensive to wire','L2 mesh needs STP to prevent loops','Full mesh impractical for large N','Configuration complexity'],
+         trap:'Full-mesh formula N(N-1)/2 is a common calculation. Mesh at L2 without STP/EtherChannel = loop risk. ECMP is how routing realizes mesh benefit.'},
+        {name:'Hybrid',icon:'🧩',desc:'Combines two or more base topologies. Real networks are almost always hybrids — the term describes a mix, not a specific wiring pattern. Each block picks what fits its function.',
+         props:[{label:'Common Combos',value:'Star-bus, star-ring, star-mesh'},{label:'Access Layer',value:'Star (cheap, simple)'},{label:'Core/Backbone',value:'Mesh (redundant paths)'},{label:'Design Rule',value:'Complexity at core, simplicity at access'},{label:'Loop Control',value:'STP/ECMP for mesh areas'},{label:'Status',value:'The norm for all real networks'}],
+         pros:['Best of each topology','Functional blocks pick what fits','Modular, scalable','Fault isolation at each block','Enterprise-standard approach'],
+         cons:['Complex to design','Each block keeps its failure properties','Requires careful loop control','More planning needed'],
+         trap:'Hybrid is a description, not one fixed pattern. Star-mesh: access=star, core=mesh. Don\'t apply STP thinking only to pure mesh — any L2 loop needs loop control.'},
+        {name:'Spine-Leaf',icon:'🏢',desc:'Modern data-center Clos fabric. Every leaf (ToR) connects to every spine. No leaf-leaf or spine-spine links. Predictable east-west latency, ECMP everywhere, no STP blocking.',
+         props:[{label:'Structure',value:'Leaf ↔ Spine (full bipartite)'},{label:'Loop Control',value:'ECMP / routed fabric (no STP)'},{label:'Hop Count',value:'Fixed ≤3-4 for any flow'},{label:'Overlay',value:'VXLAN over L3 underlay'},{label:'Control Plane',value:'BGP EVPN / IS-IS underlay'},{label:'Scaling',value:'Add spines = more paths, add leaves = more endpoints'}],
+         pros:['Predictable latency','All uplinks active (ECMP)','Easy horizontal scaling','No loops by design','Perfect east-west performance'],
+         cons:['No leaf-leaf links (limits direct peer)','Requires VXLAN/BGP for overlay','Higher initial design cost','Not suited for pure north-south'],
+         trap:'No leaf-leaf links, no spine-spine links — that\'s the definition. ALL parallel links are active — do not say "STP blocks one." Hop count: 3 hops leaf-to-leaf with 2 spines.'},
+        {name:'Two-Tier',icon:'🔻',desc:'Collapsed core merges distribution and core into one layer above access. Fewer devices, lower cost, simpler operations. The standard for branches, SMBs, and small campuses.',
+         props:[{label:'Layers',value:'Access + Collapsed Core'},{label:'Collapsed Core',value:'L3 switch pair (HSRP)'},{label:'Scale',value:'Small/branch sites'},{label:'Convergence',value:'Fast (fewer hops)'},{label:'Routed Access',value:'Optional for fastest convergence'},{label:'SPOF',value:'Collapsed core pair'}],
+         pros:['Cost effective','Simpler operations','Faster convergence (fewer hops)','Good for branch/remote/SMB','Routed access option for speed'],
+         cons:['Collapsed core is critical SPOF','Not scalable for large campus','Distribution+core merge limits policy separation','Single pair must handle all inter-VLAN'],
+         trap:'"Collapsed core" is the exam term for two-tier. The SPOF is the collapsed core — a single-core two-tier fails hard; HA pair is required. Don\'t call two-tier + WAN distribution "three-tier."'},
+        {name:'Three-Tier',icon:'🔺',desc:'Cisco\'s classic campus hierarchy: Core → Distribution → Access. Each layer has distinct roles — core is fast transport, distribution is policy brain, access is endpoint connectivity.',
+         props:[{label:'Core',value:'Fast L3 backbone, NO policy'},{label:'Distribution',value:'Routing, ACLs, HSRP, summarization'},{label:'Access',value:'Ports, VLANs, PoE, edge security'},{label:'SPOF Mitigation',value:'Dual uplinks everywhere'},{label:'Summarization',value:'Dist → Core (smaller tables)'},{label:'Scale',value:'Large campus, multi-building'}],
+         pros:['Clear role separation','Scalable for large campuses','Distribution isolates policy from core','Core stays fast (no policy)','Summarization reduces convergence scope'],
+         cons:['More devices = higher cost','Complex operations','Overkill for small sites','Core must remain policy-free'],
+         trap:'No policy in the core is the #1 three-tier trap. Best place for default gateway: distribution, not access or core. "Collapsed core" = two-tier; "hierarchical" = three-tier.'},
+        {name:'Enterprise',icon:'🏛️',desc:'The full campus: assembles three-tier hierarchy, star access, mesh cores, and functional modules (server farm, WAN edge, DMZ, wireless, management) into a segmentable whole.',
+         props:[{label:'Core',value:'Routed mesh backbone between buildings'},{label:'Distribution',value:'Per-building aggregation + policy (HSRP)'},{label:'Access',value:'Star topology, endpoints + APs'},{label:'Server Farm',value:'Spine-leaf (modern)'},{label:'WAN Edge',value:'Partial mesh / hub-spoke'},{label:'Design Goals',value:'HA, fast convergence, segmentation, manageability'}],
+         pros:['Modular, scalable design','HA everywhere (dual core, dist, access)','Clear segmentation (VLANs/VRF)','Supports wired + wireless','Manageability via OOB/NMS'],
+         cons:['Complex design and management','Higher cost for full implementation','Requires multiple protocols (STP, HSRP, OSPF)','Coordination across modules'],
+         trap:'"Enterprise campus" ≠ "single building star" — it\'s the whole modular model. Default gateway lives at distribution (HSRP). Always distinguish campus vs DC spine-leaf.'}
+      ];
+
+      /* ========== MESH CALCULATOR ========== */
+      const meshN = ref(5);
+      const meshLinks = computed(()=> meshN.value*(meshN.value-1)/2 );
+
+      /* ========== HUB VS SWITCH ========== */
+      const centerDev = ref('switch');
+      const hubSwitchData = computed(()=>({centerDev:centerDev.value}));
+
+      /* ========== THREE-TIER ========== */
+      const tierLayer = ref('dist');
+      const tierData = computed(()=>{
+        const d = {
+          core:{icon:'🔴',name:'Core',desc:'The fast transport backbone. Pure L3 forwarding with maximum speed and redundancy. No policy, no VLANs, no users — just routes.',role:'Fast L3 transport',device:'High-speed L3 switches / routers',what:'CEF forwarding, OSPF/BGP routes, ECMP',rule:'Core = fast and dumb — never attach policy',trap:'No policy in the core! Distribution does ACLs, QoS marking, and firewalling. The exam will try to put security or policy at the core.'},
+          dist:{icon:'🟡',name:'Distribution',desc:'The "routing brain" of the campus. Inter-VLAN routing, default gateways (HSRP/VRRP), ACLs, firewalling, QoS marking, and route summarization toward the core.',role:'Policy, routing, aggregation',device:'L3 switch pair (HA)',what:'Inter-VLAN routing, ACLs, HSRP/VRRP, QoS marking, OSPF summarization',rule:'Distribution = the smart layer',trap:'Best place for default gateway is distribution (HSRP/VRRP), not access or core. Access switches may be L2 — don\'t insist they must route.'},
+          access:{icon:'🟢',name:'Access',desc:'Endpoint connectivity. Ports, VLAN assignment, PoE for phones/APs, port security, 802.1X, QoS trust boundary. Keep it simple and cheap.',role:'Endpoint connectivity',device:'L2/L3 access switches',what:'VLANs, PoE, port security, 802.1X, QoS trust, portfast',rule:'Access = simple and cheap',trap:'Access uses VLANs + STP unless fully routed. It\'s not where routing policy or summarization happens — that\'s distribution.'}
+        };
+        return d[tierLayer.value];
+      });
+
+      /* ========== SPINE-LEAF ========== */
+      const spines = ref(4);
+      const leaves = ref(6);
+
+      /* ========== ENTERPRISE CAMPUS ========== */
+      const campusBlock = ref(null);
+      const campusBlocks = [
+        {id:'core',icon:'🔴',name:'Core',role:'Backbone between buildings',topo:'Routed mesh / collapsed',topoShort:'Mesh',ha:'Dual switches, routed',haShort:'Dual routed',devices:'High-speed L3 switches',tip:'No policy here — pure fast forwarding'},
+        {id:'dist',icon:'🟡',name:'Distribution',role:'Per-building aggregation + policy',topo:'Dual switch pair',topoShort:'Redundant pair',ha:'HSRP/VRRP pair',haShort:'HSRP/VRRP',devices:'L3 switch pair',tip:'Default gateway lives here (HSRP)'},
+        {id:'access',icon:'🟢',name:'Access',role:'Endpoints, VLANs, wireless APs',topo:'Star',topoShort:'Star',ha:'Dual-home, portfast',haShort:'Dual-home',devices:'L2/L3 access switches',tip:'Keep simple — let distribution hold logic'},
+        {id:'server',icon:'🖥️',name:'Server Farm',role:'Compute & storage',topo:'Spine-leaf (modern) or 3-tier',topoShort:'Spine-leaf',ha:'Redundant leaf/spine',haShort:'ECMP + redundant',servers:'Servers, storage arrays',tip:'Attach to campus core via routed link'},
+        {id:'wan',icon:'🌐',name:'WAN Edge',role:'MPLS / SD-WAN / Internet',topo:'Partial mesh / hub-spoke',topoShort:'Partial mesh',ha:'Dual ISP, DMVPN',haShort:'Dual ISP',devices:'Routers / SD-WAN edge',tip:'DMVPN or SD-WAN for spoke flexibility'},
+        {id:'dmz',icon:'🛡️',name:'DMZ',role:'Public-facing servers',topo:'Two-arm to firewalls',topoShort:'Two-arm',ha:'Dual firewalls',haShort:'Active/standby FW',devices:'Firewalls, web servers',tip:'Never place DMZ inside the trusted campus'},
+        {id:'mgmt',icon:'📊',name:'Management',role:'OOB, NMS, NetOps',topo:'Dedicated VLAN/VRF',topoShort:'Dedicated VLAN',ha:'Separate path',haShort:'OOB access',devices:'NMS, syslog, SNMP',tip:'Out-of-band management for reachability'},
+        {id:'wireless',icon:'📶',name:'Wireless',role:'Coverage + mobility',topo:'APs to access switches',topoShort:'Star to switch',ha:'WLC redundancy',haShort:'WLC HA',devices:'APs, WLCs',tip:'SSIDs map to VLANs; CAPWAP to WLCs'}
+      ];
+      const campusData = computed(()=> campusBlocks.find(b=>b.id===campusBlock.value)||campusBlocks[0]);
+
+      /* ========== EVOLUTION ========== */
+      const evolution = [
+        {era:'1970s–80s',topo:'Bus (10BASE2/5)',note:'Shared coaxial cable. CSMA/CD for access. Single collision domain. Cheap but fragile — one break kills the segment.'},
+        {era:'1980s–90s',topo:'Ring (Token Ring / FDDI)',note:'Token passing for deterministic access. MAU wiring = star with ring logic. FDDI added dual counter-rotating rings for self-healing.'},
+        {era:'1990s',topo:'Star + Hub',note:'UTP wiring to central hub. Physical star but logical bus (hub repeats to all ports). Still shared collision domain.'},
+        {era:'Late 1990s',topo:'Star + Switch',note:'Switch microsegments — per-port collision domains, full-duplex, MAC learning. The foundation of modern Ethernet.'},
+        {era:'2000s',topo:'Three-Tier Campus',note:'Cisco hierarchical model: Core → Distribution → Access. Clear role separation. HSRP/VRRP for HA. STP on L2 spans.'},
+        {era:'2000s–10s',topo:'Two-Tier (Collapsed Core)',note:'Merged distribution+core for smaller sites. Cost effective. Routed access option for fastest convergence.'},
+        {era:'2010s–Now',topo:'Spine-Leaf (Clos)',note:'DC fabric: every leaf ↔ every spine. ECMP everywhere, no STP. VXLAN overlay. BGP EVPN control plane. Predictable east-west.'},
+        {era:'Now',topo:'Hybrid + SD-WAN',note:'Enterprise campus + DC spine-leaf + SD-WAN edge. Modular blocks, each choosing its own topology. Automation and telemetry throughout.'}
+      ];
+
+      /* ========== HYBRID ========== */
+      const hybridSel = ref(null);
+      const hybrids = [
+        {id:'starbus',icon:'⭐➖',name:'Star-Bus / Tree',desc:'Endpoint stars connect to hubs/switches, which are daisy-chained on a backbone. Classic campus tree structure — the standard hierarchical design.',components:'Star access + bus/tree backbone',where:'Classic campus, hierarchical LAN',rule:'Keep complex mesh at core, stars at access',failure:'Backbone break isolates segments; star cable = one host'},
+        {id:'starring',icon:'⭐⭕',name:'Star-Ring',desc:'Star wiring with logical ring (MAU/token passing). Each node wires to a MAU which closes the ring internally. The logic is ring, physical layout is star.',components:'Star wiring + MAU ring logic',where:'Legacy Token Ring (IBM 802.5)',rule:'Physical ≠ logical topology',failure:'Ring break depends on single vs dual ring'},
+        {id:'starmesh',icon:'⭐🕸️',name:'Star-Mesh',desc:'Access layer uses star topology (each endpoint to its switch). Backbone/DC uses mesh for redundancy. This is the modern enterprise standard.',components:'Star access + mesh core/backbone',where:'Modern enterprise, spine-leaf DC',rule:'Stars at access, mesh at core',failure:'Mesh provides alternate paths; star isolates per-host'},
+        {id:'wireless',icon:'📶🕸️',name:'Wireless Mesh + Star',desc:'APs connect via star to switches, but also relay to each other via radio mesh for extended coverage. Mixed wired/wireless designs.',components:'Wired star + radio mesh',where:'Mixed wireless, extended coverage areas',rule:'Each hop degrades throughput (half per hop in some techs)',failure:'AP failure covered by neighbor mesh relay'},
+        {id:'partialwan',icon:'🌐🕸️',name:'Partial Mesh WAN',desc:'Hub-and-spoke with selective extra circuits between high-traffic sites. Balances cost against redundancy for WAN connectivity.',components:'Hub-spoke + selective extra circuits',where:'WAN cores, ISP backbones',rule:'Cost balance — full mesh too expensive for WAN',failure:'Depends on which links are kept; critical sites get more paths'}
+      ];
+      const hybridData = computed(()=> hybrids.find(h=>h.id===hybridSel.value)||hybrids[0]);
+
+      /* ========== RING ========== */
+      const ringMode = ref('single');
+
+      /* ========== DESIGN RULES ========== */
+      const designRules = [
+        'Core = fast and dumb — never attach users, policy, or ACLs to the core layer.',
+        'Distribution = the smart layer — inter-VLAN routing, HSRP/VRRP gateways, ACLs, QoS marking, and route summarization.',
+        'Access = simple and cheap — keep it shallow; let the distribution hold logic.',
+        'Star wiring + hub = physical star but logical bus (same collision domain). Star + switch = per-port collision domains.',
+        'Full mesh links = N(N-1)/2. Beyond ~6 nodes, use partial mesh or spine-leaf.',
+        'No leaf-leaf links, no spine-spine links in spine-leaf — that\'s the definition. All uplinks are ECMP, no STP.',
+        'Spine count = ECMP paths = bandwidth per leaf. Add spines for leaf capacity, add leaves for total endpoints.',
+        'Collapsed core = two-tier synonym. Hierarchical = three-tier synonym. Don\'t confuse them.',
+        'Ring = token-passing, NOT CSMA/CD. Physical layout can be star; logic is ring.',
+        'Default gateway lives at distribution (HSRP/VRRP), not at access or core.',
+        'Enterprise campus ≠ single building star — it\'s the whole modular model with 7+ functional blocks.',
+        'L2 mesh without STP/EtherChannel = loop risk. Any redundancy needs loop control.'
+      ];
+
+      /* ========== COMMANDS ========== */
+      const activeCmd = ref('access-port');
+      const commands = [
+        {id:'access-port',label:'Access Port',config:'# Access port — endpoint star-wiring\ninterface GigabitEthernet0/1\n switchport access vlan 10\n spanning-tree portfast\n switchport mode access',note:'Portfast eliminates STP delay for endpoints — the star topology unit.'},
+        {id:'hsrp',label:'HSRP Gateway',config:'# Distribution pair — first-hop redundancy\ninterface Vlan10\n ip address 10.1.10.1 255.255.255.0\n standby 10 ip 10.1.10.254\n standby 10 priority 110\n standby 10 preempt',note:'HSRP at distribution for the star topology SPOF mitigation.'},
+        {id:'etherchannel',label:'EtherChannel',config:'# Bundle two links into one logical (mesh L2)\ninterface Port-channel1\n switchport trunk encapsulation dot1q\n switchport mode trunk\n\ninterface GigabitEthernet0/23\n channel-group 1 mode active\n\ninterface GigabitEthernet0/24\n channel-group 1 mode active',note:'EtherChannel bundles redundant L2 links — used in mesh and star-mesh designs.'},
+        {id:'ecmp',label:'ECMP Routes',config:'# Two equal-cost default routes → load-balanced\nip route 0.0.0.0 0.0.0.0 10.0.0.1\nip route 0.0.0.0 0.0.0.0 10.0.0.2\n\n# Verify ECMP\nshow ip route\nshow ip cef 1.1.1.1 internal',note:'ECMP is how routing realizes mesh benefit — both paths active.'},
+        {id:'ospf-summary',label:'OSPF Summarization',config:'# Distribution → Core summarization\nrouter ospf 1\n summary-address 10.1.0.0 255.255.252.0\n\n# Core — pure L3, no policy\ninterface TenGigabitEthernet1/1\n ip address 10.0.0.1 255.255.255.252',note:'Summarization at distribution keeps core tables small and convergence fast.'},
+        {id:'spine-leaf',label:'Spine-Leaf Underlay',config:'# Leaf underlay — each link equal cost\ninterface Ethernet1/1\n description to SPINE-1\n ip address 10.10.0.1/31\n\ninterface Ethernet1/2\n description to SPINE-2\n ip address 10.10.1.1/31\n\nrouter ospf 1\n network 10.10.0.0/16 area 0\n\n# Verify ECMP\nshow ip route | include "via Two"',note:'Spine-leaf underlay: all uplinks active via ECMP. No STP needed.'}
+      ];
+      const activeCommand = computed(()=> commands.find(c=>c.id===activeCmd.value)||commands[0]);
+
+      /* ========== TRAPS ========== */
+      const traps = [
+        {tag:'Bus = 1 collision domain',text:'Bus topology is one shared collision domain AND one broadcast domain (unless VLANs separate it). Cable break kills the entire bus.'},
+        {tag:'CSMA/CD vs Token',text:'Bus/half-duplex uses CSMA/CD. Token Ring uses token passing — deterministic, no collisions. Never say "collisions in a token ring."'},
+        {tag:'Star + Hub ≠ Full Duplex',text:'Star wiring with a hub = physical star but logical bus (same collision domain, half-duplex). Full duplex requires a switch at center.'},
+        {tag:'Ring Physical ≠ Logical',text:'Physical layout can be star (MAU wiring). The logic is a ring. Don\'t say "it must be wired in a circle."'},
+        {tag:'N(N-1)/2 Formula',text:'Full mesh link count is N(N-1)/2. 4 nodes = 6 links, 5 nodes = 10. An easy calculation question.'},
+        {tag:'Mesh at L2 Needs STP',text:'L2 mesh without STP/EtherChannel = loop risk. The design must control redundancy. STP blocks one path; EtherChannel bundles parallel links.'},
+        {tag:'Collapsed Core = Two-Tier',text:'"Collapsed core" is the exam synonym for two-tier. The distribution and core are merged into one layer.'},
+        {tag:'Three-Tier Core = No Policy',text:'Core = fast and dumb — never attach users, policy, or ACLs to the core. Distribution does all the policy work.'},
+        {tag:'Default Gateway Location',text:'Best place for default gateway is distribution (HSRP/VRRP), not access or core.'},
+        {tag:'Spine-Leaf Rules',text:'No leaf-leaf links, no spine-spine links — that\'s the definition. ALL uplinks are active (ECMP), no STP blocking.'},
+        {tag:'Spine-Leaf Scaling',text:'To increase capacity per leaf, add spines (spine count = ECMP paths). To add total endpoints, add leaves.'},
+        {tag:'Enterprise Campus Scope',text:'"Enterprise campus" ≠ single building star — it\'s the whole modular model with core, distribution, access, server farm, WAN, DMZ, and management blocks.'},
+        {tag:'Wireless Mesh Degradation',text:'Wireless mesh AP relays degrade with hops — half throughput per hop in some technologies. A trap in RF questions.'},
+        {tag:'Dual Ring Self-Heals',text:'Single ring: one break = entire ring down. FDDI dual counter-rotating ring: traffic reverses on backup ring and self-heals.'}
+      ];
+
+      /* ========== QUIZ ========== */
+      const quizQuestions = reactive([
+        {q:'How many collision domains exist in a bus topology?',opts:[{text:'One (shared)'},{text:'One per node'},{text:'Two'},{text:'None'}],ans:null,correct:0},
+        {q:'What is the full mesh link formula for N nodes?',opts:[{text:'N(N-1)/2'},{text:'N²'},{text:'N(N+1)/2'},{text:'2N'}],ans:null,correct:0},
+        {q:'Star wiring with a hub results in which logical topology?',opts:[{text:'Logical bus (shared collision domain)'},{text:'Logical star (per-port collision domains)'},{text:'Logical ring'},{text:'Logical mesh'}],ans:null,correct:0},
+        {q:'Which access method does Token Ring use?',opts:[{text:'Token passing (deterministic)'},{text:'CSMA/CD'},{text:'CSMA/CA'},{text:'Polling'}],ans:null,correct:0},
+        {q:'What is the exam synonym for two-tier campus design?',opts:[{text:'Collapsed core'},{text:'Hierarchical'},{text:'Spine-leaf'},{text:'Distributed core'}],ans:null,correct:0},
+        {q:'In a spine-leaf fabric, which links are allowed?',opts:[{text:'Leaf-to-spine only (bipartite)'},{text:'Leaf-to-leaf'},{text:'Spine-to-spine'},{text:'All of the above'}],ans:null,correct:0},
+        {q:'Where does the default gateway (HSRP/VRRP) typically live in a three-tier campus?',opts:[{text:'Distribution layer'},{text:'Access layer'},{text:'Core layer'},{text:'WAN edge'}],ans:null,correct:0},
+        {q:'What does FDDI use to survive a cable break?',opts:[{text:'Dual counter-rotating rings'},{text:'Token passing'},{text:'CSMA/CD'},{text:'Spanning Tree'}],ans:null,correct:0},
+        {q:'How many links does a full mesh of 6 nodes need?',opts:[{text:'15'},{text:'12'},{text:'20'},{text:'30'}],ans:null,correct:0},
+        {q:'Which layer in the three-tier model handles ACLs, QoS marking, and route summarization?',opts:[{text:'Distribution'},{text:'Core'},{text:'Access'},{text:'WAN edge'}],ans:null,correct:0},
+        {q:'In spine-leaf, adding more spines increases which capacity?',opts:[{text:'Bandwidth per leaf (ECMP paths)'},{text:'Total endpoint count'},{text:'East-west latency'},{text:'Number of VLANs'}],ans:null,correct:0},
+        {q:'What loop-control method is used in spine-leaf fabrics?',opts:[{text:'ECMP / routed fabric (no STP)'},{text:'RSTP'},{text:'MST'},{text:'STP blocking'}],ans:null,correct:0}
+      ]);
+      const quizDone = ref(false);
+      const quizScore = ref(0);
+      const allQuizAnswered = computed(()=> quizQuestions.every(q=>q.ans!==null));
+      function submitQuiz(){
+        quizScore.value = quizQuestions.filter((q,i)=>q.ans===q.correct).length;
+        quizDone.value = true;
+        localStorage.setItem('ccnp.topo.quiz',JSON.stringify({score:quizScore.value,total:quizQuestions.length}));
+      }
+      function resetQuiz(){
+        quizQuestions.forEach(q=>q.ans=null);
+        quizDone.value=false;
+        quizScore.value=0;
+        localStorage.removeItem('ccnp.topo.quiz');
+      }
+
+      /* ========== CHECKLIST ========== */
+      const checklist = reactive(JSON.parse(localStorage.getItem('ccnp.topo.checklist')||'null')||[
+        {text:'Understand bus topology: shared cable, CSMA/CD, one collision domain',done:false},
+        {text:'Understand star topology: hub vs switch behavior at center',done:false},
+        {text:'Understand ring topology: token passing, single vs dual ring (FDDI)',done:false},
+        {text:'Know full mesh formula N(N-1)/2 and when to use partial mesh',done:false},
+        {text:'Understand hybrid topology: real networks are always hybrids',done:false},
+        {text:'Master spine-leaf: no leaf-leaf, no spine-spine, ECMP everywhere',done:false},
+        {text:'Know two-tier (collapsed core) vs three-tier (hierarchical) differences',done:false},
+        {text:'Know three-tier roles: Core=fast/dumb, Distribution=policy, Access=endpoints',done:false},
+        {text:'Understand enterprise campus blocks: core, dist, access, server, WAN, DMZ, mgmt, wireless',done:false},
+        {text:'Know STP/EtherChannel for L2 mesh, ECMP for L3 mesh',done:false},
+        {text:'Understand topology evolution from bus → ring → star → hierarchy → spine-leaf',done:false},
+        {text:'Can explain why default gateway lives at distribution, not core or access',done:false}
+      ]);
+      const doneCount = computed(()=> checklist.filter(c=>c.done).length );
+      function saveChecklist(){ localStorage.setItem('ccnp.topo.checklist',JSON.stringify(checklist)); }
+
+      return {
+        theme,sec,sections,
+        selectedTopo,topos,
+        meshN,meshLinks,
+        centerDev,hubSwitchData,
+        tierLayer,tierData,
+        spines,leaves,
+        campusBlock,campusBlocks,campusData,
+        evolution,
+        hybridSel,hybrids,hybridData,
+        ringMode,
+        designRules,
+        activeCmd,commands,activeCommand,
+        traps,
+        quizQuestions,quizDone,quizScore,allQuizAnswered,submitQuiz,resetQuiz,
+        checklist,doneCount,saveChecklist
+      };
+    }
+  }).mount('#app');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Ethernet &amp; Switching Work — Level 04</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1923;--surface:#182635;--card:#1e2d3d;--border:#2a3a4a;
+  --text:#e0e6ed;--muted:#8899aa;--accent:#3b82f6;--accent2:#10b981;
+  --red:#ef4444;--yellow:#f59e0b;--purple:#8b5cf6;--cyan:#06b6d4;
+  --orange:#f97316;--pink:#ec4899;
+}
+[data-theme="light"]{
+  --bg:#f0f4f8;--surface:#ffffff;--card:#f8fafc;--border:#d1d9e0;
+  --text:#1a2332;--muted:#5a6a7a;--accent:#2563eb;--accent2:#059669;
+  --red:#dc2626;--yellow:#d97706;--purple:#7c3aed;--cyan:#0891b2;
+  --orange:#ea580c;--pink:#db2777;
+}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;line-height:1.65;padding:0;margin:0}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 24px 80px}
+
+.hdr{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;backdrop-filter:blur(8px)}
+.hdr h1{font-size:1.15rem;margin:0;white-space:nowrap}
+.hdr .badges{display:flex;gap:6px;flex-wrap:wrap}
+.badge{font-size:.7rem;padding:3px 8px;border-radius:6px;font-weight:600;white-space:nowrap}
+.b-lvl{background:var(--accent);color:#fff}.b-exam{background:var(--purple);color:#fff}
+.b-fc{background:var(--cyan);color:#fff;cursor:pointer;text-decoration:none}
+.hdr .spacer{flex:1}
+.tbtn{background:var(--card);border:1px solid var(--border);color:var(--text);padding:5px 12px;border-radius:6px;cursor:pointer;font-size:.8rem}
+
+.nav{display:flex;flex-wrap:wrap;gap:6px;margin:18px 0;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:10px}
+.nav-btn{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:.78rem;transition:all .15s}
+.nav-btn:hover,.nav-btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+.sec{margin:20px 0;padding:20px 24px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
+.sec h2{font-size:1.1rem;margin:0 0 14px;display:flex;align-items:center;gap:8px}
+.sec h2 .ico{font-size:1.1rem}
+.sec h3{font-size:.95rem;margin:14px 0 8px;color:var(--accent)}
+
+/* frame diagram */
+.frame-diagram{display:flex;flex-wrap:wrap;gap:0;margin:12px 0;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.f-seg{padding:12px 10px;text-align:center;min-width:70px;flex:1}
+.f-seg .fv{font-weight:700;font-size:.9rem}
+.f-seg .fl{font-size:.66rem;color:var(--muted);margin-top:2px}
+
+/* pick cards */
+.pick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin:12px 0}
+.pick-card{background:var(--card);border:2px solid var(--border);border-radius:8px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .2s}
+.pick-card:hover{border-color:var(--accent)}
+.pick-card.sel{border-color:var(--accent);background:rgba(59,130,246,.12)}
+.pick-card .pico{font-size:1.5rem}
+.pick-card .pn{font-weight:700;font-size:.82rem;margin-top:4px}
+
+.detail-box{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;margin:12px 0}
+.dt-title{font-weight:700;font-size:.95rem;color:var(--accent);margin-bottom:8px}
+.dt-row{font-size:.84rem;margin:6px 0}
+.dt-label{color:var(--muted);font-weight:600}
+
+/* switching pipeline */
+.pipe{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;margin:12px 0}
+.pipe-node{background:var(--card);border:2px solid var(--border);border-radius:8px;padding:12px 16px;text-align:center;cursor:pointer;transition:all .2s;flex:1;min-width:120px}
+.pipe-node:hover{border-color:var(--accent)}
+.pipe-node.sel{border-color:var(--accent2);background:rgba(16,185,129,.12)}
+.pipe-node.hover{border-color:var(--accent);background:rgba(59,130,246,.12)}
+.pipe-node .picon{font-size:1.3rem}
+.pipe-node .pt{font-weight:700;font-size:.8rem;margin-top:3px}
+.pipe-arrow{display:flex;align-items:center;color:var(--accent);font-size:1.2rem;font-weight:700}
+
+/* tables */
+.data-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.84rem}
+.data-table th{text-align:left;padding:8px 10px;background:var(--card);border:1px solid var(--border);font-size:.75rem;text-transform:uppercase;color:var(--muted)}
+.data-table td{padding:8px 10px;border:1px solid var(--border)}
+
+/* formula */
+.formula-box{background:var(--card);border:1px solid var(--accent);border-radius:8px;padding:16px 20px;margin:12px 0;text-align:center}
+.formula-box .expr{font-size:1.3rem;font-weight:700;color:var(--accent);margin:8px 0}
+.slider-row{display:flex;align-items:center;gap:12px;margin:12px 0;flex-wrap:wrap}
+.slider-row input[type=range]{flex:1;min-width:120px;accent-color:var(--accent)}
+.slider-row .val{font-size:1.1rem;font-weight:700;color:var(--accent);min-width:50px;text-align:center}
+
+/* arp exchange */
+.arp-flow{display:flex;flex-direction:column;gap:0;margin:12px 0}
+.arp-msg{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;margin:4px 0;font-size:.84rem}
+.arp-msg .aico{font-size:1.2rem}
+.arp-msg .adir{color:var(--muted);font-size:.75rem;min-width:60px}
+.arp-msg.req{background:rgba(59,130,246,.1)}
+.arp-msg.rep{background:rgba(16,185,129,.1)}
+.arp-msg.un{background:rgba(249,115,22,.08)}
+
+/* cef stack */
+.cef-stack{display:flex;flex-direction:column;gap:0;margin:12px 0}
+.cef-block{padding:14px 16px;border:1px solid var(--border);font-size:.88rem}
+.cef-block:first-child{border-radius:8px 8px 0 0}
+.cef-block:last-child{border-radius:0 0 8px 8px}
+.cef-block .cb-name{font-weight:700;font-size:.9rem}
+.cef-block .cb-desc{color:var(--muted);font-size:.8rem;margin-top:3px}
+.cef-arrow{text-align:center;color:var(--accent);font-weight:700;padding:2px 0;font-size:.85rem}
+
+/* dev cards */
+.dev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:12px 0}
+.dev-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center;cursor:pointer;transition:all .2s}
+.dev-card:hover{border-color:var(--accent)}
+.dev-card.sel{border-color:var(--accent2);background:rgba(16,185,129,.1)}
+.dev-card .dico{font-size:1.5rem}
+.dev-card .dn{font-weight:700;font-size:.82rem;margin-top:4px}
+.dev-card .dc{font-size:.7rem;color:var(--muted)}
+
+/* collision calculator */
+.collision-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin:12px 0}
+.collision-item{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center}
+.collision-item .cv{font-size:1.5rem;font-weight:800;color:var(--accent)}
+.collision-item .cl{font-size:.72rem;color:var(--muted);margin-top:2px}
+
+.pill{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.72rem;font-weight:600;margin:2px}
+.pill-green{background:rgba(16,185,129,.15);color:var(--accent2)}
+.pill-red{background:rgba(239,68,68,.15);color:var(--red)}
+.pill-blue{background:rgba(59,130,246,.15);color:var(--accent)}
+.pill-purple{background:rgba(139,92,246,.15);color:var(--purple)}
+.pill-orange{background:rgba(249,115,22,.15);color:var(--orange)}
+
+.cmd-tabs{display:flex;flex-wrap:wrap;gap:4px;margin:10px 0}
+.cmd-tab{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:5px;cursor:pointer;font-size:.78rem;transition:all .12s}
+.cmd-tab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.cmd-block{background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin:10px 0;font-family:'Fira Code',monospace;font-size:.82rem;line-height:1.6;overflow-x:auto;white-space:pre;color:#c9d1d9}
+
+.trap-list{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.trap{background:var(--card);border-left:3px solid var(--yellow);border-radius:0 6px 6px 0;padding:10px 14px;font-size:.85rem}
+.trap strong{color:var(--yellow)}
+
+.quiz-q{margin:14px 0;padding:14px;background:var(--card);border-radius:8px;border:1px solid var(--border)}
+.quiz-q h4{margin:0 0 8px;font-size:.88rem}
+.quiz-q .qnum{color:var(--accent);font-weight:700;margin-right:6px}
+.quiz-opts{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.quiz-opt{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 12px;cursor:pointer;font-size:.84rem;transition:all .15s}
+.quiz-opt:hover{border-color:var(--accent);background:rgba(59,130,246,.08)}
+.quiz-opt.chosen{border-color:var(--accent);background:rgba(59,130,246,.15)}
+.quiz-opt.correct{border-color:var(--accent2);background:rgba(16,185,129,.15)}
+.quiz-opt.wrong{border-color:var(--red);background:rgba(239,68,68,.15)}
+.quiz-btn{margin:12px 0;padding:10px 24px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:.88rem;font-weight:600;transition:background .15s}
+.quiz-btn:hover{filter:brightness(1.15)}
+.quiz-btn:disabled{opacity:.45;cursor:default}
+.quiz-score{margin:12px 0;padding:14px;background:var(--card);border-radius:8px;border:1px solid var(--accent);font-weight:600}
+
+.chk-list{display:flex;flex-direction:column;gap:6px;margin:12px 0}
+.chk-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:all .15s;font-size:.86rem}
+.chk-item:hover{border-color:var(--accent)}
+.chk-item.done{opacity:.55}
+.chk-box{width:18px;height:18px;border:2px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.7rem;flex-shrink:0}
+.chk-item.done .chk-box{background:var(--accent2);border-color:var(--accent2);color:#fff}
+
+.callout{padding:12px 16px;border-radius:8px;margin:10px 0;font-size:.85rem}
+.callout-info{background:rgba(59,130,246,.1);border-left:3px solid var(--accent)}
+.callout-warn{background:rgba(245,158,11,.1);border-left:3px solid var(--yellow)}
+.callout-tip{background:rgba(16,185,129,.1);border-left:3px solid var(--accent2)}
+</style>
+</head>
+<body>
+<div id="app" :data-theme="theme">
+
+<!-- HEADER -->
+<div class="hdr">
+  <h1>🔲 How Ethernet &amp; Switching Work</h1>
+  <div class="badges">
+    <span class="badge b-lvl">Level 04</span>
+    <span class="badge b-exam">ENCOR 350-401</span>
+    <a class="badge b-fc" href="../Flashcards/Level 04 — Ethernet & Switching.html">Flashcards</a>
+  </div>
+  <div class="spacer"></div>
+  <button class="tbtn" @click="theme=theme==='dark'?'light':'dark'">
+    {{ theme==='dark' ? '☀️ Light' : '🌙 Dark' }}
+  </button>
+</div>
+
+<div class="wrap">
+
+<!-- NAV -->
+<div class="nav">
+  <button class="nav-btn" :class="{on:sec===s.id}" v-for="s in sections" :key="s.id" @click="sec=s.id">
+    {{ s.icon }} {{ s.label }}
+  </button>
+</div>
+
+<!-- 1. FRAME ANATOMY -->
+<div class="sec" v-show="sec==='frame'" id="frame-anatomy">
+  <h2><span class="ico">📦</span> Ethernet Frame Anatomy</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">The Layer 2 data unit. Click a field to learn its role in switching.</p>
+  <div class="frame-diagram">
+    <div class="f-seg" v-for="(f,i) in frameFields" :key="i" :class="frameFields[i].color" style="cursor:pointer" @click="frameSel=i">
+      <div class="fv">{{ f.name }}</div>
+      <div class="fl">{{ f.size }}</div>
+    </div>
+  </div>
+  <div class="detail-box" v-if="frameSel!==null">
+    <div class="dt-title">{{ frameFields[frameSel].name }} ({{ frameFields[frameSel].size }})</div>
+    <div class="dt-row"><span class="dt-label">Purpose:</span> {{ frameFields[frameSel].purpose }}</div>
+    <div class="dt-row"><span class="dt-label">Switch uses:</span> {{ frameFields[frameSel].use }}</div>
+    <div class="dt-row"><span class="dt-label">Example:</span> {{ frameFields[frameSel].example }}</div>
+  </div>
+
+  <h3>Core Switching Model</h3>
+  <div class="dev-grid">
+    <div class="dev-card" v-for="m in switchModel" :key="m.f">
+      <div style="font-size:.72rem;color:var(--muted)">{{ m.field }}</div>
+      <div style="font-weight:700;font-size:.9rem;color:var(--accent)">{{ m.action }}</div>
+    </div>
+  </div>
+  <div class="callout callout-warn">
+    <strong>Key traps:</strong> Minimum frame = <strong>64 bytes</strong> (Dest MAC → FCS). Preamble (7B) + SFD (1B) are transmitted but NOT included in frame-size calculations. `0x0800` = IPv4 EtherType, not an 800-byte length.
+  </div>
+</div>
+
+<!-- 2. MAC ADDRESSES -->
+<div class="sec" v-show="sec==='mac'" id="mac-addresses">
+  <h2><span class="ico">🏷️</span> MAC Addresses</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">A 48-bit / 6-byte Layer 2 identifier used for local frame delivery. Explore the anatomy, I/G and U/L bits, and address types.</p>
+  <div class="detail-box">
+    <div class="dt-title">Anatomy</div>
+    <div class="dt-row">
+      <span class="dt-label">Format:</span>
+      <code style="font-family:'Fira Code',monospace">AA:BB:CC:DD:EE:FF</code> ·
+      <code style="font-family:'Fira Code',monospace">AA-BB-CC-DD-EE-FF</code> ·
+      <code style="font-family:'Fira Code',monospace">AABB.CCDD.EEFF</code> (Cisco-style)
+    </div>
+    <div class="dt-row">
+      <span class="dt-label">OUI:</span> First <strong>24 bits / 3 bytes</strong> — the vendor/organization identifier. Remaining 24 bits identify the interface (NOT strictly a "serial number").
+    </div>
+  </div>
+
+  <h3>I/G and U/L Bits (first octet, counting from right)</h3>
+  <table class="data-table">
+    <tr><th>Bit</th><th>Name</th><th>0</th><th>1</th></tr>
+    <tr><td>Rightmost</td><td><strong>I/G</strong></td><td>Individual / unicast</td><td>Group (multicast/broadcast)</td></tr>
+    <tr><td>2nd from right</td><td><strong>U/L</strong></td><td>Universally administered</td><td>Locally administered</td></tr>
+  </table>
+
+  <h3>Address Types</h3>
+  <div class="pick-grid">
+    <div class="pick-card" :class="{sel:macType==='unicast'}" @click="macType='unicast'">
+      <div class="pico">➡️</div><div class="pn">Unicast</div>
+    </div>
+    <div class="pick-card" :class="{sel:macType==='multicast'}" @click="macType='multicast'">
+      <div class="pico">👥</div><div class="pn">Multicast</div>
+    </div>
+    <div class="pick-card" :class="{sel:macType==='broadcast'}" @click="macType='broadcast'">
+      <div class="pico">📢</div><div class="pn">Broadcast</div>
+    </div>
+  </div>
+  <div class="detail-box" v-if="macType">
+    <div class="dt-title">{{ macData.name }}</div>
+    <div class="dt-row"><span class="dt-label">I/G bit:</span> {{ macData.ig }} — {{ macData.igDesc }}</div>
+    <div class="dt-row"><span class="dt-label">Example:</span> <code style="font-family:'Fira Code',monospace">{{ macData.example }}</code></div>
+    <div class="dt-row"><span class="dt-label">Switch behavior:</span> {{ macData.behavior }}</div>
+  </div>
+
+  <h3>Virtual MACs (First-Hop Redundancy)</h3>
+  <table class="data-table">
+    <tr><th>Protocol</th><th>Virtual MAC Pattern</th></tr>
+    <tr v-for="(v,i) in virtualMacs" :key="i"><td>{{ v.name }}</td><td><code style="font-family:'Fira Code',monospace">{{ v.mac }}</code></td></tr>
+  </table>
+  <div class="callout callout-warn">
+    <strong>CCNP exam rule:</strong> <strong>Switch</strong> = forwards the existing Ethernet frame (MACs unchanged). <strong>Router</strong> = removes incoming L2 header, creates a new L2 header (MACs change per segment). IPv4 resolves via <strong>ARP</strong>, IPv6 via <strong>Neighbor Discovery</strong>.
+  </div>
+</div>
+
+<!-- 3. CAM TABLE -->
+<div class="sec" v-show="sec==='cam'" id="cam-table">
+  <h2><span class="ico">🗄️</span> CAM / MAC Address Table</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">The Layer 2 forwarding database. Lookup key = <strong>MAC + VLAN</strong> → switch port.</p>
+  <table class="data-table">
+    <tr><th>VLAN</th><th>MAC Address</th><th>Type</th><th>Port</th></tr>
+    <tr v-for="(e,i) in camEntries" :key="i">
+      <td>{{ e.vlan }}</td>
+      <td style="font-family:'Fira Code',monospace">{{ e.mac }}</td>
+      <td><span class="pill" :class="e.type==='DYNAMIC'?'pill-blue':'pill-purple'">{{ e.type }}</span></td>
+      <td>{{ e.port }}</td>
+    </tr>
+  </table>
+  <div class="callout callout-info">
+    <strong>Dynamic vs Static:</strong> Dynamic entries are learned automatically from the Source MAC and age out (Cisco default ≈ <strong>300s / 5 min</strong>). Static entries are manually configured and don't age like dynamic entries. Same MAC can legitimately exist in different VLANs.
+  </div>
+
+  <h3>CAM vs TCAM</h3>
+  <div class="dev-grid">
+    <div class="dev-card">
+      <div style="font-weight:700;font-size:.95rem;color:var(--accent)">CAM</div>
+      <div style="font-size:.78rem;color:var(--muted);margin-top:4px">Exact-match lookups — MAC address forwarding.</div>
+    </div>
+    <div class="dev-card">
+      <div style="font-weight:700;font-size:.95rem;color:var(--purple)">TCAM</div>
+      <div style="font-size:.78rem;color:var(--muted);margin-top:4px">Ternary (0/1/X don't-care) — routing, ACLs, QoS, policy.</div>
+    </div>
+  </div>
+  <div class="callout callout-tip">
+    <strong>Mental model:</strong> ARP table = IPv4 → MAC. CAM/MAC table = MAC + VLAN → switch port. Combining both locates an IPv4 host's switch port.
+  </div>
+</div>
+
+<!-- 4. SWITCHING LOGIC -->
+<div class="sec" v-show="sec==='logic'" id="switching-logic">
+  <h2><span class="ico">🧠</span> Switching Logic Pipeline</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">Learn → Lookup → Forward / Flood / Filter. Click each stage to explore it.</p>
+  <div class="pipe">
+    <div class="pipe-node" :class="{sel:pipeStage===0}" @click="pipeStage=0">
+      <div class="picon">📥</div><div class="pt">Receive</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-node" :class="{sel:pipeStage===1}" @click="pipeStage=1">
+      <div class="picon">🎓</div><div class="pt">Learn Source MAC</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-node" :class="{sel:pipeStage===2}" @click="pipeStage=2">
+      <div class="picon">🔍</div><div class="pt">Lookup Dest MAC</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-node" :class="{sel:pipeStage===3}" @click="pipeStage=3">
+      <div class="picon">🚚</div><div class="pt">Forward</div>
+    </div>
+    <div class="pipe-node" :class="{sel:pipeStage===4}" @click="pipeStage=4">
+      <div class="picon">🚰</div><div class="pt">Flood</div>
+    </div>
+    <div class="pipe-node" :class="{sel:pipeStage===5}" @click="pipeStage=5">
+      <div class="picon">🛑</div><div class="pt">Filter</div>
+    </div>
+  </div>
+  <div class="detail-box" v-if="pipeStage!==null">
+    <div class="dt-title">{{ pipeData.name }}</div>
+    <div class="dt-row"><span class="dt-label">What it does:</span> {{ pipeData.desc }}</div>
+    <div class="dt-row"><span class="dt-label">Trigger:</span> {{ pipeData.trigger }}</div>
+    <div class="dt-row"><span class="dt-label">Exam trap:</span> {{ pipeData.trap }}</div>
+  </div>
+  <table class="data-table">
+    <tr><th>Destination State</th><th>Switch Action</th></tr>
+    <tr><td>Known on another port</td><td><span class="pill pill-green">Forward</span> to that port</td></tr>
+    <tr><td>Known on ingress port</td><td><span class="pill pill-red">Filter</span>/drop</td></tr>
+    <tr><td>Unknown unicast</td><td><span class="pill pill-orange">Flood</span> within VLAN (except ingress)</td></tr>
+    <tr><td>Broadcast</td><td><span class="pill pill-orange">Flood</span> within VLAN</td></tr>
+    <tr><td>Multicast</td><td>Flood or constrain (IGMP snooping)</td></tr>
+  </table>
+  <div class="callout callout-warn">
+    <strong>Flooding traps:</strong> Flooding ≠ only broadcast (unknown unicast floods too). Flooding does NOT cross VLANs (needs L3). Faster MAC aging can actually INCREASE flooding. STP prevents loops but flooding still occurs on the active topology.
+  </div>
+</div>
+
+<!-- 5. FRAME SIZE CALCULATOR -->
+<div class="sec" v-show="sec==='sizes'" id="frame-sizes">
+  <h2><span class="ico">📏</span> Frame Size &amp; MTU Calculator</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:6px">Compute the total Ethernet frame size given payload and tagging. MTU = max L3 payload; frame size = L2 header + payload + trailer.</p>
+  <div class="slider-row">
+    <span style="font-size:.84rem">Payload (bytes):</span>
+    <input type="range" min="46" max="1500" v-model.number="payload">
+    <span class="val">{{ payload }}</span>
+  </div>
+  <div class="collision-grid">
+    <div class="collision-item">
+      <div class="cv">{{ payload }}</div>
+      <div class="cl">Payload (IP MTU=1500)</div>
+    </div>
+    <div class="collision-item">
+      <div class="cv">{{ 6+6+2+payload+4 }}</div>
+      <div class="cl">Untagged Frame ({{ tagged?'':'—' }})</div>
+    </div>
+    <div class="collision-item">
+      <div class="cv">{{ 6+6+4+2+payload+4 }}</div>
+      <div class="cl">802.1Q Tagged Frame</div>
+    </div>
+  </div>
+  <div class="formula-box">
+    <div>Untagged: 6+6+2+{{payload}}+4 = <strong>{{ 6+6+2+payload+4 }}</strong> bytes</div>
+    <div>Tagged: 6+6+4+2+{{payload}}+4 = <strong>{{ 6+6+4+2+payload+4 }}</strong> bytes</div>
+  </div>
+  <table class="data-table">
+    <tr><th>Concept</th><th>Value</th></tr>
+    <tr v-for="(s,i) in sizeFacts" :key="i"><td>{{ s.name }}</td><td>{{ s.value }}</td></tr>
+  </table>
+  <div class="callout callout-warn">
+    <strong>Traps:</strong> A 1500-byte MTU/payload ≠ 1500-byte total frame. Runts &lt; 64B, giants &gt; max size, baby giants &gt;1518B (legitimate encapsulation, e.g., 802.1Q = 1522B). Jumbo frames are NOT universally 9000 bytes — platform-dependent.
+  </div>
+</div>
+
+<!-- 6. DOMAINS -->
+<div class="sec" v-show="sec==='domains'" id="domains">
+  <h2><span class="ico">🌉</span> Broadcast vs Collision Domains</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">The classic distinction. Select a device to compute its domains, then compare broadcast vs collision concepts.</p>
+  <div class="dev-grid">
+    <div class="dev-card" :class="{sel:domainDev==='hub'}" @click="domainDev='hub'">
+      <div class="dico">📡</div><div class="dn">Hub</div><div class="dc">Layer 1</div>
+    </div>
+    <div class="dev-card" :class="{sel:domainDev==='switch'}" @click="domainDev='switch'">
+      <div class="dico">🔲</div><div class="dn">Switch</div><div class="dc">Layer 2</div>
+    </div>
+    <div class="dev-card" :class="{sel:domainDev==='router'}" @click="domainDev='router'">
+      <div class="dico">🌐</div><div class="dn">Router</div><div class="dc">Layer 3</div>
+    </div>
+  </div>
+  <div class="detail-box" v-if="domainDev">
+    <div class="dt-title">{{ domainData.name }} Domain Behavior</div>
+    <div class="dt-row"><span class="dt-label">Collision Domains:</span> {{ domainData.collision }}</div>
+    <div class="dt-row"><span class="dt-label">Broadcast Domains:</span> {{ domainData.broadcast }}</div>
+    <div class="dt-row"><span class="dt-label">Explanation:</span> {{ domainData.desc }}</div>
+  </div>
+
+  <h3>Classic Counting Question</h3>
+  <div class="slider-row">
+    <span style="font-size:.84rem">Switch ports:</span>
+    <input type="range" min="4" max="48" v-model.number="portCount">
+    <span class="val">{{ portCount }}</span>
+  </div>
+  <div class="collision-grid">
+    <div class="collision-item">
+      <div class="cv">{{ portCount }}</div>
+      <div class="cl">Collision Domains (1 per port)</div>
+    </div>
+    <div class="collision-item">
+      <div class="cv">{{ vlanCount }}</div>
+      <div class="cl">Broadcast Domains (1 per VLAN)</div>
+    </div>
+  </div>
+  <div class="slider-row">
+    <span style="font-size:.84rem">VLANs:</span>
+    <input type="range" min="1" max="10" v-model.number="vlanCount">
+    <span class="val">{{ vlanCount }}</span>
+  </div>
+
+  <table class="data-table">
+    <tr><th>Feature</th><th>Broadcast Domain</th><th>Collision Domain</th></tr>
+    <tr v-for="(r,i) in domainCmp" :key="i"><td>{{ r.ft }}</td><td>{{ r.bd }}</td><td>{{ r.cd }}</td></tr>
+  </table>
+  <div class="callout callout-tip">
+    <strong>Classic rule:</strong> Hub = <strong>one</strong> collision domain. Switch = <strong>one collision domain per port</strong>. Full-duplex = collisions <strong>cannot occur</strong> (but broadcasts still exist). Collision domains are mostly legacy; broadcast domains remain highly relevant.
+  </div>
+</div>
+
+<!-- 7. ARP -->
+<div class="sec" v-show="sec==='arp'" id="arp">
+  <h2><span class="ico">📇</span> ARP — Address Resolution Protocol</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">Resolves IPv4 → MAC for the next hop. ARP is carried directly inside Ethernet frames (EtherType 0x0806), NOT inside IP.</p>
+  <div class="arp-flow">
+    <div class="arp-msg req">
+      <div class="aico">📢</div>
+      <div><strong>ARP Request (Broadcast)</strong> → FF:FF:FF:FF:FF:FF<br><span style="color:var(--muted)">"Who has 10.1.1.20? Tell 10.1.1.10"</span></div>
+    </div>
+    <div class="arp-msg rep">
+      <div class="aico">📨</div>
+      <div><strong>ARP Reply (Unicast)</strong> → Requester's MAC<br><span style="color:var(--muted)">"10.1.1.20 is at AA:BB:CC:DD:EE:FF"</span></div>
+    </div>
+    <div class="arp-msg un">
+      <div class="aico">🌐</div>
+      <div><strong>Then: Ethernet Data</strong> → Dest MAC = Host B's MAC<br><span style="color:var(--muted)">Frame carries IP to the learned MAC</span></div>
+    </div>
+  </div>
+  <div class="callout callout-info">
+    <strong>Same subnet:</strong> ARP for destination host. <strong>Different subnet:</strong> ARP for next-hop / default gateway (NOT the remote host). Remote destinations resolve the next hop, then the router routes.
+  </div>
+  <table class="data-table">
+    <tr><th>Point</th><th>Detail</th></tr>
+    <tr><td>ARP Request</td><td>Normally <strong>broadcast</strong></td></tr>
+    <tr><td>ARP Reply</td><td>Normally <strong>unicast</strong></td></tr>
+    <tr><td>EtherType</td><td>0x0806 (ARP), 0x0800 (IPv4), 0x86DD (IPv6)</td></tr>
+    <tr><td>Cisco ARP timeout</td><td>14,400 seconds / 4 hours</td></tr>
+    <tr><td>ARP table</td><td>IPv4 → MAC</td></tr>
+    <tr><td>CAM/MAC table</td><td>MAC + VLAN → port</td></tr>
+    <tr><td>IPv6 equivalent</td><td>Neighbor Discovery (ND) over ICMPv6</td></tr>
+    <tr><td>Security threat</td><td>ARP spoofing/poisoning → mitigated by <strong>DAI</strong> (uses DHCP Snooping)</td></tr>
+  </table>
+</div>
+
+<!-- 8. ARP VARIANTS -->
+<div class="sec" v-show="sec==='arpvars'" id="arp-variants">
+  <h2><span class="ico">🔀</span> GARP vs Proxy ARP</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">Two commonly confused ARP variants. Select one to compare.</p>
+  <div class="dev-grid">
+    <div class="dev-card" :class="{sel:arpVar==='garp'}" @click="arpVar='garp'">
+      <div class="dico">📣</div><div class="dn">Gratuitous ARP</div><div class="dc">Proactive announcement</div>
+    </div>
+    <div class="dev-card" :class="{sel:arpVar==='proxy'}" @click="arpVar='proxy'">
+      <div class="dico">🪜</div><div class="dn">Proxy ARP</div><div class="dc">Answers for another</div>
+    </div>
+    <div class="dev-card" :class="{sel:arpVar==='probe'}" @click="arpVar='probe'">
+      <div class="dico">🔎</div><div class="dn">ARP Probe</div><div class="dc">Duplicate detection</div>
+    </div>
+  </div>
+  <div class="detail-box" v-if="arpVar">
+    <div class="dt-title">{{ arpVarData.name }}</div>
+    <div class="dt-row"><span class="dt-label">Trigger:</span> {{ arpVarData.trigger }}</div>
+    <div class="dt-row"><span class="dt-label">"Who says":</span> <span style="font-family:'Fira Code',monospace;font-size:.8rem">{{ arpVarData.phrase }}</span></div>
+    <div class="dt-row"><span class="dt-label">IP announced/answered:</span> {{ arpVarData.ip }}</div>
+    <div class="dt-row"><span class="dt-label">MAC used:</span> {{ arpVarData.mac }}</div>
+    <div class="dt-row"><span class="dt-label">Main use:</span> {{ arpVarData.use }}</div>
+    <div class="dt-row"><span class="dt-label">Exam trap:</span> {{ arpVarData.trap }}</div>
+  </div>
+  <div class="callout callout-warn">
+    <strong>Memory trick:</strong> <strong>GARP</strong> = "Here is <em>my own</em> IP-to-MAC mapping" (e.g., HSRP/VRRP failover). <strong>Proxy ARP</strong> = "I can answer for <em>someone else</em>, use MY MAC." Proxy ARP is enabled by default on Cisco IOS routed interfaces; disable with <code>no ip proxy-arp</code>.
+  </div>
+</div>
+
+<!-- 9. CEF -->
+<div class="sec" v-show="sec==='cef'" id="cef">
+  <h2><span class="ico">⚡</span> CEF — Cisco Express Forwarding</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">Cisco's high-performance IP forwarding architecture. Separates control plane from data plane. Click each structure to explore.</p>
+  <div class="cef-stack">
+    <div class="cef-block" :class="{sel:cefSel==='rib'}" style="cursor:pointer" @click="cefSel='rib'">
+      <div class="cb-name">CONTROL PLANE → RIB</div>
+      <div class="cb-desc">Routing Information Base — routes from connected, static, and routing protocols (OSPF/EIGRP/BGP). "Where do I know the network is?"</div>
+    </div>
+    <div class="cef-arrow">↓ CEF derives</div>
+    <div class="cef-block" :class="{sel:cefSel==='fIB'}" style="cursor:pointer" @click="cefSel='fib'">
+      <div class="cb-name">FIB — Forwarding Information Base</div>
+      <div class="cb-desc">Optimized forwarding decision, best for longest-prefix match. "Where should I forward this packet?"</div>
+    </div>
+    <div class="cef-arrow">+</div>
+    <div class="cef-block" :class="{sel:cefSel==='adj'}" style="cursor:pointer" @click="cefSel='adj'">
+      <div class="cb-name">Adjacency Table</div>
+      <div class="cb-desc">Layer 2 rewrite information for the next hop (egress MAC, interface). "What L2 info do I need to build the outgoing frame?"</div>
+    </div>
+    <div class="cef-arrow">↓</div>
+    <div class="cef-block" :class="{sel:cefSel==='data'}" style="cursor:pointer" @click="cefSel='data'">
+      <div class="cb-name">DATA PLANE → Forward</div>
+      <div class="cb-desc">Incoming packet → FIB lookup → adjacency lookup → L2 rewrite → forward. No full RIB re-search per packet.</div>
+    </div>
+  </div>
+  <div class="detail-box" v-if="cefSel!==null">
+    <div class="dt-title">{{ cefData.name }}</div>
+    <div class="dt-row"><span class="dt-label">Role:</span> {{ cefData.role }}</div>
+    <div class="dt-row"><span class="dt-label">Command:</span> <code style="font-family:'Fira Code',monospace">{{ cefData.cmd }}</code></div>
+    <div class="dt-row"><span class="dt-label">Trap:</span> {{ cefData.trap }}</div>
+  </div>
+  <div class="callout callout-tip">
+    <strong>Mental model:</strong> RIB = routing knowledge · FIB = forwarding decision · Adjacency = L2 rewrite. CEF uses <strong>longest-prefix match</strong> and typically <strong>flow-based/per-destination hashing</strong> for ECMP (not per-packet round-robin). CEF is an architecture, NOT the same as TCAM (a hardware resource).
+  </div>
+</div>
+
+<!-- 10. COMMANDS -->
+<div class="sec" v-show="sec==='cmds'" id="commands">
+  <h2><span class="ico">⌨️</span> Configuration &amp; Verification Commands</h2>
+  <div class="cmd-tabs">
+    <button class="cmd-tab" :class="{on:activeCmd===c.id}" v-for="c in commands" :key="c.id" @click="activeCmd=c.id">{{ c.label }}</button>
+  </div>
+  <div class="cmd-block">{{ activeCommand.config }}</div>
+  <div class="callout callout-info" v-if="activeCommand.note" style="margin-top:8px">
+    <strong>Note:</strong> {{ activeCommand.note }}
+  </div>
+</div>
+
+<!-- 11. TRAPS -->
+<div class="sec" v-show="sec==='traps'" id="traps">
+  <h2><span class="ico">⚠️</span> Exam Traps</h2>
+  <div class="trap-list">
+    <div class="trap" v-for="(t,i) in traps" :key="i">
+      <strong>{{ t.tag }}:</strong> {{ t.text }}
+    </div>
+  </div>
+</div>
+
+<!-- 12. QUIZ -->
+<div class="sec" v-show="sec==='quiz'" id="quiz">
+  <h2><span class="ico">📝</span> Quiz</h2>
+  <div v-if="!quizDone">
+    <div class="quiz-q" v-for="(q,qi) in quizQuestions" :key="qi">
+      <h4><span class="qnum">Q{{ qi+1 }}.</span> {{ q.q }}</h4>
+      <div class="quiz-opts">
+        <div class="quiz-opt" v-for="(o,oi) in q.opts" :key="oi"
+             :class="{chosen:q.ans===oi}" @click="q.ans=oi">{{ o.text }}</div>
+      </div>
+    </div>
+    <button class="quiz-btn" :disabled="!allQuizAnswered" @click="submitQuiz">Submit Answers</button>
+  </div>
+  <div v-else>
+    <div class="quiz-score">
+      Score: {{ quizScore }} / {{ quizQuestions.length }}
+      ({{ Math.round(quizScore/quizQuestions.length*100) }}%)
+    </div>
+    <div class="quiz-q" v-for="(q,qi) in quizQuestions" :key="qi">
+      <h4>
+        <span class="qnum">Q{{ qi+1 }}.</span> {{ q.q }}
+        <span v-if="q.ans===q.correct" style="color:var(--accent2);margin-left:8px">✓ Correct</span>
+        <span v-else style="color:var(--red);margin-left:8px">✗ Wrong — Answer: {{ q.opts[q.correct].text }}</span>
+      </h4>
+      <div class="quiz-opts">
+        <div class="quiz-opt" v-for="(o,oi) in q.opts" :key="oi"
+             :class="{correct:oi===q.correct,wrong:q.ans===oi&&oi!==q.correct}">{{ o.text }}</div>
+      </div>
+    </div>
+    <button class="quiz-btn" @click="resetQuiz" style="margin-top:12px">Retry Quiz</button>
+  </div>
+</div>
+
+<!-- 13. CHECKLIST -->
+<div class="sec" v-show="sec==='checklist'" id="checklist">
+  <h2><span class="ico">✅</span> Study Checklist</h2>
+  <div class="chk-list">
+    <div class="chk-item" v-for="(c,i) in checklist" :key="i" :class="{done:c.done}" @click="c.done=!c.done;saveChecklist()">
+      <div class="chk-box">{{ c.done ? '✓' : '' }}</div>
+      <span>{{ c.text }}</span>
+    </div>
+  </div>
+  <div style="margin-top:10px;font-size:.84rem;color:var(--muted)">
+    {{ doneCount }} / {{ checklist.length }} complete
+  </div>
+</div>
+
+</div><!-- wrap -->
+</div><!-- app -->
+
+<script src="../vue.global.prod.js"></script>
+<script>
+(function(){
+  const {createApp,ref,reactive,computed,watch} = Vue;
+  createApp({
+    setup(){
+      const theme = ref(localStorage.getItem('ccnp.eth.theme')||'dark');
+      const sec = ref('frame');
+      watch(theme,v=>localStorage.setItem('ccnp.eth.theme',v));
+
+      const sections = [
+        {id:'frame',label:'Frame',icon:'📦'},
+        {id:'mac',label:'MAC Address',icon:'🏷️'},
+        {id:'cam',label:'CAM Table',icon:'🗄️'},
+        {id:'logic',label:'Switching Logic',icon:'🧠'},
+        {id:'sizes',label:'Frame Sizes',icon:'📏'},
+        {id:'domains',label:'Domains',icon:'🌉'},
+        {id:'arp',label:'ARP',icon:'📇'},
+        {id:'arpvars',label:'GARP/Proxy',icon:'🔀'},
+        {id:'cef',label:'CEF',icon:'⚡'},
+        {id:'cmds',label:'Commands',icon:'⌨️'},
+        {id:'traps',label:'Traps',icon:'⚠️'},
+        {id:'quiz',label:'Quiz',icon:'📝'},
+        {id:'checklist',label:'Checklist',icon:'✅'}
+      ];
+
+      /* ========== FRAME ========== */
+      const frameSel = ref(2);
+      const frameFields = [
+        {name:'Preamble',size:'7 B',color:'',purpose:'Synchronization between transmitter and receiver.',use:'Not part of frame-size calc; transmitted on wire.',example:'Alternating bits'},
+        {name:'SFD',size:'1 B',color:'',purpose:'Start Frame Delimiter — signals frame is about to begin.',use:'Not part of frame-size calc.',example:'0xAB'},
+        {name:'Dest MAC',size:'6 B',color:'🏳️',purpose:'Identifies Layer 2 destination.',use:'<strong>Forwarding decision</strong> — CAM lookup.',example:'AA:BB:CC:DD:EE:FF'},
+        {name:'Src MAC',size:'6 B',color:'',purpose:'Identifies the sender.',use:'<strong>MAC learning</strong> — learn source on ingress port.',example:'11:22:33:44:55:66'},
+        {name:'802.1Q Tag',size:'4 B',color:'',purpose:'Optional VLAN tag: TPID (0x8100) + TCI (PCP 3b, DEI 1b, VID 12b).',use:'Provides VLAN context (0–4095, usable 1–4094).',example:'TPID 0x8100, VID 10'},
+        {name:'Type/Length',size:'2 B',color:'',purpose:'EtherType (≥0x0600 = EtherType) or 802.3 Length.',use:'Identifies upper-layer protocol (0x0800 IPv4, 0x0806 ARP, 0x86DD IPv6).',example:'0x0800 = IPv4'},
+        {name:'Payload',size:'46–1500 B',color:'',purpose:'Carries upper-layer protocol (IP/ARP/IPv6).',use:'Passed to the appropriate higher layer.',example:'IP packet'},
+        {name:'FCS',size:'4 B',color:'',purpose:'CRC-based error detection (not correction).',use:'Detects corrupted frames — receiver drops on mismatch.',example:'CRC value'}
+      ];
+      const switchModel = [
+        {field:'Source MAC',action:'Learn'},
+        {field:'Dest MAC',action:'Forward'},
+        {field:'VLAN Tag',action:'VLAN'},
+        {field:'EtherType',action:'Protocol'},
+        {field:'FCS',action:'Error Detection'}
+      ];
+
+      /* ========== MAC ========== */
+      const macType = ref('unicast');
+      const macTypes = {
+        unicast:{name:'Unicast MAC',ig:'0',igDesc:'Individual address (I/G=0)',example:'00:1B:21:AA:BB:CC',behavior:'Switch forwards to the learned port for that MAC.'},
+        multicast:{name:'Multicast MAC',ig:'1',igDesc:'Group address (I/G=1)',example:'01:00:5E:xx:xx:xx',behavior:'Switch may flood or constrain based on multicast state / IGMP snooping.'},
+        broadcast:{name:'Broadcast MAC',ig:'1',igDesc:'Group address — all bits 1',example:'FF:FF:FF:FF:FF:FF',behavior:'Flooded throughout the local L2 broadcast domain (VLAN).'}
+      };
+      const macData = computed(()=> macTypes[macType.value]||macTypes.unicast);
+      const virtualMacs = [
+        {name:'HSRP v1',mac:'0000.0C07.ACxx'},
+        {name:'HSRP v2',mac:'0000.0C9F.Fxxx'},
+        {name:'VRRP IPv4',mac:'0000.5E00.01xx'},
+        {name:'VRRP IPv6',mac:'0000.5E00.02xx'}
+      ];
+
+      /* ========== CAM ========== */
+      const camEntries = [
+        {vlan:10,mac:'001B.21AA.BBCC',type:'DYNAMIC',port:'Gi0/1'},
+        {vlan:10,mac:'000C.2912.3456',type:'DYNAMIC',port:'Gi0/2'},
+        {vlan:30,mac:'AAAA.AAAA.AAAA',type:'STATIC',port:'Gi0/24'}
+      ];
+
+      /* ========== SWITCHING LOGIC ========== */
+      const pipeStage = ref(1);
+      const pipeData = computed(()=>{
+        const p = [
+          {name:'Receive',desc:'Frame arrives on ingress interface; switch associates it with the appropriate VLAN.',trigger:'Any Ethernet frame',trap:'VLAN context is set by access VLAN (untagged) or VLAN tag (trunked).'},
+          {name:'Learn Source MAC',desc:'Switch learns the source MAC on the ingress port within that VLAN. Refreshes aging if already known on same port; updates if learned on a different port (MAC movement).',trigger:'Every received frame',trap:'Switches learn from the SOURCE MAC, not the destination MAC. MAC learning is per VLAN.'},
+          {name:'Lookup Dest MAC',desc:'Search MAC table using destination MAC + VLAN context.',trigger:'After learning step',trap:'Known unicast → forward; same-ingress-port → filter; unknown → flood.'},
+          {name:'Forward',desc:'Send the frame toward the specific learned destination port.',trigger:'Known destination on another eligible port',trap:'Switch does NOT rewrite MAC addresses when forwarding — MACs stay the same across L2. Only routers rewrite L2.'},
+          {name:'Flood',desc:'Send the frame out all eligible ports in the VLAN except the ingress.',trigger:'Unknown unicast, broadcast, or unconstrained multicast',trap:'Flooding is VIR confined, excludes ingress port. Unknown unicast ≠ broadcast.'},
+          {name:'Filter',desc:'Do not forward the frame through a particular egress path.',trigger:'Dest known on ingress port, or policy (port security, ACL, storm control)',trap:'Same-port filtering is the classic implicit behavior. STP blocking is loop prevention, not a security filter.'}
+        ];
+        return p[pipeStage.value]||p[0];
+      });
+
+      /* ========== FRAME SIZES ========== */
+      const payload = ref(1500);
+      const tagged = ref(false);
+      const sizeFacts = [
+        {name:'Minimum frame',value:'64 bytes (Dest MAC 6 + Src MAC 6 + Type 2 + Payload/Pad 46 + FCS 4)'},
+        {name:'Max untagged',value:'1518 bytes (1500 payload)'},
+        {name:'Max 802.1Q tagged',value:'1522 bytes'},
+        {name:'Standard IP MTU',value:'1500 bytes (Layer 3 packet max)'},
+        {name:'Preamble + SFD',value:'8 bytes transmitted, not in frame-size calc'},
+        {name:'Baby giant',value:'>1518 bytes from legitimate encapsulation (e.g., 802.1Q)'},
+        {name:'Jumbo frames',value:'Platform-dependent (often ~9000 MTU, not universal)'}
+      ];
+
+      /* ========== DOMAINS ========== */
+      const domainDev = ref('switch');
+      const domainData = computed(()=>{
+        const d = {
+          hub:{name:'Hub',collision:'1 (all nodes shared)',broadcast:'1',desc:'Layer 1 repeater — no segregation. All hosts share one collision domain and one broadcast domain.'},
+          switch:{name:'Switch',collision:'1 per port (microsegmentation)',broadcast:'1 per VLAN',desc:'Layer 2 — each port is a separate collision domain. Broadcast domain depends on VLANs: one per VLAN.'},
+          router:{name:'Router',collision:'Separate per interface (L2 segment)',broadcast:'Separates broadcast domains',desc:'Layer 3 — isolates collision domains per interface and separates L2 broadcast domains.'}
+        };
+        return d[domainDev.value]||d.switch;
+      });
+      const portCount = ref(24);
+      const vlanCount = ref(1);
+      const domainCmp = [
+        {ft:'Main concern',bd:'Broadcast propagation',cd:'Frame collisions'},
+        {ft:'Boundary',bd:'VLAN / L3 boundary',cd:'Switch port / segment'},
+        {ft:'Router',bd:'Separates domains',cd:'Separates L2 segments'},
+        {ft:'Switch',bd:'One per VLAN',cd:'One per port'},
+        {ft:'Hub',bd:'Extends one domain',cd:'All share one'},
+        {ft:'Full-duplex',bd:'Broadcasts still exist',cd:'Collisions impossible'},
+        {ft:'Modern relevance',bd:'Highly relevant',cd:'Mostly legacy'}
+      ];
+
+      /* ========== ARP ========== */
+      const arpVar = ref('garp');
+      const arpVars = {
+        garp:{name:'Gratuitous ARP (GARP)',trigger:'Unsolicited — proactive announcement',phrase:'"I am 10.1.1.10 and my MAC is MAC-B." (Sender IP = Target IP = own)',ip:'Own IP',mac:'Sender\'s own MAC',use:'MAC change, HSRP/VRRP failover, announcement. Updates neighbors\' ARP caches.',trap:'GARP ≠ ARP probe. GARP announces own mapping; probe (Sender IP=0.0.0.0) detects duplicate before claiming. Ethernet dest = broadcast, ARP target MAC = 00:00:00:00:00:00.'},
+        proxy:{name:'Proxy ARP',trigger:'Host ARPs for a remote reachable destination',phrase:'"I can answer for 10.2.2.2 — use MY MAC."',ip:'Another device\'s IP',mac:'Router\'s own MAC',use:'Makes remote destination appear locally reachable. Router routes afterward. Enabled by default on Cisco IOS. Disable: no ip proxy-arp.',trap:'Proxy ARP is a router/L3 function, NOT a CAM function. It replies with the ROUTER\'s MAC, not the remote destination\'s MAC.'},
+        probe:{name:'ARP Probe',trigger:'Before claiming an IPv4 address',phrase:'"Is anyone using 10.1.1.10?" (Sender IP = 0.0.0.0)',ip:'Address being tested (target)',mac:'Varies',use:'Duplicate-address detection before configuration.',trap:'ARP probe differs from GARP — probe uses Sender IP 0.0.0.0; GARP announces an established mapping.'}
+      };
+      const arpVarData = computed(()=> arpVars[arpVar.value]||arpVars.garp);
+
+      /* ========== CEF ========== */
+      const cefSel = ref('fib');
+      const cefData = computed(()=>{
+        const c = {
+          rib:{name:'RIB (Routing Information Base)',role:'Rules: what the router knows (connected, static, OSPF/EIGRP/BGP). Check with show ip route.',cmd:'show ip route 10.10.10.50',trap:'RIB shows routing knowledge, NOT verified forwarding.'},
+          fIB:{name:'FIB (Forwarding Information Base)',role:'Is forwarding entry present? Derived from RIB. Optimized longest-prefix match.',cmd:'show ip cef 10.10.10.50',trap:'FIB is different from RIB. CEF forwards using FIB, not a fresh RIB lookup.'},
+          adj:{name:'Adjacency Table',role:'Layer 2 rewrite info for next hop (egress MAC, interface). Incomplete if ARP unresolved.',cmd:'show adjacency',trap:'Adjacency provides L2 rewrite. CEF still needs ARP/ND for next-hop MAC.'},
+          data:{name:'Data Plane Forwarding',role:'Incoming packet → FIB lookup → adjacency lookup → L2 rewrite → forward.',cmd:'(forwarding happens in hardware/ASIC)',trap:'CEF forward path uses FIB+adjacency, normally flow-based hashing for ECMP.'}
+        };
+        return c[cefSel.value]||c.fIB;
+      });
+
+      /* ========== COMMANDS ========== */
+      const activeCmd = ref('mac');
+      const commands = [
+        {id:'mac',label:'MAC Table',config:'# View MAC address table\nshow mac address-table\nshow mac address-table vlan 10\nshow mac address-table address 001B.21AA.BBCC\nshow mac address-table dynamic\nshow mac address-table aging-time\nshow mac address-table count\n\n# Configure\nmac address-table aging-time 300\nmac address-table static AAAA.AAAA.AAAA vlan 10 interface GigabitEthernet0/1',note:'Primary command for Layer 2 MAC forwarding table.'},
+        {id:'frame',label:'Frame/Errors',config:'# View interface errors — look for input errors, CRC, frame, overrun\nshow interfaces GigabitEthernet0/1\nshow interfaces GigabitEthernet0/1 | include MTU\nshow interfaces status\nshow interfaces counters\n\n# Trunk info\nshow interfaces trunk',note:'CRC/frame errors indicate bad FCS at L2; MTU check sizes framing.'},
+        {id:'arp',label:'ARP',config:'# View ARP entries\nshow arp\nshow ip arp\nshow ip arp | include 10.1.1.\n\n# Clear / static / timeout\nclear ip arp 10.1.1.2\narp 10.1.1.2 abcd.1234.5678 arpa\ninterface GigabitEthernet0/0\n arp timeout 14400\n\n# Debug (careful)\ndebug arp\nundebug all',note:'ARP table = IPv4 → MAC. Default timeout 14400s (4h).'},
+        {id:'cef',label:'CEF',config:'# Check FIB\nshow ip cef\nshow ip cef 10.10.10.50\nshow ip cef 10.10.10.50 detail\n\n# Compare with RIB\nshow ip route 10.10.10.50\n\n# Check adjacency\nshow adjacency\n\n# Interface CEF status\nshow ip interface GigabitEthernet0/0',note:'Troubleshoot: RIB missing → routing problem. FIB missing → forwarding problem. Adjacency → next-hop/L2 problem.'},
+        {id:'vlan',label:'VLAN / Domains',config:'# Create VLANs\nvlan 10\n name Users\nvlan 20\n name Servers\n\n# Configure SVIs (Layer 3 gateways)\ninterface Vlan10\n ip address 10.1.10.1 255.255.255.0\ninterface Vlan20\n ip address 10.1.20.1 255.255.255.0\n\n# Enable routing between VLANs\nip routing\n\n# Verify\nshow vlan brief\nshow ip interface brief\nshow ip route\nshow spanning-tree',note:'Each VLAN = one broadcast domain. SVIs provide L3 gateways; ip routing enables inter-VLAN.'},
+        {id:'portsec',label:'Port Security',config:'# Restrict source MACs on a port\ninterface GigabitEthernet0/1\n switchport mode access\n switchport port-security\n switchport port-security maximum 2\n switchport port-security mac-address sticky\n\n# Verify\nshow port-security\nshow port-security interface GigabitEthernet0/1\n\n# Filtering / storm control\ninterface GigabitEthernet0/24\n switchport trunk allowed vlan remove 50\ninterface GigabitEthernet0/1\n storm-control broadcast level 20',note:'Violation modes: protect (drop only), restrict (drop+counter/SYSLOG), shutdown (err-disable). Sticky MAC persists if config saved.'}
+      ];
+      const activeCommand = computed(()=> commands.find(c=>c.id===activeCmd.value)||commands[0]);
+
+      /* ========== TRAPS ========== */
+      const traps = [
+        {tag:'Source vs Dest MAC',text:'Source MAC → learning. Destination MAC → forwarding. Never flip them.'},
+        {tag:'Minimum frame = 64B',text:'Counts from Dest MAC through FCS. Preamble (7B) + SFD (1B) transmitted but not included in frame-size calc.'},
+        {tag:'0x0800 trap',text:'0x0800 = IPv4 EtherType, not an 800-byte length. 0x0806 = ARP, 0x86DD = IPv6, 0x8100 = 802.1Q TPID, 0x88A8 = QinQ S-Tag.'},
+        {tag:'1500 ≠ frame total',text:'A 1500-byte MTU/payload does NOT mean a 1500-byte total Ethernet frame. Frame = 14-18B header + payload + 4B FCS.'},
+        {tag:'Switch doesn\'t rewrite MAC',text:'A switch forwards the existing frame — destination MAC stays the same across L2. Only a router removes L2 and creates a new frame.'},
+        {tag:'Unknown unicast ≠ broadcast',text:'Unknown unicast floods to find an aged/new MAC (stops once learned). Broadcast floods always — destination is FF:FF:FF:FF:FF:FF.'},
+        {tag:'Flooding confined to VLAN',text:'L2 flooding stays within its VLAN — not all ports, not other VLANs (need L3 for that). Excludes ingress port.'},
+        {tag:'MAC aging trap',text:'Faster MAC aging can INCREASE unknown-unicast flooding, not reduce it. Cisco default ≈ 300s.'},
+        {tag:'MAC flapping ≠ rogue switch',text:'MAC flapping can indicate loops, STP changes, VM mobility, duplicate/virtual MACs — investigate before assuming an attack.'},
+        {tag:'Broadcast domain = VLAN',text:'One VLAN = one broadcast domain. A switch has one per VLAN, NOT one for the whole switch. A trunk carries multiple domains without merging them.'},
+        {tag:'Hub vs Switch domains',text:'Hub = one collision domain. Switch = one collision domain per port. Full duplex = collisions impossible.'},
+        {tag:'Full duplex statement',text:'Saying "full duplex creates zero collision domains" is imprecise — better: full duplex eliminates the possibility of collisions on the link.'},
+        {tag:'GARP vs Proxy',text:'GARP announces a device\'s OWN IP→MAC (failover). Proxy ARP answers for ANOTHER IP with the ROUTER\'s MAC. Proxy ARP is enabled by default on Cisco IOS.'},
+        {tag:'CEF ≠ TCAM',text:'CEF is a forwarding ARCHITECTURE (FIB + adjacency). TCAM is a hardware resource. Don\'t answer "TCAM" when asked for the Cisco forwarding architecture.'},
+        {tag:'ARP vs CAM tables',text:'ARP = IPv4 → MAC. CAM/MAC table = MAC + VLAN → port. They answer different questions.'},
+        {tag:'IPv6 no ARP',text:'IPv6 uses Neighbor Discovery (ND) over ICMPv6, and DAD for duplicate detection. Never say "IPv6 uses ARP/GARP."'}
+      ];
+
+      /* ========== QUIZ ========== */
+      const quizQuestions = reactive([
+        {q:'What is the minimum Ethernet frame size (Dest MAC through FCS)?',opts:[{text:'64 bytes'},{text:'46 bytes'},{text:'1518 bytes'},{text:'1500 bytes'}],ans:null,correct:0},
+        {q:'What is the EtherType value for IPv4?',opts:[{text:'0x0800'},{text:'0x0806'},{text:'0x86DD'},{text:'0x8100'}],ans:null,correct:0},
+        {q:'A switch learns MAC addresses from which field?',opts:[{text:'Source MAC'},{text:'Destination MAC'},{text:'EtherType'},{text:'FCS'}],ans:null,correct:0},
+        {q:'What happens to a known unicast frame?',opts:[{text:'Forwarded to the learned destination port'},{text:'Flooded within the VLAN'},{text:'Filtered'},{text:'Dropped'}],ans:null,correct:0},
+        {q:'What is the I/G bit value for a broadcast address?',opts:[{text:'1 (group)'},{text:'0 (individual)'},{text:'Always 0'},{text:'It varies'}],ans:null,correct:0},
+        {q:'How many collision domains does a 24-port switch with 24 devices create?',opts:[{text:'24'},{text:'1'},{text:'12'},{text:'48'}],ans:null,correct:0},
+        {q:'An ARP request is sent as what kind of frame?',opts:[{text:'Broadcast'},{text:'Unicast'},{text:'Multicast'},{text:'Anycast'}],ans:null,correct:0},
+        {q:'For a destination on a different subnet, what does a host ARP for?',opts:[{text:'The default gateway / next hop'},{text:'The remote destination directly'},{text:'Nothing — it uses multicast'},{text:'The MAC broadcast'}],ans:null,correct:0},
+        {q:'What does Gratuitous ARP announce?',opts:[{text:'A device\'s own IP-to-MAC mapping'},{text:'Another device\'s IP using the router\'s MAC'},{text:'Route updates'},{text:'Duplicate IP errors'}],ans:null,correct:0},
+        {q:'What is the primary Cisco mitigation for ARP spoofing/poisoning?',opts:[{text:'Dynamic ARP Inspection (DAI)'},{text:'Proxy ARP'},{text:'CEF'},{text:'CAM table'}],ans:null,correct:0},
+        {q:'Which CEF structure provides Layer 2 rewrite information?',opts:[{text:'Adjacency table'},{text:'RIB'},{text:'FIB'},{text:'ARP cache'}],ans:null,correct:0},
+        {q:'IPv6 resolves neighbor addresses using which protocol?',opts:[{text:'Neighbor Discovery over ICMPv6'},{text:'ARP'},{text:'Gratuitous ARP'},{text:'Proxy ARP'}],ans:null,correct:0}
+      ]);
+      const quizDone = ref(false);
+      const quizScore = ref(0);
+      const allQuizAnswered = computed(()=> quizQuestions.every(q=>q.ans!==null));
+      function submitQuiz(){
+        quizScore.value = quizQuestions.filter((q,i)=>q.ans===q.correct).length;
+        quizDone.value = true;
+        localStorage.setItem('ccnp.eth.quiz',JSON.stringify({score:quizScore.value,total:quizQuestions.length}));
+      }
+      function resetQuiz(){
+        quizQuestions.forEach(q=>q.ans=null);
+        quizDone.value=false;
+        quizScore.value=0;
+        localStorage.removeItem('ccnp.eth.quiz');
+      }
+
+      /* ========== CHECKLIST ========== */
+      const checklist = reactive(JSON.parse(localStorage.getItem('ccnp.eth.checklist')||'null')||[
+        {text:'Know Ethernet frame structure: preamble, MACs, tag, EtherType, payload, FCS',done:false},
+        {text:'Memorize frame sizes: min 64B, max untagged 1518B, tagged 1522B',done:false},
+        {text:'Know the EtherTypes: 0x0800 IPv4, 0x0806 ARP, 0x86DD IPv6, 0x8100 802.1Q',done:false},
+        {text:'Understand MAC anatomy: 48-bit, OUI = first 24 bits, I/G and U/L bits',done:false},
+        {text:'Know MAC address types: unicast, multicast (01:00:5E), broadcast (FF:FF:FF:FF:FF:FF)',done:false},
+        {text:'Explain Source MAC → learn, Dest MAC → forward',done:false},
+        {text:'Distinguish forward / flood / filter behaviors',done:false},
+        {text:'Know the CAM table: MAC + VLAN → port; dynamic ages (~300s), static does not',done:false},
+        {text:'Explain CAM vs TCAM difference',done:false},
+        {text:'Distinguish broadcast domain (VLAN/L3) vs collision domain (port/segment)',done:false},
+        {text:'Know hub = 1 collision domain; switch = 1 per port; full-duplex = no collisions',done:false},
+        {text:'Understand ARP: broadcast request, unicast reply, ARP for next-hop gateway',done:false},
+        {text:'Distinguish GARP vs Proxy ARP vs ARP probe',done:false},
+        {text:'Understand CEF: RIB → FIB + Adjacency, longest-prefix match, flow-based load balancing',done:false},
+        {text:'Know security: ARP poisoning mitigated by DAI (uses DHCP snooping)',done:false}
+      ]);
+      const doneCount = computed(()=> checklist.filter(c=>c.done).length );
+      function saveChecklist(){ localStorage.setItem('ccnp.eth.checklist',JSON.stringify(checklist)); }
+
+      return {
+        theme,sec,sections,
+        frameSel,frameFields,switchModel,
+        macType,macTypes,macData,virtualMacs,
+        camEntries,
+        pipeStage,pipeData,
+        payload,tagged,sizeFacts,
+        domainDev,domainData,portCount,vlanCount,domainCmp,
+        arpVar,arpVarData,
+        cefSel,cefData,
+        activeCmd,commands,activeCommand,
+        traps,
+        quizQuestions,quizDone,quizScore,allQuizAnswered,submitQuiz,resetQuiz,
+        checklist,doneCount,saveChecklist
+      };
+    }
+  }).mount('#app');
+})();
+</script>
+</body>
+</html>

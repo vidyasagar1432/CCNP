@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How IPv6 Works — Deep Dive</title>
+<style>
+  :root {
+    --bg: #0f172a; --panel: #111c34; --card: #1e293b; --card-2: #16233d;
+    --text: #f8fafc; --muted: #94a3b8;
+    --blue: #38bdf8; --blue-dim: #0c4a6e;
+    --green: #34d399; --green-dim: #064e3b;
+    --amber: #fbbf24; --amber-dim: #78350f;
+    --red: #f87171; --red-dim: #7f1d1d;
+    --violet: #a78bfa; --violet-dim: #4c1d95;
+    --cyan: #22d3ee; --cyan-dim: #164e63;
+    --border: #334155; --hover: #263449; --code-bg: #0b1220;
+  }
+  #app[data-theme="light"] {
+    --bg: #f1f5f9; --panel: #ffffff; --card: #ffffff; --card-2: #f8fafc;
+    --text: #0f172a; --muted: #64748b;
+    --blue: #0284c7; --blue-dim: #bae6fd;
+    --green: #059669; --green-dim: #d1fae5;
+    --amber: #d97706; --amber-dim: #fef3c7;
+    --red: #dc2626; --red-dim: #fee2e2;
+    --violet: #7c3aed; --violet-dim: #ede9fe;
+    --cyan: #0891b2; --cyan-dim: #cffafe;
+    --border: #cbd5e1; --hover: #e2e8f0; --code-bg: #0b1220;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; }
+  #app { max-width: 1040px; margin: 0 auto; padding: 20px 18px 60px; }
+
+  header { position: sticky; top: 0; z-index: 30; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .lv-badge { background: var(--blue-dim); color: var(--blue); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .exam-badge { background: var(--violet-dim); color: var(--violet); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .head-actions { display: flex; align-items: center; gap: 8px; }
+  .btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: background 0.15s; }
+  .btn:hover { background: var(--hover); }
+  .btn.primary { background: var(--blue); color: #0f172a; border-color: var(--blue); }
+
+  nav { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 2px 16px; }
+  nav button.chip { border: 1px solid var(--border); background: var(--card); color: var(--muted); padding: 5px 11px; border-radius: 999px; cursor: pointer; font-size: 0.76rem; font-weight: 600; }
+  nav button.chip.active { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
+
+  section.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
+  section.panel h2 { font-size: 1.2rem; margin-bottom: 6px; }
+  section.panel h3 { font-size: 1rem; margin: 18px 0 10px; color: var(--blue); }
+  section.panel p { margin: 8px 0; }
+  .muted { color: var(--muted); }
+  .lead { color: var(--muted); font-size: 0.95rem; }
+
+  .grid { display: grid; gap: 12px; }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .g3 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .card h4 { font-size: 0.9rem; margin-bottom: 6px; }
+  .card .big { font-size: 1.3rem; font-weight: 700; font-family: 'Fira Code', ui-monospace, monospace; }
+
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85rem; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  tr:hover td { background: var(--hover); }
+
+  code, .mono { font-family: 'Fira Code', ui-monospace, monospace; }
+  .mono { font-size: 0.9rem; }
+  .chip { display: inline-block; border-radius: 999px; padding: 1px 9px; font-size: 0.74rem; font-weight: 700; }
+  .b-blue { background: var(--blue-dim); color: var(--blue); }
+  .b-green { background: var(--green-dim); color: var(--green); }
+  .b-amber { background: var(--amber-dim); color: var(--amber); }
+  .b-red { background: var(--red-dim); color: var(--red); }
+  .b-violet { background: var(--violet-dim); color: var(--violet); }
+  .b-cyan { background: var(--cyan-dim); color: var(--cyan); }
+
+  .callout { border-left: 4px solid var(--amber); background: var(--card-2); border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 12px 0; font-size: 0.9rem; }
+  .callout.green { border-color: var(--green); }
+  .callout.red { border-color: var(--red); }
+  .callout.blue { border-color: var(--blue); }
+
+  .hexbit { display: inline-flex; gap: 2px; flex-wrap: wrap; }
+  .hextet { background: var(--card-2); border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px; font-family: 'Fira Code', monospace; font-size: 0.85rem; }
+  .hextet.hl { background: var(--blue-dim); color: var(--blue); font-weight: 700; }
+
+  .bar { height: 12px; background: var(--card-2); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; display: flex; margin: 4px 0 8px; }
+  .bar > div { height: 100%; }
+  .seg-blue { background: var(--blue); }
+  .seg-green { background: var(--green); }
+  .seg-violet { background: var(--violet); }
+  .seg-amber { background: var(--amber); }
+  .seg-red { background: var(--red); }
+
+  .mlink { display: flex; align-items: center; gap: 4px; }
+  .mlink .arrow { color: var(--muted); }
+  .row-fn { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 8px 0; }
+  .row-fn input[type="text"] { background: var(--code-bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-family: 'Fira Code', monospace; font-size: 0.9rem; width: 100%; }
+  .row-fn input[type="range"] { flex: 1; }
+
+  .opt { display: flex; align-items: center; gap: 8px; padding: 6px 9px; margin: 3px 0; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; background: var(--card); font-size: 0.86rem; }
+  .opt.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .opt .letter { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex: 0 0 auto; }
+  .opt.sel .letter { background: var(--blue); color: #0f172a; }
+
+  #app pre, pre.cmd { background: var(--code-bg); color: #e2e8f0; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.82rem; line-height: 1.5; }
+
+  .trap-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  .trap-item:last-child { border-bottom: none; }
+  .trap-ico { color: var(--red); font-weight: 700; flex: 0 0 auto; }
+
+  .step-flow { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .step { border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 0.8rem; background: var(--card-2); }
+  .step .n { color: var(--blue); font-weight: 700; }
+
+  .verdict { border-radius: 8px; padding: 10px 14px; font-weight: 700; margin: 8px 0; }
+  .verdict.ok { background: var(--green-dim); color: var(--green); }
+  .verdict.bad { background: var(--red-dim); color: var(--red); }
+  .verdict.info { background: var(--blue-dim); color: var(--blue); }
+
+  .chk-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; margin: 5px 0; cursor: pointer; transition: opacity 0.15s; }
+  .chk-item.done { opacity: 0.55; text-decoration: line-through; }
+  .chk-box { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 5px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; }
+  .chk-item.done .chk-box { background: var(--green); border-color: var(--green); color: #0f172a; }
+
+  .addr-strip { display: flex; gap: 3px; font-family: 'Fira Code', monospace; font-size: 0.85rem; flex-wrap: wrap; }
+  .addr-strip .seg { padding: 3px 7px; border-radius: 6px; }
+</style>
+</head>
+<body>
+<div id="app" :data-theme="theme">
+  <header>
+    <h1><span class="lv-badge">L06</span> How IPv6 Works
+      <span class="exam-badge">ENCOR 350-401</span></h1>
+    <div class="head-actions">
+      <a class="btn" href="../Level 05 - IPv4/How IPv4 Works.html">◀ IPv4</a>
+      <a class="btn" href="../index.html">Flashcards</a>
+      <button class="btn" @click="theme = (theme==='dark'?'light':'dark')">{{ theme==='dark' ? '☀' : '🌙' }}</button>
+    </div>
+  </header>
+
+  <nav>
+    <button class="chip" v-for="s in sections" :key="s.id" :class="{active:sec===s.id}" @click="sec=s.id">{{ s.icon }} {{ s.label }}</button>
+  </nav>
+
+  <!-- 1. ADDRESSING -->
+  <section class="panel" v-show="sec==='addr'" id="addr">
+    <h2>🧭 IPv6 Addressing — 128 bits, 8 hextets</h2>
+    <p class="lead">IPv6 uses a <b>128-bit</b> address — roughly 3.4 × 10<sup>38</sup> addresses. Written as eight groups of four hex digits (hextets), it eliminates broadcast and makes IPv4 NAT unnecessary for most designs.</p>
+
+    <div class="addr-strip" style="margin:14px 0">
+      <span class="seg" v-for="(h,i) in fullHextets" :key="i" :class="i<6?'seg-blue':'seg-amber'">{{ h }}</span>
+    </div>
+    <p class="muted" style="font-size:.8rem">Blue = global routing prefix + subnet (upper 64 bits) · Amber = interface ID (lower 64 bits). A <b>/64</b> is one LAN subnet.</p>
+
+    <div class="grid g3" style="margin-top:14px">
+      <div class="card"><h4>Total size</h4><div class="big">128 bits</div><div class="muted" style="font-size:.8rem">3.4 × 10<sup>38</sup> addresses</div></div>
+      <div class="card"><h4>Layout</h4><div class="big">8 × 16-bit</div><div class="muted" style="font-size:.8rem">hextets, hex 0-9 A-F</div></div>
+      <div class="card"><h4>Broadcast</h4><div class="big">none</div><div class="muted" style="font-size:.8rem">multicast + ND instead</div></div>
+    </div>
+
+    <h3>Shortening rules</h3>
+    <table>
+      <tr><th>Rule</th><th>Example</th></tr>
+      <tr><td>Drop leading zeros in each hextet</td><td class="mono">0db8 → db8</td></tr>
+      <tr><td>Compress the longest run of zero hextets with <b>one</b> <code>::</code></td><td class="mono">2001:0db8::0370:7334</td></tr>
+      <tr><td><code>::</code> may appear only <b>once</b></td><td class="mono">two <code>::</code> = invalid</td></tr>
+      <tr><td>IPv4-style tail allowed in some forms</td><td class="mono">::ffff:192.168.1.1 (IPv4-mapped)</td></tr>
+    </table>
+
+    <h3>Shortening tool</h3>
+    <div class="row-fn">
+      <input type="text" v-model="fullInput" placeholder="2001:0db8:85a3:0000:0000:8a2e:0370:7334">
+    </div>
+    <div class="grid g3">
+      <div class="card"><h4>Step 1 — drop leading zeros</h4><div class="mono">{{ dropZeros }}</div></div>
+      <div class="card"><h4>Step 2 — compress</h4><div class="mono" style="color:var(--green)">{{ compressed }}</div></div>
+      <div class="card"><h4>Hextets &amp; zeros</h4><div class="mono">{{ zeroRunLen }} zero-hextets compressed</div></div>
+    </div>
+    <p class="muted" style="font-size:.8rem;margin-top:8px">Try presets:
+      <button class="btn" style="font-size:.7rem;padding:3px 8px" v-for="p in presets" :key="p" @click="fullInput=p">{{ p }}</button>
+    </p>
+
+    <h3>Address types by prefix</h3>
+    <table>
+      <tr><th>Type</th><th>Prefix</th><th>Example</th></tr>
+      <tr><td>Global Unicast (GUA)</td><td class="mono">2000::/3</td><td class="mono">2001:db8:1:10::1</td></tr>
+      <tr><td>Link-local</td><td class="mono">fe80::/10</td><td class="mono">fe80::1</td></tr>
+      <tr><td>Unique local (ULA)</td><td class="mono">fc00::/7 (fd)</td><td class="mono">fd12:3456:789a::1</td></tr>
+      <tr><td>Multicast</td><td class="mono">ff00::/8</td><td class="mono">ff02::1 (all nodes)</td></tr>
+      <tr><td>Loopback</td><td class="mono">::1</td><td class="mono">::1</td></tr>
+      <tr><td>Unspecified</td><td class="mono">::</td><td class="mono">::</td></tr>
+      <tr><td>IPv4-mapped</td><td class="mono">::ffff:0:0/96</td><td class="mono">::ffff:192.168.1.1</td></tr>
+    </table>
+
+    <div class="callout blue"><b>No broadcast.</b> Broadcast's role is replaced by multicast (per-link <code>ff02::1</code>, solicited-node) and ND. Routers never fragment — the sender does PMTUD.</div>
+  </section>
+
+  <!-- 2. ADDRESS TYPES -->
+  <section class="panel" v-show="sec==='types'" id="types">
+    <h2>🏷️ Address Type Explorer</h2>
+    <p class="lead">Pick an address below and see how it is classified — then test yourself with the classifier.</p>
+
+    <div class="row-fn">
+      <button class="btn" v-for="a in addrTypes" :key="a.addr" :class="{primary:typeSel===a.addr}" @click="typeSel=a.addr">{{ a.addr }}</button>
+    </div>
+    <div v-if="selectedType" class="card" style="margin-top:10px">
+      <div class="big mono">{{ selectedType.addr }}</div>
+      <div style="margin-top:6px"><span class="chip" :class="'b-'+selectedType.color">{{ selectedType.name }}</span>
+        <span class="muted" style="margin-left:8px;font-size:.85rem">{{ selectedType.prefix }}</span></div>
+      <p style="margin-top:8px;font-size:.9rem">{{ selectedType.desc }}</p>
+    </div>
+
+    <h3>Classify the address</h3>
+    <div class="row-fn">
+      <button class="btn" v-for="c in classifyOpts" :key="c.v" @click="classify=c.v">{{ c.name }}</button>
+    </div>
+    <div class="verdict" :class="classify===selectedType.name?'ok':'bad'" v-if="classify">
+      {{ classify===selectedType.name ? '✅ Correct — it is ' + selectedType.name : '❌ Wrong — it is ' + selectedType.name }}
+    </div>
+
+    <h3>Anycast vs Unicast vs Multicast</h3>
+    <table>
+      <tr><th></th><th>Unicast</th><th>Anycast</th><th>Multicast</th></tr>
+      <tr><td>Dest address</td><td>unique host</td><td>multiple identical</td><td>group</td></tr>
+      <tr><td>Who receives</td><td>one</td><td><b>one (nearest)</b></td><td><b>all members</b></td></tr>
+      <tr><td>Purpose</td><td>1:1</td><td>1:nearest-of-N</td><td>1:N</td></tr>
+      <tr><td>IPv6 form</td><td>GUA</td><td>GUA (shared)</td><td>ff00::/8</td></tr>
+      <tr><td>Example</td><td>ssh to server</td><td>DNS root servers</td><td>video feeds</td></tr>
+    </table>
+    <div class="callout red"><b>Trap:</b> anycast is <u>indistinguishable</u> from unicast in the address itself — it's a deployment choice. And anycast can't be used as a <u>source</u> address.</div>
+  </section>
+
+  <!-- 3. GLOBAL UNICAST -->
+  <section class="panel" v-show="sec==='gua'" id="gua">
+    <h2>🌐 Global Unicast (GUA)</h2>
+    <p class="lead">The public, routable equivalent of IPv4 public addresses — prefix <b>2000::/3</b> (2000:…–3FFF:…).</p>
+
+    <h3>Structure</h3>
+    <div class="bar"><div class="seg-amber" style="width:37.5%"></div><div class="seg-green" style="width:12.5%"></div><div class="seg-blue" style="width:50%"></div></div>
+    <div class="grid g3">
+      <div class="card"><h4>/48 Global routing prefix</h4><div class="muted">ISP-assigned</div></div>
+      <div class="card"><h4>/64 Subnet ID</h4><div class="muted">bits 49–64, site-defined</div></div>
+      <div class="card"><h4>64-bit Interface ID</h4><div class="muted">EUI-64 or random/privacy</div></div>
+    </div>
+
+    <h3>How a host gets a GUA</h3>
+    <div class="step-flow">
+      <div v-for="(m,i) in guaMethods" :key="m.n" class="step"><span class="n">{{ i+1 }}.</span> <b>{{ m.n }}</b> — {{ m.d }}</div>
+    </div>
+
+    <h3>/64 rule</h3>
+    <p>Every LAN is a <b>/64</b> — mandatory for <b>SLAAC</b> and ND optimizations. A /48 site yields <b>65,536</b> /64 subnets.</p>
+
+    <h3>GUA vs Link-local — the reachability story</h3>
+    <table>
+      <tr><th></th><th>GUA</th><th>Link-local</th></tr>
+      <tr><td>Presence</td><td>optional</td><td><b>mandatory (auto)</b></td></tr>
+      <tr><td>Routable</td><td>yes (global)</td><td>no (link only)</td></tr>
+      <tr><td>Two hosts on same segment, no GUA?</td><td colspan="2" class="mono">yes — ping via link-local</td></tr>
+    </table>
+    <div class="callout green"><b>Key fact:</b> <code>2001:db8::/32</code> is documentation-only (RFC 3849). NAT is <u>not required</u> for IPv6 (NPTv6 exists but is unusual).</div>
+  </section>
+
+  <!-- 4. LINK-LOCAL -->
+  <section class="panel" v-show="sec==='linklocal'" id="linklocal">
+    <h2>🔗 Link-Local (fe80::/10)</h2>
+    <p class="lead">Automatically configured on every IPv6 interface — mandatory, non-routable, and the basis for ND, SLAAC, routing adjacencies, and the default gateway.</p>
+
+    <div class="grid g3">
+      <div class="card"><h4>Prefix</h4><div class="big mono">fe80::/10</div></div>
+      <div class="card"><h4>Scope</h4><div class="big">link only</div><div class="muted">never forwarded by routers</div></div>
+      <div class="card"><h4>Presence</h4><div class="big">always</div><div class="muted">via <code>ipv6 enable</code></div></div>
+    </div>
+
+    <h3>What it powers</h3>
+    <table>
+      <tr><th>Use</th><th>Why</th></tr>
+      <tr><td>ND (NS/NA, RS/RA)</td><td>one-hop neighbor ops — replaces ARP</td></tr>
+      <tr><td>SLAAC unicast</td><td>routers use LL as next-hop</td></tr>
+      <tr><td>Routing neighbors</td><td>OSPFv3 &amp; EIGRPv6 adjacencies over fe80</td></tr>
+      <tr><td>Default gateway</td><td>hosts learn RA sender's link-local as default route</td></tr>
+    </table>
+
+    <h3>The zone (%notation)</h3>
+    <p>Because fe80:: is identical on every host/interface, you must say <b>which interface</b>:</p>
+    <ul style="margin-left:20px">
+      <li>Linux/macOS: <code class="mono">ping6 fe80::1%eth0</code></li>
+      <li>Windows: <code class="mono">ping fe80::1%5</code></li>
+    </ul>
+    <div class="callout amber"><b>Trap:</b> fe80 is <u>not</u> "IPv6 APIPA" — it's normal and deliberate. Zone <code>%</code> is significant to disambiguate interfaces.</div>
+
+    <h3>📐 EUI-64 interface ID calculator</h3>
+    <div class="row-fn">
+      <input type="text" v-model="macInput" placeholder="00:1A:2B:3C:4D:5E">
+    </div>
+    <div class="grid g2">
+      <div class="card"><h4>MAC (48 bits)</h4><div class="mono">{{ macInput }}</div></div>
+      <div class="card"><h4>Interface ID (64 bits)</h4><div class="mono" style="color:var(--green)">{{ iid }}</div></div>
+    </div>
+    <p class="muted" style="font-size:.82rem;margin-top:6px">EUI-64 inserts <code>FFFE</code> between OUI and the last 3 bytes, then flips the U/L (local) bit — the 7th bit of the first byte (e.g. <code>00</code> → <code>02</code>).</p>
+  </section>
+
+  <!-- 5. UNIQUE LOCAL -->
+  <section class="panel" v-show="sec==='ula'" id="ula">
+    <h2>🏠 Unique Local (ULA, RFC 4193)</h2>
+    <p class="lead">The IPv6 equivalent of RFC 1918 private — not globally routable but practically unique. Prefix <b>fc00::/7</b>; the <b>fd</b> form is used in practice.</p>
+
+    <div class="grid g3">
+      <div class="card"><h4>fc00::/8</h4><div class="muted">reserved / future-defined</div></div>
+      <div class="card"><h4>fd00::/8</h4><div class="big mono">L=1</div><div class="muted">locally assigned — use this</div></div>
+      <div class="card"><h4>Structure</h4><div class="mono">/48 + /16 + IID</div></div>
+    </div>
+    <p style="margin-top:10px" class="mono">fd12:3456:789a:0001::1 &nbsp;→&nbsp; prefix <code>fd12:3456:789a::/48</code>, subnet <code>0001</code></p>
+
+    <h3>Structure</h3>
+    <div class="bar"><div class="seg-red" style="width:5.5%"></div><div class="seg-amber" style="width:31.2%"></div><div class="seg-green" style="width:23.4%"></div><div class="seg-blue" style="width:50%"></div></div>
+    <div class="grid g2">
+      <div class="card"><h4>7 bits + L + 40-bit global ID</h4><div class="muted">global ID should be <b>random</b> to avoid collisions</div></div>
+      <div class="card"><h4>16-bit subnet + 64-bit IID</h4><div class="muted">site-internal subnetting</div></div>
+    </div>
+
+    <h3>ULA vs Link-local vs GUA</h3>
+    <table>
+      <tr><th></th><th>ULA (fd)</th><th>Link-local (fe80)</th><th>GUA</th></tr>
+      <tr><td>Scope</td><td>site-wide (routed inside)</td><td>one link</td><td>global</td></tr>
+      <tr><td>Routed</td><td>yes, inside the org</td><td>no</td><td>yes</td></tr>
+      <tr><td>Internet</td><td>filtered, never advertised</td><td>never</td><td>routable</td></tr>
+      <tr><td>Use case</td><td>internal services (DNS, print, mgmt)</td><td>neighbor ops</td><td>internet-facing</td></tr>
+    </table>
+    <div class="callout red"><b>Trap:</b> only <code>fd00::/8</code> is locally assigned; <code>fc00::/8</code> is for the future. The "fc vs fd" question is a favorite. And you typically <u>don't NAT</u> ULA — just route it internally.</div>
+  </section>
+
+  <!-- 6. MULTICAST & ANYCAST -->
+  <section class="panel" v-show="sec==='mcast'" id="mcast">
+    <h2>📡 IPv6 Multicast (ff00::/8)</h2>
+    <p class="lead">Multicast replaces broadcast entirely — any-to-any and "all nodes" are multicast groups.</p>
+
+    <h3>Format</h3>
+    <div class="mono" style="margin:8px 0">ff &nbsp; [flags: 0 T P R] &nbsp; [scope: 4 bits] &nbsp; [112-bit group ID]</div>
+    <table>
+      <tr><th>Field</th><th>Detail</th></tr>
+      <tr><td>ff</td><td>multicast indicator</td></tr>
+      <tr><td>flags</td><td>T (transient/permanent), P, R…</td></tr>
+      <tr><td>scope</td><td>1 interface · <b>2 link</b> · 5 site · 8 org · E global</td></tr>
+      <tr><td>group ID</td><td>group within scope (112 bits)</td></tr>
+    </table>
+
+    <h3>Scope values — memorize</h3>
+    <div class="grid g3">
+      <div class="card" v-for="s in mScopes" :key="s.v"><h4>{{ s.v }} — {{ s.name }}</h4><div class="mono muted">{{ s.ex }}</div></div>
+    </div>
+
+    <h3>Well-known groups</h3>
+    <table>
+      <tr><th>Group</th><th>Meaning</th></tr>
+      <tr v-for="g in mGroups" :key="g.addr"><td class="mono">{{ g.addr }}</td><td>{{ g.d }}</td></tr>
+    </table>
+
+    <h3>MLD (Multicast Listener Discovery)</h3>
+    <p>IPv6's IGMP equivalent: <b>MLDv1</b> (like IGMPv2) / <b>MLDv2</b> (source filtering, supports SSM). Switches use <b>MLD snooping</b> to forward to interested ports.</p>
+
+    <div class="callout red"><b>Trap:</b> no IPv6 broadcast exists. <code>ff02::1</code> is <u>all nodes</u> — a multicast group, not a broadcast. Solicited-node multicast <code>ff02::1:ff00:0/104</code> powers ND.</div>
+  </section>
+
+  <!-- 7. SLAAC & DHCPV6 -->
+  <section class="panel" v-show="sec==='slaac'" id="slaac">
+    <h2>⚙️ SLAAC &amp; DHCPv6</h2>
+    <p class="lead"><b>SLAAC</b> (Stateless Address Autoconfiguration) lets a host build its own GUA from a Router Advertisement — no server. <b>DHCPv6</b> adds stateful assignment and options.</p>
+
+    <h3>SLAAC — the steps a host runs</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1.</span> Generate link-local (EUI-64/random)</div>
+      <div class="step"><span class="n">2.</span> RS → ff02::2 (all routers)</div>
+      <div class="step"><span class="n">3.</span> Receive RA (prefix + flags + lifetime)</div>
+      <div class="step"><span class="n">4.</span> Build GUA = prefix + interface ID</div>
+      <div class="step"><span class="n">5.</span> DAD (NS to solicited-node) before use</div>
+    </div>
+
+    <h3>RA flags explorer — A / M / O</h3>
+    <div class="row-fn">
+      <span class="chip b-blue">A (auto-config)</span>
+      <span class="chip b-green">M (managed / DHCPv6)</span>
+      <span class="chip b-amber">O (other-config)</span>
+    </div>
+    <div class="grid g3">
+      <div class="card"><h4>A = {{ ra.a }} &nbsp; <button class="btn" style="font-size:.7rem;padding:2px 8px" @click="ra.a=ra.a?0:1">toggle</button></h4><div class="muted">prefix from RA</div></div>
+      <div class="card"><h4>M = {{ ra.m }} &nbsp; <button class="btn" style="font-size:.7rem;padding:2px 8px" @click="ra.m=ra.m?0:1">toggle</button></h4><div class="muted">DHCPv6 stateful</div></div>
+      <div class="card"><h4>O = {{ ra.o }} &nbsp; <button class="btn" style="font-size:.7rem;padding:2px 8px" @click="ra.o=ra.o?0:1">toggle</button></h4><div class="muted">DHCPv6 options</div></div>
+    </div>
+    <div class="verdict info" style="margin-top:12px">{{ raVerdict }}</div>
+    <table style="margin-top:8px">
+      <tr><th>A</th><th>M</th><th>O</th><th>Addressing</th><th>DNS</th></tr>
+      <tr><td>1</td><td>0</td><td>0</td><td>SLAAC</td><td>RA options (RDNSS)</td></tr>
+      <tr><td>0</td><td>1</td><td>0</td><td>DHCPv6 (stateful)</td><td>DHCPv6</td></tr>
+      <tr><td>1</td><td>1</td><td>0</td><td>Both</td><td>RA or DHCPv6</td></tr>
+      <tr><td>0</td><td>0</td><td>1</td><td>none auto → needs DHCPv6</td><td>DHCPv6</td></tr>
+    </table>
+    <div class="callout green">Production best practice: <b>SLAAC for addressing + stateless DHCPv6 for DNS</b> (A=1, M=0, O=1). SLAAC requires a <code>/64</code> — a /127 breaks it.</div>
+
+    <h3>DHCPv6 message flow</h3>
+    <div class="mlink" style="flex-direction:column;gap:2px;align-items:flex-start;margin:8px 0">
+      <div class="mono">client ── SOLICIT ──────────────▶ ff02::1:2 (all DHCP servers)</div>
+      <div class="mono">server ── ADVERTISE (unicast) ──▶ client</div>
+      <div class="mono">client ── REQUEST ──────────────▶ server</div>
+      <div class="mono">server ── REPLY ─────────────────▶ client (assignment + options)</div>
+    </div>
+    <div class="grid g3">
+      <div class="card"><h4>Ports</h4><div class="big mono">546/547</div><div class="muted">client 546 · server 547</div></div>
+      <div class="card"><h4>IA types</h4><div class="mono">IA_NA · IA_TA · IA_PD</div><div class="muted">PD delegates a /56 to CPE</div></div>
+      <div class="card"><h4>Stateful?</h4><div class="big">M/O flags</div><div class="muted">decided by RA, not DHCPv6</div></div>
+    </div>
+    <div class="callout blue"><b>Note:</b> even in DHCPv6 mode, RA/ND still supplies the <u>default route</u> — unlike IPv4 where DHCP gives it.</div>
+  </section>
+
+  <!-- 8. NEIGHBOR DISCOVERY -->
+  <section class="panel" v-show="sec==='nd'" id="nd">
+    <h2>🤝 Neighbor Discovery (ND/NDP)</h2>
+    <p class="lead">IPv6's layer-2-to-3 bootstrap — the replacement for <b>ARP, ICMP redirects, and router discovery</b>, powered by ICMPv6.</p>
+
+    <h3>The five ND messages (ICMPv6 types)</h3>
+    <table>
+      <tr><th>Message</th><th>Type</th><th>Use</th></tr>
+      <tr><td>RS — Router Solicitation</td><td class="mono">133</td><td>"any router?" → ff02::2 at boot</td></tr>
+      <tr><td>RA — Router Advertisement</td><td class="mono">134</td><td>prefix + flags + lifetime + DNS</td></tr>
+      <tr><td>NS — Neighbor Solicitation</td><td class="mono">135</td><td>"who has this address?" (like ARP)</td></tr>
+      <tr><td>NA — Neighbor Advertisement</td><td class="mono">136</td><td>"I have it (my MAC)"</td></tr>
+      <tr><td>Redirect</td><td class="mono">137</td><td>better next hop (like ICMPv4 redirect)</td></tr>
+    </table>
+
+    <h3>Replaces ARP entirely</h3>
+    <table>
+      <tr><th>IPv4</th><th>IPv6</th></tr>
+      <tr><td>ARP broadcast</td><td><b>NS/NA</b> to <b>solicited-node multicast</b></td></tr>
+      <tr><td>default gateway (static/DHCP)</td><td>RA gives default route</td></tr>
+      <tr><td>duplicate IP check</td><td><b>DAD</b> (NS/NA)</td></tr>
+      <tr><td>ICMP redirect</td><td>ND Redirect (137)</td></tr>
+    </table>
+    <p class="muted">Solicited-node multicast <code>ff02::1:ffXX:XXXX</code> — only ~1/65536 of the link gets the request; far more scalable than broadcast.</p>
+
+    <h3>What ND achieves</h3>
+    <div class="step-flow">
+      <div class="step" v-for="(r,i) in ndRoles" :key="i">{{ i+1 }}. {{ r }}</div>
+    </div>
+
+    <h3>Neighbor cache states</h3>
+    <div class="grid g3">
+      <div class="card" v-for="s in ndStates" :key="s.n"><h4>{{ s.n }}</h4><div class="muted">{{ s.d }}</div></div>
+    </div>
+
+    <div class="callout red"><b>Security:</b> RA spoofing can hijack the default gateway (MITM). Mitigate with <b>RA Guard</b> (per-port). NA spoofing is like ARP poisoning — use ND snooping / DAI analog.</div>
+  </section>
+
+  <!-- 9. ICMPV6 -->
+  <section class="panel" v-show="sec==='icmp6'" id="icmp6">
+    <h2>🖥️ ICMPv6</h2>
+    <p class="lead">IPv6's control protocol — carries error reporting, echo, plus ND (133–137) and MLD (130–132) as submodules. Without PMTUD, IPv6 breaks across MTU limits.</p>
+
+    <h3>Message classes</h3>
+    <table>
+      <tr><th>Class</th><th>Types</th><th>Purpose</th></tr>
+      <tr><td>Error</td><td class="mono">1 · 2 · 3 · 4</td><td>dest unreachable · PTB · time exceeded · param</td></tr>
+      <tr><td>Informational</td><td class="mono">128 / 129</td><td>Echo Request / Reply (ping6)</td></tr>
+      <tr><td>ND submodule</td><td class="mono">133–137</td><td>RS RA NS NA Redirect</td></tr>
+      <tr><td>MLD submodule</td><td class="mono">130–132</td><td>query / report / done</td></tr>
+    </table>
+
+    <h3>PMTUD — "routers never fragment"</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1.</span> Sender sends a large packet</div>
+      <div class="step"><span class="n">2.</span> Router whose link MTU is too small sends <b>ICMPv6 Type 2 (Packet Too Big)</b> with the link MTU</div>
+      <div class="step"><span class="n">3.</span> Sender re-emits with a smaller packet</div>
+    </div>
+    <div class="callout red">If PTB is <b>filtered</b> → big packets silently black-hole (MTU black hole). Allow ICMPv6 Type 2, plus ND (133–136) and MLD (130–132) through ACLs, or IPv6 breaks even with forwarding on.</div>
+
+    <h3>Error details to quote</h3>
+    <table>
+      <tr><th>Type</th><th>Code</th><th>Meaning</th></tr>
+      <tr><td>1</td><td>0</td><td>no route to dest</td></tr>
+      <tr><td>1</td><td>1</td><td>administratively prohibited (firewall!)</td></tr>
+      <tr><td>1</td><td>3</td><td>address unreachable</td></tr>
+      <tr><td>1</td><td>4</td><td>port unreachable</td></tr>
+      <tr><td>2</td><td>0</td><td><b>Packet Too Big</b> — replaces fragmentation</td></tr>
+      <tr><td>3</td><td>0</td><td>hop limit exceeded → traceroute6</td></tr>
+      <tr><td>4</td><td>—</td><td>malformed header/option</td></tr>
+    </table>
+    <div class="callout blue"><b>v4 vs v6:</b> routers may fragment (v4) vs only sender (v6/PTB). Echo is 128/129 (not 8/0). ND lives in ICMPv6 — never answer "ARP".</div>
+  </section>
+
+  <!-- 10. ROUTING -->
+  <section class="panel" v-show="sec==='routing'" id="routing">
+    <h2>🛣️ Routing Protocol Support for IPv6</h2>
+    <p class="lead">OSPFv3, EIGRP, and MP-BGP carry IPv6 — with link-local neighbors and protocol-specific multicast groups.</p>
+
+    <h3>Protocol comparison</h3>
+    <table>
+      <tr><th></th><th>OSPFv3</th><th>EIGRP IPv6</th><th>BGP IPv6</th></tr>
+      <tr><td>Multicast</td><td class="mono">ff02::5 / ff02::6</td><td class="mono">ff02::A</td><td>TCP 179 (unicast)</td></tr>
+      <tr><td>Neighbor/next-hop</td><td>link-local</td><td>link-local</td><td>global or IPv4 transport</td></tr>
+      <tr><td>Prefix carry</td><td>Type 9 Intra-Area-Prefix</td><td>AF ipv6 unicast</td><td>MP-BGP (AFI 2/SAFI 1)</td></tr>
+      <tr><td>Config</td><td>classic or address-family</td><td>classic or named mode</td><td>neighbor + activate in AF</td></tr>
+      <tr><td>Carries IPv4 too?</td><td>yes (AF)</td><td>yes (named mode)</td><td>yes (MP-BGP)</td></tr>
+    </table>
+
+    <h3>OSPFv3 vs OSPFv2 notable deltas</h3>
+    <ul style="margin-left:20px">
+      <li>LSAs no longer carry IPv6 addresses → moved to <b>Type 9 (Intra-Area-Prefix)</b>; <b>Type 8 (Link-Local)</b> is new.</li>
+      <li>Neighbors identified by <b>link-local</b>, not GUA.</li>
+      <li>Interface cost default is <b>1</b> for any speed (unlike v2's 10<sup>8</sup>/BW).</li>
+      <li>OSPFv3 can also carry <b>IPv4</b> via address-family — not IPv6-only.</li>
+    </ul>
+
+    <h3>EIGRP IPv6 key facts</h3>
+    <ul style="margin-left:20px">
+      <li><b>No <code>network</code> statements</b> in classic mode — interfaces / AF enable it (named mode may use network).</li>
+      <li>Still requires a <b>router-id</b>; same composite metric, DUAL, timers.</li>
+      <li>Multicast is <code>ff02::A</code>, not 224.0.0.10.</li>
+    </ul>
+
+    <h3>BGP IPv6 / MP-BGP</h3>
+    <div class="grid g3">
+      <div class="card"><h4>MP_REACH_NLRI</h4><div class="muted">AFI + SAFI + IPv6 next-hop + NLRI</div></div>
+      <div class="card"><h4>AFI/SAFI</h4><div class="mono">2 / 1</div><div class="muted">IPv6 unicast</div></div>
+      <div class="card"><h4>Activate</h4><div class="big">required</div><div class="muted">neighbor must be activated in the AF</div></div>
+    </div>
+    <div class="callout amber"><b>Trap:</b> IPv4 transport <u>can</u> still exchange IPv6 routes (via MP). NEXT-HOP is carried in MP_REACH, not the regular NEXT_HOP attribute. Path selection is identical to IPv4 BGP.</div>
+
+    <h3>Route redistribution</h3>
+    <p>Redistribution (Level 13) between IPv6 protocols still requires <b>seed metrics</b>, just like IPv4. OSPFv3 ↔ EIGRP IPv6 ↔ BGP all support redistribution.</p>
+  </section>
+
+  <!-- 11. COMMANDS -->
+  <section class="panel" v-show="sec==='cmds'" id="cmds">
+    <h2>⌨️ CLI Commands</h2>
+    <div class="row-fn">
+      <button class="btn" v-for="c in commands" :key="c.key" :class="{primary:activeCmd===c.key}" @click="activeCmd=c.key">{{ c.label }}</button>
+    </div>
+    <pre class="cmd">{{ activeCommand.show }}</pre>
+    <div class="callout green" style="margin-top:6px"><b>Note:</b> <code>show ipv6 route</code> / <code>show bgp ipv6 unicast</code> are the primary verification commands. In routing tables, next hop on point-to-point links displays as a <b>link-local</b> fe80:: address.</div>
+  </section>
+
+  <!-- 12. TRAPS -->
+  <section class="panel" v-show="sec==='traps'" id="traps">
+    <h2>⚠️ Common Traps</h2>
+    <div v-for="t in traps" :key="t" class="trap-item"><span class="trap-ico">!</span><div>{{ t }}</div></div>
+  </section>
+
+  <!-- 13. QUIZ -->
+  <section class="panel" v-show="sec==='quiz'" id="quiz">
+    <h2>📝 Quiz ({{ quizQuestions.length }})</h2>
+    <div v-for="(q,qi) in quizQuestions" :key="qi" class="card" style="margin:12px 0">
+      <div style="font-weight:700;margin-bottom:8px">{{ qi+1 }}. {{ q.q }}</div>
+      <div v-for="(o,oi) in q.opts" :key="oi"
+           class="opt" :class="{sel:q.ans===oi}"
+           @click="q.ans=oi">
+        <span class="letter">{{ String.fromCharCode(65+oi) }}</span>{{ o.text }}
+      </div>
+    </div>
+    <div class="row-fn">
+      <button class="btn primary" @click="submitQuiz()" :disabled="!allQuizAnswered">Submit answers</button>
+      <button class="btn" @click="resetQuiz()">Reset</button>
+      <span class="muted" v-if="quizDone" style="font-weight:700">Score: {{ quizScore }} / {{ quizQuestions.length }}
+        ({{ Math.round(quizScore/quizQuestions.length*100) }}%)</span>
+    </div>
+    <div class="verdict" :class="quizDone ? (quizScore===quizQuestions.length?'ok':'info') : 'info'" v-if="quizDone">
+      {{ quizScore===quizQuestions.length ? '🎉 Perfect! All ' + quizQuestions.length + ' correct.' : 'Better luck next time — review the traps section.' }}
+    </div>
+  </section>
+
+  <!-- 14. CHECKLIST -->
+  <section class="panel" v-show="sec==='checklist'" id="checklist">
+    <h2>✅ Study Checklist</h2>
+    <p class="muted" style="margin-bottom:10px">{{ doneCount }} / {{ checklist.length }} complete</p>
+    <div v-for="(c,i) in checklist" :key="i" class="chk-item" :class="{done:c.done}" @click="c.done=!c.done;saveChecklist()">
+      <span class="chk-box">{{ c.done ? '✓' : '' }}</span>{{ c.t }}
+    </div>
+  </section>
+
+</div>
+
+<script src="../vue.global.prod.js"></script>
+<script>
+(() => {
+  const { createApp, ref, computed, reactive } = Vue;
+  const LS = {
+    theme: 'ccnp.ipv6.theme', done: 'ccnp.ipv6.done',
+    quiz: 'ccnp.ipv6.quiz'
+  };
+  function loadJSON(key, fb) {
+    try { const v = JSON.parse(localStorage.getItem(key)); return (v === null || v === undefined) ? fb : v; }
+    catch (e) { return fb; }
+  }
+  function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+  function shuffle(a) {
+    const x = a.slice();
+    for (let i = x.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [x[i], x[j]] = [x[j], x[i]];
+    }
+    return x;
+  }
+
+  createApp({
+    setup() {
+      const theme = ref(loadJSON(LS.theme, 'dark'));
+      const sec = ref('addr');
+
+      /* ---------- SECTION NAV ---------- */
+      const sections = [
+        { id: 'addr', label: 'Addressing', icon: '🧭' },
+        { id: 'types', label: 'Address Types', icon: '🏷️' },
+        { id: 'gua', label: 'Global Unicast', icon: '🌐' },
+        { id: 'linklocal', label: 'Link-Local', icon: '🔗' },
+        { id: 'ula', label: 'Unique Local', icon: '🏠' },
+        { id: 'mcast', label: 'Multicast', icon: '📡' },
+        { id: 'slaac', label: 'SLAAC & DHCPv6', icon: '⚙️' },
+        { id: 'nd', label: 'Neighbor Discovery', icon: '🤝' },
+        { id: 'icmp6', label: 'ICMPv6', icon: '🖥️' },
+        { id: 'routing', label: 'Routing', icon: '🛣️' },
+        { id: 'cmds', label: 'Commands', icon: '⌨️' },
+        { id: 'traps', label: 'Traps', icon: '⚠️' },
+        { id: 'quiz', label: 'Quiz', icon: '📝' },
+        { id: 'checklist', label: 'Checklist', icon: '✅' }
+      ];
+
+      /* ---------- ADDRESSING / SHORTENING ---------- */
+      const fullHextets = ['2001', '0db8', '85a3', '0000', '0000', '8a2e', '0370', '7334'];
+      const presets = [
+        '2001:0db8:85a3:0000:0000:8a2e:0370:7334',
+        'FE80:0000:0000:0000:0202:B3FF:FE1E:8329',
+        '2001:0db8:0000:0000:0000:ff00:0042:8329',
+        'FF02:0000:0000:0000:0000:0000:0000:0001',
+        'FD12:3456:789A:0000:0000:0000:0000:0001'
+      ];
+      const fullInput = ref(presets[0]);
+
+      function stripZero(h) { return h.replace(/^0+/, '') || '0'; }
+
+      const dropZeros = computed(() => {
+        const parts = fullInput.value.toLowerCase().split(':');
+        return parts.map(stripZero).join(':');
+      });
+
+      const compressed = computed(() => {
+        const parts = fullInput.value.toLowerCase().split(':');
+        const stripped = parts.map(stripZero);
+        // find longest run of '0' hextets (length >= 2)
+        let bestStart = -1, bestLen = 1;
+        let i = 0;
+        while (i < stripped.length) {
+          if (stripped[i] === '0') {
+            let j = i;
+            while (j < stripped.length && stripped[j] === '0') j++;
+            const len = j - i;
+            if (len >= 2 && len > bestLen) { bestLen = len; bestStart = i; }
+            i = j;
+          } else i++;
+        }
+        if (bestStart < 0) return stripped.join(':');
+        const before = stripped.slice(0, bestStart);
+        const after = stripped.slice(bestStart + bestLen);
+        const left = before.join(':');
+        const right = after.join(':');
+        let out = before.length ? left + '::' + right : '::' + right;
+        if (before.length && !after.length) out = left + '::';
+        if (!before.length && !after.length) out = '::';
+        return out;
+      });
+
+      const zeroRunLen = computed(() => {
+        const parts = fullInput.value.toLowerCase().split(':');
+        let best = 0, cur = 0;
+        for (const p of parts) {
+          if (stripZero(p) === '0') { cur++; best = Math.max(best, cur); } else cur = 0;
+        }
+        return best;
+      });
+
+      /* ---------- ADDRESS TYPES ---------- */
+      const addrTypes = [
+        { addr: '2001:db8:1:10::1', prefix: '2000::/3', name: 'Global Unicast', color: 'blue', desc: 'Public, globally routable. Documentation range 2001:db8::/32. NAT not required.' },
+        { addr: 'fe80::1', prefix: 'fe80::/10', name: 'Link-Local', color: 'green', desc: 'Mandatory, automatic, link-only. Used for ND, SLAAC and routing adjacencies.' },
+        { addr: 'fd12:3456:789a::1', prefix: 'fc00::/7 (fd)', name: 'Unique Local', color: 'violet', desc: 'Site-internal, practically unique. fd00::/8 = locally assigned.' },
+        { addr: 'ff02::1', prefix: 'ff00::/8', name: 'Multicast', color: 'amber', desc: 'All nodes on link (scope 2). Replaces IPv4 broadcast.' },
+        { addr: '::1', prefix: '::1/128', name: 'Loopback', color: 'cyan', desc: 'The IPv6 loopback address, analogous to 127.0.0.1.' },
+        { addr: '::', prefix: '::/128', name: 'Unspecified', color: 'red', desc: 'The all-zero unspecified address, used as a source before assignment.' },
+        { addr: '::ffff:192.168.1.1', prefix: '::ffff:0:0/96', name: 'IPv4-mapped', color: 'muted', desc: 'Embeds an IPv4 address in the low 32 bits for transition.' }
+      ];
+      const typeSel = ref(addrTypes[0].addr);
+      const selectedType = computed(() => addrTypes.find(a => a.addr === typeSel.value));
+      const classifyOpts = [
+        { v: 'Global Unicast', name: 'Global Unicast' }, { v: 'Link-Local', name: 'Link-Local' },
+        { v: 'Unique Local', name: 'Unique Local' }, { v: 'Multicast', name: 'Multicast' },
+        { v: 'Loopback', name: 'Loopback' }, { v: 'Unspecified', name: 'Unspecified' },
+        { v: 'IPv4-mapped', name: 'IPv4-mapped' }
+      ];
+      const classify = ref('');
+
+      /* ---------- GUA ---------- */
+      const guaMethods = [
+        { n: 'SLAAC', d: 'router RA → host self-configures prefix + interface ID' },
+        { n: 'DHCPv6', d: 'stateful server hands address + options' },
+        { n: 'DHCPv6-PD', d: 'site router delegates a prefix (e.g. /56) to CPE' },
+        { n: 'Static', d: 'manual on interfaces' }
+      ];
+
+      /* ---------- EUI-64 ---------- */
+      const macInput = ref('00:1A:2B:3C:4D:5E');
+
+      function hexByte(b) {
+        const v = parseInt(b, 16);
+        return (v < 16 ? '0' : '') + v.toString(16).toUpperCase();
+      }
+      const iid = computed(() => {
+        const cleaned = macInput.value.toLowerCase().replace(/[.:-]/g, '').replace(/\s/g, '');
+        if (!/^[0-9a-f]{12}$/.test(cleaned)) return '— (need 12 hex digits)';
+        const b = cleaned.match(/.{2}/g).slice(0, 6);
+        const oui = b[0] + b[1] + b[2];
+        const last = b[3] + b[4] + b[5];
+        let first = parseInt(cleaned.slice(0, 2), 16);
+        first = (first ^ 0x02).toString(16); // flip U/L bit
+        if (first.length === 1) first = '0' + first;
+        const euil = first + oui.slice(2) + 'fffe' + last;
+        // format 001A:2BFF:FE3C:4D5E
+        const g = euil.match(/.{4}/g);
+        return g.join(':');
+      });
+
+      /* ---------- MULTICAST ---------- */
+      const mScopes = [
+        { v: '1', name: 'interface-local', ex: 'ff01::10' },
+        { v: '2', name: 'link-local', ex: 'ff02::1' },
+        { v: '5', name: 'site-local', ex: 'ff05::2' },
+        { v: '8', name: 'organization-local', ex: 'ff08::' },
+        { v: 'E', name: 'global', ex: 'ff0e::' }
+      ];
+      const mGroups = [
+        { addr: 'ff02::1', d: 'all nodes on link (replaces broadcast)' },
+        { addr: 'ff02::2', d: 'all routers on link' },
+        { addr: 'ff02::5', d: 'OSPFv3 ALLSPFRouters' },
+        { addr: 'ff02::6', d: 'OSPFv3 DR/BDR' },
+        { addr: 'ff02::A', d: 'EIGRP routers' },
+        { addr: 'ff02::1:2', d: 'ALL DHCPv6 (clients/servers)' },
+        { addr: 'ff02::1:3', d: 'LLMNR' },
+        { addr: 'ff02::16', d: 'MLDv2' },
+        { addr: 'ff02::FB', d: 'mDNS' }
+      ];
+
+      /* ---------- SLAAC RA FLAGS ---------- */
+      const ra = reactive({ a: 1, m: 0, o: 0 });
+      const raVerdict = computed(() => {
+        const a = ra.a, m = ra.m, o = ra.o;
+        if (a && !m && !o) return 'SLAAC only — host self-addresses; DNS via RA options (RDNSS).';
+        if (!a && m && !o) return 'Stateful DHCPv6 — server assigns the address; DNS via DHCPv6.';
+        if (a && m && !o) return 'Both — SLAAC + DHCPv6 for address; DNS via RA or DHCPv6.';
+        if (!a && !m && o) return 'Other-config only — no auto address; host needs DHCPv6 for address + options.';
+        if (a && !m && o) return 'Industry best practice — SLAAC addressing + stateless DHCPv6 for DNS/options.';
+        if (!a && m && o) return 'Stateful DHCPv6 for address and options.';
+        return 'Rare combination — review the A/M/O table.';
+      });
+
+      /* ---------- NEIGHBOR DISCOVERY ---------- */
+      const ndRoles = [
+        'Address resolution — LL → MAC (NS/NA), cached in the neighbor cache',
+        'Router discovery — default gateway(s) from RA',
+        'Address auto-config — prefix from RA → SLAAC',
+        'DAD — duplicate address detection',
+        'NUD — neighbor unreachability detection',
+        'Redirect — host told a better route',
+        'Stateless DHCPv6 signaling — M/O flags'
+      ];
+      const ndStates = [
+        { n: 'INCOMPLETE', d: 'NS sent, no NA yet' },
+        { n: 'REACHABLE', d: 'confirmed reachable' },
+        { n: 'STALE', d: 'no recent traffic, may be fine' },
+        { n: 'DELAY', d: 'waiting a brief probe' },
+        { n: 'PROBE', d: 'sending NS to confirm' }
+      ];
+
+      /* ---------- COMMANDS ---------- */
+      const commands = [
+        {
+          key: 'addressing', label: 'Addressing',
+          show: "interface GigabitEthernet0/1\n ipv6 address 2001:db8:1:10::1/64    # static GUA\n ipv6 address fe80::1 link-local     # optional manual LL\n ipv6 enable                        # auto link-local only\n\nshow ipv6 interface GigabitEthernet0/1\nshow ipv6 route"
+        },
+        {
+          key: 'slaac', label: 'SLAAC',
+          show: "interface GigabitEthernet0/1\n ipv6 nd ra-interval 30\n ipv6 nd ra-lifetime 1800\n ipv6 nd prefix 2001:db8:1:10::/64\n ipv6 nd ra dns 2001:db8:53::1      # RDNSS (O info)\n\n# Host verify\nip -6 addr show\nip -6 route show default"
+        },
+        {
+          key: 'dhcpv6', label: 'DHCPv6',
+          show: "ipv6 dhcp pool CORP\n address prefix 2001:db8:1:10::/64 lifetime 2592000 604800\n dns-server 2001:db8:53::1\n domain-name corp.example\n!\ninterface GigabitEthernet0/1\n ipv6 address 2001:db8:1:10::1/64\n ipv6 dhcp server CORP\n ipv6 nd managed-config-flag        # M=1\n ipv6 nd other-config-flag          # O=1\n\nshow ipv6 dhcp binding"
+        },
+        {
+          key: 'nd', label: 'Neighbor Discovery',
+          show: "interface GigabitEthernet0/1\n ipv6 nd ra-interval 30\n ipv6 nd ra-lifetime 1800\n\nshow ipv6 neighbors                 # neighbor cache\nshow ipv6 interface Gi0/1 | include Neighbor\n\n# RA Guard (defender toward users)\ninterface GigabitEthernet0/1\n ipv6 nd raguard"
+        },
+        {
+          key: 'icmp6', label: 'ICMPv6',
+          show: "ping6 2001:db8::1                  # echo = ICMPv6 128/129\ntraceroute6 2001:db8:53::1\n\nshow ipv6 mtu\ndebug ipv6 icmp\n\n# Allow PTB through ACLs\nipv6 access-list PERMIT-ICMP6\n permit icmp any any packet-too-big"
+        },
+        {
+          key: 'ospfv3', label: 'OSPFv3',
+          show: "interface GigabitEthernet0/1\n ipv6 address 2001:db8:1:10::1/64\n ospfv3 1 ipv6 area 0\n!\nrouter ospfv3 1\n router-id 1.1.1.1\n address-family ipv6 unicast\n\nshow ipv6 ospf neighbor\nshow ipv6 ospf database"
+        },
+        {
+          key: 'eigrp', label: 'EIGRP IPv6',
+          show: "router eigrp ENTERPRISE\n address-family ipv6 unicast\n  router-id 1.1.1.1\n  network 2001:db8:1:10::/64\n!\ninterface GigabitEthernet0/1\n ipv6 address 2001:db8:1:10::1/64\n\nshow ipv6 eigrp neighbors\nshow ipv6 route eigrp\nshow ipv6 protocols"
+        },
+        {
+          key: 'bgp', label: 'BGP IPv6',
+          show: "router bgp 65001\n bgp router-id 1.1.1.1\n neighbor 2001:db8:1::1 remote-as 65002\n!\n address-family ipv6 unicast\n  neighbor 2001:db8:1::1 activate\n  route-map V6IN in\n\nshow bgp ipv6 unicast summary\nshow bgp ipv6 unicast"
+        }
+      ];
+      const activeCmd = ref(commands[0].key);
+      const activeCommand = computed(() => commands.find(c => c.key === activeCmd.value));
+
+      /* ---------- TRAPS ---------- */
+      const traps = [
+        'Double colon (::) only once — two :: = invalid.',
+        '2001:db8:: is documentation (RFC 3849) — not production.',
+        'fe80::/10 is ALWAYS present automatically, not configured.',
+        'SLAAC requires a /64 — a /127 or /128 breaks auto-config.',
+        'There is NO broadcast address in IPv6 — "IPv6 broadcast" is a trick.',
+        '32 hex digits in 8 groups — not 4.',
+        'GUA is optional; link-local is mandatory. A host with only link-local has no Internet path.',
+        'NAT is not required for IPv6 — NPTv6 is unusual.',
+        'Anycast is indistinguishable from unicast in the address; cannot be a source.',
+        'OSPFv3 cost default is 1 (not speed-scaled) for any interface.',
+        'EIGRP IPv6 has no network statements in classic mode.',
+        'BGP: transport (IPv4) ≠ NLRI (IPv6) — you must activate the neighbor in the AF.',
+        'PTB (Type 2) is how IPv6 fits MTU — routers never fragment.',
+        'ND and MLD live inside ICMPv6 — never answer "IPv6 uses ARP".',
+        'ff02::1 = all nodes (multicast), not a broadcast.',
+        'Solicited-node multicast covers ~1/65536 of the link — far more scalable than broadcast.'
+      ];
+
+      /* ---------- QUIZ ---------- */
+      const quizRaw = [
+        { q: 'How many bits are in an IPv6 address?', opts: [{ text: '32' }, { text: '64' }, { text: '128' }, { text: '256' }], correct: 2 },
+        { q: 'What prefix marks Global Unicast addresses?', opts: [{ text: 'fe80::/10' }, { text: '2000::/3' }, { text: 'fc00::/7' }, { text: 'ff00::/8' }], correct: 1 },
+        { q: 'Which address is the IPv6 loopback?', opts: [{ text: '0.0.0.0' }, { text: '::' }, { text: '::1' }, { text: 'ff02::1' }], correct: 2 },
+        { q: 'Which two hextets can a run of zero hextets be compressed to?', opts: [{ text: 'Two colons (::)' }, { text: 'One colon (:)' }, { text: 'An ellipsis (…)' }, { text: 'Nothing — you can\'t compress' }], correct: 0 },
+        { q: 'What replaces ARP in IPv6?', opts: [{ text: 'Broadcast' }, { text: 'Neighbor Discovery (ND)' }, { text: 'DHCPv6' }, { text: 'IGMP' }], correct: 1 },
+        { q: 'SLAAC builds an address from a prefix in which message?', opts: [{ text: 'RS (Router Solicitation)' }, { text: 'NS (Neighbor Solicitation)' }, { text: 'RA (Router Advertisement)' }, { text: 'NA (Neighbor Advertisement)' }], correct: 2 },
+        { q: 'Which ICMPv6 type is Packet Too Big (PMTUD)?', opts: [{ text: '1' }, { text: '2' }, { text: '3' }, { text: '128' }], correct: 1 },
+        { q: 'EIGRP for IPv6 uses which multicast address?', opts: [{ text: 'ff02::A' }, { text: 'ff02::5' }, { text: '224.0.0.10' }, { text: 'ff02::1' }], correct: 0 },
+        { q: 'What are the DHCPv6 client/server ports?', opts: [{ text: '67/68' }, { text: '546/547' }, { text: '179/180' }, { text: '69/70' }], correct: 1 },
+        { q: 'Which multicast group is "all nodes on link"?', opts: [{ text: 'ff02::2' }, { text: 'ff02::1' }, { text: 'ff02::5' }, { text: 'ff02::A' }], correct: 1 },
+        { q: 'In OSPFv3, which LSA type carries the actual IPv6 prefixes?', opts: [{ text: 'Type 1 (Router)' }, { text: 'Type 2 (Network)' }, { text: 'Type 8 (Link-Local)' }, { text: 'Type 9 (Intra-Area-Prefix)' }], correct: 3 },
+        { q: 'Which statement about Unique Local (ULA) is true?', opts: [{ text: 'Only fc00::/8 is locally assigned' }, { text: 'fd00::/8 is locally assigned; fc00::/8 is for the future' }, { text: 'ULA is globally routable' }, { text: 'ULA requires NAT' }], correct: 1 }
+      ];
+      const quizQuestions = reactive(quizRaw.map(q => ({ ...q, ans: null })));
+      const quizDone = ref(false);
+      const quizScore = ref(loadJSON(LS.quiz, 0) || 0);
+      const allQuizAnswered = computed(() => quizQuestions.every(q => q.ans !== null));
+      function submitQuiz() {
+        if (!allQuizAnswered.value) return;
+        quizScore.value = quizQuestions.filter((q, i) => q.ans === q.correct).length;
+        quizDone.value = true;
+        save(LS.quiz, quizScore.value);
+      }
+      function resetQuiz() {
+        quizQuestions.forEach(q => q.ans = null);
+        quizDone.value = false;
+        quizScore.value = 0;
+        localStorage.removeItem(LS.quiz);
+      }
+
+      /* ---------- CHECKLIST ---------- */
+      const checklistRoot = loadJSON(LS.done, [
+        { t: 'Explain the 128-bit / 8-hextet format and shortening rules', done: false },
+        { t: 'Classify GUA, link-local, ULA, multicast, loopback, unspecified, IPv4-mapped', done: false },
+        { t: 'Describe the GUA /48 + /64 + IID structure and acquisition methods', done: false },
+        { t: 'Explain link-local auto-generation, zone %, and what it powers', done: false },
+        { t: 'Compute an EUI-64 interface ID from a MAC (flip U/L, insert FFFE)', done: false },
+        { t: 'Recall ULA fc00::/7, fd vs fc, and global-ID randomness', done: false },
+        { t: 'State the multicast scope nibbles and well-known ff02:: groups', done: false },
+        { t: 'Walk the SLAAC steps, RA flags A/M/O, and the /64 requirement', done: false },
+        { t: 'Describe DHCPv6 message flow, ports 546/547, and stateful vs stateless', done: false },
+        { t: 'List the five ND messages (133–137) and the neighbor cache states', done: false },
+        { t: 'Explain ICMPv6 classes and PMTUD / Packet Too Big (Type 2)', done: false },
+        { t: 'Compare OSPFv3, EIGRP IPv6, and BGP IPv6 (multicast, link-local, MP-BGP)', done: false }
+      ]);
+      const checklist = reactive(checklistRoot);
+      const doneCount = computed(() => checklist.filter(c => c.done).length);
+      function saveChecklist() { save(LS.done, checklistRoot); }
+      function toggleDone(i) { checklistRoot[i].done = !checklistRoot[i].done; saveChecklist(); }
+
+      return {
+        theme, sec, sections,
+        fullHextets, presets, fullInput, dropZeros, compressed, zeroRunLen,
+        addrTypes, typeSel, selectedType, classifyOpts, classify,
+        guaMethods, macInput, iid,
+        mScopes, mGroups,
+        ra, raVerdict,
+        ndRoles, ndStates,
+        commands, activeCmd, activeCommand,
+        traps,
+        quizQuestions, quizDone, quizScore, allQuizAnswered, submitQuiz, resetQuiz,
+        checklist, doneCount, saveChecklist, toggleDone
+      };
+    }
+  }).mount('#app');
+})();
+</script>
+</body>
+</html>

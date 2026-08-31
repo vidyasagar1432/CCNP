@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How IPv4 Works — Level 05</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1923;--surface:#182635;--card:#1e2d3d;--border:#2a3a4a;
+  --text:#e0e6ed;--muted:#8899aa;--accent:#3b82f6;--accent2:#10b981;
+  --red:#ef4444;--yellow:#f59e0b;--purple:#8b5cf6;--cyan:#06b6d4;
+  --orange:#f97316;--pink:#ec4899;
+}
+[data-theme="light"]{
+  --bg:#f0f4f8;--surface:#ffffff;--card:#f8fafc;--border:#d1d9e0;
+  --text:#1a2332;--muted:#5a6a7a;--accent:#2563eb;--accent2:#059669;
+  --red:#dc2626;--yellow:#d97706;--purple:#7c3aed;--cyan:#0891b2;
+  --orange:#ea580c;--pink:#db2777;
+}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;line-height:1.65;padding:0;margin:0}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 24px 80px}
+.hdr{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;backdrop-filter:blur(8px)}
+.hdr h1{font-size:1.15rem;margin:0;white-space:nowrap}
+.hdr .badges{display:flex;gap:6px;flex-wrap:wrap}
+.badge{font-size:.7rem;padding:3px 8px;border-radius:6px;font-weight:600;white-space:nowrap}
+.b-lvl{background:var(--accent);color:#fff}.b-exam{background:var(--purple);color:#fff}
+.b-fc{background:var(--cyan);color:#fff;cursor:pointer;text-decoration:none}
+.hdr .spacer{flex:1}
+.tbtn{background:var(--card);border:1px solid var(--border);color:var(--text);padding:5px 12px;border-radius:6px;cursor:pointer;font-size:.8rem}
+.nav{display:flex;flex-wrap:wrap;gap:6px;margin:18px 0;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:10px}
+.nav-btn{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:.78rem;transition:all .15s}
+.nav-btn:hover,.nav-btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.sec{margin:20px 0;padding:20px 24px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
+.sec h2{font-size:1.1rem;margin:0 0 14px;display:flex;align-items:center;gap:8px}
+.sec h2 .ico{font-size:1.1rem}
+.sec h3{font-size:.95rem;margin:14px 0 8px;color:var(--accent)}
+
+/* octet anatomy */
+.octet-row{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}
+.octet{flex:1;min-width:80px;background:var(--card);border:2px solid var(--border);border-radius:8px;padding:10px;text-align:center;transition:all .2s}
+.octet.sel{border-color:var(--accent);background:rgba(59,130,246,.12)}
+.octet .obits{font-family:'Fira Code',monospace;font-size:.78rem;letter-spacing:1px;color:var(--accent)}
+.octet .oval{font-weight:700;font-size:1rem}
+.octet .olabel{font-size:.66rem;color:var(--muted)}
+.octet .otyp{font-size:.62rem;padding:2px 6px;border-radius:5px;margin-top:3px;display:inline-block}
+.typ-net{background:rgba(139,92,246,.18);color:var(--purple)}
+.typ-host{background:rgba(16,185,129,.18);color:var(--accent2)}
+
+/* bit weight table */
+.bits{display:flex;gap:4px;margin:10px 0}
+.bit-cell{flex:1;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:6px 4px;text-align:center;font-size:.8rem}
+.bit-cell .bw{font-weight:700;color:var(--accent);font-size:.9rem}
+.bit-cell .bp{font-size:.6rem;color:var(--muted)}
+
+/* calculator */
+.calc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:12px 0}
+.calc-item{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center}
+.calc-item .cv{font-size:1.4rem;font-weight:800;color:var(--accent)}
+.calc-item .cl{font-size:.74rem;color:var(--muted);margin-top:2px}
+.binary-display{font-family:'Fira Code',monospace;font-size:.95rem;letter-spacing:1px;background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin:10px 0;color:#c9d1d9;text-align:center}
+.slider-row{display:flex;align-items:center;gap:12px;margin:12px 0;flex-wrap:wrap}
+.slider-row input[type=range]{flex:1;min-width:120px;accent-color:var(--accent)}
+.slider-row .val{font-size:1.1rem;font-weight:700;color:var(--accent);min-width:50px;text-align:center}
+.num-input{background:var(--card);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:6px;font-family:'Fira Code',monospace;font-size:.9rem;width:150px}
+
+.data-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.84rem}
+.data-table th{text-align:left;padding:8px 10px;background:var(--card);border:1px solid var(--border);font-size:.75rem;text-transform:uppercase;color:var(--muted)}
+.data-table td{padding:8px 10px;border:1px solid var(--border)}
+
+.pick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin:12px 0}
+.pick-card{background:var(--card);border:2px solid var(--border);border-radius:8px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .2s}
+.pick-card:hover{border-color:var(--accent)}
+.pick-card.sel{border-color:var(--accent);background:rgba(59,130,246,.12)}
+.pick-card .pico{font-size:1.4rem}
+.pick-card .pn{font-weight:700;font-size:.8rem;margin-top:3px}
+.detail-box{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;margin:12px 0}
+.dt-title{font-weight:700;font-size:.95rem;color:var(--accent);margin-bottom:8px}
+.dt-row{font-size:.84rem;margin:6px 0}
+.dt-label{color:var(--muted);font-weight:600}
+
+/* prefix bar */
+.prefix-bar{display:flex;overflow:hidden;border-radius:8px;border:1px solid var(--border);margin:12px 0;height:34px}
+.prefix-bar .pb-net{background:var(--purple)}
+.prefix-bar .pb-host{background:var(--accent2)}
+.prefix-bar .pb-cell{display:flex;align-items:center;justify-content:center;color:#fff;font-size:.62rem;font-weight:600;border-right:1px solid rgba(255,255,255,.15)}
+
+/* vlsm table */
+.vlsm-flow{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.vlsm-ok{background:var(--card);border-left:3px solid var(--accent2);border-radius:0 6px 6px 0;padding:8px 12px;font-size:.83rem}
+.vlsm-bad{background:var(--card);border-left:3px solid var(--red);border-radius:0 6px 6px 0;padding:8px 12px;font-size:.83rem}
+
+.formula-box{background:var(--card);border:1px solid var(--accent);border-radius:8px;padding:14px 20px;margin:12px 0;text-align:center}
+.formula-box .expr{font-size:1.15rem;font-weight:700;color:var(--accent);margin:6px 0}
+
+.pill{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.72rem;font-weight:600;margin:2px}
+.pill-green{background:rgba(16,185,129,.15);color:var(--accent2)}
+.pill-red{background:rgba(239,68,68,.15);color:var(--red)}
+.pill-blue{background:rgba(59,130,246,.15);color:var(--accent)}
+.pill-purple{background:rgba(139,92,246,.15);color:var(--purple)}
+.pill-orange{background:rgba(249,115,22,.15);color:var(--orange)}
+
+.cmd-tabs{display:flex;flex-wrap:wrap;gap:4px;margin:10px 0}
+.cmd-tab{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:5px;cursor:pointer;font-size:.78rem;transition:all .12s}
+.cmd-tab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.cmd-block{background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin:10px 0;font-family:'Fira Code',monospace;font-size:.82rem;line-height:1.6;overflow-x:auto;white-space:pre;color:#c9d1d9}
+
+.trap-list{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.trap{background:var(--card);border-left:3px solid var(--yellow);border-radius:0 6px 6px 0;padding:10px 14px;font-size:.85rem}
+.trap strong{color:var(--yellow)}
+
+.quiz-q{margin:14px 0;padding:14px;background:var(--card);border-radius:8px;border:1px solid var(--border)}
+.quiz-q h4{margin:0 0 8px;font-size:.88rem}
+.quiz-q .qnum{color:var(--accent);font-weight:700;margin-right:6px}
+.quiz-opts{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.quiz-opt{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 12px;cursor:pointer;font-size:.84rem;transition:all .15s}
+.quiz-opt:hover{border-color:var(--accent);background:rgba(59,130,246,.08)}
+.quiz-opt.chosen{border-color:var(--accent);background:rgba(59,130,246,.15)}
+.quiz-opt.correct{border-color:var(--accent2);background:rgba(16,185,129,.15)}
+.quiz-opt.wrong{border-color:var(--red);background:rgba(239,68,68,.15)}
+.quiz-btn{margin:12px 0;padding:10px 24px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:.88rem;font-weight:600;transition:background .15s}
+.quiz-btn:hover{filter:brightness(1.15)}
+.quiz-btn:disabled{opacity:.45;cursor:default}
+.quiz-score{margin:12px 0;padding:14px;background:var(--card);border-radius:8px;border:1px solid var(--accent);font-weight:600}
+
+.chk-list{display:flex;flex-direction:column;gap:6px;margin:12px 0}
+.chk-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:all .15s;font-size:.86rem}
+.chk-item:hover{border-color:var(--accent)}
+.chk-item.done{opacity:.55}
+.chk-box{width:18px;height:18px;border:2px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.7rem;flex-shrink:0}
+.chk-item.done .chk-box{background:var(--accent2);border-color:var(--accent2);color:#fff}
+
+.callout{padding:12px 16px;border-radius:8px;margin:10px 0;font-size:.85rem}
+.callout-info{background:rgba(59,130,246,.1);border-left:3px solid var(--accent)}
+.callout-warn{background:rgba(245,158,11,.1);border-left:3px solid var(--yellow)}
+.callout-tip{background:rgba(16,185,129,.1);border-left:3px solid var(--accent2)}
+
+.sum-prompt{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.sum-subnet{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:'Fira Code',monospace;font-size:.85rem;text-align:center;flex:1;min-width:130px}
+</style>
+</head>
+<body>
+<div id="app" :data-theme="theme">
+
+<!-- HEADER -->
+<div class="hdr">
+  <h1>🌐 How IPv4 Works</h1>
+  <div class="badges">
+    <span class="badge b-lvl">Level 05</span>
+    <span class="badge b-exam">ENCOR 350-401</span>
+    <a class="badge b-fc" href="../Flashcards/Level 05 — IPv4.html">Flashcards</a>
+  </div>
+  <div class="spacer"></div>
+  <button class="tbtn" @click="theme=theme==='dark'?'light':'dark'">
+    {{ theme==='dark' ? '☀️ Light' : '🌙 Dark' }}
+  </button>
+</div>
+
+<div class="wrap">
+
+<!-- NAV -->
+<div class="nav">
+  <button class="nav-btn" :class="{on:sec===s.id}" v-for="s in sections" :key="s.id" @click="sec=s.id">
+    {{ s.icon }} {{ s.label }}
+  </button>
+</div>
+
+<!-- 1. ADDRESS STRUCTURE -->
+<div class="sec" v-show="sec==='struct'" id="struct">
+  <h2><span class="ico">🏗️</span> Address Structure (32-Bit)</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">An IPv4 address is a 32-bit (4×8-bit octet) Layer 3 address in dotted-decimal. The prefix/mask determines the network vs host boundary. Click each octet.</p>
+  <div class="octet-row">
+    <div class="octet" v-for="(o,i) in octets" :key="i" :class="{sel:octSel===i}" @click="octSel=i">
+      <div class="obits">{{ o.bin }}</div>
+      <div class="oval">{{ o.dec }}</div>
+      <div class="olabel">Octet {{ i+1 }} — bit {{ (3-i)*8+7 }}–{{ (3-i)*8 }}</div>
+      <span class="otyp" :class="o.type==='N'?'typ-net':'typ-host'">{{ o.type==='N'?'NETWORK':'HOST' }}</span>
+    </div>
+  </div>
+  <div class="detail-box" v-if="octSel!==null">
+    <div class="dt-title">Octet {{ octSel+1 }} — {{ octets[octSel].type==='N'?'Network':'Host' }} portion</div>
+    <div class="dt-row"><span class="dt-label">Decimal:</span> <code style="font-family:'Fira Code',monospace">{{ octets[octSel].dec }}</code></div>
+    <div class="dt-row"><span class="dt-label">Binary:</span> <code style="font-family:'Fira Code',monospace">{{ octets[octSel].bin }}</code></div>
+    <div class="dt-row"><span class="dt-label">Bit weights:</span> <code style="font-family:'Fira Code',monospace">{{ octets[octSel].weights }}</code></div>
+  </div>
+
+  <div class="bits">
+    <div class="bit-cell" v-for="w in [128,64,32,16,8,4,2,1]" :key="w">
+      <div class="bw">{{ w }}</div>
+      <div class="bp">bit {{ Math.log2(256/w) }}</div>
+    </div>
+  </div>
+
+  <h3>Network vs Host Slider</h3>
+  <div class="slider-row">
+    <span style="font-size:.84rem">Prefix length /n:</span>
+    <input type="range" min="8" max="32" v-model.number="netbits">
+    <span class="val">/{{ netbits }}</span>
+  </div>
+  <div class="calc-grid">
+    <div class="calc-item"><div class="cv">{{ netbits }}</div><div class="cl">Network bits</div></div>
+    <div class="calc-item"><div class="cv">{{ 32-netbits }}</div><div class="cl">Host bits</div></div>
+    <div class="calc-item"><div class="cv">{{ maskFor(netbits) }}</div><div class="cl">Subnet mask</div></div>
+    <div class="calc-item"><div class="cv">{{ Math.pow(2,32-netbits) }}</div><div class="cl">Total addresses</div></div>
+    <div class="calc-item"><div class="cv">{{ Math.pow(2,32-netbits)-2 }}</div><div class="cl">Usable (trad.) hosts</div></div>
+    <div class="calc-item"><div class="cv">{{ 256-blockSize(netbits) }}</div><div class="cl">Block suffix</div></div>
+  </div>
+  <div class="callout callout-warn">
+    <strong>Key traps:</strong> IPv4 = 32 bits = 2³² ≈ 4.29 billion. An address alone does NOT reveal its subnet — you need the mask/prefix. The <code>-2</code> rule does NOT apply to /31 (point-to-point, RFC 3021) or /32 (host route). Network = IP AND mask (host bits → 0); broadcast = host bits → 1.
+  </div>
+</div>
+
+<!-- 2. BINARY CALCULATOR -->
+<div class="sec" v-show="sec==='binary'" id="binary">
+  <h2><span class="ico">🔢</span> Binary ↔ Decimal Calculator</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">Each octet is 8 bits with weights 128 64 32 16 8 4 2 1 (MSB→LSB). Convert between forms instantly.</p>
+  <div class="formula-box">
+    <div class="expr">128&nbsp;64&nbsp;32&nbsp;16&nbsp;8&nbsp;4&nbsp;2&nbsp;1</div>
+    <div style="font-size:.8rem;color:var(--muted)">MSB → LSB · each bit contributes its weight when set to 1</div>
+  </div>
+
+  <h3>Decimal → Binary</h3>
+  <div class="slider-row">
+    <span style="font-size:.84rem">Value (0–255):</span>
+    <input type="range" min="0" max="255" v-model.number="decVal">
+    <span class="val">{{ decVal }}</span>
+  </div>
+  <div class="binary-display">{{ decToBin(decVal) }}</div>
+  <div style="font-size:.8rem;color:var(--muted);text-align:center">{{ weightBreakdown }}</div>
+
+  <h3>Common Values</h3>
+  <table class="data-table">
+    <tr><th>Decimal</th><th>Binary</th><th>Decimal</th><th>Binary</th></tr>
+    <tr v-for="(r,i) in commonBins" :key="i">
+      <td style="font-family:'Fira Code',monospace">{{ r[0] }}</td>
+      <td style="font-family:'Fira Code',monospace">{{ r[1] }}</td>
+      <td style="font-family:'Fira Code',monospace">{{ r[2] }}</td>
+      <td style="font-family:'Fira Code',monospace">{{ r[3] }}</td>
+    </tr>
+  </table>
+  <div class="callout callout-tip">
+    <strong>Quick subnetting math:</strong> block size = 256 − interesting mask octet. Interesting octet = first mask octet that's neither 255 nor 0. For /26 (255.255.255.192): 256−192 = 64 boundary. For 172.16.50.77/20 (255.255.240.0) the interesting octet is the THIRD octet, not the fourth.
+  </div>
+</div>
+
+<!-- 3. SUBNET CALCULATOR -->
+<div class="sec" v-show="sec==='subcalc'" id="subcalc">
+  <h2><span class="ico">🧮</span> Subnet Calculator</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">Enter an address and prefix to compute network, broadcast, and usable range. The classic magic-number method.</p>
+  <div class="slider-row">
+    <span style="font-size:.84rem">Octet 4 (interesting):</span>
+    <input type="range" min="0" max="255" v-model.number="hostEx">
+    <span class="val">{{ hostEx }}</span>
+  </div>
+  <div class="slider-row">
+    <span style="font-size:.84rem">Prefix /n:</span>
+    <input type="range" min="24" max="30" v-model.number="subPrefix">
+    <span class="val">/{{ subPrefix }}</span>
+  </div>
+  <div class="calc-grid">
+    <div class="calc-item"><div class="cv" style="font-size:1.1rem">192.168.10.{{ subnetNet() }}</div><div class="cl">Network</div></div>
+    <div class="calc-item"><div class="cv" style="font-size:1.1rem">192.168.10.{{ subnetNet()+1 }}</div><div class="cl">First host</div></div>
+    <div class="calc-item"><div class="cv" style="font-size:1.1rem">192.168.10.{{ subnetBroadcast-1 }}</div><div class="cl">Last host</div></div>
+    <div class="calc-item"><div class="cv" style="font-size:1.1rem">192.168.10.{{ subnetBroadcast }}</div><div class="cl">Broadcast</div></div>
+    <div class="calc-item"><div class="cv">{{ blockSize(subPrefix) }}</div><div class="cl">Block size</div></div>
+    <div class="calc-item"><div class="cv">{{ Math.pow(2,32-subPrefix)-2 }}</div><div class="cl">Usable hosts</div></div>
+  </div>
+  <div class="formula-box">
+    <div>Block size = 256 − mask octet = 256 − {{ blockOct(subPrefix) }} = <strong>{{ blockSize(subPrefix) }}</strong></div>
+    <div>Subnet = greatest multiple of {{ blockSize(subPrefix) }} ≤ {{ hostEx }} = <strong>{{ subnetNet() }}</strong></div>
+    <div>Broadcast = subnet + block − 1 = <strong>{{ subnetBroadcast }}</strong></div>
+  </div>
+  <div class="callout callout-warn">
+    <strong>Trap:</strong> The block size is computed on the interesting octet and the actual boundary position matters. A subnet starting at a non-multiple-of-block value (e.g., 10.10.0.80/27) is INVALID — /27 networks must be multiples of 32. Network = IP AND mask; don't just round down by subtracting.
+  </div>
+</div>
+
+<!-- 4. CLASSES & PRIVATE -->
+<div class="sec" v-show="sec==='classes'" id="classes">
+  <h2><span class="ico">🏷️</span> Classes &amp; Special Ranges</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">Historical classful addressing (first octet) and the special-purpose ranges that matter for ENCOR. Click an address type to explore.</p>
+  <table class="data-table">
+    <tr><th>Class</th><th>First Octet</th><th>First Bits</th><th>Hist. Default</th><th>Use</th></tr>
+    <tr v-for="(c,i) in classTable" :key="i">
+      <td><strong>{{ c.cls }}</strong></td>
+      <td style="font-family:'Fira Code',monospace">{{ c.range }}</td>
+      <td style="font-family:'Fira Code',monospace">{{ c.bits }}</td>
+      <td style="font-family:'Fira Code',monospace">{{ c.mask }}</td>
+      <td>{{ c.use }}</td>
+    </tr>
+  </table>
+  <div class="callout callout-warn">
+    <strong>Modern rule:</strong> Class doesn't determine the network boundary today — <strong>CIDR prefix length</strong> does. `172.16.1.1/24` is valid even though 172.x is historically Class B. Classful routing protocols (RIPv1, IGRP) don't carry masks; classless ones (RIPv2, OSPF, EIGRP, IS-IS, BGP) do. Don't confuse classful addressing with classful routing protocols.
+  </div>
+
+  <h3>Address Type Explorer</h3>
+  <div class="pick-grid">
+    <div class="pick-card" :class="{sel:atype==='private'}" @click="atype='private'">
+      <div class="pico">🔒</div><div class="pn">Private</div>
+    </div>
+    <div class="pick-card" :class="{sel:atype==='public'}" @click="atype='public'">
+      <div class="pico">🌍</div><div class="pn">Public</div>
+    </div>
+    <div class="pick-card" :class="{sel:atype==='apipa'}" @click="atype='apipa'">
+      <div class="pico">🔌</div><div class="pn">APIPA</div>
+    </div>
+    <div class="pick-card" :class="{sel:atype==='loopback'}" @click="atype='loopback'">
+      <div class="pico">🔁</div><div class="pn">Loopback</div>
+    </div>
+    <div class="pick-card" :class="{sel:atype==='multicast'}" @click="atype='multicast'">
+      <div class="pico">👥</div><div class="pn">Multicast</div>
+    </div>
+    <div class="pick-card" :class="{sel:atype==='broadcast'}" @click="atype='broadcast'">
+      <div class="pico">📢</div><div class="pn">Broadcast</div>
+    </div>
+    <div class="pick-card" :class="{sel:atype==='cgnat'}" @click="atype='cgnat'">
+      <div class="pico">🎚️</div><div class="pn">CGNAT</div>
+    </div>
+    <div class="pick-card" :class="{sel:atype==='doc'}" @click="atype='doc'">
+      <div class="pico">📝</div><div class="pn">Documentation</div>
+    </div>
+  </div>
+  <div class="detail-box" v-if="atype">
+    <div class="dt-title">{{ rangeData.name }}</div>
+    <div class="dt-row"><span class="dt-label">Range/CIDR:</span> <code style="font-family:'Fira Code',monospace">{{ rangeData.cidr }}</code></div>
+    <div class="dt-row"><span class="dt-label">Routable?</span> {{ rangeData.routable }}</div>
+    <div class="dt-row"><span class="dt-label">Purpose:</span> {{ rangeData.purpose }}</div>
+    <div class="dt-row"><span class="dt-label">Key trap:</span> {{ rangeData.trap }}</div>
+  </div>
+
+  <h3>Classify the Address</h3>
+  <div class="pick-grid">
+    <div class="pick-card" :class="{sel:classify===opt}" v-for="opt in classifyOpts" :key="opt.k" @click="classify=opt.k">
+      <div class="pico">{{ opt.ico }}</div><div class="pn">{{ opt.t }}</div>
+    </div>
+  </div>
+  <div class="detail-box" v-if="classify">
+    <div class="dt-title">{{ classifyOpts.find(o=>o.k===classify).t }}</div>
+    <div class="dt-row">Example: <code style="font-family:'Fira Code',monospace">{{ classifyOpts.find(o=>o.k===classify).ex }}</code></div>
+    <div class="dt-row">{{ classifyOpts.find(o=>o.k===classify).desc }}</div>
+  </div>
+</div>
+
+<!-- 5. CIDR -->
+<div class="sec" v-show="sec==='cidr'" id="cidr">
+  <h2><span class="ico">📐</span> CIDR Prefix Lengths</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">CIDR (Classless Inter-Domain Routing) replaced fixed classes with arbitrary prefix lengths /0–/32. Select a prefix to see its details.</p>
+  <div class="pick-grid">
+    <div class="pick-card" :class="{sel:cidrSel===p.pre}" v-for="p in cidrPoints" :key="p.pre" @click="cidrSel=p.pre">
+      <div class="pn" style="font-family:'Fira Code',monospace">/{{ p.pre }}</div>
+      <div style="font-size:.72rem;color:var(--muted)">{{ p.mask }}</div>
+    </div>
+  </div>
+  <div class="detail-box" v-if="cidrSel!==null">
+    <div class="dt-title">/{{ cidrSel }}</div>
+    <div class="dt-row"><span class="dt-label">Subnet mask:</span> <code style="font-family:'Fira Code',monospace">{{ maskFor(cidrSel) }}</code></div>
+    <div class="dt-row"><span class="dt-label">Host bits:</span> {{ 32-cidrSel }}</div>
+    <div class="dt-row"><span class="dt-label">Total addresses:</span> {{ Math.pow(2,32-cidrSel) }} (2^{{32-cidrSel}})</div>
+    <div class="dt-row"><span class="dt-label">Traditional usable hosts:</span> {{ Math.pow(2,32-cidrSel)-2 }}</div>
+    <div class="dt-row"><span class="dt-label">Equivalent /24s:</span> {{ equiv24(cidrSel) }}</div>
+  </div>
+  <div class="callout callout-tip">
+    <strong>Rules:</strong> Shorter prefix = larger network (/22 &gt; /23). `0.0.0.0/0` = default route (matches everything). `192.168.1.10/32` = one host. Longest-prefix match: when multiple routes match, the MOST-SPECIFIC (longest) wins. Three /24s do NOT make an exact /22 (a /22 holds four /24s; the fourth would be covered anyway — check alignment).
+  </div>
+</div>
+
+<!-- 6. FLSM SUBNETTING -->
+<div class="sec" v-show="sec==='flsm'" id="flsm">
+  <h2><span class="ico">🔪</span> FLSM Subnetting (Equal-Size)</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">Fixed-Length Subnet Masking divides a network into subnets all using the SAME prefix length.</p>
+  <div class="formula-box">
+    <div>Subnets = 2^(newPrefix − oldPrefix) · Addresses/subnet = 2^(32−newPrefix) · Usable = 2^(32−newPrefix) − 2</div>
+  </div>
+  <div class="slider-row">
+    <span style="font-size:.84rem">New prefix within 192.168.10.0/24:</span>
+    <input type="range" min="25" max="30" v-model.number="flsmPrefix">
+    <span class="val">/{{ flsmPrefix }}</span>
+  </div>
+  <div class="calc-grid">
+    <div class="calc-item"><div class="cv">{{ Math.pow(2,flsmPrefix-24) }}</div><div class="cl">Number of subnets</div></div>
+    <div class="calc-item"><div class="cv">{{ Math.pow(2,32-flsmPrefix) }}</div><div class="cl">Addresses/subnet</div></div>
+    <div class="calc-item"><div class="cv">{{ Math.pow(2,32-flsmPrefix)-2 }}</div><div class="cl">Usable hosts/subnet</div></div>
+    <div class="calc-item"><div class="cv">{{ blockSize(flsmPrefix) }}</div><div class="cl">Block size</div></div>
+  </div>
+  <table class="data-table">
+    <tr><th>#</th><th>Network</th><th>Usable Range</th><th>Broadcast</th></tr>
+    <tr v-for="n in flsmSubnets" :key="n.idx">
+      <td>{{ n.idx }}</td>
+      <td style="font-family:'Fira Code',monospace">{{ n.net }}</td>
+      <td style="font-family:'Fira Code',monospace">{{ n.range }}</td>
+      <td style="font-family:'Fira Code',monospace">{{ n.bcast }}</td>
+    </tr>
+  </table>
+  <div class="callout callout-warn">
+    <strong>FLSM vs VLSM:</strong> FLSM = same mask everywhere (simple but can waste addresses when needs differ — e.g., one LAN needs 6 hosts, another 100). VLSM = different masks per subnet (efficient, needs classless routing). FLSM is NOT a Cisco command and NOT the same as classful routing.
+  </div>
+</div>
+
+<!-- 7. VLSM -->
+<div class="sec" v-show="sec==='vlsm'" id="vlsm">
+  <h2><span class="ico">🧩</span> VLSM Planner</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">Variable-Length Subnet Masking sizes each subnet to its host count. Input up to 4 host requirements; the planner allocates largest-first from 10.10.0.0/24.</p>
+
+  <h3>Host Requirements</h3>
+  <div class="vlsm-flow">
+    <div class="vlsm-ok" v-for="(req,i) in vlsmReqs" :key="i">
+      Subnet {{ String.fromCharCode(65+i) }}: <input class="num-input" type="number" min="2" max="254" v-model.number="req.hosts" style="width:80px"> hosts
+      → block {{ sizeOf(req.hosts) }} → /{{ 32-log2(sizeOf(req.hosts)) }}
+      → Network 10.10.0.{{ vlsmOffset(i) }} /{{ 32-log2(sizeOf(req.hosts)) }} · Broadcast 10.10.0.{{ vlsmOffset(i)+sizeOf(req.hosts)-1 }}
+    </div>
+  </div>
+
+  <table class="data-table">
+    <tr><th>Subnet</th><th>Hosts</th><th>Prefix</th><th>Block</th><th>Network</th><th>Broadcast</th></tr>
+    <tr v-for="(s,i) in vlsmTable" :key="i">
+      <td><strong>{{ s.name }}</strong></td>
+      <td>{{ s.hosts }}</td>
+      <td style="font-family:'Fira Code',monospace">/{{ s.pre }}</td>
+      <td>{{ s.block }}</td>
+      <td style="font-family:'Fira Code',monospace">{{ s.net }}</td>
+      <td style="font-family:'Fira Code',monospace">{{ s.bcast }}</td>
+    </tr>
+  </table>
+  <div class="callout callout-tip">
+    <strong>VLSM rules:</strong> 1) Allocate LARGEST first to reduce fragmentation. 2) Size = 2^h ≥ hosts + 2 (reserve network + broadcast). 3) Start at valid block boundaries (multiples of block size). 4) Never overlap (e.g., 10.10.0.32/27 inside 10.10.0.0/26 overlaps). 5) Requires a classless routing protocol — RIPv1 does NOT carry masks and cannot support VLSM.
+  </div>
+</div>
+
+<!-- 8. SUMMARIZATION -->
+<div class="sec" v-show="sec==='summary'" id="summary">
+  <h2><span class="ico">🧲</span> Summarization / Supernetting</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">Combine multiple contiguous, aligned subnets into one less-specific prefix. Find common leftmost bits.</p>
+  <div class="formula-box">
+    <div>Supernet prefix = original prefix − log₂(number of blocks)</div>
+    <div class="expr">e.g. 8 × /24 → /24−3 = /21 · 16 × /24 → /20</div>
+  </div>
+  <div class="slider-row">
+    <span style="font-size:.84rem">Number of /24 networks to summarize:</span>
+    <input type="range" min="2" max="8" v-model.number="sumCount">
+    <span class="val">{{ sumCount }}</span>
+  </div>
+  <div class="sum-prompt">
+    <div class="sum-subnet" v-for="i in sumCount" :key="i">192.168.{{ i-1 }}.0/24</div>
+  </div>
+  <div class="calc-grid">
+    <div class="calc-item"><div class="cv">/{{ 24 - log2(sumCount) }}</div><div class="cl">Summary prefix</div></div>
+    <div class="calc-item"><div class="cv">192.168.0.0/{{ 24-log2(sumCount) }}</div><div class="cl" style="font-size:.6rem">Summary address (aligned)</div></div>
+    <div class="calc-item"><div class="cv">{{ Math.pow(2,log2(sumCount)) }}</div><div class="cl">/24s covered</div></div>
+    <div class="calc-item"><div class="cv">{{ Math.pow(2,log2(sumCount))*256 }}</div><div class="cl">Addresses</div></div>
+  </div>
+  <div class="callout callout-warn">
+    <strong>Critical traps:</strong> A summary must be correctly ALIGNED — /22 boundaries are 0, 4, 8, 12 in the relevant octet (so 192.168.1.0/22 is invalid). Three /24s don't make an exact /22 (which holds four; the 4th would be covered anyway — a covering prefix). A summary covers EVERY address inside it, including non-existent space → possible black hole. Use <code>Null0</code> to discard unmatched aggregate traffic, preventing loops.
+  </div>
+  <table class="data-table">
+    <tr><th># /24s</th><th>Supernet</th><th>OSPF</th><th>EIGRP</th><th>BGP</th></tr>
+    <tr v-for="(a,i) in aggMethods" :key="i">
+      <td>{{ a.n }}</td>
+      <td style="font-family:'Fira Code',monospace">{{ a.pre }}</td>
+      <td style="font-family:'Fira Code',monospace">{{ a.ospf }}</td>
+      <td style="font-family:'Fira Code',monospace">{{ a.eigrp }}</td>
+      <td style="font-family:'Fira Code',monospace">{{ a.bgp }}</td>
+    </tr>
+  </table>
+  <div class="callout callout-info">
+    <strong>Aggregation commands:</strong> OSPF `area 1 range 10.1.0.0 255.255.252.0` (inter-area) / `summary-address` (external, ASBR). EIGRP is interface-based: `ip summary-address eigrp 100 10.1.0.0 255.255.252.0`. BGP: `aggregate-address` — add `summary-only` to suppress covered specifics. LPM always prefers specific routes over the aggregate.
+  </div>
+</div>
+
+<!-- 9. MULTICAST -->
+<div class="sec" v-show="sec==='multicast'" id="multicast">
+  <h2><span class="ico">👥</span> Multicast &amp; Unicast/Broadcast Comparison</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">IPv4 multicast uses Class D (224.0.0.0/4) to deliver to a group of interested receivers. Select a multicast topic.</p>
+  <div class="pick-grid">
+    <div class="pick-card" :class="{sel:mcast==='range'}" @click="mcast='range'">
+      <div class="pico">🗺️</div><div class="pn">Ranges</div>
+    </div>
+    <div class="pick-card" :class="{sel:mcast==='mapping'}" @click="mcast='mapping'">
+      <div class="pico">🔗</div><div class="pn">L2 Mapping</div>
+    </div>
+    <div class="pick-card" :class="{sel:mcast==='igmp'}" @click="mcast='igmp'">
+      <div class="pico">📡</div><div class="pn">IGMP / PIM</div>
+    </div>
+    <div class="pick-card" :class="{sel:mcast==='cmp'}" @click="mcast='cmp'">
+      <div class="pico">⚖️</div><div class="pn">Compare</div>
+    </div>
+  </div>
+  <div class="detail-box" v-if="mcast==='range'">
+    <div class="dt-title">IPv4 Multicast Ranges</div>
+    <table class="data-table">
+      <tr><th>Range</th><th>Purpose</th></tr>
+      <tr><td style="font-family:'Fira Code',monospace">224.0.0.0/4</td><td>Entire IPv4 multicast space (Class D)</td></tr>
+      <tr><td style="font-family:'Fira Code',monospace">224.0.0.0/24</td><td>Link-local multicast — NOT forwarded by routers</td></tr>
+      <tr><td style="font-family:'Fira Code',monospace">239.0.0.0/8</td><td>Administratively scoped (private enterprise multicast)</td></tr>
+      <tr><td style="font-family:'Fira Code',monospace">232.0.0.0/8</td><td>Source-Specific Multicast (SSM)</td></tr>
+    </table>
+    <div class="dt-row" style="margin-top:8px"><span class="dt-label">Memorize:</span> 224.0.0.1 = all hosts · .2 = all routers · .5 = OSPF · .6 = OSPF DR/BDR · .9 = RIPv2 · .10 = EIGRP · .22 = IGMPv3</div>
+  </div>
+  <div class="detail-box" v-if="mcast==='mapping'">
+    <div class="dt-title">IPv4 → Ethernet Multicast MAC</div>
+    <div class="dt-row">IPv4 multicast has <strong>28 group bits</strong>; Ethernet maps only <strong>23 bits</strong> to <code style="font-family:'Fira Code',monospace">01:00:5E:0x:xx:xx</code>.</div>
+    <div class="dt-row"><span class="dt-label">Bits lost:</span> 28 − 23 = 5 → 2⁵ = <strong>32 IPv4 multicast groups map to the SAME Ethernet MAC</strong>. This many-to-one collision is normal and expected.</div>
+    <div class="dt-row"><span class="dt-label">Exam trap:</span> The switch can distinguish MACs but the MAC mapping can't uniquely identify every IPv4 multicast group.</div>
+  </div>
+  <div class="detail-box" v-if="mcast==='igmp'">
+    <div class="dt-title">IGMP vs PIM vs IGMP Snooping</div>
+    <div class="dt-row"><span class="dt-label">IGMP:</span> host↔router membership ("who wants group X?") — Layer 3</div>
+    <div class="dt-row"><span class="dt-label">PIM:</span> router↔router multicast routing — PIM-DM (flood→prune), PIM-SM (uses RP), PIM-SSM ((S,G), no RP)</div>
+    <div class="dt-row"><span class="dt-label">IGMP snooping:</span> Layer-2 switch feature that limits multicast flooding to ports with interested receivers</div>
+  </div>
+  <div class="detail-box" v-if="mcast==='cmp'">
+    <div class="dt-title">Unicast vs Broadcast vs Multicast</div>
+    <table class="data-table">
+      <tr><th>Type</th><th>Destination</th><th>Routed?</th><th>Example</th></tr>
+      <tr><td>Unicast</td><td>One host</td><td>Yes</td><td>HTTP, SSH</td></tr>
+      <tr><td>Broadcast</td><td>All in broadcast domain</td><td>Normally not</td><td>ARP, DHCP Discover</td></tr>
+      <tr><td>Multicast</td><td>Interested group members</td><td>Yes</td><td>IPTV, routing protocols</td></tr>
+    </table>
+    <div class="dt-row"><span class="dt-label">Note:</span> Link-local multicast 224.0.0.0/24 is NOT forwarded by routers (this is why OSPF hellos stay local).</div>
+  </div>
+  <div class="callout callout-warn">
+    <strong>Broadcast key points:</strong> Directed broadcast = host bits all 1 for a subnet (e.g., 192.168.10.255). Limited broadcast = 255.255.255.255 (local only, never routed). Routers are broadcast boundaries. RIPv1 uses broadcast 255.255.255.255; RIPv2 uses multicast 224.0.0.9. IPv6 doesn't use ARP/broadcast — it uses Neighbor Discovery.
+  </div>
+</div>
+
+<!-- 10. COMMANDS -->
+<div class="sec" v-show="sec==='cmds'" id="commands">
+  <h2><span class="ico">⌨️</span> Configuration &amp; Verification Commands</h2>
+  <div class="cmd-tabs">
+    <button class="cmd-tab" :class="{on:activeCmd===c.id}" v-for="c in commands" :key="c.id" @click="activeCmd=c.id">{{ c.label }}</button>
+  </div>
+  <div class="cmd-block">{{ activeCommand.config }}</div>
+  <div class="callout callout-info" v-if="activeCommand.note" style="margin-top:8px">
+    <strong>Note:</strong> {{ activeCommand.note }}
+  </div>
+</div>
+
+<!-- 11. TRAPS -->
+<div class="sec" v-show="sec==='traps'" id="traps">
+  <h2><span class="ico">⚠️</span> Exam Traps</h2>
+  <div class="trap-list">
+    <div class="trap" v-for="(t,i) in traps" :key="i">
+      <strong>{{ t.tag }}:</strong> {{ t.text }}
+    </div>
+  </div>
+</div>
+
+<!-- 12. QUIZ -->
+<div class="sec" v-show="sec==='quiz'" id="quiz">
+  <h2><span class="ico">📝</span> Quiz</h2>
+  <div v-if="!quizDone">
+    <div class="quiz-q" v-for="(q,qi) in quizQuestions" :key="qi">
+      <h4><span class="qnum">Q{{ qi+1 }}.</span> {{ q.q }}</h4>
+      <div class="quiz-opts">
+        <div class="quiz-opt" v-for="(o,oi) in q.opts" :key="oi"
+             :class="{chosen:q.ans===oi}" @click="q.ans=oi">{{ o.text }}</div>
+      </div>
+    </div>
+    <button class="quiz-btn" :disabled="!allQuizAnswered" @click="submitQuiz">Submit Answers</button>
+  </div>
+  <div v-else>
+    <div class="quiz-score">
+      Score: {{ quizScore }} / {{ quizQuestions.length }}
+      ({{ Math.round(quizScore/quizQuestions.length*100) }}%)
+    </div>
+    <div class="quiz-q" v-for="(q,qi) in quizQuestions" :key="qi">
+      <h4>
+        <span class="qnum">Q{{ qi+1 }}.</span> {{ q.q }}
+        <span v-if="q.ans===q.correct" style="color:var(--accent2);margin-left:8px">✓ Correct</span>
+        <span v-else style="color:var(--red);margin-left:8px">✗ Wrong — Answer: {{ q.opts[q.correct].text }}</span>
+      </h4>
+      <div class="quiz-opts">
+        <div class="quiz-opt" v-for="(o,oi) in q.opts" :key="oi"
+             :class="{correct:oi===q.correct,wrong:q.ans===oi&&oi!==q.correct}">{{ o.text }}</div>
+      </div>
+    </div>
+    <button class="quiz-btn" @click="resetQuiz" style="margin-top:12px">Retry Quiz</button>
+  </div>
+</div>
+
+<!-- 13. CHECKLIST -->
+<div class="sec" v-show="sec==='checklist'" id="checklist">
+  <h2><span class="ico">✅</span> Study Checklist</h2>
+  <div class="chk-list">
+    <div class="chk-item" v-for="(c,i) in checklist" :key="i" :class="{done:c.done}" @click="c.done=!c.done;saveChecklist()">
+      <div class="chk-box">{{ c.done ? '✓' : '' }}</div>
+      <span>{{ c.text }}</span>
+    </div>
+  </div>
+  <div style="margin-top:10px;font-size:.84rem;color:var(--muted)">
+    {{ doneCount }} / {{ checklist.length }} complete
+  </div>
+</div>
+
+</div><!-- wrap -->
+</div><!-- app -->
+
+<script src="../vue.global.prod.js"></script>
+<script>
+(function(){
+  const {createApp,ref,reactive,computed,watch} = Vue;
+  createApp({
+    setup(){
+      const theme = ref(localStorage.getItem('ccnp.ipv4.theme')||'dark');
+      const sec = ref('struct');
+      watch(theme,v=>localStorage.setItem('ccnp.ipv4.theme',v));
+
+      const sections = [
+        {id:'struct',label:'Structure',icon:'🏗️'},
+        {id:'binary',label:'Binary',icon:'🔢'},
+        {id:'subcalc',label:'Subnet Calc',icon:'🧮'},
+        {id:'classes',label:'Classes/Ranges',icon:'🏷️'},
+        {id:'cidr',label:'CIDR',icon:'📐'},
+        {id:'flsm',label:'FLSM',icon:'🔪'},
+        {id:'vlsm',label:'VLSM',icon:'🧩'},
+        {id:'summary',label:'Summarize',icon:'🧲'},
+        {id:'multicast',label:'Multicast',icon:'👥'},
+        {id:'cmds',label:'Commands',icon:'⌨️'},
+        {id:'traps',label:'Traps',icon:'⚠️'},
+        {id:'quiz',label:'Quiz',icon:'📝'},
+        {id:'checklist',label:'Checklist',icon:'✅'}
+      ];
+
+      /* ===== STRUCTURE ===== */
+      const netbits = ref(24);
+      const octSel = ref(1);
+      const octets = computed(()=>{
+        const ip=[192,168,10,37];
+        const nb=netbits.value;
+        // i = octet index (0-based). Octets fully before the boundary octet are
+        // pure network; octets after the full network octets are pure host.
+        const netOctets = Math.ceil(nb/8);
+        const boundaryIsWholeOctet = (nb % 8 === 0);
+        return ip.map((dec,i)=>{
+          let type;
+          if(boundaryIsWholeOctet){
+            type = (i < netOctets) ? 'N' : 'H';
+          } else {
+            // boundary octet is partially network/host; rest follow
+            type = (i < netOctets-1) ? 'N' : (i > netOctets-1 ? 'H' : 'N');
+          }
+          return {dec,bin:decToBin(dec),weights:octWeights(dec),type};
+        });
+      });
+      function octWeights(d){
+        const w=[128,64,32,16,8,4,2,1];
+        let s=[];
+        for(let i=0;i<8;i++){ s.push(d&(1<<(7-i))?w[i]:'_'); }
+        return s.join(' ');
+      }
+      function decToBin(d){
+        let b='';
+        for(let i=7;i>=0;i--){ b+= (d & (1<<i))? '1':'0'; }
+        return b;
+      }
+      function maskFor(pre){
+        const oct=[0,0,0,0];
+        for(let i=0;i<4;i++){
+          const bits=Math.max(0,Math.min(8,pre-i*8));
+          oct[i]= bits===0?0 : (256 - Math.pow(2,8-bits));
+        }
+        return oct.join('.');
+      }
+      function blockSize(pre){
+        // block size in the interesting octet = 2^(32-pre) if pre>=24
+        return pre>=24 ? Math.pow(2,32-pre) : Math.pow(2, (pre%8===0?8:8-(pre%8)) );
+      }
+      function blockOct(pre){ return 256-blockSize(pre); }
+
+      /* ===== BINARY ===== */
+      const decVal = ref(192);
+      const commonBins = [
+        [0,'00000000',128,'10000000'],
+        [1,'00000001',192,'11000000'],
+        [4,'00000100',224,'11100000'],
+        [8,'00001000',240,'11110000'],
+        [16,'00010000',248,'11111000'],
+        [32,'00100000',252,'11111100'],
+        [64,'01000000',254,'11111110'],
+        [127,'01111111',255,'11111111']
+      ];
+      const weightBreakdown = computed(()=>{
+        const w=[128,64,32,16,8,4,2,1];
+        const parts=[];
+        for(let i=0;i<8;i++){
+          if(decVal.value & (1<<(7-i))) parts.push(w[i]);
+        }
+        return decVal.value + ' = ' + parts.join(' + ') + '  (' + decToBin(decVal.value) + ')';
+      });
+
+      /* ===== SUBNET CALC ===== */
+      const hostEx = ref(130);
+      const subPrefix = ref(26);
+      function subnetNet(){
+        const bs=blockSize(subPrefix.value);
+        return Math.floor(hostEx.value/bs)*bs;
+      }
+      const subnetBroadcast = computed(()=> subnetNet()+blockSize(subPrefix.value)-1);
+
+      /* ===== CLASSES ===== */
+      const classTable = [
+        {cls:'A',range:'0–127',bits:'0',mask:'/8',use:'Very large networks'},
+        {cls:'B',range:'128–191',bits:'10',mask:'/16',use:'Medium networks'},
+        {cls:'C',range:'192–223',bits:'110',mask:'/24',use:'Small networks'},
+        {cls:'D',range:'224–239',bits:'1110',mask:'—',use:'Multicast'},
+        {cls:'E',range:'240–255',bits:'1111',mask:'—',use:'Reserved/experimental'}
+      ];
+      const atype = ref('private');
+      const rangeData = computed(()=>{
+        const d = {
+          private:{name:'Private (RFC 1918)',cidr:'10.0.0.0/8 · 172.16.0.0/12 · 192.168.0.0/16',routable:'Internally yes; NOT globally on the public Internet',purpose:'Private LANs, DCs, VPNs, VRFs. Reusable across orgs. Overlapping space is a design concern (mergers/VRFs).',trap:'172.16–172.31 private, but 172.32+ is NOT RFC 1918. 100.64.0.0/10 is CGNAT shared, NOT private. NAT hides addressing but is NOT a security control.'},
+          public:{name:'Public IPv4',cidr:'Globally unicast, not private/special-purpose',routable:'Eligible for public Internet routing',purpose:'Internet-facing servers, edge routers, WAN, cloud. Allocated IANA → RIR → ISP/LIR → customer. Anycast uses the SAME public IP from multiple locations.',trap:'Public ≠ anything outside RFC 1918 (special-purpose ranges too). Public ≠ automatically reachable (firewalls/ACLs/NAT). 8.8.8.8 is public (Google DNS).'},
+          apipa:{name:'APIPA / IPv4 Link-Local',cidr:'169.254.0.0/16',routable:'No — local link only',purpose:'Auto-assigned when DHCP fails; Microsoft term "APIPA", standard term "IPv4 Link-Local". Uses ARP DAD. No usable gateway.',trap:'NOT RFC 1918. Symptom of DHCP/network failure. IPv6 equivalent fe80::/10 is NORMAL (not a failure symptom).'},
+          loopback:{name:'Loopback',cidr:'127.0.0.0/8 (e.g., 127.0.0.1)',routable:'No — local host only',purpose:'Tests the local IP stack; traffic never sent on physical network. A Cisco Loopback0 is a DIFFERENT concept — a virtual L3 interface for router ID, BGP peering, management (stable up/up, usually /32).',trap:'127.0.0.1 ≠ Loopback0. ping 127.0.0.1 tests only local stack, not LAN/gateway/internet.'},
+          multicast:{name:'Multicast (Class D)',cidr:'224.0.0.0/4',routable:'Yes (link-local 224.0.0.0/24 is not forwarded)',purpose:'Group delivery. IGMP (host/router membership), PIM (routing), IGMP snooping (switch). 28 IP group bits map to 23 Ethernet MAC bits → 32-to-1 collision.',trap:'Multicast ≠ broadcast. No host/network split in Class D. SSM 232.0.0.0/8 needs no RP; PIM-SM uses RP.'},
+          broadcast:{name:'Broadcast',cidr:'Directed (host bits all 1) · Limited 255.255.255.255',routable:'Directed: normally not forwarded · Limited: never routed',purpose:'Directed = all hosts in a specific subnet (192.168.10.255 for /24). Limited = local broadcast domain only. Ethernet FF:FF:FF:FF:FF:FF. Routers are broadcast boundaries. ARP uses broadcast; RIPv1 broadcast, RIPv2 multicast.',trap:'255.255.255.255 is the limited broadcast, NOT every subnet\'s broadcast. 10.1.10.79 is NOT the broadcast of 10.1.10.64/26 (that\'s .127).'},
+          cgnat:{name:'CGNAT Shared Space',cidr:'100.64.0.0/10',routable:'Carrier-grade NAT shared space',purpose:'Used by ISPs for Carrier-Grade NAT.',trap:'100.64.0.0/10 is NOT RFC 1918 private. Don\'t call every special-purpose range "private".'},
+          doc:{name:'Documentation Space',cidr:'192.0.2.0/24 · 198.51.100.0/24 · 203.0.113.0/24',routable:'Documentation only (RFC 5737)',purpose:'Examples and labs — not production public addresses.',trap:'Don\'t treat these as real Internet-routable production addresses.'}
+        };
+        return d[atype.value]||d.private;
+      });
+      const classify = ref('priv10');
+      const classifyOpts = [
+        {k:'priv10',t:'10.1.1.1',ico:'🔒',ex:'10.1.1.1',desc:'RFC 1918 private (/8)'},
+        {k:'priv172',t:'172.16.1.1',ico:'🔒',ex:'172.16.1.1',desc:'RFC 1918 private (/12)'},
+        {k:'non172',t:'172.32.1.1',ico:'🌍',ex:'172.32.1.1',desc:'NOT RFC 1918 (private-link range ends at 172.31)'},
+        {k:'priv192',t:'192.168.1.1',ico:'🔒',ex:'192.168.1.1',desc:'RFC 1918 private (/16)'},
+        {k:'loop',t:'127.0.0.1',ico:'🔁',ex:'127.0.0.1',desc:'Loopback'},
+        {k:'link',t:'169.254.1.1',ico:'🔌',ex:'169.254.1.1',desc:'IPv4 link-local / APIPA'},
+        {k:'cgnat',t:'100.64.1.1',ico:'🎚️',ex:'100.64.1.1',desc:'CGNAT shared address space'},
+        {k:'public',t:'8.8.8.8',ico:'🌍',ex:'8.8.8.8',desc:'Public IPv4 (Google DNS)'}
+      ];
+
+      /* ===== CIDR ===== */
+      const cidrSel = ref(26);
+      const cidrPoints = [
+        {pre:8,mask:'255.0.0.0'},{pre:16,mask:'255.255.0.0'},
+        {pre:20,mask:'255.255.240.0'},{pre:21,mask:'255.255.248.0'},
+        {pre:22,mask:'255.255.252.0'},{pre:23,mask:'255.255.254.0'},
+        {pre:24,mask:'255.255.255.0'},{pre:25,mask:'255.255.255.128'},
+        {pre:26,mask:'255.255.255.192'},{pre:27,mask:'255.255.255.224'},
+        {pre:28,mask:'255.255.255.240'},{pre:29,mask:'255.255.255.248'},
+        {pre:30,mask:'255.255.255.252'},{pre:31,mask:'255.255.255.254'},
+        {pre:32,mask:'255.255.255.255'}
+      ];
+      const equiv24 = (pre)=> pre<=24 ? Math.pow(2,24-pre) : '—';
+
+      /* ===== FLSM ===== */
+      const flsmPrefix = ref(27);
+      const flsmSubnets = computed(()=>{
+        const bs=blockSize(flsmPrefix.value);
+        const count=256/bs;
+        const rows=[];
+        for(let i=0;i<count;i++){
+          const net=i*bs;
+          rows.push({
+            idx:i+1,
+            net:'192.168.10.'+net+'/'+flsmPrefix.value,
+            range:'192.168.10.'+(net+1)+' – 192.168.10.'+(net+bs-2),
+            bcast:'192.168.10.'+(net+bs-1)
+          });
+        }
+        return rows;
+      });
+
+      /* ===== VLSM ===== */
+      const vlsmReqs = reactive([{hosts:50},{hosts:25},{hosts:10},{hosts:2}]);
+      function sizeOf(h){ let s=2; while(s< h+2) s*=2; return s; }
+      function vlsmOffset(i){
+        let off=0;
+        for(let k=0;k<i;k++){ off+=sizeOf(vlsmReqs[k].hosts); }
+        return off;
+      }
+      const vlsmTable = computed(()=>{
+        return vlsmReqs.map((r,i)=>{
+          const block=sizeOf(r.hosts);
+          const pre=32-log2(block);
+          const off=vlsmOffset(i);
+          return {name:'Subnet '+String.fromCharCode(65+i),hosts:r.hosts,pre:pre,block:block,net:'10.10.0.'+off,bcast:'10.10.0.'+(off+block-1)};
+        });
+      });
+
+      /* ===== SUMMARY ===== */
+      const sumCount = ref(4);
+      const log2 = n=> Math.log(n)/Math.LN2;
+      const aggMethods = [
+        {n:'2',pre:'/23',ospf:'area 1 range 192.168.0.0 255.255.254.0',eigrp:'ip summary-address eigrp ... 192.168.0.0 255.255.254.0',bgp:'aggregate-address 192.168.0.0 255.255.254.0'},
+        {n:'4',pre:'/22',ospf:'area range 255.255.252.0',eigrp:'ip summary-address ... 255.255.252.0',bgp:'aggregate-address ... 255.255.252.0'},
+        {n:'8',pre:'/21',ospf:'area range 255.255.248.0',eigrp:'ip summary-address ... 255.255.248.0',bgp:'aggregate-address ... 255.255.248.0'}
+      ];
+
+      /* ===== MULTICAST ===== */
+      const mcast = ref('range');
+
+      /* ===== COMMANDS ===== */
+      const activeCmd = ref('config');
+      const commands = [
+        {id:'config',label:'Addressing',config:'# Configure IPv4 address (standard syntax uses dotted-decimal mask)\ninterface GigabitEthernet0/1\n ip address 192.168.1.1 255.255.255.0\n no shutdown\n\n# Loopback interface\ninterface Loopback0\n ip address 10.255.255.1 255.255.255.255\n\n# Configure SVIs / VLAN interfaces (Layer 3 gateways)\ninterface Vlan10\n ip address 10.1.10.1 255.255.255.0',note:'Cisco CLI config uses the dotted-decimal subnet mask, not /n notation. A Loopback0 is a virtual L3 interface (stable, usually /32) — different from 127.0.0.1.'},
+        {id:'verify',label:'Verification',config:'# Quick interface status / IP\nshow ip interface brief\n\n# Detailed interface IP info\nshow ip interface GigabitEthernet0/1\n\n# Running config for an interface\nshow running-config interface GigabitEthernet0/1\n\n# Routing table\nshow ip route\nshow ip route connected\nshow ip route 192.168.1.0',note:'show ip interface brief is the quick health check (interface IP + status).'},
+        {id:'subnet',label:'Subnetting/Summary',config:'# Static summarized route + Null0 safety (discard unmatched)\nip route 192.168.0.0 255.255.252.0 10.0.0.1\nip route 10.1.0.0 255.255.252.0 Null0\n\n# EIGRP interface summary\ninterface GigabitEthernet0/1\n ip summary-address eigrp 100 10.1.0.0 255.255.252.0\n\n# OSPF area summarization (ABR)\nrouter ospf 1\n area 1 range 10.1.0.0 255.255.252.0\n\n# OSPF external summarization (ASBR)\nsummary-address 10.1.0.0 255.255.252.0\n\n# BGP aggregation\nrouter bgp 65001\n aggregate-address 10.1.0.0 255.255.252.0\n aggregate-address 10.1.0.0 255.255.252.0 summary-only',note:'OSPF area range = inter-area (ABR); summary-address = external (ASBR). EIGRP summarization is interface-based. BGP summary-only suppresses covered specifics from being advertised (they still exist locally).'},
+        {id:'multicast',label:'Multicast',config:'# Enable IPv4 multicast routing\nip multicast-routing\n\n# Enable PIM on an interface\ninterface GigabitEthernet0/1\n ip pim sparse-mode\n\n# Configure IGMP version\ninterface GigabitEthernet0/1\n ip igmp version 3\n\n# Verify\nshow ip mroute\nshow ip igmp groups\nshow ip pim neighbor',note:'IGMP = host/router membership. PIM = multicast routing (SM uses RP, SSM doesn\'t). IGMP snooping is a Layer-2 switch feature, not a router command.'},
+        {id:'broadcast',label:'Broadcast/APIPA',config:'# Disable directed-broadcast forwarding (anti-Smurf)\ninterface GigabitEthernet0/1\n no ip directed-broadcast\n\n# Storm control for broadcast\ninterface GigabitEthernet0/1\n storm-control broadcast level 20\n\n# Simple IOS DHCP server\nip dhcp excluded-address 10.1.10.1\nip dhcp pool CLIENTS\n network 10.1.10.0 255.255.255.0\n default-router 10.1.10.1\n\n# Verify DHCP\nshow ip dhcp binding\nshow ip dhcp pool\nshow ip dhcp server statistics',note:'A working DHCP path is the fix for APIPA, not manually configuring 169.254.x.x. Routers are broadcast boundaries.'}
+      ];
+      const activeCommand = computed(()=> commands.find(c=>c.id===activeCmd.value)||commands[0]);
+
+      /* ===== TRAPS ===== */
+      const traps = [
+        {tag:'32-bit',text:'IPv4 = 32 bits (4×8). Total space = 2³² = 4,294,967,296. Address alone does NOT reveal subnet — need mask/prefix.'},
+        {tag:'-2 rule exceptions',text:'2^h − 2 doesn\'t apply to /31 (point-to-point, RFC 3021 — both addresses usable) or /32 (single host route).'},
+        {tag:'Network vs broadcast',text:'Network = host bits all 0 (IP AND mask). Broadcast = host bits all 1. Neither is normally assigned to a host.'},
+        {tag:'/24 ≠ 24 hosts',text:'/24 means 24 network bits → 8 host bits → 256 addresses, 254 traditional usable. Block size is NOT the prefix number.'},
+        {tag:'Interesting octet',text:'Block size = 256 − interesting mask octet. 172.16.50.77/20 (255.255.240.0) — interesting octet is the THIRD, not fourth: block 16, boundary 48, network 172.16.48.0.'},
+        {tag:'Subnet ≠ wildcard',text:'Subnet mask 255.255.255.0 is NOT wildcard 0.0.0.255. Wildcard = inverse; in wildcards, 0 = must match, 1 = don\'t care.'},
+        {tag:'Class doesn\'t set mask',text:'172.16.1.1/24 or /27 is valid — modern CIDR prefix wins over historical Class B. Classful routing protocols (RIPv1/IGRP) don\'t carry masks.'},
+        {tag:'Private trap',text:'172.16–172.31 private; 172.32+ is NOT. 100.64.0.0/10 = CGNAT, not private. Private ≠ unroutable (routes internally). NAT ≠ security.'},
+        {tag:'127.0.0.1 ≠ Loopback0',text:'127.0.0.1 tests local stack only (never on wire). Cisco Loopback0 is a stable virtual L3 interface for router ID/peering/management.'},
+        {tag:'255.255.255.255',text:'This is the LIMITED broadcast, not every subnet\'s broadcast. Directed broadcast of 192.168.10.0/24 is 192.168.10.255.'},
+        {tag:'RIPv1 vs RIPv2',text:'RIPv1 = broadcast (255.255.255.255); RIPv2 = multicast (224.0.0.9). IPv6 uses ND, not ARP/broadcast.'},
+        {tag:'Multicast MAC collision',text:'28 IPv4 multicast group bits map to only 23 Ethernet MAC bits → 5 lost → 32 IPv4 groups map to ONE 01:00:5E MAC. Normal, not an error.'},
+        {tag:'Multicast vs broadcast',text:'Multicast = interested group members, IS routed (except link-local 224.0.0.0/24). Broadcast = all in domain, normally NOT routed.'},
+        {tag:'ALPM wins',text:'Longest-prefix match always beats a less-specific aggregate. /24 beats /22, /32 beats /27. Not "who was configured first".'},
+        {tag:'3 × /24 ≠ exact /22',text:'A /22 holds FOUR /24s. Three networks summarized as /22 become a covering prefix including the 4th — watch alignment and black holes. /22 third-octet boundaries: 0,4,8,12.'},
+        {tag:'APIPA is a symptom',text:'169.254.x.x on a DHCP client = DHCP/connectivity failure to investigate — fix DHCP, don\'t manually assign APIPA. fe80::/10 (IPv6 link-local) is NORMAL.'}
+      ];
+
+      /* ===== QUIZ ===== */
+      const quizQuestions = reactive([
+        {q:'How many bits are in an IPv4 address?',opts:[{text:'32 bits'},{text:'16 bits'},{text:'48 bits'},{text:'64 bits'}],ans:null,correct:0},
+        {q:'What is 11000000 in decimal?',opts:[{text:'192'},{text:'128'},{text:'200'},{text:'224'}],ans:null,correct:0},
+        {q:'For a traditional /24 subnet (2^8 addresses), how many usable hosts?',opts:[{text:'254'},{text:'256'},{text:'24'},{text:'255'}],ans:null,correct:0},
+        {q:'Which of these is RFC 1918 private?',opts:[{text:'172.16.1.1'},{text:'172.32.1.1'},{text:'100.64.1.1'},{text:'169.254.1.1'}],ans:null,correct:0},
+        {q:'What is the broadcast address of 10.1.10.64/26?',opts:[{text:'10.1.10.127'},{text:'10.1.10.79'},{text:'10.1.10.63'},{text:'10.1.10.128'}],ans:null,correct:0},
+        {q:'Which /31 is used for point-to-point links allowing both addresses?',opts:[{text:'RFC 3021 /31'},{text:'RFC 1918 /31'},{text:'Classful /31'},{text:'/32'}],ans:null,correct:0},
+        {q:'The 169.254.0.0/16 range is what?',opts:[{text:'IPv4 link-local / APIPA'},{text:'RFC 1918 private'},{text:'Public'},{text:'Multicast'}],ans:null,correct:0},
+        {q:'How many IPv4 multicast groups can map to one Ethernet multicast MAC?',opts:[{text:'32'},{text:'8'},{text:'16'},{text:'2'}],ans:null,correct:0},
+        {q:'Which protocol supports VLSM?',opts:[{text:'OSPF'},{text:'RIPv1'},{text:'IGRP'},{text:'None'}],ans:null,correct:0},
+        {q:'8 contiguous /24 networks aggregate into:',opts:[{text:'/21'},{text:'/24'},{text:'/23'},{text:'/22'}],ans:null,correct:0},
+        {q:'What is the limited broadcast address?',opts:[{text:'255.255.255.255'},{text:'255.255.255.0'},{text:'0.0.0.0'},{text:'224.0.0.1'}],ans:null,correct:0},
+        {q:'127.0.0.1 is used to:',opts:[{text:'Test the local IP stack'},{text:'Test the gateway'},{text:'Test Internet connectivity'},{text:'Identify a router'}],ans:null,correct:0}
+      ]);
+      const quizDone = ref(false);
+      const quizScore = ref(0);
+      const allQuizAnswered = computed(()=> quizQuestions.every(q=>q.ans!==null));
+      function submitQuiz(){
+        quizScore.value = quizQuestions.filter((q,i)=>q.ans===q.correct).length;
+        quizDone.value = true;
+        localStorage.setItem('ccnp.ipv4.quiz',JSON.stringify({score:quizScore.value,total:quizQuestions.length}));
+      }
+      function resetQuiz(){
+        quizQuestions.forEach(q=>q.ans=null);
+        quizDone.value=false;
+        quizScore.value=0;
+        localStorage.removeItem('ccnp.ipv4.quiz');
+      }
+
+      /* ===== CHECKLIST ===== */
+      const checklist = reactive(JSON.parse(localStorage.getItem('ccnp.ipv4.checklist')||'null')||[
+        {text:'Know IPv4 = 32 bits, 4 octets, dotted-decimal; octet range 0–255',done:false},
+        {text:'Memorize bit weights 128 64 32 16 8 4 2 1; convert binary↔decimal fast',done:false},
+        {text:'Know network = IP AND mask (host bits 0); broadcast = host bits 1',done:false},
+        {text:'Memorize common masks: /24 .0, /26 .192, /27 .224, /28 .240, /30 .252',done:false},
+        {text:'Memorize the two -2 exceptions: /31 (P2P) and /32 (host route)',done:false},
+        {text:'Understand CIDR: prefix replaces classes; shorter = larger network; LPM wins',done:false},
+        {text:'Memorize RFC 1918: 10/8, 172.16/12, 192.168/16 (172.32+ is not private)',done:false},
+        {text:'Distinguish special ranges: public, private, APIPA/169.254/16, loopback/127/8, multicast/224/4, CGNAT/100.64/10, doc space',done:false},
+        {text:'Know directed vs limited broadcast; 255.255.255.255 = limited; routers = broadcast boundary',done:false},
+        {text:'Subnet with the magic number: block size = 256 − interesting octet; find network/broadcast',done:false},
+        {text:'Distinguish FLSM (same mask) vs VLSM (variable, largest-first, aligned, non-overlapping)',done:false},
+        {text:'Know VLSM sizing: 2^h ≥ hosts + 2; RIPv1 can\'t support VLSM, OSPF/EIGRP/RIPv2/BGP can',done:false},
+        {text:'Understand summarization/supernetting: common leftmost bits, alignment, covering prefix, /22 = 4 /24s',done:false},
+        {text:'Know aggregation commands: OSPF area range, EIGRP ip summary-address, BGP aggregate-address (+summary-only), Null0 safety',done:false},
+        {text:'Know multicast: 224.0.0.0/4, link-local /24 not routed, 28→23 MAC bits (32:1), IGMP/PIM/IGMP snooping',done:false}
+      ]);
+      const doneCount = computed(()=> checklist.filter(c=>c.done).length );
+      function saveChecklist(){ localStorage.setItem('ccnp.ipv4.checklist',JSON.stringify(checklist)); }
+
+      return {
+        theme,sec,sections,
+        netbits,octSel,octets,maskFor,blockSize,blockOct,
+        decVal,commonBins,decToBin,weightBreakdown,
+        hostEx,subPrefix,subnetNet,subnetBroadcast,
+        classTable,atype,rangeData,classify,classifyOpts,
+        cidrSel,cidrPoints,equiv24,
+        flsmPrefix,flsmSubnets,
+        vlsmReqs,sizeOf,vlsmOffset,log2,vlsmTable,
+        sumCount,aggMethods,
+        mcast,
+        activeCmd,commands,activeCommand,
+        traps,
+        quizQuestions,quizDone,quizScore,allQuizAnswered,submitQuiz,resetQuiz,
+        checklist,doneCount,saveChecklist
+      };
+    }
+  }).mount('#app');
+})();
+</script>
+</body>
+</html>

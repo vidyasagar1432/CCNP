@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Glossary/Forwarding.md",
+                "file": "Level 09 - Routing Fundamentals/12. Dynamic Routing.md",
                 "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Forwarding"
+              "title": "12. Dynamic Routing"
             }
           },
           {
@@ -27,16 +27,15 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Level 11 - EIGRP/01. DUAL.md",
+                "file": "Level 13 - Route Redistribution/01. OSPF to EIGRP.md",
                 "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "01. DUAL"
+              "title": "01. OSPF to EIGRP"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       },
       {
         "id": "00800c293e289829",
@@ -192,7 +191,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Level 11 - EIGRP/01. DUAL.md",
+                "file": "Level 09 - Routing Fundamentals/12. Dynamic Routing.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -233,12 +232,33 @@
   },
   "active": "7d89de05ca9fb5db",
   "lastOpenFiles": [
-    "check_html_vue.py",
-    "Level 11 - EIGRP/How EIGRP Works.html",
+    "Level 06 - IPv6/How IPv6 Works.html",
+    "Level 09 - Routing Fundamentals/11. Route Summarization.md",
+    "Level 09 - Routing Fundamentals/10. Default Route.md",
+    "Level 09 - Routing Fundamentals/08. Static Routing.md",
+    "Level 09 - Routing Fundamentals/07. CEF.md",
+    "Level 09 - Routing Fundamentals/06. RIB.md",
+    "Level 09 - Routing Fundamentals/05. FIB.md",
+    "Level 09 - Routing Fundamentals/04. Recursive Lookup.md",
+    "Level 09 - Routing Fundamentals/03. Metrics.md",
+    "Level 09 - Routing Fundamentals/02. Administrative Distance.md",
+    "Level 09 - Routing Fundamentals/Routing Fundamentals Overview.md",
+    "Level 11 - EIGRP/01. DUAL.md",
+    "Level 05 - IPv4/How IPv4 Works.html",
+    "Level 04 - Ethernet & Switching/How Ethernet and Switching Work.html",
+    "Level 03 - OSI & TCP IP/How the OSI and TCPIP Models Work.html",
+    "Level 02 - Network Topologies/How Network Topologies Work.html",
+    "Level 01 - Physical Layer/How the Physical Layer Works.html",
+    "Level 00 - Networking Basics/How Networking Works.html",
+    "Level 12 - BGP/How BGP Works.html",
+    "Glossary/Forwarding.md",
+    "Level 13 - Route Redistribution/01. OSPF to EIGRP.md",
+    "__pycache__/check_html_vue.cpython-314.pyc",
+    "__pycache__",
+    "Level 13 - Route Redistribution/How Route Redistribution Works.html",
     "copilot/copilot-conversations/agent__create_a_single_html_file_in_Level_11_EIGRP_that@20260829_231542.md",
     "Glossary/Dynamic Routing.md",
     "Level 09 - Routing Fundamentals/12. Dynamic Routing.md",
-    "Glossary/Forwarding.md",
     "Glossary/Git.md",
     "Glossary/Gratuitous ARP.md",
     "Glossary/Glossary.md",
@@ -247,27 +267,6 @@
     "Glossary/QoS.md",
     "Glossary/Troubleshooting.md",
     "Glossary/IOS XE.md",
-    "Glossary/ROMMON.md",
-    "Glossary/Configuration Archive.md",
-    "Glossary/IOS Upgrade.md",
-    "Glossary/IOS File System.md",
-    "Glossary/Smart Licensing.md",
-    "Glossary/Cisco Licensing.md",
-    "Glossary/Cisco IOS.md",
-    "Glossary/High Availability.md",
-    "Glossary/Virtual Switching System.md",
-    "Glossary/ISSU.md",
-    "Glossary/Redundant Supervisors.md",
-    "Glossary/NSF.md",
-    "Glossary/SSO.md",
-    "Glossary/DR",
-    "Glossary",
-    "fix_glued.py",
-    "check_md.py",
-    "copilot/projects/CCNP",
-    "copilot/projects",
-    "Level 28 - Cisco IOS and IOS XE/11. Device-Level Security Hardening.json",
-    "Level 28 - Cisco IOS and IOS XE/10. YANG & RESTCONF.json",
-    "Level 28 - Cisco IOS and IOS XE/09. IOS XE Architecture (Linux-based).json"
+    "Glossary/ROMMON.md"
   ]
 }

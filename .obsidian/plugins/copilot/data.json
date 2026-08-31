@@ -3760,15 +3760,6 @@
     {
       "providerId": "20f1e404-0006-478e-803d-e523437c9b10",
       "info": {
-        "id": "opencode/hy3-free",
-        "displayName": "OpenCode Zen/Hy3 Free"
-      },
-      "configuredModelId": "a145c6ab-1e34-409e-8d0a-d038704d11a1",
-      "configuredAt": 1787901353860
-    },
-    {
-      "providerId": "20f1e404-0006-478e-803d-e523437c9b10",
-      "info": {
         "id": "opencode/mimo-v2.5-free",
         "displayName": "OpenCode Zen/MiMo V2.5 Free"
       },

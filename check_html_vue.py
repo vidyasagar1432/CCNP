@@ -16,12 +16,15 @@ works for any page using the vault's local vue.global.prod.js):
          setup() state (refs unwrapped like Vue's instance proxy)
        - catches mount-time crashes like
          "TypeError: can't access property 'key', c is undefined"
-  4. App-state smoke tests (EIGRP page)
-       - DUAL feasibility verdicts (RD<FD / RD=FD / RD>FD)
-       - EIGRP metric math (classic + wide)
-       - convergence simulator transitions
-       - quiz answer-all-correct scoring
-       - checklist toggling and command-viewer switching
+  4. App-state smoke tests
+       - EIGRP page: DUAL feasibility verdicts (RD<FD / RD=FD / RD>FD)
+         metric math (classic + wide), convergence simulator, adjacency animation
+       - Level 13: redistribution scenario switch, seed explorer + 5-tuple math,
+         AD duel, tag-flow animation, loop-prevention simulator
+       - Any page: quiz all-correct scoring, checklist toggling, command viewer
+       Tests whose state keys are absent are skipped with a note — the list above
+       is era-safe: running one level's page against the other level's tests
+       skips cleanly.
 
 Pages with a different mount style (e.g. `index.html` with app.mount(...))
 still get checks 1-3; check 4 is skipped with a note.
@@ -29,6 +32,7 @@ still get checks 1-3; check 4 is skipped with a note.
 Usage:
     python3 check_html_vue.py [page.html]
     python3 check_html_vue.py                     # Level 11 - EIGRP/How EIGRP Works.html
+    python3 check_html_vue.py "Level 13 - Route Redistribution/How Route Redistribution Works.html"
 
 Exit code 0 = all checks passed, 1 = something failed.
 """
@@ -192,8 +196,8 @@ if (!sm) {
 }
 const body = sm[1];
 const setupSrc = "(function(){"
-  + " const { ref, computed } = globalThis.__vue;"
-  + " const LS={theme:'ccnp.eigrp.theme',done:'ccnp.eigrp.done',quizbest:'ccnp.eigrp.quizbest'};"
+  + " const { ref, computed, watch, reactive, toRef, toRefs, shallowRef, shallowReactive } = globalThis.__vue;"
+  + " const LS={theme:'ccnp.eigrp.theme',done:'ccnp.eigrp.done',quizbest:'ccnp.eigrp.quizbest',sec:null};"
   + " function loadJSON(key,fb){try{const v=JSON.parse(localStorage.getItem(key));return v??fb}catch{return fb}}"
   + " function save(key,val){localStorage.setItem(key,JSON.stringify(val))}"
   + " function shuffle(a){const x=a.slice();for(let i=x.length-1;i>0;i--){"
@@ -230,6 +234,23 @@ try {
   ok("render OK (vnode type: " + vnode.type + ", children: " + kids + ")");
 } catch (e) { fail("render:", e.message); finish(); }
 
+/* ---------- render every visible section (v-show-hidden branches) ---------- */
+// A bug like `{{ computedOrRef(...) }}` hides in a v-show section that starts
+// closed, so the default render never evaluates it. Cycle each section-ish ref
+// through every literal value the template references to force all bindings.
+function sectionRender(key, value) {
+  try { if (state[key] && state[key].__v_isRef) state[key].value = value; render(ctx, []); ok("render @ " + key + "='" + value + "'"); }
+  catch (e) { fail("render @ " + key + "='" + value + "':", e.message); }
+}
+for (const skey of ["sec", "section", "sectionName", "tab", "activeTab", "active", "view"]) {
+  if (!(state[skey] && state[skey].__v_isRef)) continue;
+  const seen = new Set();
+  for (const q of [`'([a-zA-Z0-9-]+)'`, `"([a-zA-Z0-9-]+)"`]) {
+    const re = new RegExp(skey + "\\s*===?\\s*" + q, "g");
+    let mm; while ((mm = re.exec(template))) if (!seen.has(mm[1])) { seen.add(mm[1]); sectionRender(skey, mm[1]); }
+  }
+}
+
 /* ---------- app-state smoke tests (skip gracefully if bindings differ) ---------- */
 const need = (stateObj, ...keys) => {
   for (const k of keys) if (!(k in stateObj)) throw new Error("missing state." + k + " - skipped");
@@ -241,16 +262,25 @@ const T = (name, fn) => {
     else fail("state:  " + name, "-", e.message);
   }
 };
+// Robust read/set helpers: work whether an exposed binding is a Vue ref or a
+// raw reactive/array value, so shared tests run on every page regardless of
+// the author's style (e.g. quizQuestions as ref([]) vs reactive([])).
+const isRef = (v) => v && typeof v === "object" && "__v_isRef" in v && "value" in v;
+const val = (v) => (isRef(v) ? v.value : v);
+const setVal = (v, x) => { if (isRef(v)) v.value = x; }; // raw reactive: caller mutates in place
+
 
 T("fcVerdict RD<FD", () => {
   need(state, "fcVerdict");
   if (state.fcVerdict.value.cls !== "fs") throw new Error("expected 'fs' verdict");
 });
 T("fcVerdict RD=FD", () => {
+  need(state, "rd", "fcVerdict");
   state.rd.value = 20;
   if (state.fcVerdict.value.cls !== "eq") throw new Error("expected 'eq' verdict");
 });
 T("fcVerdict RD>FD", () => {
+  need(state, "rd", "fcVerdict");
   state.rd.value = 30;
   if (state.fcVerdict.value.cls !== "no") throw new Error("expected 'no' verdict");
 });
@@ -279,25 +309,101 @@ T("adjacency animation start/reset", () => {
 });
 T("quiz: answer all correctly -> full score", () => {
   need(state, "quizQuestions", "submitQuiz", "quizDone", "quizScore");
-  for (const q of state.quizQuestions.value) {
-    q.picked = q.options.findIndex(o => o.text === q.answerText);
-    if (q.picked < 0) throw new Error("correct answer not found among options");
+  const qs = val(state.quizQuestions);
+  if (!Array.isArray(qs) || qs.length === 0) throw new Error("quizQuestions not an array (skipped)");
+  const first = qs[0];
+  // Two supported models:
+  //   EIGRP-style : q.options[{text}], q.answerText, q.picked
+  //   Topologies-style: q.opts[{text}], q.correct(index), q.ans
+  if (Array.isArray(first.options) && "answerText" in first) {
+    for (const q of qs) {
+      q.picked = q.options.findIndex(o => o.text === q.answerText);
+      if (q.picked < 0) throw new Error("correct answer not found among options");
+    }
+  } else if (Array.isArray(first.opts) && typeof first.correct === "number") {
+    for (const q of qs) q.ans = q.correct;
+  } else {
+    throw new Error("unrecognized quiz question model - skipped");
   }
   state.submitQuiz();
-  if (!state.quizDone.value) throw new Error("quiz not marked done");
-  if (state.quizScore.value !== state.quizQuestions.value.length) throw new Error("score = " + state.quizScore.value);
+  if (!val(state.quizDone)) throw new Error("quiz not marked done");
+  if (val(state.quizScore) !== qs.length) throw new Error("score = " + val(state.quizScore));
 });
 T("checklist toggle", () => {
   need(state, "toggleDone", "done", "doneCount");
   state.toggleDone(0);
-  if (!state.done.value[0]) throw new Error("done[0] not set");
-  if (state.doneCount.value < 1) throw new Error("doneCount not updated");
+  if (!val(state.done)[0]) throw new Error("done[0] not set");
+  if (val(state.doneCount) < 1) throw new Error("doneCount not updated");
 });
 T("command viewer switch", () => {
-  need(state, "activeCmd", "activeCommand");
-  if (!state.activeCommand.value || state.activeCommand.value.key !== "neighbors") throw new Error("initial command wrong");
-  state.activeCmd.value = "topology";
-  if (state.activeCommand.value.key !== "topology") throw new Error("switch to topology failed");
+  need(state, "activeCmd", "activeCommand", "commands");
+  const cs = state.commands;
+  if (!Array.isArray(cs) || cs.length < 2) throw new Error("no command list");
+  setVal(state.activeCmd, cs[0].key);
+  const ac0 = val(state.activeCommand);
+  if (!ac0 || ac0.key !== cs[0].key) throw new Error("initial command wrong");
+  setVal(state.activeCmd, cs[1].key);
+  if (val(state.activeCommand).key !== cs[1].key) throw new Error("switch to second command failed");
+});
+
+/* ---------- Level 13 redistribution state tests (skip on other pages) ---------- */
+T("redist: scenario switch -> currentScenario", () => {
+  need(state, "pickScenario", "currentScenario", "scenarios");
+  if (!state.currentScenario.value || state.currentScenario.value.key !== "ospf2eigrp") throw new Error("initial scenario wrong");
+  state.pickScenario(2);
+  if (state.currentScenario.value.key !== "eigrp2bgp") throw new Error("switch to EIGRP->BGP failed");
+  state.pickScenario(0);
+});
+T("redist: seed protocol switch updates info", () => {
+  need(state, "activeSeed", "seedInfo");
+  state.activeSeed.value = "OSPF";
+  if (!state.seedInfo.value || state.seedInfo.value.proto !== "OSPF") throw new Error("OSPF seed info missing");
+  state.activeSeed.value = "BGP";
+  if (state.seedInfo.value.seed.indexOf("MED") < 0) throw new Error("BGP seed should mention MED");
+  state.activeSeed.value = "EIGRP";
+});
+T("redist: EIGRP 5-tuple metric math", () => {
+  need(state, "seedBw", "seedDly", "seedMetric");
+  state.seedBw.value = 10000; state.seedDly.value = 100;
+  if (state.seedMetric.value !== 258560) throw new Error("seedMetric = " + state.seedMetric.value + " (expected 258560)");
+});
+T("redist: AD duel lower AD wins", () => {
+  need(state, "adA", "adB", "adVerdict");
+  state.adA.value = "eigrp-ext"; state.adB.value = "ospf";
+  if (!state.adVerdict.value.winner && state.adVerdict.value.text.indexOf("OSPF") < 0)
+    throw new Error("expected OSPF to win, got: " + state.adVerdict.value.text);
+  state.adA.value = "ospf"; state.adB.value = "ebgp";
+  if (state.adVerdict.value.text.indexOf("eBGP") < 0) throw new Error("expected eBGP to win, got: " + state.adVerdict.value.text);
+});
+T("redist: AD duel tie -> metric decides", () => {
+  need(state, "adA", "adB", "adVerdict");
+  state.adA.value = "ospf"; state.adB.value = "ospf";
+  if (!state.adVerdict.value.tie) throw new Error("expected tie verdict, got: " + state.adVerdict.value.text);
+});
+T("redist: tag flow animation start/reset", () => {
+  need(state, "playTags", "resetTags", "tagRunning");
+  state.playTags();
+  if (!state.tagRunning.value) throw new Error("tagRunning not set after playTags");
+  state.resetTags();
+  if (state.tagRunning.value) throw new Error("tagRunning not cleared by resetTags");
+});
+T("redist: loop sim blind -> LOOP verdict", () => {
+  need(state, "loopMode", "setLoopMode", "loopVerdict");
+  state.setLoopMode("blind");
+  if (!state.loopVerdict.value || state.loopVerdict.value.cls !== "no") throw new Error("expected loop verdict");
+});
+T("redist: loop sim tags -> SAFE verdict", () => {
+  need(state, "setLoopMode", "loopVerdict");
+  state.setLoopMode("tags");
+  if (!state.loopVerdict.value || state.loopVerdict.value.cls !== "fs") throw new Error("expected safe verdict");
+});
+T("redist: loop sim run/reset", () => {
+  need(state, "runLoop", "resetLoop", "loopRunning", "loopSteps");
+  state.runLoop();
+  if (!state.loopRunning.value) throw new Error("loopRunning not set after runLoop");
+  state.resetLoop();
+  if (state.loopRunning.value) throw new Error("loopRunning not cleared by resetLoop");
+  if (state.loopSteps.value.length !== 0) throw new Error("loopSteps not cleared");
 });
 
 finish();
@@ -407,8 +513,10 @@ def main() -> int:
         print("  2. compile    - #app template compiles with the vault's vue.global.prod.js (node)")
         print("  3. syntax     - every inline <script> in the page parses (node)")
         print("  4. render     - compiled render runs against real setup() state (node)")
-        print("  5. state      - EIGRP-page smoke tests: DUAL verdicts, metric math, simulators,")
-        print("                   quiz all-correct scoring, checklist, command viewer (node)")
+        print("  5. state      - smoke tests per page: EIGRP (DUAL verdicts, metric, simulators),")
+        print("                   Level 13 (scenarios, seeds, AD duel, tag flow, loop sim), plus")
+        print("                   shared quiz / checklist / command-viewer checks; state keys")
+        print("                   missing from a page are skipped gracefully (node)")
         return 0
 
     html_path = Path(args.page).resolve()

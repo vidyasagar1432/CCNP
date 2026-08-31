@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How the OSI &amp; TCP/IP Models Work — Level 03</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1923;--surface:#182635;--card:#1e2d3d;--border:#2a3a4a;
+  --text:#e0e6ed;--muted:#8899aa;--accent:#3b82f6;--accent2:#10b981;
+  --red:#ef4444;--yellow:#f59e0b;--purple:#8b5cf6;--cyan:#06b6d4;
+  --orange:#f97316;--pink:#ec4899;
+}
+[data-theme="light"]{
+  --bg:#f0f4f8;--surface:#ffffff;--card:#f8fafc;--border:#d1d9e0;
+  --text:#1a2332;--muted:#5a6a7a;--accent:#2563eb;--accent2:#059669;
+  --red:#dc2626;--yellow:#d97706;--purple:#7c3aed;--cyan:#0891b2;
+  --orange:#ea580c;--pink:#db2777;
+}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;line-height:1.65;padding:0;margin:0}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 24px 80px}
+
+.hdr{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;backdrop-filter:blur(8px)}
+.hdr h1{font-size:1.15rem;margin:0;white-space:nowrap}
+.hdr .badges{display:flex;gap:6px;flex-wrap:wrap}
+.badge{font-size:.7rem;padding:3px 8px;border-radius:6px;font-weight:600;white-space:nowrap}
+.b-lvl{background:var(--accent);color:#fff}.b-exam{background:var(--purple);color:#fff}
+.b-fc{background:var(--cyan);color:#fff;cursor:pointer;text-decoration:none}
+.hdr .spacer{flex:1}
+.tbtn{background:var(--card);border:1px solid var(--border);color:var(--text);padding:5px 12px;border-radius:6px;cursor:pointer;font-size:.8rem}
+
+.nav{display:flex;flex-wrap:wrap;gap:6px;margin:18px 0;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:10px}
+.nav-btn{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:.78rem;transition:all .15s}
+.nav-btn:hover,.nav-btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+.sec{margin:20px 0;padding:20px 24px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
+.sec h2{font-size:1.1rem;margin:0 0 14px;display:flex;align-items:center;gap:8px}
+.sec h2 .ico{font-size:1.1rem}
+.sec h3{font-size:.95rem;margin:14px 0 8px;color:var(--accent)}
+
+.layer-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin:12px 0}
+.layer-card{background:var(--card);border:2px solid var(--border);border-radius:8px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .2s}
+.layer-card:hover{border-color:var(--accent)}
+.layer-card.sel{border-color:var(--accent);background:rgba(59,130,246,.12)}
+.layer-card .lnum{font-size:1.4rem;font-weight:800;color:var(--accent)}
+.layer-card .lname{font-weight:600;font-size:.78rem;margin-top:2px}
+.layer-card .lpdu{font-size:.7rem;color:var(--muted);font-style:italic}
+
+.layer-detail{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;margin:12px 0}
+.ld-name{font-weight:700;font-size:.95rem;color:var(--accent);margin-bottom:6px}
+.ld-row{font-size:.84rem;margin:6px 0}
+.ld-label{color:var(--muted);font-weight:600}
+
+/* encapsulation stack diagram */
+.stack-diagram{display:flex;flex-direction:column;gap:0;margin:14px 0}
+.stack-row{display:flex;align-items:center;gap:0;font-family:'Fira Code',monospace;font-size:.72rem;border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-bottom:6px}
+.stack-row .slabel{min-width:110px;padding:8px 10px;background:var(--card);font-weight:700;color:var(--muted);flex-shrink:0}
+.stack-row .sbits{flex:1;display:flex;padding:0}
+.stack-row .shdr{background:rgba(59,130,246,.25);border-right:1px solid var(--border);padding:8px 10px;white-space:nowrap;font-weight:700}
+.stack-row .spayload{background:rgba(16,185,129,.12);padding:8px 10px;white-space:nowrap;flex:1}
+
+/* model comparison */
+.model-cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+@media(max-width:650px){.model-cmp{grid-template-columns:1fr}}
+.model-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px}
+.model-card h4{margin:0 0 8px;font-size:.9rem;color:var(--accent)}
+.model-card .mrow{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:.82rem}
+.model-card .mrow:last-child{border-bottom:none}
+
+/* mapping */
+.map-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.84rem}
+.map-table th{text-align:left;padding:8px 10px;background:var(--card);border:1px solid var(--border);font-size:.75rem;text-transform:uppercase;color:var(--muted)}
+.map-table td{padding:8px 10px;border:1px solid var(--border)}
+
+/* header table */
+.hdr-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.84rem}
+.hdr-table th{text-align:left;padding:8px 10px;background:var(--card);border:1px solid var(--border);font-size:.75rem;text-transform:uppercase;color:var(--muted)}
+.hdr-table td{padding:8px 10px;border:1px solid var(--border)}
+
+/* PDU chain */
+.pdu-chain{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:14px 0}
+.pdu-node{background:var(--card);border:2px solid var(--accent);border-radius:8px;padding:10px 14px;text-align:center;cursor:pointer;transition:all .2s}
+.pdu-node:hover{border-color:var(--accent2);transform:translateY(-2px)}
+.pdu-node.sel{border-color:var(--accent2);background:rgba(16,185,129,.12)}
+.pdu-node .pn{font-size:1.2rem}
+.pdu-node .pl{font-size:.74rem;color:var(--muted)}
+.pdu-arrow{color:var(--accent);font-size:1.2rem;font-weight:700}
+
+/* device behavior */
+.dev-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px}
+.dev-card h4{margin:0 0 6px;font-size:.88rem;color:var(--accent)}
+.dev-card .drows{padding-top:4px}
+.dev-card .drow{font-size:.8rem;padding:4px 0;border-bottom:1px solid var(--border)}
+.dev-card .drow:last-child{border-bottom:none}
+
+/* flow steps */
+.flow-steps{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.flow-step{display:flex;align-items:flex-start;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px}
+.flow-step .fs-num{background:var(--accent);color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;flex-shrink:0}
+.flow-step .fs-body{font-size:.84rem}
+.flow-step .fs-body strong{color:var(--accent)}
+
+/* direction selector */
+.dir-tabs{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.dir-tab{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:7px 14px;border-radius:6px;cursor:pointer;font-size:.8rem;transition:all .15s}
+.dir-tab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+.pill{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.72rem;font-weight:600;margin:2px}
+.pill-green{background:rgba(16,185,129,.15);color:var(--accent2)}
+.pill-red{background:rgba(239,68,68,.15);color:var(--red)}
+.pill-blue{background:rgba(59,130,246,.15);color:var(--accent)}
+.pill-purple{background:rgba(139,92,246,.15);color:var(--purple)}
+.pill-orange{background:rgba(249,115,22,.15);color:var(--orange)}
+
+.cmd-tabs{display:flex;flex-wrap:wrap;gap:4px;margin:10px 0}
+.cmd-tab{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:5px;cursor:pointer;font-size:.78rem;transition:all .12s}
+.cmd-tab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.cmd-block{background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin:10px 0;font-family:'Fira Code',monospace;font-size:.82rem;line-height:1.6;overflow-x:auto;white-space:pre;color:#c9d1d9}
+
+.trap-list{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.trap{background:var(--card);border-left:3px solid var(--yellow);border-radius:0 6px 6px 0;padding:10px 14px;font-size:.85rem}
+.trap strong{color:var(--yellow)}
+
+.quiz-q{margin:14px 0;padding:14px;background:var(--card);border-radius:8px;border:1px solid var(--border)}
+.quiz-q h4{margin:0 0 8px;font-size:.88rem}
+.quiz-q .qnum{color:var(--accent);font-weight:700;margin-right:6px}
+.quiz-opts{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.quiz-opt{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 12px;cursor:pointer;font-size:.84rem;transition:all .15s}
+.quiz-opt:hover{border-color:var(--accent);background:rgba(59,130,246,.08)}
+.quiz-opt.chosen{border-color:var(--accent);background:rgba(59,130,246,.15)}
+.quiz-opt.correct{border-color:var(--accent2);background:rgba(16,185,129,.15)}
+.quiz-opt.wrong{border-color:var(--red);background:rgba(239,68,68,.15)}
+.quiz-btn{margin:12px 0;padding:10px 24px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:.88rem;font-weight:600;transition:background .15s}
+.quiz-btn:hover{filter:brightness(1.15)}
+.quiz-btn:disabled{opacity:.45;cursor:default}
+.quiz-score{margin:12px 0;padding:14px;background:var(--card);border-radius:8px;border:1px solid var(--accent);font-weight:600}
+
+.chk-list{display:flex;flex-direction:column;gap:6px;margin:12px 0}
+.chk-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:all .15s;font-size:.86rem}
+.chk-item:hover{border-color:var(--accent)}
+.chk-item.done{opacity:.55}
+.chk-box{width:18px;height:18px;border:2px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.7rem;flex-shrink:0}
+.chk-item.done .chk-box{background:var(--accent2);border-color:var(--accent2);color:#fff}
+
+.callout{padding:12px 16px;border-radius:8px;margin:10px 0;font-size:.85rem}
+.callout-info{background:rgba(59,130,246,.1);border-left:3px solid var(--accent)}
+.callout-warn{background:rgba(245,158,11,.1);border-left:3px solid var(--yellow)}
+.callout-tip{background:rgba(16,185,129,.1);border-left:3px solid var(--accent2)}
+</style>
+</head>
+<body>
+<div id="app" :data-theme="theme">
+
+<!-- HEADER -->
+<div class="hdr">
+  <h1>🧅 How the OSI &amp; TCP/IP Models Work</h1>
+  <div class="badges">
+    <span class="badge b-lvl">Level 03</span>
+    <span class="badge b-exam">ENCOR 350-401</span>
+    <a class="badge b-fc" href="../Flashcards/Level 03 — OSI & TCP IP.html">Flashcards</a>
+  </div>
+  <div class="spacer"></div>
+  <button class="tbtn" @click="theme=theme==='dark'?'light':'dark'">
+    {{ theme==='dark' ? '☀️ Light' : '🌙 Dark' }}
+  </button>
+</div>
+
+<div class="wrap">
+
+<!-- NAV -->
+<div class="nav">
+  <button class="nav-btn" :class="{on:sec===s.id}" v-for="s in sections" :key="s.id" @click="sec=s.id">
+    {{ s.icon }} {{ s.label }}
+  </button>
+</div>
+
+<!-- 1. OSI LAYERS -->
+<div class="sec" v-show="sec==='osi'" id="osi-layers">
+  <h2><span class="ico">🧅</span> OSI Layers</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">The seven-layer reference model. Click a layer to explore its function, real-world protocols, device, and PDU.</p>
+  <div class="layer-grid">
+    <div class="layer-card" v-for="(l,i) in osiLayers" :key="i" :class="{sel:selectedLayer===i}" @click="selectedLayer=i">
+      <div class="lnum">L{{ l.num }}</div>
+      <div class="lname">{{ l.alt }}</div>
+      <div class="lpdu">PDU: {{ l.pdu }}</div>
+    </div>
+  </div>
+  <div class="layer-detail" v-if="selectedLayer!==null">
+    <div class="ld-name">Layer {{ osiLayers[selectedLayer].num }} — {{ osiLayers[selectedLayer].name }}</div>
+    <div class="ld-row"><span class="ld-label">Function:</span> {{ osiLayers[selectedLayer].func }}</div>
+    <div class="ld-row"><span class="ld-label">Protocols/Devices:</span> {{ osiLayers[selectedLayer].proto }}</div>
+    <div class="ld-row"><span class="ld-label">PDU:</span> <span class="pill pill-blue">{{ osiLayers[selectedLayer].pdu }}</span></div>
+    <div class="ld-row"><span class="ld-label">Notes:</span> {{ osiLayers[selectedLayer].note }}</div>
+  </div>
+  <div class="callout callout-info">
+    <strong>Mnemonic (top-down):</strong> All People Seem To Need Data Processing
+    &nbsp;·&nbsp; <strong>Bottom-up:</strong> Please Do Not Throw Sausage Pizza Away
+  </div>
+  <table class="map-table">
+    <tr><th>Layer</th><th>Name</th><th>PDU</th><th>Protocol/Device</th></tr>
+    <tr v-for="(l,i) in osiLayers" :key="'t'+i">
+      <td>L{{ l.num }}</td><td>{{ l.name }}</td><td>{{ l.pdu }}</td><td>{{ l.tproto }}</td>
+    </tr>
+  </table>
+</div>
+
+<!-- 2. TCP/IP MODEL -->
+<div class="sec" v-show="sec==='tcpip'" id="tcpip-model">
+  <h2><span class="ico">🌐</span> TCP/IP Model</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">The four-layer DoD/Internet model Cisco speaks natively. Click a layer to explore it.</p>
+  <div class="layer-grid">
+    <div class="layer-card" v-for="(t,i) in tcpipLayers" :key="i" :class="{sel:selectedTcpip===t.num}" @click="selectedTcpip=t.num">
+      <div class="lnum">{{ t.num }}</div>
+      <div class="lname">{{ t.name }}</div>
+      <div class="lpdu">Covers OSI {{ t.covers }}</div>
+    </div>
+  </div>
+  <div class="layer-detail" v-if="selectedTcpip">
+    <div class="ld-name">Layer {{ tcpipData.num }} — {{ tcpipData.name }}</div>
+    <div class="ld-row"><span class="ld-label">Covers OSI layers:</span> {{ tcpipData.covers }}</div>
+    <div class="ld-row"><span class="ld-label">Protocols:</span> {{ tcpipData.protos }}</div>
+    <div class="ld-row"><span class="ld-label">What it does:</span> {{ tcpipData.role }}</div>
+    <div class="ld-row"><span class="ld-label">Reliability:</span> {{ tcpipData.reliability }}</div>
+  </div>
+  <h3>OSI ↔ TCP/IP Mapping (memorize)</h3>
+  <table class="map-table">
+    <tr><th>OSI Layer</th><th>TCP/IP Layer</th><th>Protocols</th></tr>
+    <tr><td>7 Application<br>6 Presentation<br>5 Session</td><td>4. Application</td><td>HTTP, DNS, DHCP, SMTP, SSH</td></tr>
+    <tr><td>4 Transport</td><td>3. Transport</td><td>TCP, UDP</td></tr>
+    <tr><td>3 Network</td><td>2. Internet</td><td>IP, ICMP, IGMP</td></tr>
+    <tr><td>2 Data Link<br>1 Physical</td><td>1. Network Access</td><td>Ethernet, 802.11, ARP, PPP</td></tr>
+  </table>
+  <div class="callout callout-warn">
+    <strong>Exam Traps:</strong> ARP lives at L2 "Network Access" in TCP/IP (maps IP→MAC) — some exams place it at L3. ICMP is L3 (Internet layer). IP, ICMP, UDP are unreliable — only TCP adds reliability.
+  </div>
+</div>
+
+<!-- 3. PDU CHAIN -->
+<div class="sec" v-show="sec==='pdu'" id="pdu-chain">
+  <h2><span class="ico">📦</span> PDU Chain</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">Each layer's Protocol Data Unit. Click a PDU to learn how it's built and what the next layer adds.</p>
+  <div class="pdu-chain">
+    <div class="pdu-node" :class="{sel:pduSel==='data'}" @click="pduSel='data'">
+      <div class="pn">DATA</div><div class="pl">L7-5</div>
+    </div>
+    <div class="pdu-arrow">→</div>
+    <div class="pdu-node" :class="{sel:pduSel==='segment'}" @click="pduSel='segment'">
+      <div class="pn">SEGMENT</div><div class="pl">L4 (TCP)</div>
+    </div>
+    <div class="pdu-arrow">→</div>
+    <div class="pdu-node" :class="{sel:pduSel==='datagram'}" @click="pduSel='datagram'">
+      <div class="pn">DATAGRAM</div><div class="pl">L4 (UDP)</div>
+    </div>
+    <div class="pdu-arrow">→</div>
+    <div class="pdu-node" :class="{sel:pduSel==='packet'}" @click="pduSel='packet'">
+      <div class="pn">PACKET</div><div class="pl">L3 (IP)</div>
+    </div>
+    <div class="pdu-arrow">→</div>
+    <div class="pdu-node" :class="{sel:pduSel==='frame'}" @click="pduSel='frame'">
+      <div class="pn">FRAME</div><div class="pl">L2 (Eth)</div>
+    </div>
+    <div class="pdu-arrow">→</div>
+    <div class="pdu-node" :class="{sel:pduSel==='bits'}" @click="pduSel='bits'">
+      <div class="pn">BITS</div><div class="pl">L1</div>
+    </div>
+  </div>
+  <div class="layer-detail" v-if="pduSel">
+    <div class="ld-name">{{ pduData.name }} (PDU of {{ pduData.layer }})</div>
+    <div class="ld-row"><span class="ld-label">Definition:</span> {{ pduData.def }}</div>
+    <div class="ld-row"><span class="ld-label">Added by:</span> {{ pduData.added }}</div>
+    <div class="ld-row"><span class="ld-label">Key fields:</span> {{ pduData.fields }}</div>
+    <div class="ld-row"><span class="ld-label">Example:</span> {{ pduData.example }}</div>
+  </div>
+  <div class="callout callout-warn">
+    <strong>The single most-asked PDU fact:</strong> segment = TCP, packet = IP, frame = Ethernet. UDP official PDU = "datagram"; IP RFC calls it "datagram" too — prepared for both words.
+  </div>
+</div>
+
+<!-- 4. ENCAPSULATION -->
+<div class="sec" v-show="sec==='encap'" id="encapsulation">
+  <h2><span class="ico">⬇️</span> Encapsulation (Down the Stack)</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">Each layer wraps the previous layer's payload with its own header (+trailer). The data is the same — only headers grow. Use the toggle to trace an HTTP request.</p>
+  <div class="stack-diagram">
+    <div class="stack-row">
+      <div class="slabel">L7 Data</div>
+      <div class="sbits"><div class="spayload">HTTP request ..........</div></div>
+    </div>
+    <div class="stack-row">
+      <div class="slabel">L4 Segment</div>
+      <div class="sbits"><div class="shdr">TCP hdr (ports, seq, flags)</div><div class="spayload">HTTP data</div></div>
+    </div>
+    <div class="stack-row">
+      <div class="slabel">L3 Packet</div>
+      <div class="sbits"><div class="shdr">IP hdr (src/dst IP, TTL)</div><div class="spayload">TCP hdr</div><div class="spayload">HTTP data</div></div>
+    </div>
+    <div class="stack-row">
+      <div class="slabel">L2 Frame</div>
+      <div class="sbits"><div class="shdr">Eth hdr (MAC, EtherType)</div><div class="spayload">IP</div><div class="spayload">TCP</div><div class="spayload">HTTP</div><div class="spayload">FCS</div></div>
+    </div>
+    <div class="stack-row">
+      <div class="slabel">L1 Bits</div>
+      <div class="sbits"><div class="spayload">Electrical / optical signals on the wire</div></div>
+    </div>
+  </div>
+  <div class="callout callout-{{ encapDir==='down' ? 'info' : 'tip' }}" v-if="false"></div>
+  <div class="callout callout-warn">
+    <strong>Direction trap — get this right:</strong> Source <strong>encapsulates</strong> (adds headers going DOWN the stack). Destination <strong>decapsulates</strong> (removes headers going UP). Don't flip it.
+  </div>
+  <h3>Headers/Trailers per Layer</h3>
+  <table class="hdr-table">
+    <tr><th>Layer</th><th>Header Size</th><th>Key Fields</th></tr>
+    <tr v-for="(h,i) in headers" :key="i">
+      <td>{{ h.layer }}</td><td>{{ h.size }}</td><td>{{ h.fields }}</td>
+    </tr>
+  </table>
+</div>
+
+<!-- 5. DECAPSULATION -->
+<div class="sec" v-show="sec==='decap'" id="decapsulation">
+  <h2><span class="ico">⬆️</span> Decapsulation (Up the Stack)</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">At the receiver, each layer strips its own header, validates it, and passes the payload up. Different devices decapsulate different amounts.</p>
+  <div class="stack-diagram" style="flex-direction:column-reverse">
+    <div class="stack-row">
+      <div class="slabel">L7 Data</div>
+      <div class="sbits"><div class="spayload">=&gt; Application data delivered</div></div>
+    </div>
+    <div class="stack-row">
+      <div class="slabel">L4 Strip</div>
+      <div class="sbits"><div class="shdr">-TCP hdr (checksum, port)</div><div class="spayload">deliver to app by port</div></div>
+    </div>
+    <div class="stack-row">
+      <div class="slabel">L3 Strip</div>
+      <div class="sbits"><div class="shdr">-IP hdr (checksum, TTL)</div><div class="spayload">pass to L4</div></div>
+    </div>
+    <div class="stack-row">
+      <div class="slabel">L2 Strip</div>
+      <div class="sbits"><div class="shdr">-Eth hdr (FCS check)</div><div class="spayload">pass to L3</div></div>
+    </div>
+    <div class="stack-row">
+      <div class="slabel">Wire</div>
+      <div class="sbits"><div class="spayload">[Eth][IP][TCP][HTTP data][FCS]</div></div>
+    </div>
+  </div>
+
+  <h3>What Each Device Decapsulates</h3>
+  <div class="model-cmp">
+    <div class="dev-card" v-for="(d,i) in decapDevices" :key="i">
+      <h4>{{ d.icon }} {{ d.device }}</h4>
+      <div class="drows">
+        <div class="drow" v-for="(r,j) in d.rows" :key="j">
+          <span class="pill pill-blue">{{ r.label }}</span> {{ r.value }}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="callout callout-tip">
+    <strong>Key rule:</strong> Intermediate <strong>routers</strong> decapsulate/re-encapsulate <strong>L2 only</strong> — the L3/L4 headers stay untouched (except TTL/hop). Destination MAC changes every hop; source/dest IP stay constant (NAT excepted).
+  </div>
+</div>
+
+<!-- 6. CHECK POINTS -->
+<div class="sec" v-show="sec==='checks'" id="layer-checks">
+  <h2><span class="ico">🔍</span> Layer Checks on Decapsulation</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">Each layer validates something when data arrives. Pick a layer to see what it checks and what happens if it fails.</p>
+  <div class="layer-grid" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr))">
+    <div class="layer-card" :class="{sel:checkSel===c.layer}" v-for="c in checkPoints" :key="c.layer" @click="checkSel=c.layer">
+      <div class="lnum">{{ c.icon }}</div>
+      <div class="lname">{{ c.layer }}</div>
+    </div>
+  </div>
+  <div class="layer-detail" v-if="checkSel!==null">
+    <div class="ld-name">{{ checkData.layer }}</div>
+    <div class="ld-row"><span class="ld-label">Checks:</span> {{ checkData.check }}</div>
+    <div class="ld-row"><span class="ld-label">If Bad:</span> <span v-if="checkData.result==='Drop'" class="pill pill-red">Drop</span><span v-else class="pill pill-green">{{ checkData.result }}</span> — {{ checkData.what }}</div>
+    <div class="ld-row"><span class="ld-label">Extra:</span> {{ checkData.extra }}</div>
+  </div>
+  <div class="callout callout-info">
+    <strong>IPv4 vs IPv6:</strong> IPv4 header checksum is <strong>recomputed every hop</strong> (because TTL decrements). IPv6 has <strong>NO header checksum</strong> — only the hop-limit is checked.
+  </div>
+</div>
+
+<!-- 7. DATA FLOW -->
+<div class="sec" v-show="sec==='flow'" id="data-flow">
+  <h2><span class="ico">🛤️</span> End-to-End Data Flow</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">The seven-step lifecycle of data from source to destination, plus intermediate devices.</p>
+  <div class="flow-steps">
+    <div class="flow-step" v-for="(f,i) in flowSteps" :key="i">
+      <div class="fs-num">{{ i+1 }}</div>
+      <div class="fs-body"><strong>{{ f.title }}.</strong> {{ f.text }}</div>
+    </div>
+  </div>
+
+  <h3>Direction Classes</h3>
+  <div class="dir-tabs">
+    <button class="dir-tab" :class="{on:dirSel===d.id}" v-for="d in directions" :key="d.id" @click="dirSel=d.id">{{ d.name }}</button>
+  </div>
+  <div class="layer-detail" v-if="dirSel">
+    <div class="ld-name">{{ dirData.name }}</div>
+    <div class="ld-row"><span class="ld-label">Definition:</span> {{ dirData.def }}</div>
+    <div class="ld-row"><span class="ld-label">Example:</span> {{ dirData.example }}</div>
+    <div class="ld-row"><span class="ld-label">Used by:</span> {{ dirData.used }}</div>
+  </div>
+  <div class="callout callout-info" style="margin-top:12px">
+    <strong>Flow identity = 5-tuple</strong> (src IP, dst IP, src port, dst port, protocol) — used by NetFlow, ACLs, firewalls, and QoS to identify a "flow."
+  </div>
+</div>
+
+<!-- 8. TROUBLESHOOTING -->
+<div class="sec" v-show="sec==='trouble'" id="troubleshooting">
+  <h2><span class="ico">🛠️</span> Layer-by-Layer Troubleshooting</h2>
+  <p style="color:var(--muted);font-size:.86rem;margin-bottom:12px">This is the biggest exam use of the model. Isolate problems layer by layer.</p>
+  <div class="model-cmp">
+    <div class="dev-card">
+      <h4>Layer Isolation Flow</h4>
+      <div class="drows">
+        <div class="drow"><span class="pill pill-green">L1 Physical</span> Link lights, duplex/speed errors, CRC</div>
+        <div class="drow"><span class="pill pill-blue">L2 Data Link</span> MAC table, VLAN, STP interaction</div>
+        <div class="drow"><span class="pill pill-purple">L3 Network</span> IP route, longest-prefix match</div>
+        <div class="drow"><span class="pill pill-orange">L4 Transport</span> Port reachability (telnet port)</div>
+        <div class="drow"><span class="pill pill-red">L7 Application</span> Service, protocol format</div>
+      </div>
+    </div>
+    <div class="dev-card">
+      <h4>Commands by Layer</h4>
+      <div class="drows">
+        <div class="drow"><span class="pill pill-green">L1</span> show interfaces | include (Duplex|Speed|Error|CRC)</div>
+        <div class="drow"><span class="pill pill-blue">L2</span> show mac address-table</div>
+        <div class="drow"><span class="pill pill-purple">L3</span> ping &lt;ip&gt; · show ip route</div>
+        <div class="drow"><span class="pill pill-orange">L4</span> telnet &lt;ip&gt; &lt;port&gt;</div>
+        <div class="drow"><span class="pill pill-red">L7</span> curl http://&lt;host&gt;</div>
+      </div>
+    </div>
+  </div>
+  <div class="callout callout-tip">
+    <strong>Classic pattern:</strong> "Works for some, not others" + "ping OK but telnet fails" → think <strong>L4 ports / L7</strong>, not L1-L3.
+  </div>
+</div>
+
+<!-- 9. COMMANDS -->
+<div class="sec" v-show="sec==='cmds'" id="commands">
+  <h2><span class="ico">⌨️</span> Configuration Commands</h2>
+  <div class="cmd-tabs">
+    <button class="cmd-tab" :class="{on:activeCmd===c.id}" v-for="c in commands" :key="c.id" @click="activeCmd=c.id">{{ c.label }}</button>
+  </div>
+  <div class="cmd-block">{{ activeCommand.config }}</div>
+  <div class="callout callout-info" v-if="activeCommand.note" style="margin-top:8px">
+    <strong>Note:</strong> {{ activeCommand.note }}
+  </div>
+</div>
+
+<!-- 10. TRAPS -->
+<div class="sec" v-show="sec==='traps'" id="traps">
+  <h2><span class="ico">⚠️</span> Exam Traps</h2>
+  <div class="trap-list">
+    <div class="trap" v-for="(t,i) in traps" :key="i">
+      <strong>{{ t.tag }}:</strong> {{ t.text }}
+    </div>
+  </div>
+</div>
+
+<!-- 11. QUIZ -->
+<div class="sec" v-show="sec==='quiz'" id="quiz">
+  <h2><span class="ico">📝</span> Quiz</h2>
+  <div v-if="!quizDone">
+    <div class="quiz-q" v-for="(q,qi) in quizQuestions" :key="qi">
+      <h4><span class="qnum">Q{{ qi+1 }}.</span> {{ q.q }}</h4>
+      <div class="quiz-opts">
+        <div class="quiz-opt" v-for="(o,oi) in q.opts" :key="oi"
+             :class="{chosen:q.ans===oi}" @click="q.ans=oi">{{ o.text }}</div>
+      </div>
+    </div>
+    <button class="quiz-btn" :disabled="!allQuizAnswered" @click="submitQuiz">Submit Answers</button>
+  </div>
+  <div v-else>
+    <div class="quiz-score">
+      Score: {{ quizScore }} / {{ quizQuestions.length }}
+      ({{ Math.round(quizScore/quizQuestions.length*100) }}%)
+    </div>
+    <div class="quiz-q" v-for="(q,qi) in quizQuestions" :key="qi">
+      <h4>
+        <span class="qnum">Q{{ qi+1 }}.</span> {{ q.q }}
+        <span v-if="q.ans===q.correct" style="color:var(--accent2);margin-left:8px">✓ Correct</span>
+        <span v-else style="color:var(--red);margin-left:8px">✗ Wrong — Answer: {{ q.opts[q.correct].text }}</span>
+      </h4>
+      <div class="quiz-opts">
+        <div class="quiz-opt" v-for="(o,oi) in q.opts" :key="oi"
+             :class="{correct:oi===q.correct,wrong:q.ans===oi&&oi!==q.correct}">{{ o.text }}</div>
+      </div>
+    </div>
+    <button class="quiz-btn" @click="resetQuiz" style="margin-top:12px">Retry Quiz</button>
+  </div>
+</div>
+
+<!-- 12. CHECKLIST -->
+<div class="sec" v-show="sec==='checklist'" id="checklist">
+  <h2><span class="ico">✅</span> Study Checklist</h2>
+  <div class="chk-list">
+    <div class="chk-item" v-for="(c,i) in checklist" :key="i" :class="{done:c.done}" @click="c.done=!c.done;saveChecklist()">
+      <div class="chk-box">{{ c.done ? '✓' : '' }}</div>
+      <span>{{ c.text }}</span>
+    </div>
+  </div>
+  <div style="margin-top:10px;font-size:.84rem;color:var(--muted)">
+    {{ doneCount }} / {{ checklist.length }} complete
+  </div>
+</div>
+
+</div><!-- wrap -->
+</div><!-- app -->
+
+<script src="../vue.global.prod.js"></script>
+<script>
+(function(){
+  const {createApp,ref,reactive,computed,watch} = Vue;
+  createApp({
+    setup(){
+      const theme = ref(localStorage.getItem('ccnp.osi.theme')||'dark');
+      const sec = ref('osi');
+      watch(theme,v=>localStorage.setItem('ccnp.osi.theme',v));
+
+      const sections = [
+        {id:'osi',label:'OSI Layers',icon:'🧅'},
+        {id:'tcpip',label:'TCP/IP',icon:'🌐'},
+        {id:'pdu',label:'PDU Chain',icon:'📦'},
+        {id:'encap',label:'Encapsulation',icon:'⬇️'},
+        {id:'decap',label:'Decapsulation',icon:'⬆️'},
+        {id:'checks',label:'Checks',icon:'🔍'},
+        {id:'flow',label:'Data Flow',icon:'🛤️'},
+        {id:'trouble',label:'Troubleshoot',icon:'🛠️'},
+        {id:'cmds',label:'Commands',icon:'⌨️'},
+        {id:'traps',label:'Traps',icon:'⚠️'},
+        {id:'quiz',label:'Quiz',icon:'📝'},
+        {id:'checklist',label:'Checklist',icon:'✅'}
+      ];
+
+      /* ========== OSI LAYERS ========== */
+      const selectedLayer = ref(null);
+      const osiLayers = [
+        {num:7,name:'Application',alt:'Application',pdu:'Data',func:'User services and APIs — interfaces apps to network services.',proto:'HTTP, DNS, FTP, SMTP, DHCP',tproto:'HTTP, DNS, FTP',note:'Interfaces applications to network services (names, file, email).'},
+        {num:6,name:'Presentation',alt:'Presentation',pdu:'Data',func:'Data format, character encoding, encryption.',proto:'TLS (sometimes), SSL, codecs',tproto:'TLS, codecs',note:'OSI-wise, TLS ≈ L6. In practice TLS is often described at L4/L7 — keep both views straight.'},
+        {num:5,name:'Session',alt:'Session',pdu:'Data',func:'Establishes/tears down sessions, checkpointing.',proto:'NetBIOS, RPC; TCP session logic',tproto:'NetBIOS, RPC',note:'Connection state and session management. TCP session logic also fits here.'},
+        {num:4,name:'Transport',alt:'Transport',pdu:'Segment',func:'End-to-end delivery, ports, reliability. Segmentation + TCP reliability via ACKs.',proto:'TCP, UDP, SCTP',tproto:'TCP, UDP',note:'Ports (source/destination), sequence numbers, flags, window, checksum. Header: TCP 20-60B, UDP 8B.'},
+        {num:3,name:'Network',alt:'Network',pdu:'Packet',func:'Logical addressing (IP), best path selection (routing), fragmentation.',proto:'IP, ICMP, IGMP',tproto:'IP, ICMP',note:'Routers live here. IPv4 header 20+ bytes, IPv6 40 bytes fixed. TTL/hop limit decrement.'},
+        {num:2,name:'Data Link',alt:'Data Link',pdu:'Frame',func:'MAC addressing, framing, media access. Sublayers: LLC + MAC.',proto:'Ethernet, 802.11',tproto:'Ethernet, 802.11',note:'Frame = 14B header + 4B FCS trailer. Switches operate here. FCS/CRC error detection.'},
+        {num:1,name:'Physical',alt:'Physical',pdu:'Bits',func:'Bits on the wire — electrical/optical/RF signals, connectors, topology.',proto:'UTP, fiber, coax',tproto:'UTP, fiber',note:'Hubs and transceivers operate here. Exam uses "bits" (symbols/codewords are the physical truth).'}
+      ];
+
+      /* ========== TCP/IP ========== */
+      const selectedTcpip = ref(4);
+      const tcpipLayers = [
+        {num:4,name:'Application',covers:'7,6,5',protos:'HTTP, FTP, SMTP, DNS, DHCP, Telnet, SSH, SNMP',role:'Everything above ports — protocols, data formats, sessions merged into one layer.',reliability:'Depends on transport (TCP) or app logic.'},
+        {num:3,name:'Transport',covers:'4',protos:'TCP, UDP',role:'TCP (reliable, connection-oriented, flow/congestion control) or UDP (best-effort, connectionless). Adds source/destination ports.',reliability:'TCP = reliable (ACKs, retransmit). UDP = unreliable.'},
+        {num:2,name:'Internet',covers:'3',protos:'IP, ICMP, IGMP',role:'IP (addressing + best-effort delivery), ICMP (errors/diagnosis), IGMP (multicast group membership).',reliability:'IP is best-effort / unreliable — reliability added by transport.'},
+        {num:1,name:'Network Access',covers:'2,1',protos:'Ethernet, 802.11, PPP, ARP',role:'Puts IP packets into Ethernet frames, resolves IP→MAC via ARP, actually transmits bits.',reliability:'Physical layer — no reliability concept.'}
+      ];
+      const tcpipData = computed(()=> tcpipLayers.find(l=>l.num===selectedTcpip.value)||tcpipLayers[0]);
+
+      /* ========== PDU ========== */
+      const pduSel = ref('segment');
+      const pdus = {
+        data:{name:'Data',layer:'Layers 7-5',def:'Application-layer user data (also called "message").',added:'By applications',fields:'User payload',example:'HTTP request body, DNS query'},
+        segment:{name:'Segment',layer:'Layer 4 (TCP)',def:'TCP header + payload from above. The transport PDU for connection-oriented TCP.',added:'TCP header (20-60B)',fields:'src/dst ports, seq/ack, flags, window, checksum',example:'TCP segment of a file download'},
+        datagram:{name:'Datagram',layer:'Layer 4 (UDP)',def:'UDP header + payload. Connectionless, best-effort.',added:'UDP header (8B)',fields:'ports, length, checksum',example:'DNS query as a UDP datagram — the two-datagram trap!'},
+        packet:{name:'Packet',layer:'Layer 3 (IP)',def:'IP header + payload (the segment/datagram). RFC 791 officially calls it a "datagram" for IPv4.',added:'IP header (20+ IPv4 / 40 IPv6)',fields:'version, IHL, TTL, protocol, src/dst IP, checksum',example:'Routed IP packet between networks'},
+        frame:{name:'Frame',layer:'Layer 2 (Ethernet)',def:'Ethernet header + trailer + payload (the packet).',added:'Ethernet header (14B) + FCS trailer (4B)',fields:'dst/src MAC, EtherType, FCS',example:'Frame on a switch port'},
+        bits:{name:'Bits',layer:'Layer 1 (Physical)',def:'The actual electrical/optical/RF symbols on the medium.',added:'Physical encoding',fields:'Signals',example:'Voltage transitions on UTP'}
+      };
+      const pduData = computed(()=> pdus[pduSel.value]||pdus.segment);
+
+      /* ========== HEADERS ========== */
+      const headers = [
+        {layer:'L4 TCP',size:'20-60 B',fields:'src/dst ports, seq/ack, flags, window, checksum'},
+        {layer:'L4 UDP',size:'8 B',fields:'ports, length, checksum'},
+        {layer:'L3 IPv4',size:'20+ B',fields:'version, IHL, TTL, protocol, src/dst IP, checksum'},
+        {layer:'L3 IPv6',size:'40 B fixed',fields:'flow label, hop limit, src/dst 128-bit'},
+        {layer:'L2 Ethernet',size:'14 B + 4 B FCS',fields:'dst/src MAC, EtherType/Len, FCS'},
+        {layer:'L2 802.1Q',size:'+4 B VLAN tag',fields:'TPID, PCP, VID'}
+      ];
+
+      /* ========== DECAP DEVICES ========== */
+      const decapDevices = [
+        {device:'Switch (L2)',icon:'🔲',rows:[
+          {label:'L2 Ethernet',value:'Strips header, checks FCS'},
+          {label:'Re-encapsulates',value:'Same frame out another port'},
+          {label:'Does NOT read',value:'IP or TCP headers'}
+        ]},
+        {device:'Router (L3)',icon:'🌐',rows:[
+          {label:'L2 Ethernet',value:'Decapsulates'},
+          {label:'L3 IP',value:'Reads, forwards by route, checks TTL'},
+          {label:'Rewrites L2',value:'New MAC header on egress'}
+        ]},
+        {device:'Target Host',icon:'💻',rows:[
+          {label:'All layers',value:'Decapsulates fully up to app'},
+          {label:'Verifies',value:'FCS, checksum, TTL, port matching'},
+          {label:'Delivers',value:'To application by port'}
+        ]},
+        {device:'Tunnel Endpoint',icon:'🔐',rows:[
+          {label:'Outer headers',value:'IP + GRE/IPsec'},
+          {label:'Inner packet',value:'Passed/decrypted as payload'},
+          {label:'Endpoints only',value:'Routers in path don\'t touch inner'}
+        ]}
+      ];
+
+      /* ========== CHECK POINTS ========== */
+      const checkSel = ref('L2');
+      const checkPoints = [
+        {layer:'L2',icon:'🔲',check:'FCS (CRC) match',result:'Drop',what:'CRC errors counted on switch/interface counters',extra:'Part of the Ethernet frame trailer'},
+        {layer:'L3 IPv4',icon:'🌐',check:'Header checksum + TTL',result:'Drop',what:'TTL=0 → ICMP TTL exceeded, drop; checksum recomputed each hop',extra:'Checksum recomputed because TTL decrements'},
+        {layer:'L3 IPv6',icon:'🌐',check:'Hop limit only',result:'Drop',what:'No header checksum in IPv6 — only hop-limit check',extra:'IPv6 removed header checksum entirely'},
+        {layer:'L4 TCP',icon:'📦',check:'Checksum + port matching',result:'Drop/Reset',what:'TCP ACK/sequence logic also validates segment',extra:'End-to-end checksum across the path'},
+        {layer:'L4 UDP',icon:'📦',check:'Checksum + port',result:'Drop',what:'Optional checksum in UDP',extra:'UDP is best-effort; reliability is the app\'s job'},
+        {layer:'L7 App',icon:'💻',check:'Format + session context',result:'App error',what:'Application validates its protocol format',extra:'Session state tracked by the app'}
+      ];
+      const checkData = computed(()=> checkPoints.find(c=>c.layer===checkSel.value)||checkPoints[0]);
+
+      /* ========== FLOW STEPS ========== */
+      const flowSteps = [
+        {title:'Generate',text:'Application generates data at L7.'},
+        {title:'Encapsulate down',text:'Transport adds ports → segment; network adds IP → packet; link adds Ethernet → frame; physical sends bits.'},
+        {title:'Switch transit',text:'Each L2 switch receives the frame, checks FCS, forwards by destination MAC, re-encapsulates a new L2 header on egress.'},
+        {title:'Router transit',text:'Each L3 router strips Ethernet, checks TTL/sum, looks up destination route (CEF), rewrites a new L2 header and sends out the next media.'},
+        {title:'Special devices',text:'Optional NAT/tunnel/firewall devices add/replace addresses or alter the path mid-flow.'},
+        {title:'Decapsulate up',text:'Destination host receives the frame → decapsulates step by step up to the app.'},
+        {title:'Reply (full duplex)',text:'Application replies — the same process in reverse. Full duplex possible.'}
+      ];
+
+      /* ========== DIRECTION ========== */
+      const dirSel = ref('unicast');
+      const directions = [
+        {id:'unicast',name:'Unicast',def:'One source → one destination',example:'Normal HTTP, SSH download',used:'Most application traffic'},
+        {id:'broadcast',name:'Broadcast',def:'One → all on the segment',example:'ARP request, DHCP discover',used:'L2 discovery within broadcast domain'},
+        {id:'multicast',name:'Multicast',def:'One → subscribed group members',example:'Video feeds, OSPF hello, VRRP updates',used:'Efficient one-to-many delivery'},
+        {id:'anycast',name:'Anycast',def:'One address → nearest of several nodes',example:'DNS anycast, VRRP anycast gateway',used:'IPv6/BGP for service redundancy'}
+      ];
+      const dirData = computed(()=> directions.find(d=>d.id===dirSel.value)||directions[0]);
+
+      /* ========== COMMANDS ========== */
+      const activeCmd = ref('isolate');
+      const commands = [
+        {id:'isolate',label:'Layer Isolation',config:'# The layers test — isolate L1-L3 first\nping <ip>            # OK → L1-L3 fine (ICMP is L3)\ntelnet <ip> <port>   # L4 port reachability\ncurl http://<host>   # L7 end-user service\n\n# Network device views\nshow interfaces | include (Duplex|Speed|Error|CRC)  # L1 health\nshow mac address-table                             # L2 learning\nshow ip route                                      # L3 table',note:'The classic layer-by-layer troubleshooting flow.'},
+        {id:'ipconfig',label:'IP Config',config:'# Network layer config on a Cisco router\ninterface GigabitEthernet0/0\n ip address 192.168.1.1 255.255.255.0\n no shutdown\n\n# Verify\nshow ip protocols\nshow ip route',note:'TCP/IP model is what Cisco speaks natively.'},
+        {id:'mtu',label:'MTU / Ping',config:'# Sizing PDUs to MTU\nip mtu 1500            # interface L3 packet max\n\n# Test with packet size + DF bit\nping 10.0.0.2 size 1472 df-bit\nshow ip interface      # MTU reported',note:'Segment/packet sizes controlled by MSS and MTU. Frame must fit link MTU.'},
+        {id:'debug',label:'Layer Debug',config:'# See encapsulation boundary on the wire\ndebug ip packet\ndebug ip icmp\nshow interfaces counters errors   # CRC/framing from bad FCS\n\n# Tunnels change encapsulation — MTU\ninterface Tunnel0\n ip mtu 1476',note:'Tunnels add headers → MTU must be reduced.'},
+        {id:'flow',label:'Data Flow',config:'# Observe the flow journey\ntraceroute 10.9.9.9        # shows each L3 hop (ICMP/UDP)\nping <host>                # round-trip across path\nshow ip fib                # CEF next-hop for flow\n\n# NetFlow captures 5-tuples\nip flow-export destination 10.1.1.10 2055',note:'Flow identity = 5-tuple: src/dst IP + port + protocol.'}
+      ];
+      const activeCommand = computed(()=> commands.find(c=>c.id===activeCmd.value)||commands[0]);
+
+      /* ========== TRAPS ========== */
+      const traps = [
+        {tag:'PDU names',text:'The number-one trap: frame vs packet vs segment. Segment=TCP, packet=IP, frame=Ethernet.'},
+        {tag:'Direction',text:'Source encapsulates (down). Destination decapsulates (up). Don\'t flip the direction.'},
+        {tag:'Router behavior',text:'A router decapsulates L2, reads L3, then re-encapsulates a brand-new L2 header (MACs change every hop). It does NOT decapsulate the full packet for a host.'},
+        {tag:'TLS = L6',text:'OSI-wise, TLS ≈ presentation (L6). In practice TLS is often described at L4/L7. Know both without mixing.'},
+        {tag:'Device mapping',text:'switch = L2, router = L3, hub = L1, firewall/load balancer = L4-L7. MAC = L2, IP = L3, port = L4.'},
+        {tag:'ARP placement',text:'ARP lives at Network Access (L2) in TCP/IP. Some exams place it at L3 or "between layers" — answer to the model given.'},
+        {tag:'ICMP layer',text:'ICMP is L3 (Internet layer), not "network-less." It belongs to the network layer.'},
+        {tag:'Checksum trap',text:'IPv4 header checksum is recomputed each hop (TTL decrements). IPv6 has NO header checksum. TCP/UDP checksums are end-to-end.'},
+        {tag:'Datagram trap',text:'UDP official PDU = "datagram"; IP RFC 791 also calls it a "datagram." Two-datagram trap — know both words.'},
+        {tag:'Encapsulation math',text:'Every hop re-does L2 encapsulation (new Ethernet header). L3/L4 headers change only at endpoints (except TTL/NAT).'},
+        {tag:'Peer-to-peer',text:'Here "peer" means layer-peer (logical same-layer communication), NOT file-sharing P2P. Keep them straight.'},
+        {tag:'TTL always drops',text:'TTL decreases per router hop — it always goes down on L3 forward. Don\'t say the frame travels over the router (routers strip L2).'}
+      ];
+
+      /* ========== QUIZ ========== */
+      const quizQuestions = reactive([
+        {q:'Which PDU lives at Layer 4 (TCP)?',opts:[{text:'Segment'},{text:'Packet'},{text:'Frame'},{text:'Bits'}],ans:null,correct:0},
+        {q:'Which layer does a switch (L2) operate at?',opts:[{text:'Data Link'},{text:'Network'},{text:'Transport'},{text:'Session'}],ans:null,correct:0},
+        {q:'In the TCP/IP model, which OSI layers does the Application layer cover?',opts:[{text:'7, 6, 5'},{text:'4, 3, 2'},{text:'7 and 4 only'},{text:'5, 4, 3'}],ans:null,correct:0},
+        {q:'What is the official RFC 791 term for an IPv4 PDU?',opts:[{text:'Datagram'},{text:'Segment'},{text:'Frame'},{text:'Cell'}],ans:null,correct:0},
+        {q:'Which protocol adds reliability to data delivery?',opts:[{text:'TCP'},{text:'UDP'},{text:'IP'},{text:'ICMP'}],ans:null,correct:0},
+        {q:'What happens to destination MAC addresses at each router hop?',opts:[{text:'They change (re-encapsulated)'},{text:'They stay constant'},{text:'They are removed'},{text:'They become IP'}],ans:null,correct:0},
+        {q:'Where does a router FAIL to decapsulate in the path?',opts:[{text:'It doesn\'t — the destination only fully decapsulates'},{text:'It decapsulates all layers'},{text:'It never reads IP'},{text:'It does the whole path'}],ans:null,correct:0},
+        {q:'What does a hub operate at?',opts:[{text:'Layer 1 Physical'},{text:'Layer 2 Data Link'},{text:'Layer 3 Network'},{text:'Layer 4 Transport'}],ans:null,correct:0},
+        {q:'Which header checksum is recomputed every hop?',opts:[{text:'IPv4 header'},{text:'IPv6 header'},{text:'Layer 2'},{text:'None'}],ans:null,correct:0},
+        {q:'In the TCP/IP model, which layer is ICMP part of?',opts:[{text:'Internet'},{text:'Transport'},{text:'Application'},{text:'Network Access'}],ans:null,correct:0},
+        {q:'What does the 5-tuple identify a traffic flow by?',opts:[{text:'src/dst IP + src/dst port + protocol'},{text:'MAC addresses only'},{text:'TTL and checksum'},{text:'VLAN ID and EtherType'}],ans:null,correct:0},
+        {q:'What happens if an IPv6 packet has expired hop limit?',opts:[{text:'Dropped (no checksum to check)'},{text:'Recomputed and forwarded'},{text:'Fragmented'},{text:'Sent back to source'}],ans:null,correct:0}
+      ]);
+      const quizDone = ref(false);
+      const quizScore = ref(0);
+      const allQuizAnswered = computed(()=> quizQuestions.every(q=>q.ans!==null));
+      function submitQuiz(){
+        quizScore.value = quizQuestions.filter((q,i)=>q.ans===q.correct).length;
+        quizDone.value = true;
+        localStorage.setItem('ccnp.osi.quiz',JSON.stringify({score:quizScore.value,total:quizQuestions.length}));
+      }
+      function resetQuiz(){
+        quizQuestions.forEach(q=>q.ans=null);
+        quizDone.value=false;
+        quizScore.value=0;
+        localStorage.removeItem('ccnp.osi.quiz');
+      }
+
+      /* ========== CHECKLIST ========== */
+      const checklist = reactive(JSON.parse(localStorage.getItem('ccnp.osi.checklist')||'null')||[
+        {text:'Memorize all 7 OSI layers, top-down and bottom-up (mnemonics)',done:false},
+        {text:'Know the PDU for each layer: data, segment, packet, frame, bits',done:false},
+        {text:'Map OSI 7→TCP/IP 4: 765→App, 4→Transport, 3→Internet, 21→Network Access',done:false},
+        {text:'Understand encapsulation direction (down the source stack)',done:false},
+        {text:'Understand decapsulation direction (up the destination stack)',done:false},
+        {text:'Know each layer\'s checks on receive: FCS, checksum, TTL/hop, port',done:false},
+        {text:'Know IPv4 vs IPv6 header checksum difference',done:false},
+        {text:'Explain the 7-step end-to-end data flow lifecycle',done:false},
+        {text:'Know direction classes: unicast, broadcast, multicast, anycast',done:false},
+        {text:'Use layer-by-layer troubleshooting: ping, telnet, curl, device views',done:false},
+        {text:'Know device mapping: hub=L1, switch=L2, router=L3, firewall=L4-7',done:false},
+        {text:'Explain 5-tuple flow identity used by NetFlow/ACLs/firewalls',done:false}
+      ]);
+      const doneCount = computed(()=> checklist.filter(c=>c.done).length );
+      function saveChecklist(){ localStorage.setItem('ccnp.osi.checklist',JSON.stringify(checklist)); }
+
+      return {
+        theme,sec,sections,
+        selectedLayer,osiLayers,
+        selectedTcpip,tcpipLayers,tcpipData,
+        pduSel,pdus,pduData,
+        headers,
+        decapDevices,
+        checkSel,checkPoints,checkData,
+        flowSteps,
+        dirSel,directions,dirData,
+        activeCmd,commands,activeCommand,
+        traps,
+        quizQuestions,quizDone,quizScore,allQuizAnswered,submitQuiz,resetQuiz,
+        checklist,doneCount,saveChecklist
+      };
+    }
+  }).mount('#app');
+})();
+</script>
+</body>
+</html>

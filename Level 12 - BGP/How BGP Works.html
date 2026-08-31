@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How BGP Works — Deep Dive</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --panel: #111c34;
+    --card: #1e293b;
+    --card-2: #16233d;
+    --text: #f8fafc;
+    --muted: #94a3b8;
+    --blue: #38bdf8;
+    --blue-dim: #0c4a6e;
+    --green: #34d399;
+    --green-dim: #064e3b;
+    --amber: #fbbf24;
+    --amber-dim: #78350f;
+    --red: #f87171;
+    --red-dim: #7f1d1d;
+    --violet: #a78bfa;
+    --violet-dim: #4c1d95;
+    --border: #334155;
+    --hover: #263449;
+    --code-bg: #0b1220;
+  }
+  #app[data-theme="light"] {
+    --bg: #f1f5f9;
+    --panel: #ffffff;
+    --card: #ffffff;
+    --card-2: #f8fafc;
+    --text: #0f172a;
+    --muted: #64748b;
+    --blue: #0284c7;
+    --blue-dim: #bae6fd;
+    --green: #059669;
+    --green-dim: #d1fae5;
+    --amber: #d97706;
+    --amber-dim: #fef3c7;
+    --red: #dc2626;
+    --red-dim: #fee2e2;
+    --violet: #7c3aed;
+    --violet-dim: #ede9fe;
+    --border: #cbd5e1;
+    --hover: #e2e8f0;
+    --code-bg: #0b1220;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; }
+  #app { max-width: 1040px; margin: 0 auto; padding: 20px 18px 60px; }
+
+  /* ---------- Header ---------- */
+  header {
+    position: sticky; top: 0; z-index: 30;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 12px 16px; margin-bottom: 18px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  header h1 { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .lv-badge { background: var(--blue-dim); color: var(--blue); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .exam-badge { background: var(--violet-dim); color: var(--violet); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .head-actions { display: flex; align-items: center; gap: 8px; }
+  .btn {
+    padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--card); color: var(--text); cursor: pointer; font-size: 0.82rem; font-weight: 600;
+    transition: background 0.15s;
+  }
+  .btn:hover { background: var(--hover); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn.primary { background: var(--blue); border-color: var(--blue); color: #04222e; }
+  .btn.primary:hover { filter: brightness(1.1); background: var(--blue); }
+  .btn.green { background: var(--green); border-color: var(--green); color: #04241a; }
+
+  /* ---------- Nav ---------- */
+  nav {
+    position: sticky; top: 62px; z-index: 20;
+    display: flex; gap: 6px; overflow-x: auto; padding: 8px 2px; margin-bottom: 18px;
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+    backdrop-filter: blur(4px); border-radius: 10px;
+  }
+  nav a {
+    text-decoration: none; white-space: nowrap; font-size: 0.76rem; font-weight: 600;
+    color: var(--muted); padding: 6px 11px; border: 1px solid var(--border); border-radius: 999px;
+    background: var(--panel);
+  }
+  nav a:hover { color: var(--text); border-color: var(--blue); }
+
+  /* ---------- Sections ---------- */
+  section { margin-bottom: 30px; scroll-margin-top: 130px; }
+  .sec-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .sec-num {
+    min-width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center;
+    font-weight: 800; font-size: 0.9rem; color: var(--panel);
+  }
+  .sec-num.bl { background: var(--blue); } .sec-num.gr { background: var(--green); }
+  .sec-num.am { background: var(--amber); } .sec-num.rd { background: var(--red); }
+  .sec-num.vi { background: var(--violet); }
+  .sec-head h2 { font-size: 1.25rem; }
+  .sec-sub { color: var(--muted); font-size: 0.88rem; margin-bottom: 14px; }
+
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px 18px; margin-bottom: 14px;
+  }
+  .card h3 { font-size: 1rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .card p { margin-bottom: 8px; }
+  .card ul, .card ol { padding-left: 20px; margin-bottom: 8px; }
+  .card li { margin-bottom: 4px; }
+
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+
+  .callout {
+    border-radius: 10px; padding: 12px 14px; margin: 12px 0; font-size: 0.9rem;
+    border: 1px solid var(--border); background: var(--card-2);
+  }
+  .callout.b { border-left: 4px solid var(--blue); }
+  .callout.g { border-left: 4px solid var(--green); }
+  .callout.a { border-left: 4px solid var(--amber); }
+  .callout.r { border-left: 4px solid var(--red); }
+  .callout.v { border-left: 4px solid var(--violet); }
+  .callout strong { color: var(--text); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 10px 0; }
+  th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--card-2); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  tr:nth-child(even) td { background: color-mix(in srgb, var(--card-2) 55%, transparent); }
+
+  code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .inline-code { background: var(--card-2); border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px; font-size: 0.85em; }
+  pre {
+    background: var(--code-bg); color: #dbeafe; border-radius: 10px; padding: 14px 16px;
+    overflow-x: auto; font-size: 0.8rem; line-height: 1.5; margin: 10px 0; border: 1px solid var(--border);
+  }
+  pre .dim { color: #64748b; }
+  pre .hl { color: #fbbf24; font-weight: 700; }
+
+  .chip {
+    display: inline-flex; align-items: center; gap: 5px; padding: 2px 10px; border-radius: 999px;
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.02em; white-space: nowrap;
+  }
+  .chip.succ { background: var(--green-dim); color: var(--green); }
+  .chip.warn { background: var(--amber-dim); color: var(--amber); }
+  .chip.down { background: var(--red-dim); color: var(--red); }
+  .chip.info { background: var(--blue-dim); color: var(--blue); }
+  .chip.fs   { background: var(--violet-dim); color: var(--violet); }
+
+  .keyval { display: flex; gap: 16px; flex-wrap: wrap; margin: 8px 0; }
+  .kv { background: var(--card-2); border: 1px solid var(--border); border-radius: 10px; padding: 8px 14px; font-size: 0.84rem; }
+  .kv b { display: block; color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 2px; }
+
+  /* ---------- Chains ---------- */
+  .chain { display: flex; align-items: stretch; gap: 6px; flex-wrap: wrap; margin: 12px 0; }
+  .chain .c {
+    background: var(--card-2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 12px; font-size: 0.8rem; text-align: center; flex: 1; min-width: 110px; font-weight: 600;
+  }
+  .chain .c.arw { border: none; background: none; color: var(--muted); flex: 0 0 auto; font-size: 1.1rem; font-weight: 800; min-width: 24px; padding: 8px 0; }
+  .chain .c i { display: block; font-style: normal; color: var(--muted); font-weight: 400; font-size: 0.72rem; margin-top: 2px; }
+
+  /* ---------- Best-path ladder ---------- */
+  .ladder { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin: 10px 0; }
+  .lstep { display: flex; gap: 10px; padding: 7px 12px; font-size: 0.84rem; border-bottom: 1px dashed var(--border); align-items: center; }
+  .lstep:last-child { border-bottom: none; }
+  .lstep .sno { min-width: 30px; font-weight: 800; color: var(--muted); }
+  .lstep.pass { opacity: 0.55; }
+  .lstep.pass .sno { color: var(--green); }
+  .lstep.decide { background: var(--green-dim); color: var(--green); font-weight: 700; }
+  .lstep.skip { opacity: 0.35; }
+  .lstep .win { margin-left: auto; font-weight: 700; white-space: nowrap; }
+
+  /* ---------- Calculators & duels ---------- */
+  .calc-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+  .calc-row label { font-size: 0.84rem; font-weight: 600; display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 220px; }
+  .calc-row input[type=range] { width: 100%; accent-color: var(--blue); }
+  .calc-row .val { color: var(--blue); font-family: ui-monospace, monospace; font-weight: 700; }
+  select {
+    background: var(--card-2); color: var(--text); border: 1px solid var(--border);
+    border-radius: 8px; padding: 7px 10px; font-size: 0.86rem; font-weight: 600; cursor: pointer;
+  }
+  .verdict {
+    border-radius: 10px; padding: 12px 16px; font-weight: 700; font-size: 0.95rem; margin-top: 10px;
+    border: 1px solid var(--border);
+  }
+  .verdict.fs  { background: var(--green-dim); color: var(--green); border-color: var(--green); }
+  .verdict.eq  { background: var(--amber-dim); color: var(--amber); border-color: var(--amber); }
+  .verdict.no  { background: var(--red-dim); color: var(--red); border-color: var(--red); }
+
+  /* ---------- Traps ---------- */
+  .trap-card { cursor: pointer; user-select: none; transition: border-color 0.15s; }
+  .trap-card:hover { border-color: var(--red); }
+  .trap-card .t { font-weight: 700; font-size: 0.92rem; display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+  .trap-card .t .hint { color: var(--red); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; opacity: 0.8; }
+  .trap-card.flipped { border-color: var(--red); background: var(--red-dim); border-width: 1.5px; }
+  .trap-card .ans { margin-top: 10px; border-top: 1px dashed var(--border); padding-top: 10px; font-size: 0.88rem; }
+
+  /* ---------- Quiz ---------- */
+  .q-card { border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; background: var(--card); }
+  .q-card .qtext { font-weight: 700; margin-bottom: 10px; font-size: 0.93rem; }
+  .opt { display: block; width: 100%; text-align: left; padding: 8px 12px; margin: 5px 0; border-radius: 8px; cursor: pointer; font-size: 0.86rem; border: 1px solid var(--border); background: var(--card-2); color: var(--text); }
+  .opt:hover:not(:disabled) { border-color: var(--blue); }
+  .opt.picked { border-color: var(--blue); background: var(--blue-dim); font-weight: 700; }
+  .opt.correct { border-color: var(--green); background: var(--green-dim); }
+  .opt.wrong { border-color: var(--red); background: var(--red-dim); }
+  .opt:disabled { cursor: default; opacity: 0.9; }
+  .q-why { margin-top: 8px; font-size: 0.84rem; color: var(--muted); }
+  .q-why b { color: var(--text); }
+  .score-bar { display: flex; align-items: center; gap: 12px; margin: 12px 0; flex-wrap: wrap; }
+  .score-meter { flex: 1; height: 10px; background: var(--card-2); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; min-width: 160px; }
+  .score-meter div { height: 100%; background: var(--green); transition: width 0.3s; }
+
+  /* ---------- Checklist ---------- */
+  .check-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; margin-bottom: 4px; font-size: 0.88rem; cursor: pointer; }
+  .check-item:hover { background: var(--hover); }
+  .check-item input { accent-color: var(--green); width: 16px; height: 16px; cursor: pointer; }
+  .check-item.done { color: var(--muted); text-decoration: line-through; }
+  .check-item a { color: var(--text); text-decoration: none; }
+  .check-item a:hover { color: var(--blue); text-decoration: underline; }
+  .prog { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .prog .meter { flex: 1; height: 10px; background: var(--card-2); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
+  .prog .meter div { height: 100%; background: var(--green); transition: width 0.3s; }
+
+  footer { margin-top: 30px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.82rem; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  footer a { color: var(--blue); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  .pill-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+  .pill { padding: 6px 12px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; border: 1px solid var(--border); background: var(--card-2); }
+
+  @media print {
+    header, nav, .btn, .sim-controls, footer .no-print { display: none !important; }
+    body { background: #fff; }
+    * { color: #111 !important; background: #fff !important; border-color: #ccc !important; }
+  }
+</style>
+</head>
+<body>
+<div id="app" :data-theme="theme">
+
+  <!-- ================= HEADER ================= -->
+  <header>
+    <h1>
+      <span class="lv-badge">Level 12</span>
+      How BGP Works
+      <span class="exam-badge">ENCOR 350-401</span>
+    </h1>
+    <div class="head-actions">
+      <a class="btn" href="../index.html">Flashcards</a>
+      <button class="btn" @click="toggleTheme">{{ theme === 'dark' ? 'Light' : 'Dark' }} mode</button>
+    </div>
+  </header>
+
+  <!-- ================= NAV ================= -->
+  <nav>
+    <a href="#overview">1 · What is BGP</a>
+    <a href="#sessions">2 · eBGP &amp; iBGP</a>
+    <a href="#path">3 · Best Path</a>
+    <a href="#aspath">4 · AS_PATH</a>
+    <a href="#pref">5 · Local Pref</a>
+    <a href="#med">6 · MED</a>
+    <a href="#comm">7 · Communities</a>
+    <a href="#scale">8 · Scaling</a>
+    <a href="#tools">9 · Policy Tools</a>
+    <a href="#commands">10 · Commands</a>
+    <a href="#traps">11 · Traps</a>
+    <a href="#quiz">12 · Quiz</a>
+    <a href="#plan">13 · Checklist</a>
+  </nav>
+
+  <!-- ================= 1. WHAT IS BGP ================= -->
+  <section id="overview">
+    <div class="sec-head"><div class="sec-num bl">1</div><h2>What is BGP?</h2></div>
+    <div class="card">
+      <p>
+        <b>BGP</b> (Border Gateway Protocol) is the <b>path-vector</b> routing protocol of the
+        internet. It exchanges <b>reachability + path attributes</b> between <b>autonomous systems</b>
+        (ASes) over reliable TCP sessions — not metrics like an IGP. BGP's job isn't to find the
+        fastest path; it's to let each AS choose paths according to <b>policy</b>.
+      </p>
+      <div class="grid2">
+        <div class="callout b">
+          <strong>Transport facts — memorize</strong><br>
+          <b>TCP port 179</b> (reliable — no retransmit logic to build). Sessions use the
+          <b>update-source</b> IP. BGP is <b>incremental</b>: full table once, then only updates —
+          no periodic re-advertisements, no flooding.
+        </div>
+        <div class="callout g">
+          <strong>What BGP carries</strong><br>
+          Prefixes plus path attributes: <b>AS_PATH</b> (loop prevention), <b>local-pref</b>,
+          <b>MED</b>, <b>communities</b>, <b>origin</b>. The IGP (OSPF/EIGRP) can't carry these —
+          that is exactly why iBGP exists.
+        </div>
+      </div>
+      <h3>Core facts table</h3>
+      <table>
+        <tr><th>Fact</th><th>Value</th><th>Trap</th></tr>
+        <tr><td>Transport</td><td>TCP <span class="inline-code">179</span></td><td>Not UDP, not a routing-protocol port</td></tr>
+        <tr><td>Peers</td><td>eBGP = different AS · iBGP = same AS</td><td>remote-as decides the session type</td></tr>
+        <tr><td>AD</td><td>eBGP <b>20</b> / iBGP <b>200</b></td><td>iBGP is far less trusted</td></tr>
+        <tr><td>Sessions</td><td>iBGP needs full mesh (n(n-1)/2)</td><td>revealed: route reflectors scale it</td></tr>
+        <tr><td>Loop prevention</td><td>AS_PATH (eBGP) + split horizon (iBGP)</td><td>each eBGP hop prepends its AS</td></tr>
+        <tr><td>Best path</td><td>9-step deterministic algorithm</td><td>first differing step decides — always</td></tr>
+      </table>
+      <div class="chain">
+        <div class="c">TCP session<i>port 179 · update-source IP</i></div>
+        <div class="c arw">→</div>
+        <div class="c">eBGP/iBGP peers<i>remote-as decides</i></div>
+        <div class="c arw">→</div>
+        <div class="c">Update: full table<i>then incremental only</i></div>
+        <div class="c arw">→</div>
+        <div class="c">Best-path algorithm<i>per prefix, first difference wins</i></div>
+        <div class="c arw">→</div>
+        <div class="c">Install in RIB<i>if next hop is reachable</i></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 2. eBGP & iBGP ================= -->
+  <section id="sessions">
+    <div class="sec-head"><div class="sec-num bl">2</div><h2>eBGP &amp; iBGP</h2></div>
+    <div class="sec-sub">Same protocol, two personalities. The defaults flip completely based on whether the peer is in your AS.</div>
+
+    <div class="card">
+      <h3>eBGP vs iBGP at a glance</h3>
+      <table>
+        <tr><th>Feature</th><th>eBGP</th><th>iBGP</th></tr>
+        <tr><td>Peers in</td><td>different AS</td><td>same AS</td></tr>
+        <tr><td>AD</td><td><b>20</b></td><td><b>200</b></td></tr>
+        <tr><td>TTL default</td><td><b>1</b> (needs ebgp-multihop for non-direct)</td><td>255 (loopbacks OK)</td></tr>
+        <tr><td>Next-hop</td><td>changed to self on advertise</td><td><b>NOT changed</b> → next-hop-self needed</td></tr>
+        <tr><td>Split horizon</td><td>AS_PATH loop prevention</td><td>no re-advertise to iBGP → full mesh</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>Session explorer</h3>
+      <p>Pick a session type to see its config, behavior and failure modes.</p>
+      <div class="pill-list">
+        <button v-for="s in sessionTypes" :key="s.id" class="pill btn"
+          :class="activeSession === s.id ? 'primary' : ''" @click="activeSession = s.id">{{ s.name }}</button>
+      </div>
+      <div v-if="sessionInfo" class="keyval">
+        <div class="kv"><b>AD</b>{{ sessionInfo.ad }}</div>
+        <div class="kv"><b>TTL default</b>{{ sessionInfo.ttl }}</div>
+        <div class="kv"><b>Next-hop</b>{{ sessionInfo.nexthop }}</div>
+        <div class="kv"><b>Loop prevention</b>{{ sessionInfo.loopPrev }}</div>
+      </div>
+      <pre v-if="sessionInfo">{{ sessionInfo.config }}</pre>
+      <div class="callout r"><strong>Exam trap:</strong> {{ sessionInfo.trap }}</div>
+    </div>
+  </section>
+
+  <!-- ================= 3. BEST PATH ================= -->
+  <section id="path">
+    <div class="sec-head"><div class="sec-num am">3</div><h2>The Best-Path Algorithm</h2></div>
+    <div class="sec-sub">One best path per prefix. The algorithm runs in strict order — the first step where the paths differ decides, and everything after never runs.</div>
+
+    <div class="card">
+      <h3>The 9-step ladder</h3>
+      <table>
+        <tr><th>#</th><th>Criterion</th><th>Winner</th></tr>
+        <tr><td>1</td><td>Weight (Cisco proprietary)</td><td>higher</td></tr>
+        <tr><td>2</td><td>Local Preference</td><td>higher</td></tr>
+        <tr><td>3</td><td>Locally originated</td><td>network/aggregate/redistributed</td></tr>
+        <tr><td>4</td><td>AS_PATH</td><td>shorter</td></tr>
+        <tr><td>5</td><td>Origin</td><td>i &lt; e &lt; ?</td></tr>
+        <tr><td>6</td><td>MED</td><td>lower (same neighbor AS only)</td></tr>
+        <tr><td>7</td><td>eBGP over iBGP</td><td>eBGP</td></tr>
+        <tr><td>8</td><td>IGP metric to next hop</td><td>lower</td></tr>
+        <tr><td>9</td><td>Tie-breaks (oldest eBGP, router ID…)</td><td>lowest router ID etc.</td></tr>
+      </table>
+      <div class="callout a">
+        <strong>Memory mantra:</strong> <span class="inline-code">Weight &gt; Local Pref &gt; AS_PATH &gt; MED</span> —
+        the exam's four tunables in order. Steps 7–9 are the tail the exam rarely reaches.
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Path duel — watch the ladder walk</h3>
+      <p>Pick a scenario and the ladder highlights the deciding step. All earlier steps tied; later steps never ran.</p>
+      <div class="pill-list">
+        <button v-for="(d, i) in duels" :key="i" class="pill btn"
+          :class="duelScen === i ? 'primary' : ''" @click="duelScen = i">{{ d.name }}</button>
+      </div>
+      <div class="keyval" v-if="duel">
+        <div class="kv"><b>Path A</b>{{ duel.aName }}<br><span style="color:var(--muted); font-size:0.75rem;">w {{ duel.a.w }} · lp {{ duel.a.lp }} · as {{ duel.a.ap }} · med {{ duel.a.med }}</span></div>
+        <div class="kv"><b>Path B</b>{{ duel.bName }}<br><span style="color:var(--muted); font-size:0.75rem;">w {{ duel.b.w }} · lp {{ duel.b.lp }} · as {{ duel.b.ap }} · med {{ duel.b.med }}</span></div>
+      </div>
+      <div class="ladder">
+        <div v-for="(s, i) in duelSteps" :key="i" class="lstep" :class="s.cls">
+          <span class="sno">{{ i + 1 }}</span>
+          <span>{{ s.label }}</span>
+          <span class="win" v-if="s.decided">← {{ duelVerdict.winner }} wins</span>
+        </div>
+      </div>
+      <div class="verdict" :class="duelVerdict.cls">Step {{ duelVerdict.stepNo }} · {{ duelVerdict.why }} — {{ duelVerdict.winner }}. {{ duelVerdict.skipped }} step(s) never ran.</div>
+    </div>
+  </section>
+
+  <!-- ================= 4. AS_PATH ================= -->
+  <section id="aspath">
+    <div class="sec-head"><div class="sec-num gr">4</div><h2>AS_PATH</h2></div>
+    <div class="sec-sub">Well-known mandatory. Two jobs: loop prevention and best-path step 4 (shorter wins).</div>
+
+    <div class="grid2">
+      <div class="card">
+        <h3>Forms and rules</h3>
+        <table>
+          <tr><th>Type</th><th>Meaning</th><th>Example</th></tr>
+          <tr><td>AS_SEQUENCE</td><td>ordered list traversed</td><td><span class="inline-code">65010 65020 65030</span></td></tr>
+          <tr><td>AS_SET</td><td>unordered set (aggregation)</td><td><span class="inline-code">{65010, 65020}</span></td></tr>
+        </table>
+        <ul>
+          <li>Every eBGP advertisement <b>prepends its own AS</b>; iBGP never modifies AS_PATH.</li>
+          <li>Own AS anywhere in an inbound path → route <b>rejected</b> (it looped already).</li>
+          <li>AS_SET only appears from <span class="inline-code">aggregate-address … as-set</span>.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Regex cheat-sheet</h3>
+        <table>
+          <tr><th>Pattern</th><th>Meaning</th></tr>
+          <tr><td><span class="inline-code">^</span> / <span class="inline-code">$</span></td><td>anchor start / end</td></tr>
+          <tr><td><span class="inline-code">.</span></td><td>any single char</td></tr>
+          <tr><td><span class="inline-code">_</span></td><td>separator (space/brace)</td></tr>
+          <tr><td><span class="inline-code">*</span> / <span class="inline-code">+</span></td><td>zero+ / one+</td></tr>
+        </table>
+        <ul>
+          <li><span class="inline-code">^65001$</span> = exactly one AS</li>
+          <li><span class="inline-code">^65001_</span> = starts with 65001</li>
+          <li><span class="inline-code">_65001_</span> = contains 65001</li>
+          <li><span class="inline-code">^$</span> = empty path = locally originated</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>As-path prepend — steering inbound traffic</h3>
+      <pre>route-map PREPEND permit 10
+ match ip address prefix-list HOST
+ set as-path prepend 65001 65001 65001
+
+router bgp 65001
+ neighbor 192.0.2.2 route-map PREPEND out</pre>
+      <div class="callout r">
+        <strong>Exam trap:</strong> only prepend <b>your own AS number</b>. Prepending a neighbor's AS can
+        break its loop-detection logic and cause flapping — the classic mistake.
+      </div>
+      <div class="chain">
+        <div class="c">Route learned<i>AS_PATH = [65010]</i></div>
+        <div class="c arw">→</div>
+        <div class="c">Prepend own AS ×3<i>route-map out</i></div>
+        <div class="c arw">→</div>
+        <div class="c">Neighbor sees<i>65001 65001 65001 65010</i></div>
+        <div class="c arw">→</div>
+        <div class="c">Looks longer<i>inbound prefers alternate path</i></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 5. LOCAL PREFERENCE ================= -->
+  <section id="pref">
+    <div class="sec-head"><div class="sec-num gr">5</div><h2>Local Preference</h2></div>
+    <div class="sec-sub">Well-known discretionary. Tells your ENTIRE AS which outbound eBGP path to prefer. Higher wins, step 2.</div>
+
+    <div class="card">
+      <h3>Properties</h3>
+      <table>
+        <tr><th>Fact</th><th>Value</th></tr>
+        <tr><td>Default</td><td><b>100</b></td></tr>
+        <tr><td>Set where</td><td>inbound from eBGP (neighbor … in)</td></tr>
+        <tr><td>Propagates</td><td><b>iBGP only</b> — external routers never see it</td></tr>
+        <tr><td>Best path</td><td>step 2, higher wins</td></tr>
+        <tr><td>Job</td><td>outbound traffic selection (which exit your AS takes)</td></tr>
+      </table>
+      <div class="callout r">
+        <strong>Exam trap:</strong> local-pref is set where eBGP routes <b>arrive</b> (neighbor … route-map
+        <b>in</b>), then rides iBGP so every router in the AS makes the <b>same exit choice</b>. Apply a
+        route-map on <b>out</b> and your neighbors ignore it.
+      </div>
+      <pre>! Global default for all eBGP routes
+router bgp 65001
+ bgp default local-preference 200
+
+! Per-neighbor override for specific prefixes
+route-map SETLP permit 10
+ match ip address prefix-list CRITICAL
+ set local-preference 300
+
+router bgp 65001
+ neighbor 192.0.2.2 route-map SETLP in</pre>
+      <div class="chain">
+        <div class="c">eBGP route arrives<i>at edge router</i></div>
+        <div class="c arw">→</div>
+        <div class="c">local-pref set<i>100 default · 300 via route-map</i></div>
+        <div class="c arw">→</div>
+        <div class="c">Rides iBGP<i>every internal router sees it</i></div>
+        <div class="c arw">→</div>
+        <div class="c">AS-wide exit choice<i>consistent, primary/backup works</i></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 6. MED ================= -->
+  <section id="med">
+    <div class="sec-head"><div class="sec-num am">6</div><h2>MED</h2></div>
+    <div class="sec-sub">Optional non-transitive. Tells a NEIGHBOR AS which of your exit points to use for INBOUND traffic. Lower wins, step 6.</div>
+
+    <div class="card">
+      <h3>Properties + the direction trap</h3>
+      <table>
+        <tr><th>Fact</th><th>Value</th></tr>
+        <tr><td>Type</td><td>optional non-transitive</td></tr>
+        <tr><td>Default</td><td>0 (missing = 0 — can win by accident)</td></tr>
+        <tr><td>Wins</td><td>lower (step 6)</td></tr>
+        <tr><td>Compared</td><td><b>same neighbor AS only</b> (unless always-compare-med)</td></tr>
+        <tr><td>Travel</td><td>crosses iBGP, stripped at a third AS</td></tr>
+      </table>
+      <table>
+        <tr><th>Attribute</th><th>Set on / judged by</th><th>Which traffic</th></tr>
+        <tr><td><b>Local Pref</b></td><td>set inbound · judged by me</td><td>my <b>outbound</b> exit</td></tr>
+        <tr><td><b>MED</b></td><td>set outbound · judged by upstream</td><td>my <b>inbound</b> entry</td></tr>
+      </table>
+      <div class="callout r">
+        <strong>The direction trap:</strong> MED is <b>set outbound</b> (neighbor … route-map
+        <b>out</b>) but <b>judged inbound</b> by the upstream AS that receives it. Setting a route-map
+        "in" sets MED on routes arriving at you — usually wrong.
+      </div>
+      <pre>! Two links to the upstream: prefer link A for inbound traffic
+route-map SETMED permit 10
+ match ip address prefix-list PRIMARY-LINK
+ set metric 50                  ! lower = more preferred by upstream
+
+router bgp 65001
+ neighbor 192.0.2.2 route-map SETMED out   ! link A
+ neighbor 192.0.2.3 route-map SETMED2 out  ! link B (metric 200)</pre>
+      <div class="callout a">
+        <strong>Same-AS rule:</strong> MED from AS 100 and MED from AS 200 are <b>not comparable</b> —
+        both count as 0 unless <span class="inline-code">bgp always-compare-med</span> is configured.
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 7. COMMUNITIES ================= -->
+  <section id="comm">
+    <div class="sec-head"><div class="sec-num vi">7</div><h2>Communities</h2></div>
+    <div class="sec-sub">Optional TRANSITIVE tags — the upstream applies the policy, not the sender. The one attribute that crosses ASes for you.</div>
+
+    <div class="card">
+      <h3>The four well-known communities</h3>
+      <table>
+        <tr><th>Community</th><th>Value</th><th>Action it triggers</th></tr>
+        <tr><td><b>NO_EXPORT</b></td><td>0xFFFFFF01</td><td>don't advertise outside the local AS</td></tr>
+        <tr><td><b>NO_ADVERTISE</b></td><td>0xFFFFFF02</td><td>don't advertise to <b>any</b> peer</td></tr>
+        <tr><td>LOCAL_AS</td><td>0xFFFFFF03</td><td>don't leave the confederation sub-AS</td></tr>
+        <tr><td>INTERNET</td><td>0x00000000</td><td>advertise anywhere (default)</td></tr>
+      </table>
+      <div class="callout r">
+        <strong>Classic trap:</strong> <b>NO_EXPORT</b> still flows inside your AS (kept for iBGP peers);
+        <b>NO_ADVERTISE</b> dies at this router entirely (not even iBGP). Mixing them up changes the
+        whole reachability picture.
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Set, send, match</h3>
+      <pre>route-map COMM permit 10
+ match ip address prefix-list MKT
+ set community 65001:100
+
+router bgp 65001
+ neighbor 192.0.2.2 route-map COMM out
+ neighbor 192.0.2.2 send-community        ! REQUIRED — else stripped
+
+! Receiving side
+ip community-list standard 10 permit 65001:100
+route-map APPLY permit 10
+ match community 10
+ set local-preference 200
+router bgp 65001
+ neighbor 192.0.2.2 route-map APPLY in</pre>
+      <div class="callout r">
+        <strong>Exam trap:</strong> without <span class="inline-code">send-community</span>, communities
+        <b>silently vanish</b> at the outbound edge — the number-one "why is my policy doing nothing"
+        on the exam. Standard lists match exactly; expanded lists use regex.
+      </div>
+      <div class="chain">
+        <div class="c">set community<i>ASN:value on the edge route-map</i></div>
+        <div class="c arw">→</div>
+        <div class="c">send-community<i>required or stripped</i></div>
+        <div class="c arw">→</div>
+        <div class="c">Transit across ASes<i>optional transitive</i></div>
+        <div class="c arw">→</div>
+        <div class="c">Upstream matches<i>community-list → set local-pref / filter</i></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 8. SCALING ================= -->
+  <section id="scale">
+    <div class="sec-head"><div class="sec-num bl">8</div><h2>Scaling iBGP</h2></div>
+    <div class="sec-sub">iBGP split horizon demands a full mesh. Route reflectors break it with hub-and-spoke; confederations slice the AS into sub-ASes.</div>
+
+    <div class="card">
+      <h3>Session count — the reason reflectors exist</h3>
+      <div class="calc-row">
+        <label>iBGP routers in the AS
+          <input type="range" min="3" max="40" step="1" v-model.number="nRouters">
+          <span class="val">{{ nRouters }} routers</span>
+        </label>
+      </div>
+      <div class="keyval">
+        <div class="kv"><b>Full mesh</b>{{ fullMesh }} sessions <span style="color:var(--muted);">( n(n-1)/2 )</span></div>
+        <div class="kv"><b>With one route reflector</b>{{ rrSessions }} sessions <span style="color:var(--muted);">( clients peer only with the RR )</span></div>
+        <div class="kv"><b>Reduction</b><b style="color:var(--green);">{{ meshReduction }}%</b></div>
+      </div>
+      <div class="callout g"><strong>n(n-1)/2 collapses to n-1</strong> — linear instead of quadratic. That is the entire point of a route reflector.</div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h3>Route reflector roles &amp; rules</h3>
+        <table>
+          <tr><th>Route learned from</th><th>Sent to</th></tr>
+          <tr><td>Client</td><td>all other clients <b>and</b> non-clients</td></tr>
+          <tr><td>Non-client</td><td><b>clients only</b></td></tr>
+          <tr><td>eBGP</td><td>everyone</td></tr>
+          <tr><td>iBGP (general)</td><td>not re-advertised — except the rules above</td></tr>
+        </table>
+        <p style="font-size:0.86rem;">
+          Clients peer <b>only with the RR</b> — never with each other. Config:
+          <span class="inline-code">neighbor X route-reflector-client</span> on the reflector.
+        </p>
+        <table>
+          <tr><th>Loop attribute</th><th>Job</th></tr>
+          <tr><td>ORIGINATOR_ID</td><td>sees own ID → drop the route</td></tr>
+          <tr><td>CLUSTER_LIST</td><td>cluster IDs traversed → drop on re-receipt</td></tr>
+          <tr><td>CLUSTER_ID</td><td>identifies the reflector's cluster</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h3>Confederation</h3>
+        <p>Split the AS into <b>sub-ASes</b> that peer eBGP-style while presenting one public AS outside.</p>
+        <pre>router bgp 64512
+ bgp confederation identifier 65001
+ bgp confederation peers 64513 64514
+ neighbor 10.0.0.2 remote-as 64513</pre>
+        <table>
+          <tr><th>Session</th><th>AD</th><th>Behavior</th></tr>
+          <tr><td>iBGP within sub-AS</td><td>200</td><td>iBGP rules</td></tr>
+          <tr><td>Confed eBGP</td><td><b>200</b></td><td>eBGP-ish, <b>attributes kept</b></td></tr>
+          <tr><td>Real eBGP</td><td>20</td><td>normal eBGP</td></tr>
+        </table>
+        <div class="callout r">
+          <strong>Exam trap:</strong> confed eBGP sessions use <b>AD 200</b>, not 20 — and
+          <b>local-pref, MED and next-hop survive</b> sub-AS boundaries (unlike real eBGP). The confed
+          AS_PATH is stripped before leaving to the outside world.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 9. POLICY TOOLS ================= -->
+  <section id="tools">
+    <div class="sec-head"><div class="sec-num am">9</div><h2>Policy Tools</h2></div>
+    <div class="sec-sub">The toolkit: aggregation, prefix-lists, route-maps, PBR. The exam's fill-in-the-blank section.</div>
+
+    <div class="card">
+      <h3>Aggregation</h3>
+      <table>
+        <tr><th>Method</th><th>Command</th><th>Condition</th></tr>
+        <tr><td>Static</td><td><span class="inline-code">network X mask Y</span></td><td>prefix must exist in the BGP table</td></tr>
+        <tr><td>Aggregate</td><td><span class="inline-code">aggregate-address X mask</span></td><td><b>any</b> more-specific in the table</td></tr>
+      </table>
+      <pre>router bgp 65001
+ aggregate-address 172.16.0.0 255.255.0.0
+ aggregate-address 172.16.0.0 255.255.0.0 summary-only
+ aggregate-address 172.16.0.0 255.255.0.0 as-set</pre>
+      <ul>
+        <li><b>summary-only</b> suppresses the more-specifics.</li>
+        <li><b>as-set</b> records the originating ASes as an AS_SET — without it the aggregate hides origins (black-hole risk on multi-origin).</li>
+        <li><b>atomic-aggregate</b> (well-known discretionary) + <b>aggregator</b> mark the aggregation point.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Prefix-list <span class="inline-code">ge</span>/<span class="inline-code">le</span> matcher</h3>
+      <p style="font-size:0.86rem;">
+        <b>ge/le modify length, never the prefix bits</b>. Pick a list rule and a route to test:
+      </p>
+      <div class="pill-list">
+        <button v-for="(r, i) in plRules" :key="i" class="pill btn"
+          :class="plRule === i ? 'primary' : ''" @click="plRule = i">{{ r.label }}</button>
+      </div>
+      <div class="pill-list">
+        <button v-for="(r, i) in plRoutes" :key="i" class="pill"
+          :class="plRoute === i ? 'fs' : ''" @click="plRoute = i">{{ r.label }}</button>
+      </div>
+      <div class="verdict" :class="plVerdict.match ? 'fs' : 'no'">
+        {{ plVerdict.match ? 'MATCH ✓' : 'NO MATCH ✗' }} — {{ plVerdict.why }}
+      </div>
+      <table>
+        <tr><th>Common patterns</th><th>Matches</th></tr>
+        <tr><td><span class="inline-code">permit 10.0.0.0/8</span></td><td>only 10.0.0.0/8 exactly</td></tr>
+        <tr><td><span class="inline-code">permit 10.0.0.0/8 le 32</span></td><td>all 10.x.x.x, any length</td></tr>
+        <tr><td><span class="inline-code">permit 0.0.0.0/0 le 32</span></td><td><b>everything</b> (universal permit)</td></tr>
+        <tr><td><span class="inline-code">permit 0.0.0.0/0</span></td><td>default route only</td></tr>
+      </table>
+      <div class="callout r"><strong>Exam trap:</strong> prefix-lists end with an <b>implicit deny</b> and evaluate
+        <b>lowest seq first, first match wins</b>. A deny of 10.1.1.0/24 followed by permit 10.0.0.0/8 le 32 blocks the hosts and allows the rest.</div>
+    </div>
+
+    <div class="card">
+      <h3>Route-maps — match/set semantics</h3>
+      <table>
+        <tr><th>Action</th><th>With match</th><th>Without match</th></tr>
+        <tr><td><b>permit</b></td><td>apply set + let route pass</td><td>default pass (no set)</td></tr>
+        <tr><td><b>deny</b></td><td><b>block the route</b> (filter)</td><td>default pass (skip entry)</td></tr>
+      </table>
+      <table>
+        <tr><th>Match</th><th>Set</th></tr>
+        <tr><td><span class="inline-code">match ip address prefix-list PC</span></td><td><span class="inline-code">set local-preference</span></td></tr>
+        <tr><td><span class="inline-code">match as-path 10</span></td><td><span class="inline-code">set community</span></td></tr>
+        <tr><td><span class="inline-code">match ip next-hop</span></td><td><span class="inline-code">set ip next-hop</span> (PBR)</td></tr>
+        <tr><td><span class="inline-code">match interface</span></td><td><span class="inline-code">set interface</span> (PBR)</td></tr>
+      </table>
+      <pre>! Applied to BGP neighbors — direction is the classic misconfig
+router bgp 65001
+ neighbor 192.0.2.2 route-map INBOUND-POLICY in
+ neighbor 192.0.2.2 route-map OUTBOUND-POLICY out</pre>
+      <div class="callout b">
+        <strong>PBR note:</strong> policy-based routing applies a route-map <b>inbound on an
+        interface</b> (<span class="inline-code">ip policy route-map PBR</span>). <span class="inline-code">set ip
+        next-hop</span> overrides the RIB; <span class="inline-code">set ip default next-hop</span> is only a fallback
+        when no route exists. <span class="inline-code">ip local policy route-map</span> covers locally generated traffic.
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 10. COMMANDS ================= -->
+  <section id="commands">
+    <div class="sec-head"><div class="sec-num bl">10</div><h2>Command Viewer</h2></div>
+    <div class="card">
+      <div class="pill-list">
+        <button v-for="c in commands" :key="c.key" class="pill btn" :class="activeCmd === c.key ? 'primary' : ''" @click="activeCmd = c.key">{{ c.label }}</button>
+      </div>
+      <div v-if="activeCommand">
+        <p style="font-size:0.84rem; color:var(--muted);">{{ activeCommand.tagline }}</p>
+        <pre>{{ activeCommand.cmd }}<span class="dim">
+{{ activeCommand.output }}</span></pre>
+        <div class="callout b" style="font-size:0.84rem;"><strong>What to look at:</strong> {{ activeCommand.read }}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 11. TRAPS ================= -->
+  <section id="traps">
+    <div class="sec-head"><div class="sec-num rd">11</div><h2>Exam Traps — flip to reveal</h2></div>
+    <div class="sec-sub">Click any card to flip it. These are the BGP questions people get wrong on ENCOR.</div>
+    <div class="grid2">
+      <div v-for="(t, i) in traps" :key="i" class="card trap-card" :class="{ flipped: trapOpen[i] }" @click="trapOpen[i] = !trapOpen[i]">
+        <div class="t">
+          <span>{{ i + 1 }}. {{ t.q }}</span>
+          <span class="hint">{{ trapOpen[i] ? '▲' : 'REVEAL' }}</span>
+        </div>
+        <div v-if="trapOpen[i]" class="ans">{{ t.a }}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 12. SUMMARY + QUIZ ================= -->
+  <section id="quiz">
+    <div class="sec-head"><div class="sec-num gr">12</div><h2>One-Minute Summary &amp; Self-Test</h2></div>
+
+    <div class="card">
+      <h3>BGP in 60 seconds</h3>
+      <pre>Transport = TCP 179. Path-vector. Peer type = remote-as decides (eBGP 20 / iBGP 200).
+eBGP : TTL 1 (ebgp-multihop) · next-hop changed to self · AS_PATH prepended.
+iBGP : next-hop NOT changed (next-hop-self) · split horizon (no transit) → full mesh
+        → route reflectors (clients only peer with RR) or confeds (sub-ASes, AD 200).
+
+Best path (first difference decides):
+  1 Weight (local)  2 Local-Pref (higher)  3 Locally originated
+  4 AS_PATH (shorter)  5 Origin (i &lt; e &lt; ?)  6 MED (lower)
+  7 eBGP &gt; iBGP  8 IGP metric  9 Router ID.
+
+Local-pref : AS-wide, iBGP-only, set in, default 100 — my outbound exit.
+MED         : non-transitive, set out/judged in, same-AS only, default 0 — my inbound entry.
+Communities : optional TRANSITIVE, send-community or stripped.
+              NO_EXPORT (stays in AS) vs NO_ADVERTISE (stops here).
+AS path     : prepend your OWN AS only.
+Prefix-list : ge/le = length, implicit deny, 0.0.0.0/0 le 32 = everything.
+Route-map   : seq, first match wins, deny = filter, direction in/out is local.
+Aggregate   : aggregate-address (any more-specific) vs network (exact) · summary-only · as-set.</pre>
+    </div>
+
+    <div class="card">
+      <h3>Mini quiz — {{ quizQuestions.length }} questions</h3>
+      <div class="score-bar">
+        <span class="chip info" v-if="!quizDone">Answer all {{ quizQuestions.length }} to submit</span>
+        <span v-else>
+          <b style="color:var(--green); font-size:1.05rem;">{{ quizScore }} / {{ quizQuestions.length }}</b>
+          <span style="color:var(--muted);"> ({{ Math.round(quizScore / quizQuestions.length * 100) }}%)</span>
+        </span>
+        <div class="score-meter"><div :style="{ width: quizPct + '%' }"></div></div>
+        <button v-if="quizDone" class="btn primary" @click="resetQuiz">Retake (reshuffle)</button>
+      </div>
+
+      <div v-for="(q, qi) in quizQuestions" :key="qi" class="q-card">
+        <div class="qtext">{{ qi + 1 }}. {{ q.q }}</div>
+        <button v-for="(o, oi) in q.options" :key="oi" class="opt"
+          :class="{
+            'picked': q.picked === oi,
+            'correct': quizDone && o.text === q.answerText,
+            'wrong': quizDone && q.picked === oi && o.text !== q.answerText
+          }"
+          :disabled="quizDone"
+          @click="q.picked = oi">
+          {{ ['A','B','C','D'][oi] }}. {{ o.text }}
+        </button>
+        <div v-if="quizDone" class="q-why"><b>Why:</b> {{ q.why }}</div>
+      </div>
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
+        <button class="btn primary" @click="submitQuiz" :disabled="quizDone || answeredCount < quizQuestions.length">
+          {{ answeredCount < quizQuestions.length ? 'Answer all questions first (' + answeredCount + '/' + quizQuestions.length + ')' : 'Submit answers' }}
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 13. CHECKLIST ================= -->
+  <section id="plan">
+    <div class="sec-head"><div class="sec-num vi">13</div><h2>Study Checklist</h2></div>
+    <div class="card">
+      <div class="prog">
+        <span style="font-size:0.85rem; font-weight:700;">{{ doneCount }} / {{ planItems.length }} notes reviewed</span>
+        <div class="meter"><div :style="{ width: doneCount / planItems.length * 100 + '%' }"></div></div>
+      </div>
+      <div v-for="(item, i) in planItems" :key="item.file" class="check-item" :class="{ done: done[i] }">
+        <input type="checkbox" :checked="done[i]" @change="toggleDone(i)">
+        <a :href="item.file" target="_blank">{{ item.label }}</a>
+      </div>
+      <p style="font-size:0.8rem; color:var(--muted); margin-top:8px;">Progress is saved in your browser. After reviewing, drill the deck from the Flashcards button in the header.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span>Level 12 · BGP — built from [[01. eBGP]], [[02. iBGP]], [[03. Path Selection]], and the rest of the level notes.</span>
+    <span><a href="BGP Overview.md">← Back to Level 12 overview</a></span>
+  </footer>
+</div>
+
+<script src="../vue.global.prod.js"></script>
+<script>
+(function () {
+  "use strict";
+  const { createApp, ref, computed } = Vue;
+
+  const LS = { theme: "ccnp.bgp.theme", done: "ccnp.bgp.done", quizbest: "ccnp.bgp.quizbest" };
+  function loadJSON(key, fb) { try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fb; } catch { return fb; } }
+  function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+  function shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+  createApp({
+    setup() {
+      // ---------------- theme ----------------
+      const theme = ref(loadJSON(LS.theme, "dark"));
+      function toggleTheme() { theme.value = theme.value === "dark" ? "light" : "dark"; save(LS.theme, theme.value); }
+
+      // ---------------- session explorer (eBGP / iBGP) ----------------
+      const sessionTypes = [
+        { id: "ebgp", name: "eBGP" },
+        { id: "ibgp", name: "iBGP" }
+      ];
+      const activeSession = ref("ebgp");
+      const SESSION_INFO = {
+        ebgp: {
+          ad: "20", ttl: "1 → ebgp-multihop for non-direct peers", nexthop: "Changed to self on advertise",
+          loopPrev: "AS_PATH (never re-advertise to another eBGP peer)",
+          config: `router bgp 65001
+ neighbor 192.168.1.2 remote-as 65002
+ network 172.16.0.0 mask 255.255.0.0`,
+          trap: "eBGP peers are directly connected by default — TTL is 1. Loopback peering requires `neighbor X ebgp-multihop 2` plus `update-source Loopback0`. AD 20."
+        },
+        ibgp: {
+          ad: "200", ttl: "255 — loopbacks fine", nexthop: "NOT changed → next-hop-self at the edge",
+          loopPrev: "Split horizon: iBGP-learned routes are not re-advertised to iBGP peers",
+          config: `router bgp 65001
+ neighbor 10.0.0.2 remote-as 65001      ! same AS = iBGP
+ neighbor 10.0.0.2 next-hop-self`,
+          trap: "iBGP routes stop at the receiving router (split horizon) — you need a full mesh, route reflectors, or confederations. And without next-hop-self, internal routers may not reach the advertised next hop. AD 200."
+        }
+      };
+      const sessionInfo = computed(() => SESSION_INFO[activeSession.value]);
+
+      // ---------------- best-path duel ----------------
+      const duelScen = ref(0);
+      const duels = [
+        {
+          name: "Weight decides", aName: "Path A", bName: "Path B",
+          a: { w: 200, lp: 100, lo: false, ap: 2, o: 0, med: 100, ebgp: true, igp: 10, rid: "1.1.1.1" },
+          b: { w: 100, lp: 100, lo: false, ap: 2, o: 0, med: 100, ebgp: true, igp: 10, rid: "2.2.2.2" }
+        },
+        {
+          name: "Local Pref decides", aName: "Path A (lp 200)", bName: "Path B (lp 100)",
+          a: { w: 0, lp: 200, lo: false, ap: 2, o: 0, med: 100, ebgp: true, igp: 10, rid: "1.1.1.1" },
+          b: { w: 0, lp: 100, lo: false, ap: 2, o: 0, med: 100, ebgp: true, igp: 10, rid: "2.2.2.2" }
+        },
+        {
+          name: "AS_PATH decides", aName: "Path A (2 AS)", bName: "Path B (3 AS)",
+          a: { w: 0, lp: 100, lo: false, ap: 2, o: 0, med: 100, ebgp: true, igp: 10, rid: "1.1.1.1" },
+          b: { w: 0, lp: 100, lo: false, ap: 3, o: 0, med: 100, ebgp: true, igp: 10, rid: "2.2.2.2" }
+        },
+        {
+          name: "MED decides", aName: "Path A (MED 50)", bName: "Path B (MED 200)",
+          a: { w: 0, lp: 100, lo: false, ap: 2, o: 0, med: 50, ebgp: true, igp: 10, rid: "1.1.1.1" },
+          b: { w: 0, lp: 100, lo: false, ap: 2, o: 0, med: 200, ebgp: true, igp: 10, rid: "2.2.2.2" }
+        },
+        {
+          name: "eBGP vs iBGP", aName: "Path A (eBGP)", bName: "Path B (iBGP)",
+          a: { w: 0, lp: 100, lo: false, ap: 2, o: 0, med: 100, ebgp: true, igp: 10, rid: "1.1.1.1" },
+          b: { w: 0, lp: 100, lo: false, ap: 2, o: 0, med: 100, ebgp: false, igp: 10, rid: "2.2.2.2" }
+        },
+        {
+          name: "Router ID tie-break", aName: "Path A (RID 1.1.1.1)", bName: "Path B (RID 2.2.2.2)",
+          a: { w: 0, lp: 100, lo: false, ap: 2, o: 0, med: 100, ebgp: true, igp: 10, rid: "1.1.1.1" },
+          b: { w: 0, lp: 100, lo: false, ap: 2, o: 0, med: 100, ebgp: true, igp: 10, rid: "2.2.2.2" }
+        }
+      ];
+      const duel = computed(() => duels[duelScen.value]);
+      const STEPS = [
+        { k: "w", label: "Weight — higher wins (Cisco proprietary)" },
+        { k: "lp", label: "Local Preference — higher wins" },
+        { k: "lo", label: "Locally originated — preferred" },
+        { k: "ap", label: "AS_PATH — shorter wins" },
+        { k: "o", label: "Origin — i < e < ?" },
+        { k: "med", label: "MED — lower wins (same AS only)" },
+        { k: "t", label: "eBGP over iBGP" },
+        { k: "igp", label: "IGP metric to next hop — lower" },
+        { k: "rid", label: "Lowest Router ID (tie-break)" }
+      ];
+      const duelVerdict = computed(() => {
+        const A = duel.value.a, B = duel.value.b;
+        const pn = (w) => w === A ? duel.value.aName : duel.value.bName;
+        let decided = 8, why = "Lowest Router ID", winner = A.rid < B.rid ? duel.value.aName : duel.value.bName;
+        if (A.w !== B.w) { decided = 0; why = "Weight differs"; winner = A.w > B.w ? duel.value.aName : duel.value.bName; }
+        else if (A.lp !== B.lp) { decided = 1; why = "Local Preference differs"; winner = A.lp > B.lp ? duel.value.aName : duel.value.bName; }
+        else if (A.lo !== B.lo) { decided = 2; why = "Locally originated"; winner = pn(A.lo ? A : B); }
+        else if (A.ap !== B.ap) { decided = 3; why = "AS_PATH differs"; winner = pn(A.ap < B.ap ? A : B); }
+        else if (A.o !== B.o) { decided = 4; why = "Origin differs (i<e<?)"; winner = pn(A.o < B.o ? A : B); }
+        else if (A.med !== B.med) { decided = 5; why = "MED differs"; winner = pn(A.med < B.med ? A : B); }
+        else if (A.ebgp !== B.ebgp) { decided = 6; why = "eBGP beats iBGP"; winner = A.ebgp ? duel.value.aName : duel.value.bName; }
+        else if (A.igp !== B.igp) { decided = 7; why = "IGP metric differs"; winner = pn(A.igp < B.igp ? A : B); }
+        return { decided, why, winner, stepNo: decided + 1, skipped: 8 - decided, cls: decided <= 4 ? "fs" : "eq" };
+      });
+      const duelSteps = computed(() => STEPS.map((s, i) => ({
+        label: s.label,
+        cls: i < duelVerdict.value.decided ? "pass" : (i === duelVerdict.value.decided ? "decide" : "skip"),
+        decided: i === duelVerdict.value.decided
+      })));
+
+      // ---------------- session count calculator ----------------
+      const nRouters = ref(10);
+      const fullMesh = computed(() => nRouters.value * (nRouters.value - 1) / 2);
+      const rrSessions = computed(() => nRouters.value - 1);
+      const meshReduction = computed(() => Math.round((1 - rrSessions.value / fullMesh.value) * 100));
+
+      // ---------------- prefix-list ge/le matcher ----------------
+      const plRule = ref(2);
+      const plRoute = ref(1);
+      function ip2int(ip) { return ip.split(".").reduce((acc, o) => (acc << 8) + Number(o), 0) >>> 0; }
+      function maskBits(len) { return len === 0 ? 0 : (0xFFFFFFFF << (32 - len)) >>> 0; }
+      const plRules = [
+        { label: "10.0.0.0/8 (exact)", prefix: "10.0.0.0", len: 8, ge: null, le: null },
+        { label: "10.0.0.0/8 le 32", prefix: "10.0.0.0", len: 8, ge: null, le: 32 },
+        { label: "10.0.0.0/16 le 24", prefix: "10.0.0.0", len: 16, ge: null, le: 24 },
+        { label: "0.0.0.0/0 le 32 (universal)", prefix: "0.0.0.0", len: 0, ge: null, le: 32 }
+      ];
+      const plRoutes = [
+        { label: "10.0.0.0/8", prefix: "10.0.0.0", len: 8 },
+        { label: "10.1.2.0/24", prefix: "10.1.2.0", len: 24 },
+        { label: "10.1.2.0/25", prefix: "10.1.2.0", len: 25 },
+        { label: "192.168.1.0/24", prefix: "192.168.1.0", len: 24 },
+        { label: "0.0.0.0/0", prefix: "0.0.0.0", len: 0 }
+      ];
+      const plVerdict = computed(() => {
+        const r = plRules[plRule.value], t = plRoutes[plRoute.value];
+        const lo = r.ge ?? r.len, hi = r.le ?? 32;
+        const masked = (ip2int(t.prefix) & maskBits(r.len)) === (ip2int(r.prefix) & maskBits(r.len));
+        const inRange = t.len >= lo && t.len <= hi;
+        const match = masked && inRange;
+        let why;
+        if (!masked) why = "prefix bits differ — the " + r.len + "-bit anchor " + r.prefix + "/" + r.len + " does not cover " + t.prefix + "/" + t.len + ".";
+        else if (!inRange) why = "bits match, but length " + t.len + " is outside " + lo + "–" + hi + " (ge/le change length, never bits).";
+        else why = "prefix bits identical AND length " + t.len + " within " + lo + "–" + hi + ".";
+        return { match, why };
+      });
+
+      // ---------------- commands ----------------
+      const activeCmd = ref("summary");
+      const activeCommand = computed(() => commands.find(c => c.key === activeCmd.value));
+      const commands = [
+        {
+          key: "summary", label: "Summary", cmd: "show ip bgp summary",
+          tagline: "Session states, uptimes and prefix counts for every neighbor — start here."
+          , output: `BGP router identifier 10.0.0.1, local AS number 65001
+BGP table version is 123, main routing table version 123
+
+Neighbor        V    AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
+192.0.2.2       4 65002    4563    4521       123    0    0 1w2d        512
+10.0.0.2        4 65001    2301    2288       123    0    0 3d04h        512
+192.0.2.3       4 65002    1231    1345       123    0    0 00:02:11  Active`
+          , read: "A neighbor stuck in Active = the TCP session can't establish (TTL, update-source, ACL 179). Established neighbors show a state/PfxRcd count — 512 here means routes ARE arriving."
+        },
+        {
+          key: "table", label: "BGP table", cmd: "show ip bgp",
+          tagline: "Every known prefix with its best path."
+          , output: `BGP table version is 123, local router ID is 10.0.0.1
+Status codes: s suppressed, d damped, h history, * valid, > best, i - internal
+
+   Network          Next Hop            Metric LocPrf Weight Path
+*> 10.10.0.0/16     192.0.2.2                50    100      0 65010 i
+*> 10.20.0.0/16     192.0.2.2               200    100      0 65010 65020 ?
+*  10.20.0.0/16     10.0.0.2                100    200      0 65030 i`
+          , read: "Metric = MED. LocPrf = local preference. > marks the best path. The second entry for 10.20.0.0/16 is an iBGP-learned alternate — compare MED (same-AS rule) and local-pref to see why the first wins."
+        },
+        {
+          key: "prefix", label: "Prefix detail", cmd: "show ip bgp 10.20.0.0/16",
+          tagline: "ALL paths for one prefix with every attribute — the tie-break debugger."
+          , output: `BGP routing table entry for 10.20.0.0/16
+  Paths: (2 available, best #1)
+  Path #1: (via eBGP) from 192.0.2.2 (65010)
+    Origin IGP, metric 200, localpref 100, weight 0, valid, external, best
+    Path 65010 65020
+  Path #2: (via iBGP) from 10.0.0.2 (65030)
+    Origin incomplete, metric 100, localpref 200, weight 0, valid, internal
+    Path 65030`
+          , read: "Read the attributes top-to-bottom in best-path order: local-pref already differs (100 vs 200) so path #2 wins despite the shorter AS_PATH — step 2 decided before step 4 ever ran."
+        },
+        {
+          key: "neighbors", label: "Neighbor", cmd: "show ip bgp neighbors 192.0.2.2",
+          tagline: "Session state, timers, capabilities and the negotiated update-source."
+          , output: `BGP neighbor is 192.0.2.2,  remote AS 65002, external link
+  BGP version 4, remote router ID 10.9.9.9
+  BGP state = Established, up for 1w2d
+  Last read 00:00:12, last write 00:00:12
+  Hold time is 180, keepalive interval is 60 seconds
+  For address family: IPv4 Unicast
+    Update messages: 4563, withdrawn: 12
+    Route refresh request: received 4, sent 2
+  BGP table version 123`
+          , read: "Established + up for 1w2d = healthy. Hold 180 / keepalive 60. A flapping session or capability mismatch shows up in version/message counters here."
+        },
+        {
+          key: "received", label: "Received", cmd: "show ip bgp neighbors 192.0.2.2 received-routes",
+          tagline: "Routes as received BEFORE inbound policy — isolates filtering."
+          , output: `   Network          Next Hop            Metric LocPrf Weight Path
+*> 10.10.0.0/16     192.0.2.2                50    100      0 65010 i
+*> 10.20.0.0/16     192.0.2.2               200    100      0 65010 65020 ?
+*> 10.99.0.0/16     192.0.2.2                50    100      0 65010 i`
+          , read: "Compare received-routes vs show ip bgp: anything present here but missing from the table was dropped by your inbound route-map or prefix-list. Nothing here at all = filter or session problem."
+        },
+        {
+          key: "advertised", label: "Advertised", cmd: "show ip bgp neighbors 192.0.2.2 advertised-routes",
+          tagline: "What actually left toward the peer — the outbound policy view."
+          , output: `   Network          Next Hop            Metric LocPrf Weight Path
+*> 172.16.0.0/16    10.0.0.2                  0    100      0 65001 i
+*> 10.10.0.0/16     10.0.0.2                 50    100      0 65010 i
+   (local table version 120)`
+          , read: "Missing prefixes here = outbound route-map or the implicit position issues. No communities column = check send-community, or your tags were stripped."
+        },
+        {
+          key: "routemap", label: "Route-map", cmd: "show route-map",
+          tagline: "Per-sequence counters — did the policy actually fire?"
+          , output: `route-map SETLP, permit, sequence 10
+  Match clauses:
+    ip address prefix-lists: CRITICAL
+  Set clauses:
+    local-preference 300
+  Policy routing matches: 0 packets, 0 bytes
+  Routing Protocol matches: 5 routes, 0 denied`
+          , read: "'Routing Protocol matches: 5' = the route-map acted on 5 routes. 0 matches while routes exist = wrong match clause, wrong direction, or a mis-addressed prefix-list."
+        },
+        {
+          key: "community", label: "Community", cmd: "show ip bgp community 65001:100",
+          tagline: "Routes carrying a specific community — verify the tag survived."
+          , output: `BGP table version is 123, local router ID is 10.0.0.1
+Status codes: s suppressed, d damped, h history, * valid, > best, i - internal
+
+   Network          Next Hop            Metric LocPrf Weight Path
+*> 10.10.0.0/16     192.0.2.2                50    100      0 65010 i
+*> 10.20.0.0/16     192.0.2.2               200    100      0 65010 65020 ?`
+          , read: "An empty result while the route exists = the community was stripped (no send-community on the sender) or filtered. show ip bgp community-list 10 proves whether the list matches."
+        }
+      ];
+
+      // ---------------- traps ----------------
+      const trapOpen = ref([]);
+      const traps = [
+        { q: "eBGP AD vs iBGP AD?", a: "eBGP 20, iBGP 200. The iBGP path loses to nearly every other source — that's why iBGP routes need reachable next hops and why synchronization being off matters." },
+        { q: "eBGP peer not directly connected — what breaks?", a: "TTL default is 1. Use `neighbor X ebgp-multihop 2` (plus `update-source Loopback0`) for loopback-to-loopback eBGP." },
+        { q: "Does iBGP change the next hop?", a: "No. iBGP leaves the next hop unchanged — that's why `next-hop-self` is required at eBGP boundaries or internal routers can't resolve the recursion." },
+        { q: "MED compared across different neighbor ASes?", a: "No. MED is only comparable between paths from the SAME neighbor AS unless `bgp always-compare-med` is configured." },
+        { q: "A route has MED 0. What happens?", a: "Missing MED counts as 0 — and since lower MED wins (step 6), an unset route can beat your carefully set MED 200. Always set it if you care about inbound." },
+        { q: "Weight survives a router hop?", a: "No. Weight is local to a single router (Cisco proprietary) and never advertised. Local-pref is the AS-wide version." },
+        { q: "`redistribute` into BGP — origin value?", a: "? (incomplete). `network` statements give origin i. In best-path step 5, i beats ?." },
+        { q: "Communities vanish — why?", a: "Missing `neighbor X send-community`. Without it the attribute is stripped at the outbound edge — the number-one silent policy failure." },
+        { q: "NO_EXPORT vs NO_ADVERTISE?", a: "NO_EXPORT keeps the route inside your AS (iBGP peers still see it). NO_ADVERTISE stops it at THIS router — not even iBGP." },
+        { q: "aggregate-address without as-set — risk?", a: "The aggregate advertises only the aggregator's AS in AS_PATH, hiding the true origins — a black-hole/loop risk for multi-origin aggregates. `as-set` records them." },
+        { q: "Prefix-list ends with…?", a: "Implicit deny. Always append `permit 0.0.0.0/0 le 32` if you want everything else to pass. ge/le modify LENGTH, never the prefix bits." },
+        { q: "Route reflector: routes learned from a non-client go to…?", a: "Clients only. Client-learned routes go to all clients AND non-clients. eBGP routes go to everyone. Loop safety is ORIGINATOR_ID + CLUSTER_LIST." }
+      ];
+
+      // ---------------- quiz ----------------
+      const baseQuestions = [
+        { q: "BGP peers exchange routes over:", options: ["UDP port 520", "IP protocol 89", "TCP port 179", "IP protocol 88"], answer: 2, why: "BGP runs over TCP 179 — reliable delivery is delegated to TCP." },
+        { q: "eBGP and iBGP administrative distances:", options: ["90 / 170", "20 / 200", "110 / 120", "1 / 20"], answer: 1, why: "eBGP 20, iBGP 200 — the classic BGP trap." },
+        { q: "eBGP sessions to a NON-directly-connected peer need:", options: ["Nothing special", "ebgp-multihop (TTL is 1 by default)", "A static route only", "next-hop-self"], answer: 1, why: "TTL 1 kills non-direct eBGP; ebgp-multihop raises it (and enables loopback peering)." },
+        { q: "Which iBGP rule requires a full mesh?", options: ["Next-hop is always changed", "iBGP-learned routes are NOT re-advertised to iBGP peers", "AS_PATH is prepended", "MED is stripped inbound"], answer: 1, why: "Split horizon: routes learned from one iBGP peer stop there — every speaker must peer with every other." },
+        { q: "The best-path algorithm decides at…?", options: ["The last differing step", "The FIRST step where paths differ — later steps never run", "The lowest MED always", "The highest local-pref always"], answer: 1, why: "Strict priority: the first difference decides; everything after is skipped." },
+        { q: "Best-path order of the four tunables:", options: ["AS_PATH > MED > Weight > Local Pref", "MED > AS_PATH > Local Pref > Weight", "Weight > Local Pref > AS_PATH > MED", "Local Pref > Weight > MED > AS_PATH"], answer: 2, why: "Weight (1) > Local Pref (2) > AS_PATH (4) > MED (6)." },
+        { q: "MED comparison scope by default:", options: ["Across all ASes", "Same neighbor AS only", "iBGP only", "eBGP only"], answer: 1, why: "MED from AS 100 vs AS 200 is not comparable unless bgp always-compare-med." },
+        { q: "Local preference propagates:", options: ["To eBGP peers", "Via iBGP only", "To confederation peers only", "It never propagates"], answer: 1, why: "Local-pref is set at the edge and rides iBGP for an AS-wide exit choice." },
+        { q: "Communities are lost when:", options: ["The route crosses an AS", "send-community is missing", "local-pref is 100", "MED is 0"], answer: 1, why: "Without send-community the attribute is stripped at the edge. Communities are optional TRANSITIVE — they survive AS crossings when sent." },
+        { q: "NO_EXPORT vs NO_ADVERTISE:", options: ["Identical behavior", "NO_EXPORT stays in the AS; NO_ADVERTISE dies at this router", "NO_ADVERTISE stays in the AS; NO_EXPORT dies", "Both die at this router"], answer: 1, why: "NO_EXPORT still flows to iBGP peers; NO_ADVERTISE stops entirely." },
+        { q: "`aggregate-address 172.16.0.0 255.255.0.0` requires…?", options: ["An exact prefix in the table", "ANY more-specific in the table", "A route-map", "send-community"], answer: 1, why: "aggregate-address synthesizes from any more-specific. network X mask Y is the one that needs the exact route." },
+        { q: "`ip prefix-list X permit 10.0.0.0/16 le 24` matches…?", options: ["Only 10.0.0.0/16", "Any 10.0.0.0/16 with length 16 through 24", "Any length from /8 up", "All routes starting with 10"], answer: 1, why: "The /16 is the bit anchor; le 24 caps the length range — /25+ never matches." }
+      ];
+      const quizQuestions = ref(shuffle(baseQuestions).map(q => ({ ...q, options: shuffle(q.options).map(t => ({ text: t })), answerText: q.options[q.answer], picked: null })));
+      const quizDone = ref(false);
+      const answeredCount = computed(() => quizQuestions.value.filter(q => q.picked !== null).length);
+      const quizScore = computed(() => quizQuestions.value.filter(q => q.picked !== null && q.options[q.picked].text === q.answerText).length);
+      const quizPct = computed(() => Math.round(quizScore.value / quizQuestions.value.length * 100));
+      function submitQuiz() { quizDone.value = true; const best = loadJSON(LS.quizbest, 0); if (quizScore.value > best) save(LS.quizbest, quizScore.value); }
+      function resetQuiz() { quizQuestions.value = shuffle(baseQuestions).map(q => ({ ...q, options: shuffle(q.options).map(t => ({ text: t })), answerText: q.options[q.answer], picked: null })); quizDone.value = false; }
+
+      // ---------------- checklist ----------------
+      const planItems = [
+        { file: "BGP Overview.md", label: "BGP Overview — the level map" },
+        { file: "01. eBGP.md", label: "01 · eBGP — AD 20, TTL 1, multihop" },
+        { file: "02. iBGP.md", label: "02 · iBGP — next-hop-self, split horizon" },
+        { file: "03. Path Selection.md", label: "03 · Path Selection — the 9-step algorithm" },
+        { file: "04. AS Path.md", label: "04 · AS Path — loop prevention + prepend" },
+        { file: "05. Local Preference.md", label: "05 · Local Preference — AS-wide exit" },
+        { file: "06. MED.md", label: "06 · MED — same-AS rule, direction trap" },
+        { file: "07. Communities.md", label: "07 · Communities — send-community, NO_EXPORT" },
+        { file: "08. Route Reflector.md", label: "08 · Route Reflector — rules + loop attributes" },
+        { file: "09. Confederation.md", label: "09 · Confederation — sub-ASes, AD 200" },
+        { file: "10. Aggregation.md", label: "10 · Aggregation — summary-only, as-set" },
+        { file: "11. Policy Routing.md", label: "11 · Policy Routing — inbound next-hop override" },
+        { file: "12. Prefix Lists.md", label: "12 · Prefix Lists — ge/le, implicit deny" },
+        { file: "13. Route Maps.md", label: "13 · Route Maps — match/set, in/out" },
+        { file: "14. Troubleshooting.md", label: "14 · Troubleshooting — session → table → RIB" }
+      ];
+      const done = ref(loadJSON(LS.done, {}));
+      const doneCount = computed(() => Object.values(done.value).filter(Boolean).length);
+      function toggleDone(i) { done.value[i] = !done.value[i]; save(LS.done, done.value); }
+
+      return {
+        theme, toggleTheme,
+        sessionTypes, activeSession, sessionInfo,
+        duelScen, duels, duel, duelVerdict, duelSteps,
+        nRouters, fullMesh, rrSessions, meshReduction,
+        plRule, plRoute, plRules, plRoutes, plVerdict,
+        activeCmd, activeCommand, commands,
+        trapOpen, traps,
+        quizQuestions, quizDone, quizScore, quizPct, answeredCount, submitQuiz, resetQuiz,
+        planItems, done, doneCount, toggleDone
+      };
+    }
+  }).mount("#app");
+})();
+</script>
+</body>
+</html>
