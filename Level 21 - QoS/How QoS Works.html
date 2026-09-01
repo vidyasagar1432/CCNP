@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How QoS Works — Deep Dive</title>
+<style>
+  :root {
+    --bg: #0f172a; --panel: #111c34; --card: #1e293b; --card-2: #16233d;
+    --text: #f8fafc; --muted: #94a3b8;
+    --blue: #38bdf8; --blue-dim: #0c4a6e;
+    --green: #34d399; --green-dim: #064e3b;
+    --amber: #fbbf24; --amber-dim: #78350f;
+    --red: #f87171; --red-dim: #7f1d1d;
+    --violet: #a78bfa; --violet-dim: #4c1d95;
+    --cyan: #22d3ee; --cyan-dim: #164e63;
+    --border: #334155; --hover: #263449; --code-bg: #0b1220;
+  }
+  #app[data-theme="light"] {
+    --bg: #f1f5f9; --panel: #ffffff; --card: #ffffff; --card-2: #f8fafc;
+    --text: #0f172a; --muted: #64748b;
+    --blue: #0284c7; --blue-dim: #bae6fd;
+    --green: #059669; --green-dim: #d1fae5;
+    --amber: #d97706; --amber-dim: #fef3c7;
+    --red: #dc2626; --red-dim: #fee2e2;
+    --violet: #7c3aed; --violet-dim: #ede9fe;
+    --cyan: #0891b2; --cyan-dim: #cffafe;
+    --border: #cbd5e1; --hover: #e2e8f0; --code-bg: #0b1220;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; }
+  #app { max-width: 1040px; margin: 0 auto; padding: 20px 18px 60px; }
+
+  header { position: sticky; top: 0; z-index: 30; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .lv-badge { background: var(--blue-dim); color: var(--blue); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .exam-badge { background: var(--violet-dim); color: var(--violet); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .head-actions { display: flex; align-items: center; gap: 8px; }
+  .btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: background 0.15s; }
+  .btn:hover { background: var(--hover); }
+  .btn.primary { background: var(--blue); color: #0f172a; border-color: var(--blue); }
+
+  nav { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 2px 16px; }
+  nav button.chip { border: 1px solid var(--border); background: var(--card); color: var(--muted); padding: 5px 11px; border-radius: 999px; cursor: pointer; font-size: 0.76rem; font-weight: 600; }
+  nav button.chip.active { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
+
+  section.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
+  section.panel h2 { font-size: 1.2rem; margin-bottom: 6px; }
+  section.panel h3 { font-size: 1rem; margin: 18px 0 10px; color: var(--blue); }
+  section.panel p { margin: 8px 0; }
+  .muted { color: var(--muted); }
+  .lead { color: var(--muted); font-size: 0.95rem; }
+
+  .grid { display: grid; gap: 12px; }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .g3 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .g4 { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .card h4 { font-size: 0.9rem; margin-bottom: 6px; }
+  .card .big { font-size: 1.3rem; font-weight: 700; font-family: 'Fira Code', ui-monospace, monospace; }
+
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85rem; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  tr:hover td { background: var(--hover); }
+
+  code, .mono { font-family: 'Fira Code', ui-monospace, monospace; }
+  .mono { font-size: 0.9rem; }
+  .chip-tag { display: inline-block; border-radius: 999px; padding: 1px 9px; font-size: 0.74rem; font-weight: 700; }
+  .b-blue { background: var(--blue-dim); color: var(--blue); }
+  .b-green { background: var(--green-dim); color: var(--green); }
+  .b-amber { background: var(--amber-dim); color: var(--amber); }
+  .b-red { background: var(--red-dim); color: var(--red); }
+  .b-violet { background: var(--violet-dim); color: var(--violet); }
+  .b-cyan { background: var(--cyan-dim); color: var(--cyan); }
+
+  .callout { border-left: 4px solid var(--amber); background: var(--card-2); border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 12px 0; font-size: 0.9rem; }
+  .callout.green { border-color: var(--green); }
+  .callout.red { border-color: var(--red); }
+  .callout.blue { border-color: var(--blue); }
+  .callout.violet { border-color: var(--violet); }
+
+  .row-fn { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 8px 0; }
+  .row-fn input[type="number"], .row-fn input[type="text"] { background: var(--code-bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-family: 'Fira Code', monospace; font-size: 0.9rem; }
+
+  .opt { display: flex; align-items: center; gap: 8px; padding: 6px 9px; margin: 3px 0; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; background: var(--card); font-size: 0.86rem; }
+  .opt.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .opt .letter { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex: 0 0 auto; }
+  .opt.sel .letter { background: var(--blue); color: #0f172a; }
+
+  #app pre, pre.cmd { background: var(--code-bg); color: #e2e8f0; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.82rem; line-height: 1.5; }
+
+  .trap-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  .trap-item:last-child { border-bottom: none; }
+  .trap-ico { color: var(--red); font-weight: 700; flex: 0 0 auto; }
+
+  .step-flow { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .step { border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 0.8rem; background: var(--card-2); }
+  .step .n { color: var(--blue); font-weight: 700; }
+
+  .verdict { border-radius: 8px; padding: 10px 14px; font-weight: 700; margin: 8px 0; }
+  .verdict.ok { background: var(--green-dim); color: var(--green); }
+  .verdict.bad { background: var(--red-dim); color: var(--red); }
+  .verdict.info { background: var(--blue-dim); color: var(--blue); }
+
+  .chk-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; margin: 5px 0; cursor: pointer; transition: opacity 0.15s; }
+  .chk-item.done { opacity: 0.55; text-decoration: line-through; }
+  .chk-box { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 5px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; }
+  .chk-item.done .chk-box { background: var(--green); border-color: var(--green); color: #0f172a; }
+
+  .proto-cell { border: 1px solid var(--border); border-radius: 10px; padding: 9px 10px; background: var(--card); cursor: pointer; text-align: center; }
+  .proto-cell.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .proto-cell .pn { font-weight: 700; }
+  .proto-cell .pd { font-size: 0.75rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<div id="app" :data-theme="theme">
+  <header>
+    <h1><span class="lv-badge">L21</span> How QoS Works
+      <span class="exam-badge">ENCOR 350-401</span></h1>
+    <div class="head-actions">
+      <a class="btn" href="../Level 20 - MPLS/How MPLS Works.html">◀ MPLS</a>
+      <a class="btn" href="../Level 22 - Wireless/How Wireless Works.html">Wireless ▶</a>
+      <a class="btn" href="../index.html">Flashcards</a>
+      <button class="btn" @click="theme = (theme==='dark'?'light':'dark')">{{ theme==='dark' ? '☀' : '🌙' }}</button>
+    </div>
+  </header>
+
+  <nav>
+    <button class="chip" v-for="s in sections" :key="s.id" :class="{active:sec===s.id}" @click="sec=s.id">{{ s.icon }} {{ s.label }}</button>
+  </nav>
+
+  <!-- 1. OVERVIEW -->
+  <section class="panel" v-show="sec==='intro'" id="intro">
+    <h2>🎛️ QoS — the whole picture</h2>
+    <p class="lead">Quality of Service gives different traffic <b>different treatment</b>. The flow: <b>Classify → Mark → (Police/Shape) → Queue → Drop (WRED)</b>. Two architectures: <b>DiffServ</b> (scalable, per-class) and <b>IntServ</b> (per-flow, RSVP).</p>
+
+    <h3>The QoS toolbox (memorize the order)</h3>
+    <div class="grid g3">
+      <div class="card"><h4>Classify</h4><span class="chip-tag b-blue">identify</span><p class="muted" style="margin:0">DSCP / CoS / ACL / NBAR</p></div>
+      <div class="card"><h4>Mark</h4><span class="chip-tag b-green">write</span><p class="muted" style="margin:0">set DSCP / CoS / precedence</p></div>
+      <div class="card"><h4>Police/Shape</h4><span class="chip-tag b-amber">rate</span><p class="muted" style="margin:0">drop vs buffer excess</p></div>
+      <div class="card"><h4>Queue</h4><span class="chip-tag b-violet">order</span><p class="muted" style="margin:0">CBWFQ + LLQ</p></div>
+      <div class="card"><h4>WRED</h4><span class="chip-tag b-red">avoid</span><p class="muted" style="margin:0">random early drop</p></div>
+    </div>
+
+    <h3>Architecture choice</h3>
+    <div class="grid g2">
+      <div class="card"><h4>DiffServ</h4><span class="chip-tag b-green">DSCP + PHB</span><p class="muted" style="margin:0">per-class · no signaling · scales · statistical</p></div>
+      <div class="card"><h4>IntServ</h4><span class="chip-tag b-red">RSVP</span><p class="muted" style="margin:0">per-flow · reservation · hard guarantee · doesn't scale</p></div>
+    </div>
+
+    <h3>Key DSCP values (memorize)</h3>
+    <table>
+      <tr><th>DSCP</th><th>Value</th><th>Use</th><th>Queue</th></tr>
+      <tr><td>EF</td><td>46</td><td>voice</td><td>LLQ priority</td></tr>
+      <tr><td>AF41</td><td>34</td><td>video conf</td><td>CBWFQ + WRED</td></tr>
+      <tr><td>AF31</td><td>26</td><td>video stream</td><td>CBWFQ + WRED</td></tr>
+      <tr><td>CS6</td><td>48</td><td>control</td><td>priority</td></tr>
+      <tr><td>CS0 / BE</td><td>0</td><td>best effort</td><td>default</td></tr>
+    </table>
+    <div class="callout red"><b>The golden rule:</b> <b>mark once at the edge, trust in the core.</b> The edge classifies &amp; sets DSCP; the core reads DSCP and applies the PHB (queue/WRED) — never re-marks.</div>
+  </section>
+
+  <!-- 2. CLASSIFICATION -->
+  <section class="panel" v-show="sec==='class'" id="class">
+    <h2>🔍 Classification</h2>
+    <p class="lead"><b>Identifying</b> which traffic gets which treatment — always the <b>first step</b> before marking/policing/queuing.</p>
+
+    <h3>What we classify on</h3>
+    <table>
+      <tr><th>Field</th><th>Layer</th><th>Notes</th></tr>
+      <tr><td>DSCP</td><td>L3</td><td>6 bits</td></tr>
+      <tr><td>IP precedence</td><td>L3</td><td>3 bits</td></tr>
+      <tr><td>802.1p CoS</td><td>L2</td><td>3 bits</td></tr>
+      <tr><td>ACL</td><td>L3/4</td><td>match IP/ports</td></tr>
+      <tr><td>NBAR</td><td>L7</td><td>application signature</td></tr>
+    </table>
+    <div class="callout blue"><b>Deeper match = more accurate but more expensive.</b></div>
+
+    <h3>Match logic</h3>
+    <div class="grid g2">
+      <div class="card"><h4>match-any</h4><p class="muted" style="margin:0">ANY criterion matches</p></div>
+      <div class="card"><h4>match-all</h4><p class="muted" style="margin:0">EVERY criterion must match</p></div>
+    </div>
+    <pre class="cmd">class-map match-any VOICE
+ match dscp ef
+class-map match-all STRICT
+ match dscp af41
+ match access-group name VIDEO-ACL
+show class-map
+show policy-map
+</pre>
+    <div class="callout red"><b>Trap:</b> classification <b>identifies</b>; marking <b>writes</b>. Only classify at the <b>edge</b>; the core trusts. NBAR classifies at <b>L7</b>.</div>
+  </section>
+
+  <!-- 3. MARKING -->
+  <section class="panel" v-show="sec==='mark'" id="mark">
+    <h2>🖊️ Marking</h2>
+    <p class="lead"><b>Writing</b> a QoS value so downstream devices treat it consistently.</p>
+
+    <h3>Marking locations</h3>
+    <table>
+      <tr><th>Layer</th><th>Field</th><th>Bits</th></tr>
+      <tr><td>L2</td><td>802.1p CoS</td><td>3</td></tr>
+      <tr><td>L3</td><td>IP precedence</td><td>3</td></tr>
+      <tr><td>L3</td><td>DSCP</td><td>6</td></tr>
+      <tr><td>MPLS</td><td>EXP</td><td>3</td></tr>
+    </table>
+    <div class="callout blue"><b>DSCP (6 bits) = 64 values — the modern standard.</b> CoS is LAN-only.</div>
+
+    <h3>Marking value selector</h3>
+    <div class="row-fn">
+      <button class="btn" v-for="m in markOptions" :key="m.key" :class="{primary:markPick===m.key}" @click="markPick=m.key">{{ m.label }}</button>
+    </div>
+    <div class="verdict" :class="markVerdict.cls">{{ markVerdict.text }}</div>
+    <pre class="cmd">policy-map MARK
+ class VOICE
+  set dscp ef          ! set cos / set precedence also available
+ class CAMERA
+  set dscp af41
+interface GigabitEthernet0/1
+ service-policy input MARK
+</pre>
+    <div class="callout red"><b>Trap:</b> marking <b>writes</b>; classification <b>reads</b>. DSCP = 6 bits / 64 values; precedence = 3 bits / 8. <b>EF = voice, AF4x/3x = video, CS6 = control</b>. Set at edge, trust in core.</div>
+  </section>
+
+  <!-- 4. POLICING -->
+  <section class="panel" v-show="sec==='police'" id="police">
+    <h2>🚓 Policing</h2>
+    <p class="lead">Enforces a rate by <b>dropping (or re-marking)</b> excess — <b>no buffering</b>.</p>
+
+    <h3>Policing vs Shaping</h3>
+    <table>
+      <tr><th>Aspect</th><th>Policing</th><th>Shaping</th></tr>
+      <tr><td>Excess</td><td>drop / re-mark</td><td>buffer</td></tr>
+      <tr><td>Delay</td><td><b>none</b></td><td><b>adds</b></td></tr>
+      <tr><td>Location</td><td>ingress / egress</td><td>egress only</td></tr>
+      <tr><td>Burst</td><td>drops</td><td>smooths</td></tr>
+      <tr><td>Loss</td><td>high</td><td>low</td></tr>
+    </table>
+    <div class="callout red"><b>Policing DROPS; shaping DELAYS.</b> Policing works ingress or egress; shaping is egress-only.</div>
+
+    <h3>Token bucket</h3>
+    <div class="grid g3">
+      <div class="card"><h4>CIR</h4><p class="muted" style="margin:0">fill rate (bps)</p></div>
+      <div class="card"><h4>Bc</h4><p class="muted" style="margin:0">committed burst</p></div>
+      <div class="card"><h4>Be</h4><p class="muted" style="margin:0">excess burst</p></div>
+    </div>
+
+    <h3>Dual-bucket / three outcomes</h3>
+    <div class="grid g3">
+      <div class="card"><h4>conform</h4><p class="muted" style="margin:0">Bc available → <b>transmit</b></p></div>
+      <div class="card"><h4>exceed</h4><p class="muted" style="margin:0">Be available → <b>re-mark + transmit</b></p></div>
+      <div class="card"><h4>violate</h4><p class="muted" style="margin:0">no tokens → <b>drop</b></p></div>
+    </div>
+    <pre class="cmd">policy-map POLICE-DATA
+ class BULK
+  police cir 1000000 bc 200000 be 200000
+   conform-action transmit
+   exceed-action drop
+   violate-action drop
+interface Gi0/1
+ service-policy input POLICE-DATA
+</pre>
+    <div class="callout red"><b>Trap:</b> policing = <b>drop/re-mark</b>, no buffering, works <b>in/egress</b>. Token bucket: <b>CIR, Bc, Be</b>. <b>conform/exceed/violate</b> three actions. <b>service-policy input</b> for ingress.</div>
+  </section>
+
+  <!-- 5. SHAPING -->
+  <section class="panel" v-show="sec==='shape'" id="shape">
+    <h2>🏔️ Shaping</h2>
+    <p class="lead">Smooths traffic to a rate by <b>buffering excess</b> (not dropping). Egress-only, adds delay.</p>
+
+    <h3>Shape command selector</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:shapeCmd==='average'}" @click="shapeCmd='average'"><div class="pn">shape average</div><div class="pd">standard token bucket (Bc/Be)</div></div>
+      <div class="proto-cell" :class="{sel:shapeCmd==='peak'}" @click="shapeCmd='peak'"><div class="pn">shape peak</div><div class="pd">permits extra burst (uses Be)</div></div>
+    </div>
+    <div class="verdict" :class="shapeVerdict.cls">{{ shapeVerdict.text }}</div>
+
+    <h3>Hierarchical shaping</h3>
+    <table>
+      <tr><th>Level</th><th>Policy</th></tr>
+      <tr><td>Parent</td><td>total aggregate rate (e.g., 10 Mbps)</td></tr>
+      <tr><td>Child</td><td>per-class sub-rates</td></tr>
+    </table>
+    <pre class="cmd">policy-map SHAPE-LINK
+ class class-default
+  shape average 10000000
+interface Gi0/1
+ service-policy output SHAPE-LINK
+show policy-map interface Gi0/1
+show queueing interface
+</pre>
+    <div class="callout red"><b>Trap:</b> shaping = <b>buffer</b> (policing = drop); <b>egress-only</b>, adds delay. <b>shape average</b> standard, <b>shape peak</b> uses Be. <b>Hierarchical</b> = parent + child. For access-rate smoothing, <b>shape</b> — not police.</div>
+  </section>
+
+  <!-- 6. QUEUING / LLQ / CBWFQ -->
+  <section class="panel" v-show="sec==='queue'" id="queue">
+    <h2>📚 Queuing — CBWFQ &amp; LLQ</h2>
+    <p class="lead">Decides the <b>order</b> packets leave a congested interface. Modern answer: <b>CBWFQ</b> (per-class shares) + <b>LLQ</b> (strict priority for voice).</p>
+
+    <h3>Mechanism map</h3>
+    <table>
+      <tr><th>Mechanism</th><th>Behavior</th><th>Use</th></tr>
+      <tr><td>FIFO</td><td>first in, first out</td><td>no QoS</td></tr>
+      <tr><td>WFQ</td><td>per-flow fair</td><td>default legacy</td></tr>
+      <tr><td>PQ</td><td>strict priority</td><td>starvation risk</td></tr>
+      <tr><td>CBWFQ</td><td>per-class bandwidth</td><td><b>modern default</b></td></tr>
+      <tr><td>LLQ</td><td>priority + CBWFQ</td><td><b>voice</b></td></tr>
+    </table>
+
+    <h3>priority vs bandwidth (the trap)</h3>
+    <div class="grid g2">
+      <div class="card"><h4>priority — LLQ</h4><p class="muted" style="margin:0">strict-priority, served first, <b>POLICED</b> to the value</p></div>
+      <div class="card"><h4>bandwidth — CBWFQ</h4><p class="muted" style="margin:0">guaranteed weighted share, <b>not strict priority</b></p></div>
+    </div>
+    <div class="callout red"><b>LLQ's priority class MUST be policed</b> to prevent starving lower classes — that's the difference from plain PQ.</div>
+    <pre class="cmd">policy-map WAN-EDGE
+ class VOICE
+  priority 128          ! LLQ - strict, policed
+ class VIDEO
+  bandwidth 1000        ! CBWFQ guaranteed share
+ class DATA
+  bandwidth 2000
+ class class-default
+  fair-queue
+interface GigabitEthernet0/1
+ service-policy output WAN-EDGE
+show policy-map interface
+show queueing interface
+</pre>
+
+    <h3>Queue keyword explorer</h3>
+    <div class="grid g3">
+      <div class="proto-cell" :class="{sel:queueKw==='priority'}" @click="queueKw='priority'"><div class="pn">priority</div><div class="pd">LLQ strict-priority</div></div>
+      <div class="proto-cell" :class="{sel:queueKw==='bandwidth'}" @click="queueKw='bandwidth'"><div class="pn">bandwidth</div><div class="pd">CBWFQ guaranteed share</div></div>
+      <div class="proto-cell" :class="{sel:queueKw==='fair'}" @click="queueKw='fair'"><div class="pn">fair-queue</div><div class="pd">per-flow inside class-default</div></div>
+    </div>
+    <div class="verdict" :class="queueVerdict.cls">{{ queueVerdict.text }}</div>
+    <div class="callout blue"><b>Queuing is egress and only matters <u>under congestion</u>.</b></div>
+  </section>
+
+  <!-- 7. WRED -->
+  <section class="panel" v-show="sec==='wred'" id="wred">
+    <h2>🛑 Congestion Avoidance — WRED</h2>
+    <p class="lead">Drops packets <b>before</b> a queue overflows to prevent <b>tail drop</b> and <b>TCP global synchronization</b>.</p>
+
+    <h3>The tail-drop problem</h3>
+    <div class="card"><p style="margin:0">Dropping at the tail hurts <b>voice</b> and causes <b>synchronized TCP</b> slow-downs (all flows back off together, then burst together).</p></div>
+
+    <h3>WRED thresholds (min → max → full)</h3>
+    <div class="grid g3">
+      <div class="card"><h4>Below min</h4><p class="muted" style="margin:0">normal — no drop</p></div>
+      <div class="card"><h4>min → max</h4><p class="muted" style="margin:0">random drop rate ↑ as depth grows</p></div>
+      <div class="card"><h4>Above max</h4><p class="muted" style="margin:0">full — drop all</p></div>
+    </div>
+
+    <h3>Weighted = per-class drop profile</h3>
+    <table>
+      <tr><th>Class</th><th>Drop profile</th></tr>
+      <tr><td>Voice (EF)</td><td>no drop / highest min</td></tr>
+      <tr><td>Video (AF)</td><td>moderate</td></tr>
+      <tr><td>Best effort</td><td>aggressive</td></tr>
+    </table>
+    <div class="callout red"><b>Trap:</b> <b>tail drop → TCP global sync</b>, and WRED fixes both. Thresholds <b>min → max → full</b>. <b>ECN marks instead of drops</b> (TCP-friendly). Applies at <b>congested egress</b>.</div>
+    <pre class="cmd">policy-map AVOID
+ class AF31
+  bandwidth 1000
+  random-detect dscp-based
+interface Gi0/1
+ service-policy output AVOID
+show policy-map interface
+show queueing random-detect
+</pre>
+  </section>
+
+  <!-- 8. DIFFSERV -->
+  <section class="panel" v-show="sec==='diff'" id="diff">
+    <h2>🌐 DiffServ — Differentiated Services</h2>
+    <p class="lead">Each packet carries its <b>own class</b> in the <b>DSCP field</b>; each router applies a <b>PHB</b>. No signaling, no reservations — scalable, the de-facto model.</p>
+
+    <h3>DSCP and PHB</h3>
+    <table>
+      <tr><th>Field</th><th>Bits</th><th>Purpose</th></tr>
+      <tr><td>DSCP</td><td>6</td><td>packet class</td></tr>
+      <tr><td>ECN</td><td>2</td><td>congestion marks</td></tr>
+      <tr><td>PHB</td><td>—</td><td>treatment per class</td></tr>
+    </table>
+
+    <h3>The PHB classes</h3>
+    <table>
+      <tr><th>PHB</th><th>DSCP</th><th>Use</th></tr>
+      <tr><td>EF</td><td>46</td><td>voice (low latency)</td></tr>
+      <tr><td>AF4x</td><td>34/36/38</td><td>video conf</td></tr>
+      <tr><td>AF3x</td><td>26/28/30</td><td>video stream</td></tr>
+      <tr><td>AF2x</td><td>18/20/22</td><td>signaling/OAM</td></tr>
+      <tr><td>AF1x</td><td>10/12/14</td><td>bulk</td></tr>
+      <tr><td>CSx</td><td>0–56</td><td>class selector / control</td></tr>
+    </table>
+    <div class="callout blue"><b>AF = assured forwarding with 3 drop precedences (x1 low, x2 medium, x3 high).</b> Lower drop number = better survival (AF41 outlives AF43).</div>
+
+    <h3>Network zones</h3>
+    <div class="grid g3">
+      <div class="card"><h4>Edge</h4><p class="muted" style="margin:0">classify + mark</p></div>
+      <div class="card"><h4>Core</h4><p class="muted" style="margin:0">trust + PHB (queue/WRED)</p></div>
+      <div class="card"><h4>Provider</h4><p class="muted" style="margin:0">honor DSCP / contract</p></div>
+    </div>
+    <pre class="cmd">policy-map DIFFSERV
+ class VOICE
+  priority 128
+ class VIDEO
+  bandwidth 1000
+  random-detect dscp-based
+ class DATA
+  bandwidth 2000
+</pre>
+    <div class="callout red"><b>Trap:</b> DiffServ = <b>DSCP + PHB</b>, no signaling, per-class, <b>statistical</b>. EF → LLQ; AF → bandwidth + WRED; BE → default. <b>Mark at edge, trust in core.</b></div>
+  </section>
+
+  <!-- 9. INTSERV -->
+  <section class="panel" v-show="sec==='int'" id="int">
+    <h2>🎟️ IntServ — Integrated Services (RSVP)</h2>
+    <p class="lead">Per-flow <b>hard QoS guarantees</b> using <b>RSVP</b> to reserve bandwidth end-to-end <b>before</b> traffic flows.</p>
+
+    <h3>The IntServ model</h3>
+    <div class="grid g3">
+      <div class="card"><h4>Flow</h4><p class="muted" style="margin:0">per session/app</p></div>
+      <div class="card"><h4>Reservation</h4><p class="muted" style="margin:0">RSVP PATH/RESV</p></div>
+      <div class="card"><h4>State</h4><p class="muted" style="margin:0">per-flow on EVERY router</p></div>
+    </div>
+    <div class="callout red"><b>Every router holds per-flow state</b> — that's why it <b>doesn't scale</b> to large networks.</div>
+
+    <h3>RSVP flow</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> PATH: sender → receiver (announce requirements)</div>
+      <div class="step"><span class="n">2</span> RESV: receiver → sender (reserve resources)</div>
+      <div class="step"><span class="n">3</span> Admission on each hop: accept / reject</div>
+    </div>
+
+    <h3>Retention selector</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:intService==='guar'}" @click="intService='guar'"><div class="pn">Guaranteed</div><div class="pd">hard bandwidth + delay</div></div>
+      <div class="proto-cell" :class="{sel:intService==='load'}" @click="intService='load'"><div class="pn">Controlled load</div><div class="pd">QoS under load</div></div>
+    </div>
+    <div class="verdict" :class="intVerdict.cls">{{ intVerdict.text }}</div>
+    <pre class="cmd">interface Gi0/1
+ ip rsvp bandwidth 128 64        ! max / typical
+ ip rsvp reservation bandwidth per-flow
+show ip rsvp interface
+show ip rsvp reservation
+show ip rsvp sender
+</pre>
+    <div class="callout red"><b>Trap:</b> IntServ = <b>per-flow + RSVP reservations</b>, hard guarantees. <b>PATH → RESV</b>; routers admit/reject. <b>Doesn't scale</b>. Survives as <b>RSVP-TE</b> for MPLS-TE. <b>DiffServ wins on scale; IntServ wins on guarantee.</b></div>
+  </section>
+
+  <!-- 10. MQC -->
+  <section class="panel" v-show="sec==='mqc'" id="mqc">
+    <h2>🧱 MQC — Modular QoS CLI</h2>
+    <p class="lead">The standard three-block QoS recipe: <b>class-map</b> (match) → <b>policy-map</b> (action) → <b>service-policy</b> (attach).</p>
+
+    <h3>The three blocks (memorize)</h3>
+    <div class="grid g3">
+      <div class="card"><h4>class-map</h4><p class="muted" style="margin:0">the WHAT — match criteria</p></div>
+      <div class="card"><h4>policy-map</h4><p class="muted" style="margin:0">the HOW — actions per class</p></div>
+      <div class="card"><h4>service-policy</h4><p class="muted" style="margin:0">the WHERE — attach in/out</p></div>
+    </div>
+
+    <h3>policy-map actions</h3>
+    <table>
+      <tr><th>Command</th><th>Action</th></tr>
+      <tr><td>set dscp / cos / precedence</td><td>mark</td></tr>
+      <tr><td>police</td><td>enforce rate</td></tr>
+      <tr><td>shape</td><td>smooth rate</td></tr>
+      <tr><td>bandwidth</td><td>CBWFQ share</td></tr>
+      <tr><td>priority</td><td>LLQ strict priority</td></tr>
+      <tr><td>random-detect</td><td>WRED</td></tr>
+      <tr><td>fair-queue</td><td>per-flow</td></tr>
+    </table>
+
+    <h3>Attaching (direction)</h3>
+    <div class="grid g2">
+      <div class="card"><h4>service-policy input</h4><p class="muted" style="margin:0">ingress</p></div>
+      <div class="card"><h4>service-policy output</h4><p class="muted" style="margin:0">egress</p></div>
+    </div>
+    <div class="callout red"><b>A policy attaches in ONE direction</b> — input or output, not both at once. Unmatched traffic falls to <b>class-default</b>. <b>Hierarchical MQC</b> nests a child policy inside a parent (shape + per-class).</div>
+    <pre class="cmd">class-map match-any VOICE
+ match dscp ef
+policy-map EDGE
+ class VOICE
+  priority 128
+ class class-default
+  fair-queue
+interface GigabitEthernet0/1
+ service-policy output EDGE
+show class-map
+show policy-map
+show policy-map interface
+</pre>
+  </section>
+
+  <!-- 11. DSCP PHB -->
+  <section class="panel" v-show="sec==='dscp'" id="dscp">
+    <h2>🎚️ DSCP &amp; PHB Deep-Dive</h2>
+    <p class="lead">DSCP is the <b>6-bit</b> L3 field selecting a <b>PHB</b> (the other 2 ToS bits are ECN). Three PHB families: <b>EF, AF, CS</b>.</p>
+
+    <h3>DSCP field structure</h3>
+    <div class="card"><p style="margin:0"><span class="mono">[ DSCP · 6 bits ][ ECN · 2 bits ]</span> — 8-bit ToS byte. DSCP = up to <b>64 values</b>.</p></div>
+
+    <h3>AF drop precedence calculator</h3>
+    <div class="row-fn">
+      <label class="muted" style="font-size:.85rem">AF class (1–4):</label>
+      <select v-model.number="afClass" style="background:var(--code-bg);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px">
+        <option v-for="n in 4" :key="n" :value="n">{{ n }}</option>
+      </select>
+      <label class="muted" style="font-size:.85rem">Drop (1–3):</label>
+      <select v-model.number="afDrop" style="background:var(--code-bg);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px">
+        <option v-for="n in 3" :key="n" :value="n">{{ n }}</option>
+      </select>
+    </div>
+    <div class="verdict" :class="afVerdict.cls">{{ afVerdict.text }}</div>
+
+    <h3>CS selector (CSx = x*8)</h3>
+    <div class="row-fn">
+      <button class="btn" v-for="n in 8" :key="n" :class="{primary:csPick===n}" @click="csPick=n">CS{{ n-1 }}</button>
+    </div>
+    <div class="verdict" :class="csVerdict.cls">{{ csVerdict.text }}</div>
+
+    <h3>The three PHB families</h3>
+    <div class="grid g3">
+      <div class="card"><h4>EF = 46</h4><p class="muted" style="margin:0">voice · single value, no precedences → LLQ</p></div>
+      <div class="card"><h4>AFx.y</h4><p class="muted" style="margin:0">video/data · class 1-4 + drop 1-3 → CBWFQ/WRED</p></div>
+      <div class="card"><h4>CSx = x*8</h4><p class="muted" style="margin:0">class selector · legacy precedence · CS6=48 control</p></div>
+    </div>
+    <pre class="cmd">class-map match-any VOICE
+ match dscp ef
+class-map match-any VIDEO
+ match dscp af41 af31
+policy-map DSCP-PHB
+ class VOICE
+  priority 128
+ class VIDEO
+  bandwidth 1000
+</pre>
+    <div class="callout red"><b>Trap:</b> <b>EF is exactly 46</b> — single value. <b>AF = class(1-4) + drop(1-3)</b>: AF41 survives longer than AF43. <b>CSx = x*8</b> (CS6 = 48). ECN uses 2 bits; DSCP only 6.</div>
+  </section>
+
+  <!-- 12. TRUST BOUNDARIES -->
+  <section class="panel" v-show="sec==='trust'" id="trust">
+    <h2>🛡️ Marking &amp; Trust Boundaries</h2>
+    <p class="lead">The <b>trust boundary</b> is where the network decides to <b>accept or re-mark</b> incoming markings. Mark <b>once at the edge</b>, then <b>trust in the core</b>.</p>
+
+    <h3>Trust zone selector</h3>
+    <div class="grid g3">
+      <div class="proto-cell" :class="{sel:trustZone==='access'}" @click="trustZone='access'"><div class="pn">Access edge</div><div class="pd">untrusted — classify/re-mark</div></div>
+      <div class="proto-cell" :class="{sel:trustZone==='trusted'}" @click="trustZone='trusted'"><div class="pn">Trusted port</div><div class="pd">cameras/phones/APs — trust CoS</div></div>
+      <div class="proto-cell" :class="{sel:trustZone==='core'}" @click="trustZone='core'"><div class="pn">Core</div><div class="pd">trust DSCP, apply PHB (no re-mark)</div></div>
+    </div>
+    <div class="verdict" :class="trustVerdict.cls">{{ trustVerdict.text }}</div>
+
+    <h3>CoS ↔ DSCP mapping (typical)</h3>
+    <table>
+      <tr><th>CoS</th><th>Typical DSCP</th></tr>
+      <tr><td>0</td><td>BE (0)</td></tr>
+      <tr><td>3</td><td>call signaling</td></tr>
+      <tr><td>4</td><td>video (AF41)</td></tr>
+      <tr><td>5</td><td>voice (EF)</td></tr>
+      <tr><td>6/7</td><td>network control</td></tr>
+    </table>
+    <div class="callout red"><b>Crossing L2/L3 needs a CoS→DSCP mapping table.</b> On access ports you often <b>trust CoS but set DSCP</b>.</div>
+    <pre class="cmd">! trust CoS on an access port
+mls qos trust cos
+! set DSCP by class (marking)
+policy-map MARK
+ class VOICE
+  set dscp ef
+ class CAMERA
+  set dscp af41
+interface GigabitEthernet0/1
+ service-policy input MARK
+show mls qos interface Gi0/1
+show mls qos maps cos-dscp
+</pre>
+    <div class="callout red"><b>Trap:</b> <b>marking writes; classification reads.</b> The <b>trust boundary</b> is the access decision. <b>Core never re-marks.</b> CoS is L2/LAN-only; DSCP crosses L3 — map at the boundary.</div>
+  </section>
+
+  <!-- 13. COMMANDS -->
+  <section class="panel" v-show="sec==='cmds'" id="cmds">
+    <h2>⌨️ CLI Commands</h2>
+    <div class="row-fn">
+      <button class="btn" v-for="c in commands" :key="c.key" :class="{primary:activeCmd===c.key}" @click="activeCmd=c.key">{{ c.label }}</button>
+    </div>
+    <pre class="cmd">{{ activeCommand.show }}</pre>
+  </section>
+
+  <!-- 14. TRAPS -->
+  <section class="panel" v-show="sec==='traps'" id="traps">
+    <h2>⚠️ Common Traps</h2>
+    <div v-for="t in traps" :key="t" class="trap-item"><span class="trap-ico">!</span><div>{{ t }}</div></div>
+  </section>
+
+  <!-- 15. QUIZ -->
+  <section class="panel" v-show="sec==='quiz'" id="quiz">
+    <h2>📝 Quiz ({{ quizQuestions.length }})</h2>
+    <div v-for="(q,qi) in quizQuestions" :key="qi" class="card" style="margin:12px 0">
+      <div style="font-weight:700;margin-bottom:8px">{{ qi+1 }}. {{ q.q }}</div>
+      <div v-for="(o,oi) in q.opts" :key="oi"
+           class="opt" :class="{sel:q.ans===oi}"
+           @click="q.ans=oi">
+        <span class="letter">{{ String.fromCharCode(65+oi) }}</span>{{ o.text }}
+      </div>
+    </div>
+    <div class="row-fn">
+      <button class="btn primary" @click="submitQuiz()" :disabled="!allQuizAnswered">Submit answers</button>
+      <button class="btn" @click="resetQuiz()">Reset</button>
+      <span class="muted" v-if="quizDone" style="font-weight:700">Score: {{ quizScore }} / {{ quizQuestions.length }}
+        ({{ Math.round(quizScore/quizQuestions.length*100) }}%)</span>
+    </div>
+    <div class="verdict" :class="quizDone ? (quizScore===quizQuestions.length?'ok':'info') : 'info'" v-if="quizDone">
+      {{ quizScore===quizQuestions.length ? '🎉 Perfect! All ' + quizQuestions.length + ' correct.' : 'Better luck next time — review the traps section.' }}
+    </div>
+  </section>
+
+  <!-- 16. CHECKLIST -->
+  <section class="panel" v-show="sec==='checklist'" id="checklist">
+    <h2>✅ Study Checklist</h2>
+    <p class="muted" style="margin-bottom:10px">{{ doneCount }} / {{ checklist.length }} complete</p>
+    <div v-for="(c,i) in checklist" :key="i" class="chk-item" :class="{done:c.done}" @click="toggleDone(i)">
+      <span class="chk-box">{{ c.done ? '✓' : '' }}</span>{{ c.t }}
+    </div>
+  </section>
+
+</div>
+
+<script src="../vue.global.prod.js"></script>
+<script>
+(() => {
+  const { createApp, ref, computed, reactive } = Vue;
+  const LS = {
+    theme: 'ccnp.qos.theme', done: 'ccnp.qos.done',
+    quiz: 'ccnp.qos.quiz'
+  };
+  function loadJSON(key, fb) {
+    try { const v = JSON.parse(localStorage.getItem(key)); return (v === null || v === undefined) ? fb : v; }
+    catch (e) { return fb; }
+  }
+  function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+  createApp({
+    setup() {
+      const theme = ref(loadJSON(LS.theme, 'dark'));
+      const sec = ref('intro');
+
+      /* ---------- SECTION NAV ---------- */
+      const sections = [
+        { id: 'intro', label: 'Overview', icon: '🎛️' },
+        { id: 'class', label: 'Classification', icon: '🔍' },
+        { id: 'mark', label: 'Marking', icon: '🖊️' },
+        { id: 'police', label: 'Policing', icon: '🚓' },
+        { id: 'shape', label: 'Shaping', icon: '🏔️' },
+        { id: 'queue', label: 'Queuing', icon: '📚' },
+        { id: 'wred', label: 'WRED', icon: '🛑' },
+        { id: 'diff', label: 'DiffServ', icon: '🌐' },
+        { id: 'int', label: 'IntServ', icon: '🎟️' },
+        { id: 'mqc', label: 'MQC', icon: '🧱' },
+        { id: 'dscp', label: 'DSCP/PHB', icon: '🎚️' },
+        { id: 'trust', label: 'Trust Boundaries', icon: '🛡️' },
+        { id: 'cmds', label: 'Commands', icon: '⌨️' },
+        { id: 'traps', label: 'Traps', icon: '⚠️' },
+        { id: 'quiz', label: 'Quiz', icon: '📝' },
+        { id: 'checklist', label: 'Checklist', icon: '✅' }
+      ];
+
+      /* ---------- MARKING VALUE ---------- */
+      const markOptions = [
+        { key: 'ef', label: 'EF (46) voice' },
+        { key: 'af41', label: 'AF41 (34) video conf' },
+        { key: 'af31', label: 'AF31 (26) video stream' },
+        { key: 'cs6', label: 'CS6 (48) control' },
+        { key: 'be', label: 'CS0/BE (0)' }
+      ];
+      const markPick = ref('ef');
+      const markVerdict = computed(() => {
+        const map = {
+          ef: 'EF = 46 — voice, low latency/jitter → LLQ priority.',
+          af41: 'AF41 = 34 — video conferencing → CBWFQ + WRED.',
+          af31: 'AF31 = 26 — video streaming → CBWFQ + WRED.',
+          cs6: 'CS6 = 48 — network control/routing → priority.',
+          be: 'CS0/BE = 0 — best effort → default queue.'
+        };
+        return { cls: 'info', text: map[markPick.value] };
+      });
+
+      /* ---------- SHAPE COMMAND ---------- */
+      const shapeCmd = ref('average');
+      const shapeVerdict = computed(() => {
+        if (shapeCmd.value === 'average') return { cls: 'info', text: 'shape average — standard token bucket (Bc/Be); aligns to the CIR.' };
+        return { cls: 'info', text: 'shape peak — permits extra burst above CIR using Be (higher peak rate).' };
+      });
+
+      /* ---------- QUEUE KEYWORD ---------- */
+      const queueKw = ref('priority');
+      const queueVerdict = computed(() => {
+        if (queueKw.value === 'priority') return { cls: 'info', text: 'priority = LLQ strict-priority class, served first and POLICED to the value — use for voice (EF).' };
+        if (queueKw.value === 'bandwidth') return { cls: 'info', text: 'bandwidth = CBWFQ guaranteed weighted share, NOT strict priority — use for video/data.' };
+        return { cls: 'info', text: 'fair-queue = per-flow scheduling, typically in class-default for leftover traffic.' };
+      });
+
+      /* ---------- INTSERV SERVICE ---------- */
+      const intService = ref('guar');
+      const intVerdict = computed(() => {
+        if (intService.value === 'guar') return { cls: 'info', text: 'Guaranteed service — hard bandwidth + delay commitment (the classic IntServ service).' };
+        return { cls: 'info', text: 'Controlled load — provides QoS performance approximating an unloaded network under load.' };
+      });
+
+      /* ---------- AF DROP PRECEDENCE ---------- */
+      const afClass = ref(4);
+      const afDrop = ref(1);
+      const afVerdict = computed(() => {
+        const val = afClass.value * 8 + afDrop.value * 2; // AFxy = x*8 + y*2
+        const surv = afDrop.value === 1 ? 'lowest drop probability — survives longest' : (afDrop.value === 2 ? 'medium drop probability' : 'highest drop probability — drops first');
+        return { cls: 'info', text: 'AF' + afClass.value + afDrop.value + ' = DSCP ' + val + ' — class ' + afClass.value + ', drop precedence ' + afDrop.value + ' (' + surv + ').' };
+      });
+
+      /* ---------- CS SELECTOR ---------- */
+      const csPick = ref(7);
+      const csVerdict = computed(() => {
+        const n = csPick.value - 1;
+        const val = n * 8;
+        const note = n === 6 ? ' — CS6 (48) is the network control/routing DSCP.' : (n === 5 ? ' — CS5 (40) commonly EF-adjacent marking.' : ' — maps to IP precedence ' + n + '.');
+        return { cls: 'info', text: 'CS' + n + ' = DSCP ' + val + ' (CSx = x*8)' + note };
+      });
+
+      /* ---------- TRUST ZONE ---------- */
+      const trustZone = ref('access');
+      const trustVerdict = computed(() => {
+        if (trustZone.value === 'access') return { cls: 'info', text: 'Access edge — UNTRUSTED: classify and re-mark everything entering the network (the trust boundary decision).' };
+        if (trustZone.value === 'trusted') return { cls: 'info', text: 'Trusted port (cameras/phones/APs) — TRUST the incoming CoS/DSCP as-is.' };
+        return { cls: 'info', text: 'Core — TRUST DSCP and apply the PHB (queue/WRED); never re-mark.' };
+      });
+
+      /* ---------- COMMANDS ---------- */
+      const commands = [
+        {
+          key: 'mqc', label: 'MQC',
+          show: "class-map match-any VOICE\n match dscp ef\nclass-map match-all STRICT\n match dscp af41\n match access-group name VIDEO-ACL\npolicy-map EDGE\n class VOICE\n  priority 128\n class class-default\n  fair-queue\ninterface GigabitEthernet0/1\n service-policy output EDGE\n\nshow class-map\nshow policy-map\nshow policy-map interface"
+        },
+        {
+          key: 'mark', label: 'Marking',
+          show: "policy-map MARK\n class VOICE\n  set dscp ef\n class CAMERA\n  set dscp af41\ninterface GigabitEthernet0/1\n service-policy input MARK\n\nshow policy-map\nshow mls qos interface\nshow mls qos maps cos-dscp"
+        },
+        {
+          key: 'police', label: 'Policing',
+          show: "policy-map POLICE-DATA\n class BULK\n  police cir 1000000 bc 200000 be 200000\n   conform-action transmit\n   exceed-action drop\n   violate-action drop\ninterface Gi0/1\n service-policy input POLICE-DATA\n\nshow policy-map interface Gi0/1\nshow policy-map"
+        },
+        {
+          key: 'shape', label: 'Shaping',
+          show: "policy-map SHAPE-LINK\n class class-default\n  shape average 10000000\ninterface Gi0/1\n service-policy output SHAPE-LINK\n\n! hierarchical - parent shapes aggregate, child per-class\npolicy-map PARENT\n class class-default\n  shape average 10000000\n  service-policy CHILD\n\nshow policy-map interface Gi0/1\nshow queueing interface"
+        },
+        {
+          key: 'queue', label: 'Queuing',
+          show: "policy-map WAN-EDGE\n class VOICE\n  priority 128          ! LLQ strict, policed\n class VIDEO\n  bandwidth 1000        ! CBWFQ share\n class DATA\n  bandwidth 2000\n class class-default\n  fair-queue\ninterface GigabitEthernet0/1\n service-policy output WAN-EDGE\n\nshow policy-map interface\nshow queueing interface"
+        },
+        {
+          key: 'wred', label: 'WRED',
+          show: "policy-map AVOID\n class AF31\n  bandwidth 1000\n  random-detect dscp-based    ! or precedence-based\ninterface Gi0/1\n service-policy output AVOID\n\nshow policy-map interface\nshow queueing random-detect"
+        },
+        {
+          key: 'intserv', label: 'IntServ/RSVP',
+          show: "interface Gi0/1\n ip rsvp bandwidth 128 64        ! max / typical\n ip rsvp reservation bandwidth per-flow\n ip rsvp neighbor 192.0.2.1\n\nshow ip rsvp interface\nshow ip rsvp reservation\nshow ip rsvp sender\nshow ip rsvp installed\ndebug ip rsvp"
+        }
+      ];
+      const activeCmd = ref(commands[0].key);
+      const activeCommand = computed(() => commands.find(c => c.key === activeCmd.value));
+
+      /* ---------- TRAPS ---------- */
+      const traps = [
+        'Classification IDENTIFIES traffic; marking WRITES a value — two different acts.',
+        'Set the trust boundary at the access edge; mark ONCE at the edge, TRUST in the core (core never re-marks).',
+        'DSCP = 6 bits (64 values); IP precedence = 3 bits; ECN = the other 2 ToS bits.',
+        'EF is exactly 46 — single voice class, no drop precedences → LLQ.',
+        'AF = class(1-4) + drop precedence(1-3): AF41 survives longer than AF43 (x3 drops first).',
+        'CSx = x*8 (CS6 = 48 control, CS5 = 40); backward-compatible with IP precedence.',
+        'Policing DROPS/RE-MARKS (no buffer, works in/egress); shaping BUFFERS (egress-only, adds delay).',
+        'Token bucket: CIR + Bc + Be; three outcomes conform (transmit) / exceed (re-mark) / violate (drop).',
+        'shape average = standard; shape peak = uses Be for extra burst.',
+        'CBWFQ = per-class bandwidth share; LLQ = strict priority class that MUST be policed to avoid starvation.',
+        'priority (LLQ, strict+policed) vs bandwidth (CBWFQ weighted share) — do not confuse them.',
+        'PQ (plain strict) can starve; WFQ is per-flow fairness; LLQ is voice-safe because it polices.',
+        'Tail drop → TCP global synchronization; WRED fixes it with weighted random early detection (min→max→full).',
+        'ECN marks instead of drops when WRED would drop — TCP-friendly.',
+        'DiffServ = DSCP + PHB, per-class, no signaling, statistical, scales.',
+        'IntServ = RSVP PATH/RESV, per-flow, hard guarantee, DOES NOT scale; survives as RSVP-TE.',
+        'MQC = class-map (match) → policy-map (actions) → service-policy (attach input/output); unmatched → class-default.',
+        'A service-policy attaches in ONE direction; hierarchical MQC = parent(shape) + child(per-class).',
+        'CoS is L2/LAN-only (3 bits); crossing to L3 needs a CoS→DSCP mapping table (CoS5=EF, 4=AF41, 3=signaling, 6/7=control).'
+      ];
+
+      /* ---------- QUIZ ---------- */
+      const quizRaw = [
+        { q: 'Which QoS step WRITES a value into the packet?', opts: [{ text: 'Marking' }, { text: 'Classification' }, { text: 'Policing' }, { text: 'Queuing' }], correct: 0 },
+        { q: 'How many bits is DSCP?', opts: [{ text: '6 (64 values)' }, { text: '3 (8 values)' }, { text: '8 (256 values)' }, { text: '5 (32 values)' }], correct: 0 },
+        { q: 'What DSCP value is used for voice (EF)?', opts: [{ text: '46' }, { text: '48' }, { text: '34' }, { text: '0' }], correct: 0 },
+        { q: 'Which DSCP marks network control/routing?', opts: [{ text: 'CS6 (48)' }, { text: 'EF (46)' }, { text: 'AF41 (34)' }, { text: 'BE (0)' }], correct: 0 },
+        { q: 'Policing handles excess traffic by:', opts: [{ text: 'dropping or re-marking (no buffer)' }, { text: 'buffering then sending' }, { text: 'adding delay' }, { text: 'prioritizing it' }], correct: 0 },
+        { q: 'Shaping is which of the following?', opts: [{ text: 'egress-only, buffers excess (adds delay)' }, { text: 'ingress-only, drops excess' }, { text: 'egress or ingress, drops' }, { text: 'always drops at the tail' }], correct: 0 },
+        { q: 'In the token bucket, what does "exceed" typically do?', opts: [{ text: 're-mark + transmit (Be available)' }, { text: 'drop immediately' }, { text: 'transmit normally' }, { text: 'buffer forever' }], correct: 0 },
+        { q: 'LLQ is CBWFQ plus:', opts: [{ text: 'a strict-priority class that is POLICED' }, { text: 'a plain priority queue with no limit' }, { text: 'a FIFO queue' }, { text: 'WRED only' }], correct: 0 },
+        { q: 'priority vs bandwidth: which is the LLQ strict-priority option?', opts: [{ text: 'priority' }, { text: 'bandwidth' }, { text: 'fair-queue' }, { text: 'shape' }], correct: 0 },
+        { q: 'Tail drop leads to:', opts: [{ text: 'TCP global synchronization' }, { text: 'faster forwarding' }, { text: 'less jitter' }, { text: 'higher bandwidth' }], correct: 0 },
+        { q: 'WRED helps by:', opts: [{ text: 'randomly dropping lower-priority traffic as the queue fills' }, { text: 'buffering all traffic' }, { text: 'removing DSCP bits' }, { text: 'only dropping voice' }], correct: 0 },
+        { q: 'DiffServ is best described as:', opts: [{ text: 'per-class, DSCP+PHB, no signaling, statistical' }, { text: 'per-flow, RSVP reservations, hard guarantee' }, { text: 'connection-oriented QoS' }, { text: 'a queuing algorithm' }], correct: 0 },
+        { q: 'IntServ uses which protocol for reservations?', opts: [{ text: 'RSVP (PATH/RESV)' }, { text: 'LDP' }, { text: 'BGP' }, { text: 'PIM' }], correct: 0 },
+        { q: 'The main reason IntServ does not scale is:', opts: [{ text: 'per-flow reservation state on every router' }, { text: 'it requires MPLS' }, { text: 'it uses too many labels' }, { text: 'it needs IGMPv3' }], correct: 0 },
+        { q: 'MQC stands for:', opts: [{ text: 'Modular QoS CLI — class-map, policy-map, service-policy' }, { text: 'Multi-QoS Control' }, { text: 'Modular Queuing Concentration' }, { text: 'Managed Quality System' }], correct: 0 },
+        { q: 'In MQC, unmatched traffic falls into:', opts: [{ text: 'class-default' }, { text: 'the EF class' }, { text: 'the strict priority queue' }, { text: 'nothing' }], correct: 0 },
+        { q: 'AF41 vs AF43: which survives longer under congestion?', opts: [{ text: 'AF41 (x1 lower drop precedence)' }, { text: 'AF43 (x3 higher drop precedence)' }, { text: 'equal' }, { text: 'depends on CS value' }], correct: 0 },
+        { q: 'The trust boundary is best defined as:', opts: [{ text: 'the point where the network accepts or re-marks incoming markings' }, { text: 'a firewall between domains' }, { text: 'the core queuing point' }, { text: 'the RSVP admission point' }], correct: 0 }
+      ];
+      const quizQuestions = reactive(quizRaw.map(q => ({ ...q, ans: null })));
+      const quizDone = ref(false);
+      const quizScore = ref(loadJSON(LS.quiz, 0) || 0);
+      const allQuizAnswered = computed(() => quizQuestions.every(q => q.ans !== null));
+      function submitQuiz() {
+        if (!allQuizAnswered.value) return;
+        quizScore.value = quizQuestions.filter((q, i) => q.ans === q.correct).length;
+        quizDone.value = true;
+        save(LS.quiz, quizScore.value);
+      }
+      function resetQuiz() {
+        quizQuestions.forEach(q => q.ans = null);
+        quizDone.value = false;
+        quizScore.value = 0;
+        localStorage.removeItem(LS.quiz);
+      }
+
+      /* ---------- CHECKLIST ---------- */
+      const checklistRoot = loadJSON(LS.done, [
+        { t: 'Flow: Classify → Mark → (Police/Shape) → Queue → WRED; mark at edge, trust in core', done: false },
+        { t: 'Classification identifies; marking writes. Fields: DSCP(6) / precedence(3) / CoS(3) / NBAR(L7)', done: false },
+        { t: 'DSCP: EF=46 voice, AF41=34 video conf, AF31=26 video stream, CS6=48 control, BE=0', done: false },
+        { t: 'Policing = drop/re-mark (no buffer, in/egress); Shaping = buffer (egress-only, adds delay)', done: false },
+        { t: 'Token bucket CIR/Bc/Be; conform(transmit)/exceed(re-mark)/violate(drop); shape avg vs peak', done: false },
+        { t: 'Queuing: FIFO/WFQ/PQ/CBWFQ/LLQ; CBWFQ=bandwidth share, LLQ=priority + CBWFQ (policed)', done: false },
+        { t: 'priority (LLQ strict, policed) vs bandwidth (CBWFQ share) — never confuse; LLQ prevents starvation', done: false },
+        { t: 'WRED: random early drop; fixes tail drop → TCP global sync; min→max→full; ECN marks instead', done: false },
+        { t: 'DiffServ = DSCP+PHB per-class, no signaling, statistical; IntServ = RSVP per-flow, hard, no scale', done: false },
+        { t: 'IntServ: PATH → RESV; every router holds per-flow state; survives as RSVP-TE', done: false },
+        { t: 'MQC: class-map(match) → policy-map(actions) → service-policy(attach in/out); class-default; parent/child', done: false },
+        { t: 'DSCP/PHB: EF=46 (no precedences); AFxy = class 1-4 + drop 1-3 (x3 drops first); CSx=x*8; ECN 2 bits', done: false },
+        { t: 'Trust boundary = access edge decision; trust CoS set DSCP; CoS↔DSCP mapping (5=EF,4=AF41,3=signaling,6/7=control)', done: false }
+      ]);
+      const checklist = reactive(checklistRoot);
+      const doneCount = computed(() => checklist.filter(c => c.done).length);
+      function saveChecklist() { save(LS.done, checklistRoot); }
+      function toggleDone(i) { checklistRoot[i].done = !checklistRoot[i].done; saveChecklist(); }
+
+      return {
+        theme, sec, sections,
+        markOptions, markPick, markVerdict,
+        shapeCmd, shapeVerdict,
+        queueKw, queueVerdict,
+        intService, intVerdict,
+        afClass, afDrop, afVerdict,
+        csPick, csVerdict,
+        trustZone, trustVerdict,
+        commands, activeCmd, activeCommand,
+        traps,
+        quizQuestions, quizDone, quizScore, allQuizAnswered, submitQuiz, resetQuiz,
+        checklist, doneCount, saveChecklist, toggleDone
+      };
+    }
+  }).mount('#app');
+})();
+</script>
+</body>
+</html>

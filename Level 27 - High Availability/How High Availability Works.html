@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How High Availability Works — Deep Dive</title>
+<style>
+  :root {
+    --bg: #0f172a; --panel: #111c34; --card: #1e293b; --card-2: #16233d;
+    --text: #f8fafc; --muted: #94a3b8;
+    --blue: #38bdf8; --blue-dim: #0c4a6e;
+    --green: #34d399; --green-dim: #064e3b;
+    --amber: #fbbf24; --amber-dim: #78350f;
+    --red: #f87171; --red-dim: #7f1d1d;
+    --violet: #a78bfa; --violet-dim: #4c1d95;
+    --cyan: #22d3ee; --cyan-dim: #164e63;
+    --border: #334155; --hover: #263449; --code-bg: #0b1220;
+  }
+  #app[data-theme="light"] {
+    --bg: #f1f5f9; --panel: #ffffff; --card: #ffffff; --card-2: #f8fafc;
+    --text: #0f172a; --muted: #64748b;
+    --blue: #0284c7; --blue-dim: #bae6fd;
+    --green: #059669; --green-dim: #d1fae5;
+    --amber: #d97706; --amber-dim: #fef3c7;
+    --red: #dc2626; --red-dim: #fee2e2;
+    --violet: #7c3aed; --violet-dim: #ede9fe;
+    --cyan: #0891b2; --cyan-dim: #cffafe;
+    --border: #cbd5e1; --hover: #e2e8f0; --code-bg: #0b1220;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; }
+  #app { max-width: 1040px; margin: 0 auto; padding: 20px 18px 60px; }
+
+  header { position: sticky; top: 0; z-index: 30; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .lv-badge { background: var(--blue-dim); color: var(--blue); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .exam-badge { background: var(--violet-dim); color: var(--violet); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .head-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: background 0.15s; }
+  .btn:hover { background: var(--hover); }
+  .btn.primary { background: var(--blue); color: #0f172a; border-color: var(--blue); }
+
+  nav { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 2px 16px; }
+  nav button.chip { border: 1px solid var(--border); background: var(--card); color: var(--muted); padding: 5px 11px; border-radius: 999px; cursor: pointer; font-size: 0.76rem; font-weight: 600; }
+  nav button.chip.active { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
+
+  section.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
+  section.panel h2 { font-size: 1.2rem; margin-bottom: 6px; }
+  section.panel h3 { font-size: 1rem; margin: 18px 0 10px; color: var(--blue); }
+  section.panel p { margin: 8px 0; }
+  .muted { color: var(--muted); }
+  .lead { color: var(--muted); font-size: 0.95rem; }
+
+  .grid { display: grid; gap: 12px; }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .g3 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .g4 { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .card h4 { font-size: 0.9rem; margin-bottom: 6px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85rem; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  tr:hover td { background: var(--hover); }
+
+  code, .mono { font-family: 'Fira Code', ui-monospace, monospace; }
+  .mono { font-size: 0.9rem; }
+  .chip-tag { display: inline-block; border-radius: 999px; padding: 1px 9px; font-size: 0.74rem; font-weight: 700; }
+  .b-blue { background: var(--blue-dim); color: var(--blue); }
+  .b-green { background: var(--green-dim); color: var(--green); }
+  .b-amber { background: var(--amber-dim); color: var(--amber); }
+  .b-red { background: var(--red-dim); color: var(--red); }
+  .b-violet { background: var(--violet-dim); color: var(--violet); }
+  .b-cyan { background: var(--cyan-dim); color: var(--cyan); }
+
+  .callout { border-left: 4px solid var(--amber); background: var(--card-2); border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 12px 0; font-size: 0.9rem; }
+  .callout.green { border-color: var(--green); }
+  .callout.red { border-color: var(--red); }
+  .callout.blue { border-color: var(--blue); }
+  .callout.violet { border-color: var(--violet); }
+
+  .row-fn { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 8px 0; }
+
+  .opt { display: flex; align-items: center; gap: 8px; padding: 6px 9px; margin: 3px 0; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; background: var(--card); font-size: 0.86rem; }
+  .opt.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .opt .letter { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex: 0 0 auto; }
+  .opt.sel .letter { background: var(--blue); color: #0f172a; }
+
+  #app pre, pre.cmd { background: var(--code-bg); color: #e2e8f0; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.82rem; line-height: 1.5; }
+
+  .trap-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  .trap-item:last-child { border-bottom: none; }
+  .trap-ico { color: var(--red); font-weight: 700; flex: 0 0 auto; }
+
+  .step-flow { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .step { border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 0.8rem; background: var(--card-2); }
+  .step .n { color: var(--blue); font-weight: 700; }
+
+  .verdict { border-radius: 8px; padding: 10px 14px; font-weight: 700; margin: 8px 0; }
+  .verdict.ok { background: var(--green-dim); color: var(--green); }
+  .verdict.bad { background: var(--red-dim); color: var(--red); }
+  .verdict.info { background: var(--blue-dim); color: var(--blue); }
+
+  .chk-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; margin: 5px 0; cursor: pointer; transition: opacity 0.15s; }
+  .chk-item.done { opacity: 0.55; text-decoration: line-through; }
+  .chk-box { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 5px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; }
+  .chk-item.done .chk-box { background: var(--green); border-color: var(--green); color: #0f172a; }
+
+  .proto-cell { border: 1px solid var(--border); border-radius: 10px; padding: 9px 10px; background: var(--card); cursor: pointer; text-align: center; }
+  .proto-cell.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .proto-cell .pn { font-weight: 700; }
+  .proto-cell .pd { font-size: 0.75rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<div id="app" :data-theme="theme">
+  <header>
+    <h1><span class="lv-badge">L27</span> How High Availability Works
+      <span class="exam-badge">ENCOR 350-401</span></h1>
+    <div class="head-actions">
+      <a class="btn" href="../Level 26 - Monitoring &amp; Telemetry/How Monitoring &amp; Telemetry Works.html">◀ Monitor</a>
+      <a class="btn" href="../Level 28 - Cisco IOS and IOS XE/How Cisco IOS and IOS XE Works.html">IOS XE ▶</a>
+      <a class="btn" href="../index.html">Flashcards</a>
+      <button class="btn" @click="theme = (theme==='dark'?'light':'dark')">{{ theme==='dark' ? '☀' : '🌙' }}</button>
+    </div>
+  </header>
+
+  <nav>
+    <button class="chip" v-for="s in sections" :key="s.id" :class="{active:sec===s.id}" @click="sec=s.id">{{ s.icon }} {{ s.label }}</button>
+  </nav>
+
+  <!-- 1. OVERVIEW -->
+  <section class="panel" v-show="sec==='intro'" id="intro">
+    <h2>🛡️ High Availability — the whole picture</h2>
+    <p class="lead">HA is <b>layered</b>: each layer covers a different failure mode. <b>SSO/NSF</b> = the brain, <b>redundant supervisors</b> = the chassis, <b>EtherChannel</b> = links, <b>HSRP/VRRP/GLBP</b> = gateway, and <b>routing/ECMP</b> = paths.</p>
+
+    <h3>The layered redundancy model</h3>
+    <div class="grid g3">
+      <div class="card"><h4>Brain</h4><p class="muted" style="margin:0">SSO, NSF, ISSU</p></div>
+      <div class="card"><h4>Links</h4><p class="muted" style="margin:0">EtherChannel / LAG</p></div>
+      <div class="card"><h4>Gateway</h4><p class="muted" style="margin:0">HSRP / VRRP / GLBP</p></div>
+    </div>
+    <div class="callout red"><b>Best practice #1: NO single point of failure on any critical path. And test it — untested redundancy isn't redundancy.</b></div>
+  </section>
+
+  <!-- 2. SSO -->
+  <section class="panel" v-show="sec==='sso'" id="sso">
+    <h2>🔄 SSO — Stateful Switchover</h2>
+    <p class="lead">Keeps <b>control-plane state</b> synced between active &amp; standby supervisors so a switchover causes <b>no forwarding interruption</b>.</p>
+
+    <h3>Mode picker (SSO vs RPR)</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:ssoPick==='sso'}" @click="ssoPick='sso'"><div class="pn">SSO</div><div class="pd">stateful sync · zero drop · mode sso</div></div>
+      <div class="proto-cell" :class="{sel:ssoPick==='rpr'}" @click="ssoPick='rpr'"><div class="pn">RPR</div><div class="pd">cold standby · reload · forwarding drops</div></div>
+    </div>
+    <div class="verdict" :class="ssoVerdict.cls">{{ ssoVerdict.text }}</div>
+    <div class="callout blue"><b>Sync = bulk (at start) + incremental/SYNC (ongoing). Requires dual supervisors.</b></div>
+    <pre class="cmd">redundancy
+ mode sso
+ main-cpu
+ state processor 1 standby supervisor
+show redundancy states
+show redundancy sso
+redundancy force-switchover
+</pre>
+  </section>
+
+  <!-- 3. NSF -->
+  <section class="panel" v-show="sec==='nsf'" id="nsf">
+    <h2>🚚 NSF — Non-Stop Forwarding</h2>
+    <p class="lead">Continues <b>forwarding</b> while the control plane recovers during a switchover. <b>CEF/FIB independent</b> of the control plane keeps packets flowing.</p>
+
+    <h3>NSF + SSO (the classic pair)</h3>
+    <div class="grid g2">
+      <div class="card"><h4>SSO</h4><p class="muted" style="margin:0">preserves control-plane state</p></div>
+      <div class="card"><h4>NSF</h4><p class="muted" style="margin:0">continues forwarding</p></div>
+    </div>
+    <div class="callout red"><b>Peers must be NSF-aware (graceful restart) to hold state instead of flapping routes. OSPF `nsf`; BGP `bgp graceful-restart`.</b></div>
+    <pre class="cmd">redundancy
+ mode sso
+!
+router ospf 1
+ nsf
+!
+router bgp 65000
+ bgp graceful-restart
+show ip ospf nsf
+show bgp neighbors | include Restart
+show ip cef
+</pre>
+  </section>
+
+  <!-- 4. REDUNDANT SUPERVISORS -->
+  <section class="panel" v-show="sec==='sup'" id="sup">
+    <h2>🧠 Redundant Supervisors</h2>
+    <p class="lead">A standby supervisor protects a chassis switch. <b>Modes</b> define how much state is kept: RPR (none) &lt; RPR+ (shared config) &lt; SSO (full sync).</p>
+
+    <h3>Mode picker (capability ladder)</h3>
+    <div class="grid g3">
+      <div class="proto-cell" :class="{sel:supPick==='rpr'}" @click="supPick='rpr'"><div class="pn">RPR</div><div class="pd">no state · reload on failover</div></div>
+      <div class="proto-cell" :class="{sel:supPick==='rprp'}" @click="supPick='rprp'"><div class="pn">RPR+</div><div class="pd">shared startup config + image</div></div>
+      <div class="proto-cell" :class="{sel:supPick==='sso'}" @click="supPick='sso'"><div class="pn">SSO</div><div class="pd">full sync · zero-loss failover</div></div>
+    </div>
+    <div class="verdict" :class="supVerdict.cls">{{ supVerdict.text }}</div>
+    <pre class="cmd">redundancy
+ mode rpr | rpr-plus | sso
+ show redundancy states
+show module | include Supervisor
+</pre>
+  </section>
+
+  <!-- 5. LINK REDUNDANCY -->
+  <section class="panel" v-show="sec==='link'" id="link">
+    <h2>🔗 Link Redundancy — EtherChannel</h2>
+    <p class="lead">Bundle multiple physical links into one logical <b>port-channel</b> to scale bandwidth, avoid STP blocking, and survive link failure.</p>
+
+    <h3>Protocol picker (the core contrast)</h3>
+    <div class="grid g3">
+      <div class="proto-cell" :class="{sel:linkPick==='lacp'}" @click="linkPick='lacp'"><div class="pn">LACP</div><div class="pd">IEEE standard · active/passive</div></div>
+      <div class="proto-cell" :class="{sel:linkPick==='pagp'}" @click="linkPick='pagp'"><div class="pn">PAgP</div><div class="pd">Cisco-proprietary · desirable/auto</div></div>
+      <div class="proto-cell" :class="{sel:linkPick==='static'}" @click="linkPick='static'"><div class="pn">Static</div><div class="pd">mode on · no negotiation</div></div>
+    </div>
+    <div class="verdict" :class="linkVerdict.cls">{{ linkVerdict.text }}</div>
+    <div class="callout red"><b>Hash (src/dst MAC/IP/port) picks the member per flow so each flow stays in-order. Members must match speed/duplex. vPC/M-LAG = active-active across two switches.</b></div>
+    <pre class="cmd">interface Port-channel1
+interface GigabitEthernet0/1
+ channel-group 1 mode active
+interface GigabitEthernet0/2
+ channel-group 1 mode active
+show etherchannel summary
+show etherchannel load-balance
+</pre>
+  </section>
+
+  <!-- 6. GATEWAY REDUNDANCY -->
+  <section class="panel" v-show="sec==='gw'" id="gw">
+    <h2>🚪 Gateway Redundancy — HSRP · VRRP · GLBP</h2>
+    <p class="lead">Keep the <b>default gateway</b> available by sharing a <b>virtual IP</b> among routers. Hosts point at the virtual IP, not one router.</p>
+
+    <h3>Protocol picker (memorize)</h3>
+    <div class="grid g3">
+      <div class="proto-cell" :class="{sel:gwPick==='hsrp'}" @click="gwPick='hsrp'"><div class="pn">HSRP</div><div class="pd">Cisco · Active/Standby · UDP 1985</div></div>
+      <div class="proto-cell" :class="{sel:gwPick==='vrrp'}" @click="gwPick='vrrp'"><div class="pn">VRRP</div><div class="pd">IETF · Master/Backup · 112</div></div>
+      <div class="proto-cell" :class="{sel:gwPick==='glbp'}" @click="gwPick='glbp'"><div class="pn">GLBP</div><div class="pd">load-balanced · AVG/AVF</div></div>
+    </div>
+    <div class="verdict" :class="gwVerdict.cls">{{ gwVerdict.text }}</div>
+    <div class="callout red"><b>HSRP/VRRP = active-passive; GLBP = active-active load sharing. Virtual MAC: HSRP 0c07.acXX, VRRP 0000.5e0001XX. Election: higher priority, tie → higher IP. Preempt to take over.</b></div>
+    <pre class="cmd">interface Vlan10
+ standby 1 ip 192.168.1.254
+ standby 1 priority 110
+ standby 1 preempt
+show standby brief
+show standby
+show vrrp brief
+show glbp
+</pre>
+  </section>
+
+  <!-- 7. ISSU -->
+  <section class="panel" v-show="sec==='issue'" id="issue">
+    <h2>🔄 ISSU — In-Service Software Upgrade</h2>
+    <p class="lead">Upgrade IOS XE on a <b>dual-supervisor</b> device <b>without taking the network down</b> — rides on SSO switchover + NSF forwarding.</p>
+
+    <h3>Stage picker (the sequence)</h3>
+    <div class="grid g3">
+      <div class="proto-cell" :class="{sel:issuePick==='loadnew'}" @click="issuePick='loadnew'"><div class="pn">1 Loadnew</div><div class="pd">install new image on standby</div></div>
+      <div class="proto-cell" :class="{sel:issuePick==='runversion'}" @click="issuePick='runversion'"><div class="pn">2 Runversion</div><div class="pd">standby runs new image</div></div>
+      <div class="proto-cell" :class="{sel:issuePick==='switchover'}" @click="issuePick='switchover'"><div class="pn">3 Switchover</div><div class="pd">control moves (SSO, no drop)</div></div>
+      <div class="proto-cell" :class="{sel:issuePick==='loadold'}" @click="issuePick='loadold'"><div class="pn">4 Loadold</div><div class="pd">load old image on new standby</div></div>
+      <div class="proto-cell" :class="{sel:issuePick==='commit'}" @click="issuePick='commit'"><div class="pn">5 Commit</div><div class="pd">write new image, done</div></div>
+    </div>
+    <div class="verdict" :class="issueVerdict.cls">{{ issueVerdict.text }}</div>
+    <div class="callout red"><b>ISSU requires dual supervisors + SSO + NSF. Major version jumps may NOT be ISSU-capable (need a reload).</b></div>
+    <pre class="cmd">redundancy
+ mode sso
+!
+install add file bootflash:image.bin activate
+show install summary
+show issu state
+show redundancy states
+</pre>
+  </section>
+
+  <!-- 8. STACKWISE / VSS -->
+  <section class="panel" v-show="sec==='stack'" id="stack">
+    <h2>📚 StackWise / VSS — one logical switch</h2>
+    <p class="lead">Make multiple physical switches behave as <b>one logical switch</b>: shared control plane, config, and one L2 domain.</p>
+
+    <h3>Type picker (the two flavors)</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:stackPick==='stackwise'}" @click="stackPick='stackwise'"><div class="pn">StackWise</div><div class="pd">stackable switches (3750/3850) · StackWise cable</div></div>
+      <div class="proto-cell" :class="{sel:stackPick==='vss'}" @click="stackPick='vss'"><div class="pn">VSS</div><div class="pd">2× 6500/4500 chassis · VSL link</div></div>
+    </div>
+    <div class="verdict" :class="stackVerdict.cls">{{ stackVerdict.text }}</div>
+    <div class="callout red"><b>StackWise = `show switch`, active/standby/member. VSS = `show vss`, active/standby virtual switch, dual-active detection (VSSP/PAgP/BFD) prevents split-brain. EtherChannel can span members (no STP block).</b></div>
+    <pre class="cmd">! StackWise — priority picks master
+switch 1 priority 15
+switch 1 provision ws-c3850-48p
+show switch
+!
+! VSS
+switch virtual domain 100
+ switch mode virtual
+show vss
+show switch virtual role
+show etherchannel summary
+</pre>
+  </section>
+
+  <!-- 9. DESIGN -->
+  <section class="panel" v-show="sec==='design'" id="design">
+    <h2>🏗️ Redundancy Design &amp; Best Practices</h2>
+    <p class="lead">Layer HA mechanisms to match a business availability target — <b>not every device needs everything</b>.</p>
+
+    <h3>Layers vs failure mode</h3>
+    <table>
+      <tr><th>Layer</th><th>Mechanism</th><th>Protects against</th></tr>
+      <tr><td>Device/software</td><td>SSO, NSF, ISSU</td><td>supervisor/RP failure</td></tr>
+      <tr><td>Chassis</td><td>redundant supervisors</td><td>brain failure</td></tr>
+      <tr><td>Link</td><td>EtherChannel/LAG, M-LAG</td><td>link/port failure</td></tr>
+      <tr><td>Gateway</td><td>HSRP/VRRP/GLBP</td><td>first-hop failure</td></tr>
+      <tr><td>Path</td><td>ECMP, routing, multihoming</td><td>transit/AS failure</td></tr>
+    </table>
+    <div class="callout red"><b>Redundant ≠ load-shared (many designs are active/standby). EtherChannel beats single links — no STP blocking. Test failover with `redundancy force-switchover`.</b></div>
+    <pre class="cmd">show redundancy states
+show redundancy sso
+show standby brief
+show etherchannel summary
+show ip ospf nsf
+show ip route
+show switch
+show vss
+</pre>
+  </section>
+
+  <!-- 10. COMMANDS -->
+  <section class="panel" v-show="sec==='cmds'" id="cmds">
+    <h2>⌨️ Commands</h2>
+    <div class="row-fn">
+      <button class="btn" v-for="c in commands" :key="c.key" :class="{primary:activeCmd===c.key}" @click="activeCmd=c.key">{{ c.label }}</button>
+    </div>
+    <pre class="cmd">{{ activeCommand.show }}</pre>
+  </section>
+
+  <!-- 11. TRAPS -->
+  <section class="panel" v-show="sec==='traps'" id="traps">
+    <h2>⚠️ Common Traps</h2>
+    <div v-for="t in traps" :key="t" class="trap-item"><span class="trap-ico">!</span><div>{{ t }}</div></div>
+  </section>
+
+  <!-- 12. QUIZ -->
+  <section class="panel" v-show="sec==='quiz'" id="quiz">
+    <h2>📝 Quiz ({{ quizQuestions.length }})</h2>
+    <div v-for="(q,qi) in quizQuestions" :key="qi" class="card" style="margin:12px 0">
+      <div style="font-weight:700;margin-bottom:8px">{{ qi+1 }}. {{ q.q }}</div>
+      <div v-for="(o,oi) in q.opts" :key="oi"
+           class="opt" :class="{sel:q.ans===oi}"
+           @click="q.ans=oi">
+        <span class="letter">{{ String.fromCharCode(65+oi) }}</span>{{ o.text }}
+      </div>
+    </div>
+    <div class="row-fn">
+      <button class="btn primary" @click="submitQuiz()" :disabled="!allQuizAnswered">Submit answers</button>
+      <button class="btn" @click="resetQuiz()">Reset</button>
+      <span class="muted" v-if="quizDone" style="font-weight:700">Score: {{ quizScore }} / {{ quizQuestions.length }}
+        ({{ Math.round(quizScore/quizQuestions.length*100) }}%)</span>
+    </div>
+    <div class="verdict" :class="quizDone ? (quizScore===quizQuestions.length?'ok':'info') : 'info'" v-if="quizDone">
+      {{ quizScore===quizQuestions.length ? '🎉 Perfect! All ' + quizQuestions.length + ' correct.' : 'Better luck next time — review the traps section.' }}
+    </div>
+  </section>
+
+  <!-- 13. CHECKLIST -->
+  <section class="panel" v-show="sec==='checklist'" id="checklist">
+    <h2>✅ Study Checklist</h2>
+    <p class="muted" style="margin-bottom:10px">{{ doneCount }} / {{ checklist.length }} complete</p>
+    <div v-for="(c,i) in checklist" :key="i" class="chk-item" :class="{done:c.done}" @click="toggleDone(i)">
+      <span class="chk-box">{{ c.done ? '✓' : '' }}</span>{{ c.t }}
+    </div>
+  </section>
+
+</div>
+
+<script src="../vue.global.prod.js"></script>
+<script>
+(() => {
+  const { createApp, ref, computed, reactive } = Vue;
+  const LS = {
+    theme: 'ccnp.ha.theme', done: 'ccnp.ha.done',
+    quiz: 'ccnp.ha.quiz'
+  };
+  function loadJSON(key, fb) {
+    try { const v = JSON.parse(localStorage.getItem(key)); return (v === null || v === undefined) ? fb : v; }
+    catch (e) { return fb; }
+  }
+  function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+  createApp({
+    setup() {
+      const theme = ref(loadJSON(LS.theme, 'dark'));
+      const sec = ref('intro');
+
+      /* ---------- SECTION NAV ---------- */
+      const sections = [
+        { id: 'intro', label: 'Overview', icon: '🛡️' },
+        { id: 'sso', label: 'SSO', icon: '🔄' },
+        { id: 'nsf', label: 'NSF', icon: '🚚' },
+        { id: 'sup', label: 'Supervisors', icon: '🧠' },
+        { id: 'link', label: 'EtherChannel', icon: '🔗' },
+        { id: 'gw', label: 'Gateway', icon: '🚪' },
+        { id: 'issue', label: 'ISSU', icon: '🔄' },
+        { id: 'stack', label: 'Stack/VSS', icon: '📚' },
+        { id: 'design', label: 'Design', icon: '🏗️' },
+        { id: 'cmds', label: 'Commands', icon: '⌨️' },
+        { id: 'traps', label: 'Traps', icon: '⚠️' },
+        { id: 'quiz', label: 'Quiz', icon: '📝' },
+        { id: 'checklist', label: 'Checklist', icon: '✅' }
+      ];
+
+      /* ---------- SSO vs RPR ---------- */
+      const ssoPick = ref('sso');
+      const ssoVerdict = computed(() => {
+        if (ssoPick.value === 'sso') return { cls: 'info', text: 'SSO — control-plane state synced (bulk + incremental). Switchover = ZERO forwarding loss.' };
+        return { cls: 'info', text: 'RPR — cold standby; no state sync. Switchover = reload + forwarding drop.' };
+      });
+
+      /* ---------- SUPERVISOR MODE ---------- */
+      const supPick = ref('sso');
+      const supVerdict = computed(() => {
+        if (supPick.value === 'rpr') return { cls: 'info', text: 'RPR — NO state on standby; switchover reloads and drops forwarding. Basic HA.' };
+        if (supPick.value === 'rprp') return { cls: 'info', text: 'RPR+ — shares startup config + image, minimal state, faster than RPR. Mid-tier.' };
+        return { cls: 'info', text: 'SSO — full control-plane sync, zero-loss failover. The production choice.' };
+      });
+
+      /* ---------- ETHCHANNEL ---------- */
+      const linkPick = ref('lacp');
+      const linkVerdict = computed(() => {
+        if (linkPick.value === 'lacp') return { cls: 'info', text: 'LACP — IEEE 802.3ad/802.1AX standard, modes active/passive. The open interoperable choice.' };
+        if (linkPick.value === 'pagp') return { cls: 'info', text: 'PAgP — Cisco-proprietary, modes desirable/auto.' };
+        return { cls: 'info', text: 'Static — `mode on`, manual bundling with NO negotiation.' };
+      });
+
+      /* ---------- GATEWAY ---------- */
+      const gwPick = ref('hsrp');
+      const gwVerdict = computed(() => {
+        if (gwPick.value === 'hsrp') return { cls: 'info', text: 'HSRP — Cisco-proprietary, UDP 1985. States Active/Standby; virtual MAC 0000.0c07.acXX. Active-passive.' };
+        if (gwPick.value === 'vrrp') return { cls: 'info', text: 'VRRP — IETF standard, IP protocol 112. States Master/Backup; virtual MAC 0000.5e0001XX. Active-passive.' };
+        return { cls: 'info', text: 'GLBP — active-active LOAD SHARING; AVG (gateway) + AVF (forwarders), unique MAC per AVF.' };
+      });
+
+      /* ---------- ISSU ---------- */
+      const issuePick = ref('switchover');
+      const issueVerdict = computed(() => {
+        const m = {
+          loadnew: 'Stage 1 Loadnew — install the new image on the standby supervisor.',
+          runversion: 'Stage 2 Runversion — standby runs the new image while SSO is maintained.',
+          switchover: 'Stage 3 Switchover — control moves to the standby via SSO (no traffic drop, NSF forwards).',
+          loadold: 'Stage 4 Loadold — load the old image on the now-standby (old active) supervisor.',
+          commit: 'Stage 5 Commit — write the new image and complete the upgrade.'
+        };
+        return { cls: 'info', text: m[issuePick.value] };
+      });
+
+      /* ---------- STACK ---------- */
+      const stackPick = ref('vss');
+      const stackVerdict = computed(() => {
+        if (stackPick.value === 'stackwise') return { cls: 'info', text: 'StackWise — stackable switches (3750/3850) linked by a StackWise cable; active/standby/member; verify with `show switch`.' };
+        return { cls: 'info', text: 'VSS — two 6500/4500 chassis fused over a VSL into one logical switch; active/standby virtual switch; dual-active detection prevents split-brain; `show vss`.' };
+      });
+
+      /* ---------- COMMANDS ---------- */
+      const commands = [
+        {
+          key: 'redund', label: 'Redundancy/SSO',
+          show: "redundancy\n mode sso\n main-cpu\n state processor 1 standby supervisor\n!\nshow redundancy states\nshow redundancy sso\nredundancy force-switchover"
+        },
+        {
+          key: 'nsf', label: 'NSF',
+          show: "redundancy\n mode sso\n!\nrouter ospf 1\n nsf\n!\nrouter bgp 65000\n bgp graceful-restart\nshow ip ospf nsf\nshow bgp neighbors | include Restart\nshow ip cef"
+        },
+        {
+          key: 'chan', label: 'EtherChannel',
+          show: "interface Port-channel1\ninterface GigabitEthernet0/1\n channel-group 1 mode active\ninterface GigabitEthernet0/2\n channel-group 1 mode active\nshow etherchannel summary\nshow etherchannel load-balance"
+        },
+        {
+          key: 'fhrp', label: 'Gateway (FHRP)',
+          show: "interface Vlan10\n standby 1 ip 192.168.1.254\n standby 1 priority 110\n standby 1 preempt\nshow standby brief\nshow vrrp brief\nshow glbp"
+        },
+        {
+          key: 'issue', label: 'ISSU',
+          show: "redundancy\n mode sso\n!\ninstall add file bootflash:image.bin activate\nshow install summary\nshow issu state\nshow redundancy states"
+        },
+        {
+          key: 'stack', label: 'Stack/VSS',
+          show: "! StackWise\nswitch 1 priority 15\nswitch 1 provision ws-c3850-48p\nshow switch\n!\n! VSS\nswitch virtual domain 100\n switch mode virtual\nshow vss\nshow switch virtual role\nshow etherchannel summary"
+        }
+      ];
+      const activeCmd = ref(commands[0].key);
+      const activeCommand = computed(() => commands.find(c => c.key === activeCmd.value));
+
+      /* ---------- TRAPS ---------- */
+      const traps = [
+        'SSO = control-plane STATE sync (bulk + incremental); forwarding unaffected; requires dual supervisors + `mode sso`.',
+        'NSF = forwarding continues while control plane rebuilds; requires SSO; CEF/FIB independent; peers NSF-aware.',
+        'OSPF NSF = `nsf`; BGP = `bgp graceful-restart`; different implementations, same zero-loss goal.',
+        'Redundant-supervisor modes: RPR (no state) &lt; RPR+ (shared config) &lt; SSO (full sync, zero-loss).',
+        'EtherChannel = one logical port-channel over many links; LACP (standard, active/passive) vs PAgP (Cisco, desirable/auto) vs static (mode on).',
+        'EtherChannel members must match speed/duplex; hash keeps a single flow in-order on one member.',
+        'vPC/M-LAG = active-active EtherChannel across two switches.',
+        'HSRP (Cisco, UDP 1985, Active/Standby) / VRRP (IETF, 112, Master/Backup) = active-passive; GLBP = active-active load sharing.',
+        'Virtual MAC: HSRP 0000.0c07.acXX; VRRP 0000.5e0001XX. Election = higher priority, tie → higher IP; preempt to take over.',
+        'ISSU stages: loadnew → runversion → switchover → loadold → commit; requires dual supervisors + SSO + NSF.',
+        'Major image jumps may NOT be ISSU-capable (force a reload); verify with `show issu state`.',
+        'StackWise = stackable 3750/3850 with StackWise cable (`show switch`); VSS = 2×6500/4500 over VSL (`show vss`).',
+        'Both StackWise/VSS = one logical switch; EtherChannel spans members so STP doesn\'t block.',
+        'VSS dual-active detection (VSSP/PAgP/BFD) prevents split-brain (both halves active).',
+        'HA is layered: device + chassis + link + gateway + path; no SPOF on any critical path.',
+        'Redundant ≠ load-shared; EtherChannel beats single links; test failover with `redundancy force-switchover`.'
+      ];
+
+      /* ---------- QUIZ ---------- */
+      const quizRaw = [
+        { q: 'SSO (Stateful Switchover) synchronizes:', opts: [{ text: 'control-plane state between active &amp; standby supervisors' }, { text: 'only the startup config' }, { text: 'MAC addresses in hardware' }, { text: 'nothing on a single supervisor' }], correct: 0 },
+        { q: 'SSO provides ___ forwarding impact during switchover:', opts: [{ text: 'zero' }, { text: 'complete' }, { text: 'a full reload' }, { text: 'only multicast' }], correct: 0 },
+        { q: 'NSF allows a router to:', opts: [{ text: 'continue forwarding while the control plane rebuilds' }, { text: 'drop all traffic during a reboot' }, { text: 'convert to a switch' }, { text: 'encrypt all data' }], correct: 0 },
+        { q: 'Which is the NSF configuration for OSPF?', opts: [{ text: '`nsf` under the OSPF process' }, { text: '`graceful-restart` under BGP only' }, { text: '`snmp-server`' }, { text: '`spanning-tree`' }], correct: 0 },
+        { q: 'Which redundant-supervisor mode has NO state on standby?', opts: [{ text: 'RPR' }, { text: 'SSO' }, { text: 'RPR+' }, { text: 'all sync equally' }], correct: 0 },
+        { q: 'The redundancy mode with FULL control-plane sync is:', opts: [{ text: 'SSO' }, { text: 'RPR' }, { text: 'RPR+' }, { text: 'PAgP' }], correct: 0 },
+        { q: 'LACP is:', opts: [{ text: 'the IEEE standard EtherChannel protocol' }, { text: 'Cisco-proprietary' }, { text: 'a routing protocol' }, { text: 'an encryption method' }], correct: 0 },
+        { q: 'The Cisco-proprietary EtherChannel protocol is:', opts: [{ text: 'PAgP' }, { text: 'LACP' }, { text: 'STP' }, { text: 'VXLAN' }], correct: 0 },
+        { q: 'A static EtherChannel uses which mode?', opts: [{ text: 'mode on (no negotiation)' }, { text: 'mode active' }, { text: 'mode desirable' }, { text: 'mode passive' }], correct: 0 },
+        { q: 'HSRP is ___ while GLBP is ___:', opts: [{ text: 'active-passive / active-active load sharing' }, { text: 'active-active / active-passive' }, { text: 'both load share' }, { text: 'both passive' }], correct: 0 },
+        { q: 'VRRP states are:', opts: [{ text: 'Master / Backup' }, { text: 'Active / Standby' }, { text: 'AVG / AVF' }, { text: 'Root / Non-root' }], correct: 0 },
+        { q: 'In FHRP election, tie-breakers after priority are:', opts: [{ text: 'higher IP wins' }, { text: 'lower IP wins' }, { text: 'hostname' }, { text: 'interface number' }], correct: 0 },
+        { q: 'The correct ISSU stage order is:', opts: [{ text: 'loadnew → runversion → switchover → loadold → commit' }, { text: 'commit → loadnew → switchover → runversion → loadold' }, { text: 'runversion → commit → loadnew → loadold → switchover' }, { text: 'loadold → switchover → commit → runversion → loadnew' }], correct: 0 },
+        { q: 'ISSU is only available on:', opts: [{ text: 'dual-supervisor devices with SSO + NSF' }, { text: 'single-supervisor routers' }, { text: 'any switch regardless of supervisor' }, { text: 'pure Layer 2 only' }], correct: 0 },
+        { q: 'VSS links two chassis over:', opts: [{ text: 'a VSL (Virtual Switch Link)' }, { text: 'a StackWise cable' }, { text: 'an Ethernet cross cable' }, { text: 'a serial adapter' }], correct: 0 },
+        { q: 'StackWise is verified with which command?', opts: [{ text: 'show switch' }, { text: 'show vss' }, { text: 'show standby' }, { text: 'show redundancy' }], correct: 0 },
+        { q: 'VSS prevents split-brain via:', opts: [{ text: 'dual-active detection (VSSP/PAgP/BFD)' }, { text: 'STP root election only' }, { text: 'unused ports' }, { text: 'OSPF area 0' }], correct: 0 },
+        { q: 'The #1 HA design best practice is:', opts: [{ text: 'no single point of failure on any critical path' }, { text: 'always use one large switch' }, { text: 'never bundle links' }, { text: 'skip failover testing' }], correct: 0 }
+      ];
+      const quizQuestions = reactive(quizRaw.map(q => ({ ...q, ans: null })));
+      const quizDone = ref(false);
+      const quizScore = ref(loadJSON(LS.quiz, 0) || 0);
+      const allQuizAnswered = computed(() => quizQuestions.every(q => q.ans !== null));
+      function submitQuiz() {
+        if (!allQuizAnswered.value) return;
+        quizScore.value = quizQuestions.filter((q, i) => q.ans === q.correct).length;
+        quizDone.value = true;
+        save(LS.quiz, quizScore.value);
+      }
+      function resetQuiz() {
+        quizQuestions.forEach(q => q.ans = null);
+        quizDone.value = false;
+        quizScore.value = 0;
+        localStorage.removeItem(LS.quiz);
+      }
+
+      /* ---------- CHECKLIST ---------- */
+      const checklistRoot = loadJSON(LS.done, [
+        { t: 'SSO = control-plane state sync (bulk+incremental), zero forwarding loss, dual supervisors, mode sso', done: false },
+        { t: 'NSF = forwarding continues during rebuild; requires SSO; CEF/FIB independent; OSPF nsf / BGP graceful-restart', done: false },
+        { t: 'Redundant-supervisor modes RPR &lt; RPR+ &lt; SSO (state capability ladder)', done: false },
+        { t: 'EtherChannel LACP (standard) vs PAgP (Cisco) vs static mode on; consistent speed/duplex; hash per flow', done: false },
+        { t: 'vPC/M-LAG = active-active bundle across two switches', done: false },
+        { t: 'FHRP: HSRP (Cisco, Active/Standby) / VRRP (IETF, Master/Backup) active-passive; GLBP load shares; virtual MACs', done: false },
+        { t: 'ISSU = loadnew → runversion → switchover → loadold → commit; needs dual sup + SSO + NSF', done: false },
+        { t: 'StackWise (StackWise cable, show switch) vs VSS (VSL, show vss); one logical switch; dual-active detection', done: false },
+        { t: 'HA layered: device + chassis + link + gateway + path; no SPOF; test with force-switchover', done: false }
+      ]);
+      const checklist = reactive(checklistRoot);
+      const doneCount = computed(() => checklist.filter(c => c.done).length);
+      function saveChecklist() { save(LS.done, checklistRoot); }
+      function toggleDone(i) { checklistRoot[i].done = !checklistRoot[i].done; saveChecklist(); }
+
+      return {
+        theme, sec, sections,
+        ssoPick, ssoVerdict,
+        supPick, supVerdict,
+        linkPick, linkVerdict,
+        gwPick, gwVerdict,
+        issuePick, issueVerdict,
+        stackPick, stackVerdict,
+        commands, activeCmd, activeCommand,
+        traps,
+        quizQuestions, quizDone, quizScore, allQuizAnswered, submitQuiz, resetQuiz,
+        checklist, doneCount, saveChecklist, toggleDone
+      };
+    }
+  }).mount('#app');
+})();
+</script>
+</body>
+</html>

@@ -13,29 +13,30 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Level 09 - Routing Fundamentals/12. Dynamic Routing.md",
-                "mode": "preview",
+                "file": "Notebook/Routing Fundamentals.md",
+                "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "12. Dynamic Routing"
+              "title": "Routing Fundamentals"
             }
           },
           {
-            "id": "d26831fd6dc20016",
+            "id": "238d811bb94942b3",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Level 13 - Route Redistribution/01. OSPF to EIGRP.md",
+                "file": "Notebook/CCNP_ENCOR_Routing_Fundamentals_Final_Notes.md",
                 "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "01. OSPF to EIGRP"
+              "title": "CCNP_ENCOR_Routing_Fundamentals_Final_Notes"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       },
       {
         "id": "00800c293e289829",
@@ -191,7 +192,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Level 09 - Routing Fundamentals/12. Dynamic Routing.md",
+                "file": "Notebook/CCNP_ENCOR_Routing_Fundamentals_Final_Notes.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -232,7 +233,26 @@
   },
   "active": "7d89de05ca9fb5db",
   "lastOpenFiles": [
-    "Level 06 - IPv6/How IPv6 Works.html",
+    "copilot/copilot-conversations/agent__create_a_single_html_file_in_Level_11_EIGRP_that@20260829_231542.md",
+    "Notebook/CCNP_ENCOR_Routing_Fundamentals_Final_Notes.md",
+    "Level 30 - Labs/How Labs Work.html",
+    "Level 29 - Troubleshooting/How Troubleshooting Works.html",
+    "Level 28 - Cisco IOS and IOS XE/How Cisco IOS and IOS XE Works.html",
+    "Level 27 - High Availability/How High Availability Works.html",
+    "Level 26 - Monitoring & Telemetry/How Monitoring & Telemetry Works.html",
+    "Level 25 - Virtualization & Cloud/How Virtualization & Cloud Works.html",
+    "Level 24 - SDN & Automation/How SDN and Automation Works.html",
+    "Level 23 - Enterprise WAN/How Enterprise WAN Works.html",
+    "Level 22 - Wireless/How Wireless Works.html",
+    "Level 21 - QoS/How QoS Works.html",
+    "Notebook/Routing Fundamentals.md",
+    "Notebook/Routing_Fundamentals_Final.md",
+    "Level 09 - Routing Fundamentals/Routing Fundamentals Overview.md",
+    "Level 13 - Route Redistribution/01. OSPF to EIGRP.md",
+    "copilot/copilot-conversations/agent__cleanup_this_note_but_dont_change_note_writing_style_,@20260831_222751.md",
+    "Notebook/Untitled.md",
+    "copilot/copilot-conversations/agent__cleanup_this_note@20260831_222200.md",
+    "Level 09 - Routing Fundamentals/12. Dynamic Routing.md",
     "Level 09 - Routing Fundamentals/11. Route Summarization.md",
     "Level 09 - Routing Fundamentals/10. Default Route.md",
     "Level 09 - Routing Fundamentals/08. Static Routing.md",
@@ -242,31 +262,11 @@
     "Level 09 - Routing Fundamentals/04. Recursive Lookup.md",
     "Level 09 - Routing Fundamentals/03. Metrics.md",
     "Level 09 - Routing Fundamentals/02. Administrative Distance.md",
-    "Level 09 - Routing Fundamentals/Routing Fundamentals Overview.md",
     "Level 11 - EIGRP/01. DUAL.md",
-    "Level 05 - IPv4/How IPv4 Works.html",
-    "Level 04 - Ethernet & Switching/How Ethernet and Switching Work.html",
-    "Level 03 - OSI & TCP IP/How the OSI and TCPIP Models Work.html",
-    "Level 02 - Network Topologies/How Network Topologies Work.html",
-    "Level 01 - Physical Layer/How the Physical Layer Works.html",
-    "Level 00 - Networking Basics/How Networking Works.html",
-    "Level 12 - BGP/How BGP Works.html",
     "Glossary/Forwarding.md",
-    "Level 13 - Route Redistribution/01. OSPF to EIGRP.md",
-    "__pycache__/check_html_vue.cpython-314.pyc",
-    "__pycache__",
-    "Level 13 - Route Redistribution/How Route Redistribution Works.html",
-    "copilot/copilot-conversations/agent__create_a_single_html_file_in_Level_11_EIGRP_that@20260829_231542.md",
     "Glossary/Dynamic Routing.md",
-    "Level 09 - Routing Fundamentals/12. Dynamic Routing.md",
     "Glossary/Git.md",
     "Glossary/Gratuitous ARP.md",
-    "Glossary/Glossary.md",
-    "Glossary/First Hop Redundancy Protocol.md",
-    "Glossary/Network Simulator.md",
-    "Glossary/QoS.md",
-    "Glossary/Troubleshooting.md",
-    "Glossary/IOS XE.md",
-    "Glossary/ROMMON.md"
+    "Glossary/Glossary.md"
   ]
 }

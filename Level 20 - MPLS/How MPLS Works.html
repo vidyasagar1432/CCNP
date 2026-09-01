@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How MPLS Works — Deep Dive</title>
+<style>
+  :root {
+    --bg: #0f172a; --panel: #111c34; --card: #1e293b; --card-2: #16233d;
+    --text: #f8fafc; --muted: #94a3b8;
+    --blue: #38bdf8; --blue-dim: #0c4a6e;
+    --green: #34d399; --green-dim: #064e3b;
+    --amber: #fbbf24; --amber-dim: #78350f;
+    --red: #f87171; --red-dim: #7f1d1d;
+    --violet: #a78bfa; --violet-dim: #4c1d95;
+    --cyan: #22d3ee; --cyan-dim: #164e63;
+    --border: #334155; --hover: #263449; --code-bg: #0b1220;
+  }
+  #app[data-theme="light"] {
+    --bg: #f1f5f9; --panel: #ffffff; --card: #ffffff; --card-2: #f8fafc;
+    --text: #0f172a; --muted: #64748b;
+    --blue: #0284c7; --blue-dim: #bae6fd;
+    --green: #059669; --green-dim: #d1fae5;
+    --amber: #d97706; --amber-dim: #fef3c7;
+    --red: #dc2626; --red-dim: #fee2e2;
+    --violet: #7c3aed; --violet-dim: #ede9fe;
+    --cyan: #0891b2; --cyan-dim: #cffafe;
+    --border: #cbd5e1; --hover: #e2e8f0; --code-bg: #0b1220;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; }
+  #app { max-width: 1040px; margin: 0 auto; padding: 20px 18px 60px; }
+
+  header { position: sticky; top: 0; z-index: 30; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .lv-badge { background: var(--blue-dim); color: var(--blue); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .exam-badge { background: var(--violet-dim); color: var(--violet); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .head-actions { display: flex; align-items: center; gap: 8px; }
+  .btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: background 0.15s; }
+  .btn:hover { background: var(--hover); }
+  .btn.primary { background: var(--blue); color: #0f172a; border-color: var(--blue); }
+
+  nav { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 2px 16px; }
+  nav button.chip { border: 1px solid var(--border); background: var(--card); color: var(--muted); padding: 5px 11px; border-radius: 999px; cursor: pointer; font-size: 0.76rem; font-weight: 600; }
+  nav button.chip.active { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
+
+  section.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
+  section.panel h2 { font-size: 1.2rem; margin-bottom: 6px; }
+  section.panel h3 { font-size: 1rem; margin: 18px 0 10px; color: var(--blue); }
+  section.panel p { margin: 8px 0; }
+  .muted { color: var(--muted); }
+  .lead { color: var(--muted); font-size: 0.95rem; }
+
+  .grid { display: grid; gap: 12px; }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .g3 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .g4 { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .card h4 { font-size: 0.9rem; margin-bottom: 6px; }
+  .card .big { font-size: 1.3rem; font-weight: 700; font-family: 'Fira Code', ui-monospace, monospace; }
+
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85rem; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  tr:hover td { background: var(--hover); }
+
+  code, .mono { font-family: 'Fira Code', ui-monospace, monospace; }
+  .mono { font-size: 0.9rem; }
+  .chip-tag { display: inline-block; border-radius: 999px; padding: 1px 9px; font-size: 0.74rem; font-weight: 700; }
+  .b-blue { background: var(--blue-dim); color: var(--blue); }
+  .b-green { background: var(--green-dim); color: var(--green); }
+  .b-amber { background: var(--amber-dim); color: var(--amber); }
+  .b-red { background: var(--red-dim); color: var(--red); }
+  .b-violet { background: var(--violet-dim); color: var(--violet); }
+  .b-cyan { background: var(--cyan-dim); color: var(--cyan); }
+
+  .callout { border-left: 4px solid var(--amber); background: var(--card-2); border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 12px 0; font-size: 0.9rem; }
+  .callout.green { border-color: var(--green); }
+  .callout.red { border-color: var(--red); }
+  .callout.blue { border-color: var(--blue); }
+  .callout.violet { border-color: var(--violet); }
+
+  .row-fn { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 8px 0; }
+  .row-fn input[type="number"], .row-fn input[type="text"] { background: var(--code-bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-family: 'Fira Code', monospace; font-size: 0.9rem; }
+
+  .opt { display: flex; align-items: center; gap: 8px; padding: 6px 9px; margin: 3px 0; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; background: var(--card); font-size: 0.86rem; }
+  .opt.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .opt .letter { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex: 0 0 auto; }
+  .opt.sel .letter { background: var(--blue); color: #0f172a; }
+
+  #app pre, pre.cmd { background: var(--code-bg); color: #e2e8f0; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.82rem; line-height: 1.5; }
+
+  .trap-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  .trap-item:last-child { border-bottom: none; }
+  .trap-ico { color: var(--red); font-weight: 700; flex: 0 0 auto; }
+
+  .step-flow { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .step { border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 0.8rem; background: var(--card-2); }
+  .step .n { color: var(--blue); font-weight: 700; }
+
+  .verdict { border-radius: 8px; padding: 10px 14px; font-weight: 700; margin: 8px 0; }
+  .verdict.ok { background: var(--green-dim); color: var(--green); }
+  .verdict.bad { background: var(--red-dim); color: var(--red); }
+  .verdict.info { background: var(--blue-dim); color: var(--blue); }
+
+  .chk-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; margin: 5px 0; cursor: pointer; transition: opacity 0.15s; }
+  .chk-item.done { opacity: 0.55; text-decoration: line-through; }
+  .chk-box { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 5px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; }
+  .chk-item.done .chk-box { background: var(--green); border-color: var(--green); color: #0f172a; }
+
+  .proto-cell { border: 1px solid var(--border); border-radius: 10px; padding: 9px 10px; background: var(--card); cursor: pointer; text-align: center; }
+  .proto-cell.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .proto-cell .pn { font-weight: 700; }
+  .proto-cell .pd { font-size: 0.75rem; color: var(--muted); }
+
+  .shim { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; font-family: 'Fira Code', monospace; font-size: 0.78rem; text-align: center; }
+  .shim div { padding: 8px 4px; }
+  .shim .lab { background: var(--blue-dim); color: var(--blue); }
+  .shim .exp { background: var(--green-dim); color: var(--green); }
+  .shim .s { background: var(--amber-dim); color: var(--amber); }
+  .shim .ttl { background: var(--violet-dim); color: var(--violet); }
+</style>
+</head>
+<body>
+<div id="app" :data-theme="theme">
+  <header>
+    <h1><span class="lv-badge">L20</span> How MPLS Works
+      <span class="exam-badge">ENCOR 350-401</span></h1>
+    <div class="head-actions">
+      <a class="btn" href="../Level 19 - Multicast/How Multicast Works.html">◀ Multicast</a>
+      <a class="btn" href="../Level 21 - QoS/How QoS Works.html">QoS ▶</a>
+      <a class="btn" href="../index.html">Flashcards</a>
+      <button class="btn" @click="theme = (theme==='dark'?'light':'dark')">{{ theme==='dark' ? '☀' : '🌙' }}</button>
+    </div>
+  </header>
+
+  <nav>
+    <button class="chip" v-for="s in sections" :key="s.id" :class="{active:sec===s.id}" @click="sec=s.id">{{ s.icon }} {{ s.label }}</button>
+  </nav>
+
+  <!-- 1. OVERVIEW -->
+  <section class="panel" v-show="sec==='intro'" id="intro">
+    <h2>🏷️ MPLS — the whole picture</h2>
+    <p class="lead">Multiprotocol Label Switching forwards using <b>short fixed-length labels</b> instead of IP longest-prefix lookups. Labels sit in a 2.5 shim. Enables <b>traffic engineering (TE)</b>, <b>L3VPN</b>, and <b>pseudowires (L2VPN)</b>.</p>
+
+    <h3>Where the shim sits</h3>
+    <div class="grid g3">
+      <div class="card"><h4>L3</h4><p class="mono muted" style="margin:0">IP</p></div>
+      <div class="card" style="border-color:var(--blue)"><h4>L2.5</h4><p class="mono muted" style="margin:0">MPLS shim (labels)</p></div>
+      <div class="card"><h4>L2</h4><p class="mono muted" style="margin:0">Ethernet / PPP</p></div>
+    </div>
+
+    <h3>The core idea (memorize)</h3>
+    <pre class="cmd">CE -- PE (LER) -- P (LSR) -- P -- PE (LER) -- CE
+        push            swap/swap            pop</pre>
+    <div class="card"><p style="margin:0"><b>Edge routers push/pop</b>; <b>core routers only swap</b>. Forwarding inside the core is <b>label-based</b> — the core stays <b>customer-route-free</b>.</p></div>
+
+    <h3>Domain vocabulary</h3>
+    <table>
+      <tr><th>Term</th><th>Meaning</th></tr>
+      <tr><td>LSP</td><td>label-switched path (the tunnel, ingress→egress LER)</td></tr>
+      <tr><td>LER / PE</td><td>edge — push/pop + VRF + MP-BGP</td></tr>
+      <tr><td>LSR / P</td><td>core — swap only, LFIB-driven</td></tr>
+      <tr><td>FEC</td><td>class of packets sharing a label</td></tr>
+      <tr><td>LFIB</td><td>label forwarding table (in-label → out-label)</td></tr>
+    </table>
+    <div class="callout red"><b>One-liner:</b> MPLS = <b>label switching</b>, edge pushes/pops, core swaps; needs <b>CEF + LDP</b>; basis for <b>L3VPN / L2VPN / TE</b>.</div>
+  </section>
+
+  <!-- 2. BASICS -->
+  <section class="panel" v-show="sec==='basics'" id="basics">
+    <h2>🔤 MPLS Basics &amp; benefits</h2>
+    <p class="lead">Why MPLS exists and what makes the core fast.</p>
+
+    <h3>Problems MPLS answers</h3>
+    <div class="grid g2">
+      <div class="card"><h4>Slow IP lookup</h4><p class="muted" style="margin:0">→ label swap (fast)</p></div>
+      <div class="card"><h4>No traffic engineering</h4><p class="muted" style="margin:0">→ MPLS-TE paths</p></div>
+      <div class="card"><h4>No VPN in core</h4><p class="muted" style="margin:0">→ label-stack VPN</p></div>
+      <div class="card"><h4>No L2 services</h4><p class="muted" style="margin:0">→ pseudowire</p></div>
+    </div>
+
+    <h3>What MPLS brings</h3>
+    <table>
+      <tr><th>Benefit</th><th>Detail</th></tr>
+      <tr><td>Speed</td><td>label forwarding instead of IP lookup</td></tr>
+      <tr><td>Transparency</td><td>core needs <b>no customer routes</b></td></tr>
+      <tr><td>Services</td><td>VPN / TE / pseudowire</td></tr>
+      <tr><td>Scaling</td><td>fewer core routes</td></tr>
+    </table>
+    <pre class="cmd">ip cef
+mpls ip
+interface Gi0/0
+ mpls ip
+show mpls forwarding-table
+show mpls ldp bindings
+show ip cef
+show mpls interfaces
+ping mpls ipv4 10.0.0.2/32
+</pre>
+    <div class="callout red"><b>Trap:</b> MPLS rides on <b>CEF + LDP</b>. The core stays <b>customer-route-free</b> — the key to L3VPN scale.</div>
+  </section>
+
+  <!-- 3. LABELS -->
+  <section class="panel" v-show="sec==='labels'" id="labels">
+    <h2>🏷️ MPLS Labels — the shim header</h2>
+    <p class="lead">A 20-bit label in a <b>32-bit shim</b> between L2 and L3. Each router swaps the top label and forwards.</p>
+
+    <h3>The 32-bit shim (memorize the bit counts)</h3>
+    <div class="shim">
+      <div class="lab" style="width:62.5%">Label · 20 bits</div>
+      <div class="exp" style="width:9.4%">Exp 3</div>
+      <div class="s" style="width:3.1%">S 1</div>
+      <div class="ttl" style="width:25%">TTL 8</div>
+    </div>
+    <table>
+      <tr><th>Field</th><th>Bits</th><th>Meaning</th></tr>
+      <tr><td>Label</td><td>20</td><td>forwarding value</td></tr>
+      <tr><td>Exp</td><td>3</td><td>QoS / class</td></tr>
+      <tr><td>S</td><td>1</td><td>bottom of stack</td></tr>
+      <tr><td>TTL</td><td>8</td><td>hop limit</td></tr>
+    </table>
+
+    <h3>Label value ranges</h3>
+    <table>
+      <tr><th>Value</th><th>Use</th></tr>
+      <tr><td>0</td><td>explicit null (keep QoS/Exp at egress)</td></tr>
+      <tr><td>1</td><td>router alert (control traffic)</td></tr>
+      <tr><td>3</td><td>implicit null (PHP — pop before egress)</td></tr>
+      <tr><td>16 – 1,048,575</td><td>normal labels</td></tr>
+    </table>
+
+    <h3>Label operations</h3>
+    <div class="grid g3">
+      <div class="card"><h4>Push</h4><p class="muted" style="margin:0">ingress LER — add shim</p></div>
+      <div class="card"><h4>Swap</h4><p class="muted" style="margin:0">core LSR — replace top</p></div>
+      <div class="card"><h4>Pop</h4><p class="muted" style="margin:0">penultimate/egress — remove</p></div>
+    </div>
+    <div class="callout green"><b>PHP (penultimate hop popping):</b> the last core hop <b>pops</b> the label (implicit null 3) so the egress does pure IP delivery. Use <b>explicit null 0</b> when the egress still needs to read <b>Exp</b> for QoS.</div>
+
+    <h3>TTL handling mode</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:ttlMode==='pipe'}" @click="ttlMode='pipe'"><div class="pn">Pipe mode</div><div class="pd">TTL NOT decremented — hides the core</div></div>
+      <div class="proto-cell" :class="{sel:ttlMode==='uniform'}" @click="ttlMode='uniform'"><div class="pn">Uniform mode</div><div class="pd">TTL decrements normally</div></div>
+    </div>
+    <div class="verdict" :class="ttlVerdict.cls">{{ ttlVerdict.text }}</div>
+    <div class="callout red"><b>Trap:</b> shim = <b>label 20 + exp 3 + S 1 + TTL 8</b>. <b>S bit marks bottom of stack</b>. VPN = <b>two-label stack</b> (transport + service). PHP pops before egress; explicit null 0 preserves QoS.</div>
+  </section>
+
+  <!-- 4. LER -->
+  <section class="panel" v-show="sec==='ler'" id="ler">
+    <h2>🔶 LER — Label Edge Router (PE)</h2>
+    <p class="lead">Sits at the <b>edge</b>. Does the IP→label transition: <b>push on ingress, pop on egress</b>. Runs full IP routing (IGP + MP-BGP for VPNs).</p>
+
+    <h3>Edge responsibilities</h3>
+    <table>
+      <tr><th>Direction</th><th>Action</th></tr>
+      <tr><td>Ingress</td><td>classify → <b>push</b> label</td></tr>
+      <tr><td>Egress</td><td><b>pop</b> label → deliver IP</td></tr>
+      <tr><td>Core side</td><td>faces MPLS (LSP)</td></tr>
+      <tr><td>CE side</td><td>faces customer</td></tr>
+    </table>
+
+    <h3>Ingress flow</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> receive IP from CE</div>
+      <div class="step"><span class="n">2</span> CEF lookup → FEC</div>
+      <div class="step"><span class="n">3</span> push transport label (+ service label)</div>
+      <div class="step"><span class="n">4</span> forward into core</div>
+    </div>
+
+    <h3>Role selector</h3>
+    <div class="grid g3">
+      <div class="proto-cell" :class="{sel:lerRole==='ingress'}" @click="lerRole='ingress'"><div class="pn">Ingress LER</div><div class="pd">push point</div></div>
+      <div class="proto-cell" :class="{sel:lerRole==='egress'}" @click="lerRole='egress'"><div class="pn">Egress LER</div><div class="pd">pop point</div></div>
+    </div>
+    <div class="verdict" :class="lerVerdict.cls">{{ lerVerdict.text }}</div>
+
+    <h3>LER in a VPN (PE)</h3>
+    <div class="grid g4">
+      <div class="card"><h4>VRF</h4><p class="muted" style="margin:0">per-customer table</p></div>
+      <div class="card"><h4>MP-BGP</h4><p class="muted" style="margin:0">VPNv4 routes</p></div>
+      <div class="card"><h4>LDP</h4><p class="muted" style="margin:0">core label</p></div>
+      <div class="card"><h4>CE-facing</h4><p class="muted" style="margin:0">PE–CE routing</p></div>
+    </div>
+    <pre class="cmd">interface Gi0/0          ! core facing
+ mpls ip
+interface Gi0/1          ! CE facing -> VRF
+ ip vrf forwarding CUST1
+ ip address 10.10.0.1 255.255.255.0
+show ip cef
+show mpls forwarding-table
+show ip vrf
+show ip route vrf CUST1
+</pre>
+    <div class="callout red"><b>Trap:</b> LER = <b>edge (PE)</b>: push ingress, pop egress. Core-facing interfaces get <b>mpls ip</b>; CE interfaces go <b>into VRFs</b>. VPN edge = LER + <b>VRF + MP-BGP</b>.</div>
+  </section>
+
+  <!-- 5. LSR -->
+  <section class="panel" v-show="sec==='lsr'" id="lsr">
+    <h2>⬛ LSR — Label Switch Router (P)</h2>
+    <p class="lead">Lives in the <b>core</b>. Forwards by <b>swapping the top label</b> based on the <b>LFIB</b> — no IP lookup, no customer routes.</p>
+
+    <h3>Forwarding flow</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> receive labeled packet</div>
+      <div class="step"><span class="n">2</span> LFIB lookup (in label)</div>
+      <div class="step"><span class="n">3</span> swap label</div>
+      <div class="step"><span class="n">4</span> forward out interface</div>
+    </div>
+    <div class="callout blue"><b>Only the <u>top label</u> is examined and swapped.</b> The core is routing-free of customer prefixes — the scale win.</div>
+
+    <h3>LDP — label distribution</h3>
+    <div class="grid g2">
+      <div class="card"><h4>Protocol</h4><p class="mono muted" style="margin:0">LDP · UDP/TCP 646</p></div>
+      <div class="card"><h4>Exchange</h4><p class="muted" style="margin:0">label ↔ FEC bindings; triggered by IGP routes → core LSPs</p></div>
+    </div>
+
+    <h3>Role selector</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:lsrPos==='core'}" @click="lsrPos='core'"><div class="pn">Core LSR</div><div class="pd">swap only</div></div>
+      <div class="proto-cell" :class="{sel:lsrPos==='penult'}" @click="lsrPos='penult'"><div class="pn">Penultimate LSR</div><div class="pd">PHP — pops (implicit null)</div></div>
+    </div>
+    <div class="verdict" :class="lsrVerdict.cls">{{ lsrVerdict.text }}</div>
+    <pre class="cmd">mpls ip
+interface Gi0/0
+ mpls ip
+mpls ldp router-id 192.0.2.1
+show mpls forwarding-table
+show mpls ldp bindings
+show mpls ldp neighbor
+show mpls interfaces
+</pre>
+    <div class="callout red"><b>Trap:</b> LSR = <b>core (P)</b>: swaps labels only, uses the <b>LFIB</b> (not the IP RIB). <b>LDP = UDP/TCP 646</b>. Penultimate LSR does <b>PHP</b>.</div>
+  </section>
+
+  <!-- 6. LFIB -->
+  <section class="panel" v-show="sec==='lfib'" id="lfib">
+    <h2>🗂️ LFIB — Label Forwarding Information Base</h2>
+    <p class="lead">The MPLS forwarding table: maps <b>incoming label → swap/pop + outgoing interface</b>. The thing you <span class="mono">show</span> when forwarding breaks.</p>
+
+    <h3>What the LFIB holds</h3>
+    <div class="grid g3">
+      <div class="card"><h4>In label</h4><p class="muted" style="margin:0">what arrives</p></div>
+      <div class="card"><h4>Out label</h4><p class="muted" style="margin:0">what leaves</p></div>
+      <div class="card"><h4>Prefix + OS/interface</h4><p class="muted" style="margin:0">the FEC + next hop</p></div>
+    </div>
+
+    <h3>Example entry</h3>
+    <pre class="cmd">show mpls forwarding-table
+ In Label   Out Label   Prefix    Out Interface   Next Hop
+ 17         32          10.0.0.0  Gi0/1           192.0.2.2
+ 20         Pop         10.0.0.0  Gi0/0           192.0.2.1</pre>
+    <div class="card"><p style="margin:0"><b>Pop</b> entry = PHP toward the egress.</p></div>
+
+    <h3>Operation selector</h3>
+    <div class="grid g4">
+      <div class="proto-cell" :class="{sel:lfibOp==='swap'}" @click="lfibOp='swap'"><div class="pn">Swap</div><div class="pd">core LSR</div></div>
+      <div class="proto-cell" :class="{sel:lfibOp==='pop'}" @click="lfibOp='pop'"><div class="pn">Pop</div><div class="pd">penultimate</div></div>
+      <div class="proto-cell" :class="{sel:lfibOp==='popush'}" @click="lfibOp='popush'"><div class="pn">Pop + push</div><div class="pd">VPN edge</div></div>
+    </div>
+    <div class="verdict" :class="lfibVerdict.cls">{{ lfibVerdict.text }}</div>
+    <div class="callout red"><b>Trap:</b> LFIB = <b>in-label → out-label + interface</b>. Core forward = <b>LFIB only</b>; ingress push = CEF. <b>Pop + push</b> = VPN edge label swap (swap the service label). Missing entry = no FEC / no LDP.</div>
+    <pre class="cmd">show mpls forwarding-table
+show mpls forwarding-table detail
+show mpls forwarding-table vrf CUST1
+show ip cef
+</pre>
+  </section>
+
+  <!-- 7. FEC -->
+  <section class="panel" v-show="sec==='fec'" id="fec">
+    <h2>🎯 FEC — Forwarding Equivalence Class</h2>
+    <p class="lead">A class of packets that <b>share the same forwarding treatment</b> — same next hop, same path, same label. MPLS assigns <b>one label per FEC</b>.</p>
+
+    <h3>What defines a FEC</h3>
+    <div class="grid g4">
+      <div class="card"><h4>Prefix</h4><p class="muted" style="margin:0">e.g. /24 destination</p></div>
+      <div class="card"><h4>Next hop</h4><p class="muted" style="margin:0">same egress</p></div>
+      <div class="card"><h4>QoS</h4><p class="muted" style="margin:0">same class</p></div>
+      <div class="card"><h4>VPN</h4><p class="muted" style="margin:0">same VRF</p></div>
+    </div>
+    <div class="callout blue"><b>Key:</b> packets in one FEC are <b>indistinguishable</b> for forwarding. LDP advertises <b>label ↔ FEC</b> bindings to build LSPs.</div>
+
+    <h3>FEC granularity</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:fecGran==='host'}" @click="fecGran='host'"><div class="pn">Host (/32)</div><div class="pd">fine · more labels · more control/overhead</div></div>
+      <div class="proto-cell" :class="{sel:fecGran==='agg'}" @click="fecGran='agg'"><div class="pn">Aggregate</div><div class="pd">coarse · fewer labels</div></div>
+    </div>
+    <div class="verdict" :class="fecVerdict.cls">{{ fecVerdict.text }}</div>
+
+    <h3>How ingress classifies</h3>
+    <table>
+      <tr><th>Packet</th><th>FEC</th></tr>
+      <tr><td class="mono">to 10.0.0.0/24</td><td>FEC A</td></tr>
+      <tr><td class="mono">to 10.1.0.0/24</td><td>FEC B</td></tr>
+      <tr><td>VPN prefix</td><td>per-VRF FEC</td></tr>
+    </table>
+    <div class="callout red"><b>Trap:</b> <b>one label per FEC</b>. Ingress classifies IP → FEC; the core only sees the label. VPNs create <b>per-VRF FECs</b> (with RD).</div>
+    <pre class="cmd">show mpls ldp bindings
+show mpls forwarding-table
+show ip cef vrf CUST1
+debug mpls ldp
+</pre>
+  </section>
+
+  <!-- 8. VRF -->
+  <section class="panel" v-show="sec==='vrf'" id="vrf">
+    <h2>🧊 VRF — Virtual Routing and Forwarding</h2>
+    <p class="lead">A per-tenant <b>virtual routing table + forwarding instance</b> on a PE. Each VRF has its <b>own RIB, FIB (CEF), interfaces, and routes</b> — customers isolated on shared hardware.</p>
+
+    <h3>What a VRF contains</h3>
+    <div class="grid g3">
+      <div class="card"><h4>RIB</h4><p class="muted" style="margin:0">routes</p></div>
+      <div class="card"><h4>CEF/FIB</h4><p class="muted" style="margin:0">forwarding</p></div>
+      <div class="card"><h4>Interfaces</h4><p class="muted" style="margin:0">CE-facing</p></div>
+    </div>
+    <div class="callout blue"><b>Isolation is at <u>both</u> the control and data plane.</b></div>
+
+    <h3>RD vs RT (memorize)</h3>
+    <div class="grid g2">
+      <div class="card"><h4>RD — Route Distinguisher</h4><p class="muted" style="margin:0">makes prefixes <b>UNIQUE</b> in MP-BGP (identity)</p></div>
+      <div class="card"><h4>RT — Route Target</h4><p class="muted" style="margin:0">import/export <b>MEMBERSHIP</b> policy</p></div>
+    </div>
+
+    <h3>RD format</h3>
+    <div class="grid g2">
+      <div class="card"><h4>ASN:NN</h4><p class="mono muted" style="margin:0">65000:100</p></div>
+      <div class="card"><h4>IP:NN</h4><p class="mono muted" style="margin:0">10.0.0.1:100</p></div>
+    </div>
+
+    <h3>RD vs RT selector</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:vrfRdrt==='rd'}" @click="vrfRdrt='rd'"><div class="pn">RD — uniqueness</div><div class="pd">disambiguates overlapping prefixes</div></div>
+      <div class="proto-cell" :class="{sel:vrfRdrt==='rt'}" @click="vrfRdrt='rt'"><div class="pn">RT — membership</div><div class="pd">who shares the VRF</div></div>
+    </div>
+    <div class="verdict" :class="vrfVerdict.cls">{{ vrfVerdict.text }}</div>
+    <pre class="cmd">ip vrf CUST1
+ rd 65000:100
+ route-target export 65000:100
+ route-target import 65000:100
+interface Gi0/1
+ ip vrf forwarding CUST1
+ ip address 10.10.0.1 255.255.255.0
+router bgp 65000
+ address-family ipv4 vrf CUST1
+show ip vrf
+show ip route vrf CUST1
+ping vrf CUST1 10.10.0.2
+</pre>
+    <div class="callout red"><b>Trap:</b> VRF = <b>per-tenant routing + forwarding</b>. <b>RD = uniqueness; RT = membership</b>. <b>ip vrf forwarding REMOVES the IP</b> — re-apply <b>ip address</b>. Per-VRF BGP = <b>address-family ipv4 vrf</b>. Use <b>ping vrf X</b>.</div>
+  </section>
+
+  <!-- 9. MP-BGP -->
+  <section class="panel" v-show="sec==='mpbgp'" id="mpbgp">
+    <h2>🔁 MP-BGP — Multiprotocol BGP (VPNv4)</h2>
+    <p class="lead">Carries <b>VPN routes</b> between PEs using address families and the <b>RD + RT</b> model. The <b>VPNv4</b> address family is how the control plane builds L3VPNs.</p>
+
+    <h3>Address families</h3>
+    <table>
+      <tr><th>AF</th><th>Carries</th></tr>
+      <tr><td>ipv4 unicast</td><td>normal BGP</td></tr>
+      <tr><td>ipv4 multicast</td><td>multicast NLRI</td></tr>
+      <tr><td><b>vpnv4</b></td><td><b>VRF routes + label</b></td></tr>
+      <tr><td>vpnv6</td><td>IPv6 VPN routes</td></tr>
+    </table>
+
+    <h3>The VPNv4 route</h3>
+    <div class="card"><p style="margin:0"><span class="mono">RD(8B) + IPv4(32B) + Label</span> — <b>RD + prefix</b> = globally unique; label = the VPN FEC; RT = membership.</p></div>
+
+    <h3>RT policy</h3>
+    <div class="grid g3">
+      <div class="card"><h4>export</h4><p class="muted" style="margin:0">tags routes leaving the VRF</p></div>
+      <div class="card"><h4>import</h4><p class="muted" style="margin:0">which routes enter the VRF</p></div>
+      <div class="card"><h4>policy</h4><p class="muted" style="margin:0">controls VPN membership/topology</p></div>
+    </div>
+    <div class="callout blue"><b>RTs ride as <u>extended communities</u></b> and create the VPN topology (full-mesh / extranet / hub-spoke).</div>
+    <pre class="cmd">router bgp 65000
+ neighbor 192.0.2.2 remote-as 65000
+ address-family vpnv4
+  neighbor 192.0.2.2 activate
+  neighbor 192.0.2.2 send-community extended
+ exit-address-family
+show bgp vpnv4 unicast all
+show bgp vpnv4 unicast vrf CUST1
+show bgp vpnv4 all summary
+</pre>
+    <div class="callout red"><b>Trap:</b> MP-BGP = <b>AF + RD/RT</b> model. <b>VPNv4 NLRI = RD(8) + IPv4(32) + label</b>. <b>RD = uniqueness; RT = membership</b>. RTs ride as <b>extended communities</b>. Key check: <b>show bgp vpnv4 unicast vrf X</b>.</div>
+  </section>
+
+  <!-- 10. MPLS VPN -->
+  <section class="panel" v-show="sec==='vpn'" id="vpn">
+    <h2>🔗 MPLS VPN (L3VPN)</h2>
+    <p class="lead">Private, isolated customer connectivity over a shared SP core. Each customer has a <b>VRF on the PE</b>; the core carries traffic in a <b>two-label stack</b>.</p>
+
+    <h3>The roles</h3>
+    <div class="grid g3">
+      <div class="card"><h4>CE</h4><p class="muted" style="margin:0">customer router, PE-facing</p></div>
+      <div class="card"><h4>PE</h4><p class="muted" style="margin:0">provider edge — VRF + MP-BGP</p></div>
+      <div class="card"><h4>P</h4><p class="muted" style="margin:0">provider core — label switch</p></div>
+    </div>
+
+    <h3>The two-label stack (memorize)</h3>
+    <div class="grid g2">
+      <div class="card"><h4>Top label — transport</h4><p class="mono muted" style="margin:0">reaches egress PE (LDP)</p></div>
+      <div class="card"><h4>Inner label — service (VPN)</h4><p class="mono muted" style="margin:0">which VRF/CE at egress</p></div>
+    </div>
+    <div class="callout blue"><b>The core only looks at the <u>top</u> label; the egress PE uses the <u>inner</u> one.</b></div>
+
+    <h3>End-to-end flow</h3>
+    <pre class="cmd">CE1 --(IP)--> PE1: push [service|transport]
+               P  : swap transport label
+               PE2: pop, read service label -> VRF -> CE2</pre>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> CE1 sends IP</div>
+      <div class="step"><span class="n">2</span> PE1 VRF lookup → push labels</div>
+      <div class="step"><span class="n">3</span> P swaps top label</div>
+      <div class="step"><span class="n">4</span> PE2 pop + service label → CE2</div>
+    </div>
+
+    <h3>VPN topology (RT-driven)</h3>
+    <div class="grid g3">
+      <div class="proto-cell" :class="{sel:topo==='full'}" @click="topo='full'"><div class="pn">Full mesh</div><div class="pd">all RTs shared</div></div>
+      <div class="proto-cell" :class="{sel:topo==='hub'}" @click="topo='hub'"><div class="pn">Hub-and-spoke</div><div class="pd">import/export split</div></div>
+      <div class="proto-cell" :class="{sel:topo==='extra'}" @click="topo='extra'"><div class="pn">Extranet</div><div class="pd">selective sharing</div></div>
+    </div>
+    <div class="verdict" :class="topoVerdict.cls">{{ topoVerdict.text }}</div>
+
+    <h3>Control-plane plumbing</h3>
+    <table>
+      <tr><th>Plane</th><th>Protocol</th><th>Result</th></tr>
+      <tr><td>Core</td><td>IGP + LDP</td><td>transport labels</td></tr>
+      <tr><td>VPN</td><td>MP-BGP</td><td>VPNv4 + service label</td></tr>
+      <tr><td>CE–PE</td><td>eBGP/OSPF/EIGRP/static</td><td>customer routes</td></tr>
+    </table>
+    <pre class="cmd">show ip vrf
+show ip route vrf CUST1
+show bgp vpnv4 unicast vrf CUST1
+show mpls forwarding-table
+ping vrf CUST1 10.10.0.2
+traceroute vrf CUST1 10.10.0.2
+</pre>
+    <div class="callout red"><b>Trap:</b> L3VPN = <b>VRF + MP-BGP + two-label stack</b>. PE = edge intelligence; P = label switch only. <b>Top = transport (LDP); inner = service/VPN</b>. RTs define membership. CE–PE = eBGP/OSPF/EIGRP/static.</div>
+  </section>
+
+  <!-- 11. COMMANDS -->
+  <section class="panel" v-show="sec==='cmds'" id="cmds">
+    <h2>⌨️ CLI Commands</h2>
+    <div class="row-fn">
+      <button class="btn" v-for="c in commands" :key="c.key" :class="{primary:activeCmd===c.key}" @click="activeCmd=c.key">{{ c.label }}</button>
+    </div>
+    <pre class="cmd">{{ activeCommand.show }}</pre>
+  </section>
+
+  <!-- 12. TRAPS -->
+  <section class="panel" v-show="sec==='traps'" id="traps">
+    <h2>⚠️ Common Traps</h2>
+    <div v-for="t in traps" :key="t" class="trap-item"><span class="trap-ico">!</span><div>{{ t }}</div></div>
+  </section>
+
+  <!-- 13. QUIZ -->
+  <section class="panel" v-show="sec==='quiz'" id="quiz">
+    <h2>📝 Quiz ({{ quizQuestions.length }})</h2>
+    <div v-for="(q,qi) in quizQuestions" :key="qi" class="card" style="margin:12px 0">
+      <div style="font-weight:700;margin-bottom:8px">{{ qi+1 }}. {{ q.q }}</div>
+      <div v-for="(o,oi) in q.opts" :key="oi"
+           class="opt" :class="{sel:q.ans===oi}"
+           @click="q.ans=oi">
+        <span class="letter">{{ String.fromCharCode(65+oi) }}</span>{{ o.text }}
+      </div>
+    </div>
+    <div class="row-fn">
+      <button class="btn primary" @click="submitQuiz()" :disabled="!allQuizAnswered">Submit answers</button>
+      <button class="btn" @click="resetQuiz()">Reset</button>
+      <span class="muted" v-if="quizDone" style="font-weight:700">Score: {{ quizScore }} / {{ quizQuestions.length }}
+        ({{ Math.round(quizScore/quizQuestions.length*100) }}%)</span>
+    </div>
+    <div class="verdict" :class="quizDone ? (quizScore===quizQuestions.length?'ok':'info') : 'info'" v-if="quizDone">
+      {{ quizScore===quizQuestions.length ? '🎉 Perfect! All ' + quizQuestions.length + ' correct.' : 'Better luck next time — review the traps section.' }}
+    </div>
+  </section>
+
+  <!-- 14. CHECKLIST -->
+  <section class="panel" v-show="sec==='checklist'" id="checklist">
+    <h2>✅ Study Checklist</h2>
+    <p class="muted" style="margin-bottom:10px">{{ doneCount }} / {{ checklist.length }} complete</p>
+    <div v-for="(c,i) in checklist" :key="i" class="chk-item" :class="{done:c.done}" @click="toggleDone(i)">
+      <span class="chk-box">{{ c.done ? '✓' : '' }}</span>{{ c.t }}
+    </div>
+  </section>
+
+</div>
+
+<script src="../vue.global.prod.js"></script>
+<script>
+(() => {
+  const { createApp, ref, computed, reactive } = Vue;
+  const LS = {
+    theme: 'ccnp.mpls.theme', done: 'ccnp.mpls.done',
+    quiz: 'ccnp.mpls.quiz'
+  };
+  function loadJSON(key, fb) {
+    try { const v = JSON.parse(localStorage.getItem(key)); return (v === null || v === undefined) ? fb : v; }
+    catch (e) { return fb; }
+  }
+  function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+  createApp({
+    setup() {
+      const theme = ref(loadJSON(LS.theme, 'dark'));
+      const sec = ref('intro');
+
+      /* ---------- SECTION NAV ---------- */
+      const sections = [
+        { id: 'intro', label: 'Overview', icon: '🏷️' },
+        { id: 'basics', label: 'Basics', icon: '🔤' },
+        { id: 'labels', label: 'Labels', icon: '🏷️' },
+        { id: 'ler', label: 'LER', icon: '🔶' },
+        { id: 'lsr', label: 'LSR', icon: '⬛' },
+        { id: 'lfib', label: 'LFIB', icon: '🗂️' },
+        { id: 'fec', label: 'FEC', icon: '🎯' },
+        { id: 'vrf', label: 'VRF', icon: '🧊' },
+        { id: 'mpbgp', label: 'MP-BGP', icon: '🔁' },
+        { id: 'vpn', label: 'MPLS VPN', icon: '🔗' },
+        { id: 'cmds', label: 'Commands', icon: '⌨️' },
+        { id: 'traps', label: 'Traps', icon: '⚠️' },
+        { id: 'quiz', label: 'Quiz', icon: '📝' },
+        { id: 'checklist', label: 'Checklist', icon: '✅' }
+      ];
+
+      /* ---------- TTL MODE ---------- */
+      const ttlMode = ref('pipe');
+      const ttlVerdict = computed(() => {
+        if (ttlMode.value === 'pipe') return { cls: 'info', text: 'Pipe mode — TTL not decremented in the core (hidden core hops). Used in SP networks.' };
+        return { cls: 'info', text: 'Uniform mode — TTL decrements normally across the MPLS network.' };
+      });
+
+      /* ---------- LER ROLE ---------- */
+      const lerRole = ref('ingress');
+      const lerVerdict = computed(() => {
+        if (lerRole.value === 'ingress') return { cls: 'info', text: 'Ingress LER = the PUSH point: classifies IP into a FEC and pushes the label stack.' };
+        return { cls: 'info', text: 'Egress LER = the POP point: pops labels (after PHP) and delivers IP to the CE / reads the service label for the VRF.' };
+      });
+
+      /* ---------- LSR POSITION ---------- */
+      const lsrPos = ref('core');
+      const lsrVerdict = computed(() => {
+        if (lsrPos.value === 'core') return { cls: 'info', text: 'Core LSR — swaps the top label based on the LFIB; no IP lookup.' };
+        return { cls: 'info', text: 'Penultimate LSR — does PHP: pops the label (implicit null 3) so the egress receives naked IP for delivery.' };
+      });
+
+      /* ---------- LFIB OPERATION ---------- */
+      const lfibOp = ref('swap');
+      const lfibVerdict = computed(() => {
+        if (lfibOp.value === 'swap') return { cls: 'info', text: 'Swap — the core LSR changes the top label; the LFIB holds the in→out mapping.' };
+        if (lfibOp.value === 'pop') return { cls: 'info', text: 'Pop — the penultimate LSR removes the label (PHP), or the egress pops the service label.' };
+        return { cls: 'info', text: 'Pop + push — the VPN edge pattern: pops the transport label and swaps in a new service label.' };
+      });
+
+      /* ---------- FEC GRANULARITY ---------- */
+      const fecGran = ref('host');
+      const fecVerdict = computed(() => {
+        if (fecGran.value === 'host') return { cls: 'info', text: 'Host (/32) granularity — fine control but MORE labels and more overhead.' };
+        return { cls: 'info', text: 'Aggregate granularity — coarser, FEWER labels, less control.' };
+      });
+
+      /* ---------- RD VS RT ---------- */
+      const vrfRdrt = ref('rd');
+      const vrfVerdict = computed(() => {
+        if (vrfRdrt.value === 'rd') return { cls: 'info', text: 'RD (Route Distinguisher) = identity — makes overlapping customer prefixes UNIQUE in MP-BGP.' };
+        return { cls: 'info', text: 'RT (Route Target) = membership policy — controls which routes are imported/exported, creating the VPN topology.' };
+      });
+
+      /* ---------- VPN TOPOLOGY ---------- */
+      const topo = ref('full');
+      const topoVerdict = computed(() => {
+        if (topo.value === 'full') return { cls: 'info', text: 'Full mesh — all RTs shared, any-to-any connectivity.' };
+        if (topo.value === 'hub') return { cls: 'info', text: 'Hub-and-spoke — import/export RTs split so spoke-to-spoke traffic goes through the hub.' };
+        return { cls: 'info', text: 'Extranet — selective RT sharing authorizes specific sites/customers to communicate.' };
+      });
+
+      /* ---------- COMMANDS ---------- */
+      const commands = [
+        {
+          key: 'basics', label: 'Enable MPLS',
+          show: "ip cef                          ! prerequisite\nmpls ip\ninterface Gi0/0\n mpls ip                         ! per core link\n\nshow mpls forwarding-table\nshow mpls ldp bindings\nshow ip cef\nshow mpls interfaces\nping mpls ipv4 10.0.0.2/32"
+        },
+        {
+          key: 'ler', label: 'LER/PE (edge)',
+          show: "interface Gi0/0                  ! core facing\n mpls ip\ninterface Gi0/1                  ! CE facing -> VRF\n ip vrf forwarding CUST1\n ip address 10.10.0.1 255.255.255.0\n\nshow ip cef\nshow mpls forwarding-table\nshow ip vrf\nshow ip route vrf CUST1\nshow mpls ldp neighbor"
+        },
+        {
+          key: 'lsr', label: 'LSR/P (core)',
+          show: "mpls ip\ninterface Gi0/0\n mpls ip\nmpls ldp router-id 192.0.2.1\n\nshow mpls forwarding-table\nshow mpls ldp bindings\nshow mpls ldp neighbor\nshow mpls interfaces\ndebug mpls ldp"
+        },
+        {
+          key: 'lfib', label: 'LFIB',
+          show: "show mpls forwarding-table\nshow mpls forwarding-table detail\nshow mpls forwarding-table vrf CUST1\nshow mpls ip bindings\nshow ip cef\ndebug mpls ldp"
+        },
+        {
+          key: 'fec', label: 'FEC / LDP bindings',
+          show: "show mpls ldp bindings\nshow mpls forwarding-table\nshow ip cef\nshow ip cef vrf CUST1\ndebug mpls ldp"
+        },
+        {
+          key: 'vrf', label: 'VRF',
+          show: "ip vrf CUST1\n rd 65000:100\n route-target export 65000:100\n route-target import 65000:100\ninterface Gi0/1\n ip vrf forwarding CUST1\n ip address 10.10.0.1 255.255.255.0\nrouter bgp 65000\n address-family ipv4 vrf CUST1\n\nshow ip vrf\nshow ip vrf detail\nshow ip route vrf CUST1\nshow ip cef vrf CUST1\nping vrf CUST1 10.10.0.2"
+        },
+        {
+          key: 'mpbgp', label: 'MP-BGP/VPNv4',
+          show: "router bgp 65000\n neighbor 192.0.2.2 remote-as 65000\n address-family vpnv4\n  neighbor 192.0.2.2 activate\n  neighbor 192.0.2.2 send-community extended\n exit-address-family\n\nip vrf CUST1\n rd 65000:100\n route-target export 65000:100\n route-target import 65000:100\n\nshow bgp vpnv4 unicast all\nshow bgp vpnv4 unicast vrf CUST1\nshow bgp vpnv4 all summary"
+        },
+        {
+          key: 'vpn', label: 'MPLS VPN verify',
+          show: "show ip vrf\nshow ip vrf detail\nshow ip route vrf CUST1\nshow bgp vpnv4 unicast vrf CUST1\nshow mpls forwarding-table\nping vrf CUST1 10.10.0.2\ntraceroute vrf CUST1 10.10.0.2"
+        }
+      ];
+      const activeCmd = ref(commands[0].key);
+      const activeCommand = computed(() => commands.find(c => c.key === activeCmd.value));
+
+      /* ---------- TRAPS ---------- */
+      const traps = [
+        'MPLS = label switching, 2.5 shim; edge push/pop, core swap; needs CEF + LDP.',
+        'MPLS shim = label 20 + Exp 3 + S 1 + TTL 8 (32 bits). S marks bottom of stack.',
+        'Label values: implicit null 3 (PHP), explicit null 0 (keep QoS at egress), router alert 1.',
+        'PHP pops the label one hop before the egress; explicit null preserves Exp at egress.',
+        'VPN uses a TWO-label stack: top = transport (LDP), inner = service/VPN.',
+        'Pipe mode hides the core TTL; uniform mode decrements it normally.',
+        'LER (PE) = edge; push on ingress, pop on egress; core interfaces get mpls ip, CE interfaces go into VRFs.',
+        'LSR (P) = core; swaps top label via LFIB only; LDP = UDP/TCP 646; penultimate does PHP.',
+        'LFIB = in-label → out-label + interface; core uses LFIB only, ingress push uses CEF.',
+        'Pop + push = the VPN edge label swap (swap the service label).',
+        'FEC = same forwarding treatment; ONE label per FEC; VPNs create per-VRF FECs (with RD).',
+        'VRF = per-tenant RIB + FIB + interfaces + labels; isolation at both control and data plane.',
+        'RD = uniqueness; RT = membership. ip vrf forwarding REMOVES the IP — re-apply ip address.',
+        'MP-BGP VPNv4 NLRI = RD(8) + IPv4(32) + label; RTs ride as extended communities.',
+        'MPLS VPN: PE = VRF+MP-BGP, P = label switch only; CE–PE = eBGP/OSPF/EIGRP/static.',
+        'RTs define the VPN topology: full-mesh / hub-and-spoke / extranet.'
+      ];
+
+      /* ---------- QUIZ ---------- */
+      const quizRaw = [
+        { q: 'The MPLS shim sits between which layers?', opts: [{ text: 'L2 and L3 (2.5)' }, { text: 'L3 and L4' }, { text: 'L1 and L2' }, { text: 'L4 and L5' }], correct: 0 },
+        { q: 'Which routers push and pop labels?', opts: [{ text: 'LER (edge)' }, { text: 'LSR (core)' }, { text: 'P routers only' }, { text: 'CE only' }], correct: 0 },
+        { q: 'Which routers only SWAP labels?', opts: [{ text: 'LSR (core)' }, { text: 'LER (edge)' }, { text: 'CE' }, { text: 'the RP' }], correct: 0 },
+        { q: 'How many bits is the MPLS label field?', opts: [{ text: '20' }, { text: '32' }, { text: '24' }, { text: '16' }], correct: 0 },
+        { q: 'Which field marks the bottom of the label stack?', opts: [{ text: 'S (1 bit)' }, { text: 'Exp (3 bits)' }, { text: 'TTL (8 bits)' }, { text: 'Label (20 bits)' }], correct: 0 },
+        { q: 'Penultimate Hop Popping (PHP) uses which label value?', opts: [{ text: 'implicit null (3)' }, { text: 'explicit null (0)' }, { text: 'router alert (1)' }, { text: '16' }], correct: 0 },
+        { q: 'Which label preserves QoS (Exp) at the egress?', opts: [{ text: 'explicit null (0)' }, { text: 'implicit null (3)' }, { text: 'router alert (1)' }, { text: 'any label' }], correct: 0 },
+        { q: 'What protocol distributes core MPLS labels, and on what port?', opts: [{ text: 'LDP, UDP/TCP 646' }, { text: 'LDP, UDP 848' }, { text: 'MP-BGP, TCP 179' }, { text: 'OSPF, UDP 520' }], correct: 0 },
+        { q: 'The LFIB maps:', opts: [{ text: 'in-label → out-label + interface' }, { text: 'IP prefix → next hop' }, { text: 'MAC → port' }, { text: 'group → RPF interface' }], correct: 0 },
+        { q: 'A FEC is best described as:', opts: [{ text: 'a class of packets sharing the same forwarding treatment and label' }, { text: 'a single labeled packet' }, { text: 'the label stack itself' }, { text: 'the MPLS shim header' }], correct: 0 },
+        { q: 'In a VPN, the inner (service) label identifies:', opts: [{ text: 'the VPN/VRF at the egress PE' }, { text: 'the transport path' }, { text: 'the CE interface' }, { text: 'the P router' }], correct: 0 },
+        { q: 'RD vs RT: which makes overlapping customer prefixes unique?', opts: [{ text: 'RD' }, { text: 'RT' }, { text: 'the label' }, { text: 'the VPNv4 AF' }], correct: 0 },
+        { q: 'A PE imports only routes whose ______ matches its import list.', opts: [{ text: 'RT (route target)' }, { text: 'RD (route distinguisher)' }, { text: 'label value' }, { text: 'AS path' }], correct: 0 },
+        { q: 'Which address family carries VRF routes + service labels between PEs?', opts: [{ text: 'vpnv4' }, { text: 'ipv4 unicast' }, { text: 'ipv4 multicast' }, { text: 'ipv4 labeled-unicast' }], correct: 0 },
+        { q: 'RTs are carried in BGP as:', opts: [{ text: 'extended communities' }, { text: 'regular communities only' }, { text: 'labels' }, { text: 'AS-path attributes' }], correct: 0 },
+        { q: 'In MPLS L3VPN, which device runs the VRF and MP-BGP?', opts: [{ text: 'PE' }, { text: 'P' }, { text: 'CE' }, { text: 'both P and CE' }], correct: 0 },
+        { q: 'After "ip vrf forwarding CUST1" on an interface, you must:', opts: [{ text: 're-apply the ip address (it was removed)' }, { text: 'reload the router' }, { text: 'configure mpls ip first' }, { text: 'nothing — it keeps the address' }], correct: 0 },
+        { q: 'Pipe mode TTL handling:', opts: [{ text: 'does NOT decrement TTL in the core (hides core hops)' }, { text: 'decrements TTL normally' }, { text: 'disables TTL entirely' }, { text: 'uses BGP TTL security' }], correct: 0 }
+      ];
+      const quizQuestions = reactive(quizRaw.map(q => ({ ...q, ans: null })));
+      const quizDone = ref(false);
+      const quizScore = ref(loadJSON(LS.quiz, 0) || 0);
+      const allQuizAnswered = computed(() => quizQuestions.every(q => q.ans !== null));
+      function submitQuiz() {
+        if (!allQuizAnswered.value) return;
+        quizScore.value = quizQuestions.filter((q, i) => q.ans === q.correct).length;
+        quizDone.value = true;
+        save(LS.quiz, quizScore.value);
+      }
+      function resetQuiz() {
+        quizQuestions.forEach(q => q.ans = null);
+        quizDone.value = false;
+        quizScore.value = 0;
+        localStorage.removeItem(LS.quiz);
+      }
+
+      /* ---------- CHECKLIST ---------- */
+      const checklistRoot = loadJSON(LS.done, [
+        { t: 'MPLS = label switching (2.5 shim); edge push/pop, core swap; needs CEF + LDP', done: false },
+        { t: 'Shim = label 20 + Exp 3 + S 1 + TTL 8; S marks bottom of stack', done: false },
+        { t: 'Label values: implicit null 3 (PHP), explicit null 0 (QoS), router alert 1; normal 16+', done: false },
+        { t: 'PHP pops before egress; explicit null keeps Exp; pipe vs uniform TTL', done: false },
+        { t: 'LER (PE) = edge: push ingress / pop egress; core mpls ip, CE into VRF', done: false },
+        { t: 'LSR (P) = core: swap via LFIB; LDP = UDP/TCP 646; no customer routes', done: false },
+        { t: 'LFIB = in-label → out-label + interface; pop+push = VPN edge swap', done: false },
+        { t: 'FEC = same treatment; one label per FEC; per-VRF FECs with RD', done: false },
+        { t: 'VRF = per-tenant RIB/FIB/interfaces/labels; RD = uniqueness, RT = membership', done: false },
+        { t: 'ip vrf forwarding removes the IP — re-apply ip address; use ping vrf X', done: false },
+        { t: 'MP-BGP VPNv4 = RD(8) + IPv4(32) + label; RTs as extended communities', done: false },
+        { t: 'MPLS VPN: two-label stack (transport LDP top + service inner); 3 routing layers', done: false },
+        { t: 'RTs define topology: full-mesh / hub-and-spoke / extranet', done: false }
+      ]);
+      const checklist = reactive(checklistRoot);
+      const doneCount = computed(() => checklist.filter(c => c.done).length);
+      function saveChecklist() { save(LS.done, checklistRoot); }
+      function toggleDone(i) { checklistRoot[i].done = !checklistRoot[i].done; saveChecklist(); }
+
+      return {
+        theme, sec, sections,
+        ttlMode, ttlVerdict,
+        lerRole, lerVerdict,
+        lsrPos, lsrVerdict,
+        lfibOp, lfibVerdict,
+        fecGran, fecVerdict,
+        vrfRdrt, vrfVerdict,
+        topo, topoVerdict,
+        commands, activeCmd, activeCommand,
+        traps,
+        quizQuestions, quizDone, quizScore, allQuizAnswered, submitQuiz, resetQuiz,
+        checklist, doneCount, saveChecklist, toggleDone
+      };
+    }
+  }).mount('#app');
+})();
+</script>
+</body>
+</html>

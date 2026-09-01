@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Cisco IOS and IOS XE Works — Deep Dive</title>
+<style>
+  :root {
+    --bg: #0f172a; --panel: #111c34; --card: #1e293b; --card-2: #16233d;
+    --text: #f8fafc; --muted: #94a3b8;
+    --blue: #38bdf8; --blue-dim: #0c4a6e;
+    --green: #34d399; --green-dim: #064e3b;
+    --amber: #fbbf24; --amber-dim: #78350f;
+    --red: #f87171; --red-dim: #7f1d1d;
+    --violet: #a78bfa; --violet-dim: #4c1d95;
+    --cyan: #22d3ee; --cyan-dim: #164e63;
+    --border: #334155; --hover: #263449; --code-bg: #0b1220;
+  }
+  #app[data-theme="light"] {
+    --bg: #f1f5f9; --panel: #ffffff; --card: #ffffff; --card-2: #f8fafc;
+    --text: #0f172a; --muted: #64748b;
+    --blue: #0284c7; --blue-dim: #bae6fd;
+    --green: #059669; --green-dim: #d1fae5;
+    --amber: #d97706; --amber-dim: #fef3c7;
+    --red: #dc2626; --red-dim: #fee2e2;
+    --violet: #7c3aed; --violet-dim: #ede9fe;
+    --cyan: #0891b2; --cyan-dim: #cffafe;
+    --border: #cbd5e1; --hover: #e2e8f0; --code-bg: #0b1220;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; }
+  #app { max-width: 1040px; margin: 0 auto; padding: 20px 18px 60px; }
+
+  header { position: sticky; top: 0; z-index: 30; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .lv-badge { background: var(--blue-dim); color: var(--blue); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .exam-badge { background: var(--violet-dim); color: var(--violet); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .head-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: background 0.15s; }
+  .btn:hover { background: var(--hover); }
+  .btn.primary { background: var(--blue); color: #0f172a; border-color: var(--blue); }
+
+  nav { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 2px 16px; }
+  nav button.chip { border: 1px solid var(--border); background: var(--card); color: var(--muted); padding: 5px 11px; border-radius: 999px; cursor: pointer; font-size: 0.76rem; font-weight: 600; }
+  nav button.chip.active { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
+
+  section.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
+  section.panel h2 { font-size: 1.2rem; margin-bottom: 6px; }
+  section.panel h3 { font-size: 1rem; margin: 18px 0 10px; color: var(--blue); }
+  section.panel p { margin: 8px 0; }
+  .muted { color: var(--muted); }
+  .lead { color: var(--muted); font-size: 0.95rem; }
+
+  .grid { display: grid; gap: 12px; }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .g3 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .g4 { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .card h4 { font-size: 0.9rem; margin-bottom: 6px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85rem; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  tr:hover td { background: var(--hover); }
+
+  code, .mono { font-family: 'Fira Code', ui-monospace, monospace; }
+  .mono { font-size: 0.9rem; }
+  .chip-tag { display: inline-block; border-radius: 999px; padding: 1px 9px; font-size: 0.74rem; font-weight: 700; }
+  .b-blue { background: var(--blue-dim); color: var(--blue); }
+  .b-green { background: var(--green-dim); color: var(--green); }
+  .b-amber { background: var(--amber-dim); color: var(--amber); }
+  .b-red { background: var(--red-dim); color: var(--red); }
+  .b-violet { background: var(--violet-dim); color: var(--violet); }
+  .b-cyan { background: var(--cyan-dim); color: var(--cyan); }
+
+  .callout { border-left: 4px solid var(--amber); background: var(--card-2); border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 12px 0; font-size: 0.9rem; }
+  .callout.green { border-color: var(--green); }
+  .callout.red { border-color: var(--red); }
+  .callout.blue { border-color: var(--blue); }
+  .callout.violet { border-color: var(--violet); }
+
+  .row-fn { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 8px 0; }
+
+  .opt { display: flex; align-items: center; gap: 8px; padding: 6px 9px; margin: 3px 0; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; background: var(--card); font-size: 0.86rem; }
+  .opt.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .opt .letter { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex: 0 0 auto; }
+  .opt.sel .letter { background: var(--blue); color: #0f172a; }
+
+  #app pre, pre.cmd { background: var(--code-bg); color: #e2e8f0; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.82rem; line-height: 1.5; }
+
+  .trap-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  .trap-item:last-child { border-bottom: none; }
+  .trap-ico { color: var(--red); font-weight: 700; flex: 0 0 auto; }
+
+  .step-flow { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .step { border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 0.8rem; background: var(--card-2); }
+  .step .n { color: var(--blue); font-weight: 700; }
+
+  .verdict { border-radius: 8px; padding: 10px 14px; font-weight: 700; margin: 8px 0; }
+  .verdict.ok { background: var(--green-dim); color: var(--green); }
+  .verdict.bad { background: var(--red-dim); color: var(--red); }
+  .verdict.info { background: var(--blue-dim); color: var(--blue); }
+
+  .chk-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; margin: 5px 0; cursor: pointer; transition: opacity 0.15s; }
+  .chk-item.done { opacity: 0.55; text-decoration: line-through; }
+  .chk-box { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 5px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; }
+  .chk-item.done .chk-box { background: var(--green); border-color: var(--green); color: #0f172a; }
+
+  .proto-cell { border: 1px solid var(--border); border-radius: 10px; padding: 9px 10px; background: var(--card); cursor: pointer; text-align: center; }
+  .proto-cell.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .proto-cell .pn { font-weight: 700; }
+  .proto-cell .pd { font-size: 0.75rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<div id="app" :data-theme="theme">
+  <header>
+    <h1><span class="lv-badge">L28</span> How Cisco IOS &amp; IOS XE Works
+      <span class="exam-badge">ENCOR 350-401</span></h1>
+    <div class="head-actions">
+      <a class="btn" href="../Level 27 - High Availability/How High Availability Works.html">◀ HA</a>
+      <a class="btn" href="../Level 29 - Troubleshooting/How Troubleshooting Works.html">TShoot ▶</a>
+      <a class="btn" href="../index.html">Flashcards</a>
+      <button class="btn" @click="theme = (theme==='dark'?'light':'dark')">{{ theme==='dark' ? '☀' : '🌙' }}</button>
+    </div>
+  </header>
+
+  <nav>
+    <button class="chip" v-for="s in sections" :key="s.id" :class="{active:sec===s.id}" @click="sec=s.id">{{ s.icon }} {{ s.label }}</button>
+  </nav>
+
+  <!-- 1. OVERVIEW -->
+  <section class="panel" v-show="sec==='intro'" id="intro">
+    <h2>📟 Cisco IOS &amp; IOS XE — the whole picture</h2>
+    <p class="lead">Operate a device: <b>CLI modes</b>, <b>licensing</b>, and <b>file/image management</b> (upgrade, backup, recovery). Then the modern layer: <b>IOS XE = modular daemons on Linux</b>, <b>YANG + RESTCONF/NETCONF</b>, and <b>device hardening</b>.</p>
+
+    <h3>The three blocks</h3>
+    <div class="grid g3">
+      <div class="card"><h4>Operate</h4><span class="chip-tag b-blue">CLI + modes</span><p class="muted" style="margin:0">config modes, privilege 15</p></div>
+      <div class="card"><h4>Manage</h4><span class="chip-tag b-green">lic + files</span><p class="muted" style="margin:0">licensing, upgrade, backup, recovery</p></div>
+      <div class="card"><h4>Modern</h4><span class="chip-tag b-amber">IOS XE</span><p class="muted" style="margin:0">daemons on Linux · YANG/RESTCONF · hardening</p></div>
+    </div>
+    <div class="callout red"><b>IOS XE = monolithic IOS re-architected as modular daemons (IOSd) on a Linux kernel — same CLI, SMU patches, model-driven management, streaming telemetry.</b></div>
+  </section>
+
+  <!-- 2. CLI -->
+  <section class="panel" v-show="sec==='cli'" id="cli">
+    <h2>⌨️ The Command-Line Interface</h2>
+    <p class="lead"><b>EXEC</b> commands (show, ping) run in privileged mode; <b>configure</b> commands (interface, router) run in config mode. Help (`?`), Tab completion, and `do` speed you up.</p>
+
+    <h3>Mode picker</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:cliPick==='exec'}" @click="cliPick='exec'"><div class="pn">EXEC</div><div class="pd">show · ping · copy (privileged #)</div></div>
+      <div class="proto-cell" :class="{sel:cliPick==='config'}" @click="cliPick='config'"><div class="pn">Config</div><div class="pd">interface · router · hostname (config)#</div></div>
+    </div>
+    <div class="verdict" :class="cliVerdict.cls">{{ cliVerdict.text }}</div>
+    <div class="callout blue"><b>`?` gives context help; `?` right after a word (no space) completes it. `do` runs an EXEC command from inside config mode. Ctrl+Z/end exits config. Privilege 15 = enable (full).</b></div>
+    <pre class="cmd">enable
+configure terminal
+interface GigabitEthernet0/1
+ ip address 10.0.0.1 255.255.255.0
+ no shutdown
+end
+do show running-config | include ip address
+terminal length 0
+</pre>
+  </section>
+
+  <!-- 3. CONFIG MODES -->
+  <section class="panel" v-show="sec==='modes'" id="modes">
+    <h2>📚 Configuration Modes</h2>
+    <p class="lead">Hierarchical: <b>global → interface/line/router → submode</b>. The prompt reveals where you are.</p>
+
+    <h3>Mode hierarchy</h3>
+    <div class="grid g4">
+      <div class="card"><h4>Global</h4><p class="muted" style="margin:0">(config)#</p></div>
+      <div class="card"><h4>Interface</h4><p class="muted" style="margin:0">(config-if)#</p></div>
+      <div class="card"><h4>Line</h4><p class="muted" style="margin:0">(config-line)#</p></div>
+      <div class="card"><h4>Router</h4><p class="muted" style="margin:0">(config-router)#</p></div>
+    </div>
+    <div class="callout red"><b>`exit` = up one level; `end`/Ctrl+Z = back to EXEC. Interface commands are interface-scoped. `do` runs EXEC inside config without leaving.</b></div>
+    <pre class="cmd">configure terminal
+ hostname R1
+ interface GigabitEthernet0/1
+  ip address 10.0.0.1 255.255.255.0
+  no shutdown
+  exit
+ line vty 0 4
+  password cisco
+  exit
+ end
+show running-config
+</pre>
+  </section>
+
+  <!-- 4. LICENSING -->
+  <section class="panel" v-show="sec==='lic'" id="lic">
+    <h2>📜 Licensing &amp; Smart Licensing</h2>
+    <p class="lead">Licensing gates features on IOS XE. <b>Classic</b> = EULA/PAK license files; <b>Smart Licensing</b> = central portal (CSSM) + registration token, the modern default.</p>
+
+    <h3>Model picker (classic vs smart)</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:licPick==='classic'}" @click="licPick='classic'"><div class="pn">Classic</div><div class="pd">PAK/license files · local · 60-day eval</div></div>
+      <div class="proto-cell" :class="{sel:licPick==='smart'}" @click="licPick='smart'"><div class="pn">Smart</div><div class="pd">CSSM portal · call-home · SLUP 90-day eval</div></div>
+    </div>
+    <div class="verdict" :class="licVerdict.cls">{{ licVerdict.text }}</div>
+    <div class="callout blue"><b>universalK9 = one image with features gated by license. Tiers: network-essentials &lt; network-advantage. `show license summary` / `show license status` verify.</b></div>
+    <pre class="cmd">show license
+show license summary
+show license feature
+license boot level network-advantage
+reload
+!
+! Smart Licensing
+license smart register idtoken TOKEN
+license smart deregister
+show license status
+show call-home
+</pre>
+  </section>
+
+  <!-- 5. FILE SYSTEMS -->
+  <section class="panel" v-show="sec==='fs'" id="fs">
+    <h2>📁 File Systems</h2>
+    <p class="lead">IOS uses a virtual file system with prefixes: <b>flash:, bootflash:, nvram:, system:</b> and network prefixes (tftp:, ftp:, scp:).</p>
+
+    <h3>Prefix picker</h3>
+    <div class="grid g4">
+      <div class="proto-cell" :class="{sel:fsPick==='flash'}" @click="fsPick='flash'"><div class="pn">flash:</div><div class="pd">image + files</div></div>
+      <div class="proto-cell" :class="{sel:fsPick==='bootflash'}" @click="fsPick='bootflash'"><div class="pn">bootflash:</div><div class="pd">IOS XE image</div></div>
+      <div class="proto-cell" :class="{sel:fsPick==='nvram'}" @click="fsPick='nvram'"><div class="pn">nvram:</div><div class="pd">startup-config</div></div>
+      <div class="proto-cell" :class="{sel:fsPick==='system'}" @click="fsPick='system'"><div class="pn">system:</div><div class="pd">running-config</div></div>
+    </div>
+    <div class="verdict" :class="fsVerdict.cls">{{ fsVerdict.text }}</div>
+    <div class="callout red"><b>`copy running-config startup-config` saves RAM→NVRAM. `show file systems` lists all prefixes. Verify image integrity with `verify /md5`.</b></div>
+    <pre class="cmd">show file systems
+dir bootflash:
+copy running-config startup-config
+copy tftp://10.0.0.5/ios.bin bootflash:
+show flash:
+verify /md5 bootflash:ios.bin
+</pre>
+  </section>
+
+  <!-- 6. UPGRADE -->
+  <section class="panel" v-show="sec==='upgrade'" id="upgrade">
+    <h2>⬆️ Software Upgrade</h2>
+    <p class="lead">Copy the new image to flash, <b>set `boot system flash:`</b>, verify, save, reload, verify version. The image is NOT run in-place — you must point boot at it.</p>
+
+    <h3>The upgrade flow</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> check space</div>
+      <div class="step"><span class="n">2</span> copy image</div>
+      <div class="step"><span class="n">3</span> verify MD5</div>
+      <div class="step"><span class="n">4</span> boot system</div>
+      <div class="step"><span class="n">5</span> save + reload</div>
+      <div class="step"><span class="n">6</span> show version</div>
+    </div>
+    <div class="callout red"><b>`boot system flash:` is REQUIRED — the image won't auto-boot. Keep the old image for rollback. SMU = targeted patch, not a full image.</b></div>
+    <pre class="cmd">copy tftp://10.0.0.5/ios-xe-new.bin bootflash:
+verify /md5 bootflash:ios-xe-new.bin
+boot system bootflash:ios-xe-new.bin
+copy running-config startup-config
+reload
+show version
+show boot
+</pre>
+  </section>
+
+  <!-- 7. BACKUP -->
+  <section class="panel" v-show="sec==='backup'" id="backup">
+    <h2>💾 Configuration Backup</h2>
+    <p class="lead">Copy running/startup config off-box (TFTP/SCP/FTP/USB) or use the <b>archive</b> feature for <b>automatic, versioned snapshots</b>.</p>
+
+    <h3>The archive pattern</h3>
+    <div class="callout blue"><b>`archive` + `path` + `write-memory` + `maximum N` auto-saves versions. `show archive` lists generation. `configure replace file:` applies an archived config.</b></div>
+    <div class="callout red"><b>`copy run start` is NOT off-box backup (NVRAM only) — go off-box for real DR.</b></div>
+    <pre class="cmd">archive
+ path tftp://10.0.0.5/archive
+ write-memory
+ maximum 14
+show archive
+copy running-config tftp://10.0.0.5/r1-run.cfg
+copy tftp://10.0.0.5/r1-run.cfg running-config
+configure replace flash:config.bak
+</pre>
+  </section>
+
+  <!-- 8. RECOVERY -->
+  <section class="panel" v-show="sec==='recover'" id="recover">
+    <h2>🛟 Recovery — passwords &amp; images</h2>
+    <p class="lead">Regain access after lost passwords, corrupt images, or failed boots — via <b>config-register</b> and <b>ROMMON</b>.</p>
+
+    <h3>Config-register picker</h3>
+    <div class="grid g3">
+      <div class="proto-cell" :class="{sel:regPick==='x2102'}" @click="regPick='x2102'"><div class="pn">0x2102</div><div class="pd">normal boot (default)</div></div>
+      <div class="proto-cell" :class="{sel:regPick==='x2142'}" @click="regPick='x2142'"><div class="pn">0x2142</div><div class="pd">ignore startup-config (recovery)</div></div>
+      <div class="proto-cell" :class="{sel:regPick==='x2100'}" @click="regPick='x2100'"><div class="pn">0x2100</div><div class="pd">boot to ROMMON</div></div>
+    </div>
+    <div class="verdict" :class="regVerdict.cls">{{ regVerdict.text }}</div>
+    <div class="callout red"><b>Password recovery: break → confreg 0x2142 → boot → copy start run → change password → restore 0x2102 → save + reload. IOS XE emergency access = `platform console virtual`.</b></div>
+    <pre class="cmd">confreg 0x2142
+boot
+copy startup-config running-config
+enable secret NewPass
+config-register 0x2102
+copy running-config startup-config
+reload
+</pre>
+  </section>
+
+  <!-- 9. IOS XE ARCH -->
+  <section class="panel" v-show="sec==='arch'" id="arch">
+    <h2>🧬 IOS XE Architecture — daemons on Linux</h2>
+    <p class="lead">IOS XE = IOS re-architected as <b>modular daemons on a Linux kernel</b>. A single <b>IOSd daemon</b> runs the classic IOS control plane in a <b>Controller</b> container.</p>
+
+    <h3>Key daemons</h3>
+    <div class="grid g3">
+      <div class="card"><h4>IOSd</h4><p class="muted" style="margin:0">routing/switching control plane</p></div>
+      <div class="card"><h4>fman/FMAN-FP</h4><p class="muted" style="margin:0">features + forwarding</p></div>
+      <div class="card"><h4>hman</h4><p class="muted" style="margin:0">hardware/device mgmt</p></div>
+    </div>
+    <table>
+      <tr><th>Aspect</th><th>Classic IOS</th><th>IOS XE</th></tr>
+      <tr><td>Architecture</td><td>monolithic</td><td>modular daemons on Linux</td></tr>
+      <tr><td>Process isolation</td><td>limited</td><td>strong</td></tr>
+      <tr><td>Patching</td><td>full reload</td><td>SMU without full reload</td></tr>
+      <tr><td>Management</td><td>CLI</td><td>+ RESTCONF/NETCONF, gNMI</td></tr>
+      <tr><td>Telemetry</td><td>—</td><td>streaming</td></tr>
+    </table>
+    <div class="callout red"><b>To the CLI operator nothing looks different — the architecture underneath changed. SMU = Small Maintenance Upgrade (patch, no full reload).</b></div>
+    <pre class="cmd">show version
+show platform
+show platform software ?
+show processes cpu
+show processes memory
+show running-config
+</pre>
+  </section>
+
+  <!-- 10. YANG & RESTCONF -->
+  <section class="panel" v-show="sec==='yang'" id="yang">
+    <h2>🧩 YANG &amp; RESTCONF/NETCONF on IOS XE</h2>
+    <p class="lead"><b>YANG</b> = data-modeling language (structured tree). <b>NETCONF</b> and <b>RESTCONF</b> = the model-driven protocols that read/write it. The native Cisco model mirrors the CLI.</p>
+
+    <h3>Protocol picker (memorize)</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:yangPick==='netconf'}" @click="yangPick='netconf'"><div class="pn">NETCONF</div><div class="pd">SSH 830 · XML · RPC (RFC 6241)</div></div>
+      <div class="proto-cell" :class="{sel:yangPick==='restconf'}" @click="yangPick='restconf'"><div class="pn">RESTCONF</div><div class="pd">HTTPS 443 · JSON/XML · REST (RFC 8040)</div></div>
+    </div>
+    <div class="verdict" :class="yangVerdict.cls">{{ yangVerdict.text }}</div>
+    <div class="callout red"><b>YANG = the blueprint (model); NETCONF/RESTCONF = the delivery trucks (protocols). Enable: `restconf` and `netconf-yang`. Models: Cisco-IOS-XE-native (mirrors CLI) vs OpenConfig (multi-vendor).</b></div>
+    <pre class="cmd">conf t
+ restconf
+ netconf-yang
+ ip http secure-server
+end
+show restconf
+show netconf-yang sessions
+show netconf-yang datastore
+</pre>
+  </section>
+
+  <!-- 11. HARDENING -->
+  <section class="panel" v-show="sec==='harden'" id="harden">
+    <h2>🔒 Device-Level Security Hardening</h2>
+    <p class="lead">Secure the management and control planes: <b>AAA</b>, <b>CoPP</b>, SSH (not Telnet), SNMPv3, least privilege.</p>
+
+    <h3>AAA server picker (the core contrast)</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:aaaPick==='tacacs'}" @click="aaaPick='tacacs'"><div class="pn">TACACS+</div><div class="pd">TCP 49 · separates A/A/A · encrypts all 3</div></div>
+      <div class="proto-cell" :class="{sel:aaaPick==='radius'}" @click="aaaPick='radius'"><div class="pn">RADIUS</div><div class="pd">UDP 1812/1813 · combines · encrypts password only</div></div>
+    </div>
+    <div class="verdict" :class="aaaVerdict.cls">{{ aaaVerdict.text }}</div>
+    <div class="callout red"><b>CoPP rate-limits control-plane traffic (`control-plane` + `service-policy input`); MPP restricts mgmt protocols to mgmt interfaces. `enable secret` is hashed (vs weak `enable password`). SSH not Telnet; SNMPv3.</b></div>
+    <pre class="cmd">aaa new-model
+aaa authentication login default group tacacs+ local
+username admin privilege 15 secret StrongPass
+enable secret HashedSecret
+ip ssh version 2
+line vty 0 4
+ transport input ssh
+ login local
+no ip http server
+snmp-server group MGT v3 priv
+control-plane
+ service-policy input COPP
+show aaa
+show control-plane
+show ip ssh
+</pre>
+  </section>
+
+  <!-- 12. COMMANDS -->
+  <section class="panel" v-show="sec==='cmds'" id="cmds">
+    <h2>⌨️ Commands</h2>
+    <div class="row-fn">
+      <button class="btn" v-for="c in commands" :key="c.key" :class="{primary:activeCmd===c.key}" @click="activeCmd=c.key">{{ c.label }}</button>
+    </div>
+    <pre class="cmd">{{ activeCommand.show }}</pre>
+  </section>
+
+  <!-- 13. TRAPS -->
+  <section class="panel" v-show="sec==='traps'" id="traps">
+    <h2>⚠️ Common Traps</h2>
+    <div v-for="t in traps" :key="t" class="trap-item"><span class="trap-ico">!</span><div>{{ t }}</div></div>
+  </section>
+
+  <!-- 14. QUIZ -->
+  <section class="panel" v-show="sec==='quiz'" id="quiz">
+    <h2>📝 Quiz ({{ quizQuestions.length }})</h2>
+    <div v-for="(q,qi) in quizQuestions" :key="qi" class="card" style="margin:12px 0">
+      <div style="font-weight:700;margin-bottom:8px">{{ qi+1 }}. {{ q.q }}</div>
+      <div v-for="(o,oi) in q.opts" :key="oi"
+           class="opt" :class="{sel:q.ans===oi}"
+           @click="q.ans=oi">
+        <span class="letter">{{ String.fromCharCode(65+oi) }}</span>{{ o.text }}
+      </div>
+    </div>
+    <div class="row-fn">
+      <button class="btn primary" @click="submitQuiz()" :disabled="!allQuizAnswered">Submit answers</button>
+      <button class="btn" @click="resetQuiz()">Reset</button>
+      <span class="muted" v-if="quizDone" style="font-weight:700">Score: {{ quizScore }} / {{ quizQuestions.length }}
+        ({{ Math.round(quizScore/quizQuestions.length*100) }}%)</span>
+    </div>
+    <div class="verdict" :class="quizDone ? (quizScore===quizQuestions.length?'ok':'info') : 'info'" v-if="quizDone">
+      {{ quizScore===quizQuestions.length ? '🎉 Perfect! All ' + quizQuestions.length + ' correct.' : 'Better luck next time — review the traps section.' }}
+    </div>
+  </section>
+
+  <!-- 15. CHECKLIST -->
+  <section class="panel" v-show="sec==='checklist'" id="checklist">
+    <h2>✅ Study Checklist</h2>
+    <p class="muted" style="margin-bottom:10px">{{ doneCount }} / {{ checklist.length }} complete</p>
+    <div v-for="(c,i) in checklist" :key="i" class="chk-item" :class="{done:c.done}" @click="toggleDone(i)">
+      <span class="chk-box">{{ c.done ? '✓' : '' }}</span>{{ c.t }}
+    </div>
+  </section>
+
+</div>
+
+<script src="../vue.global.prod.js"></script>
+<script>
+(() => {
+  const { createApp, ref, computed, reactive } = Vue;
+  const LS = {
+    theme: 'ccnp.ios.theme', done: 'ccnp.ios.done',
+    quiz: 'ccnp.ios.quiz'
+  };
+  function loadJSON(key, fb) {
+    try { const v = JSON.parse(localStorage.getItem(key)); return (v === null || v === undefined) ? fb : v; }
+    catch (e) { return fb; }
+  }
+  function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+  createApp({
+    setup() {
+      const theme = ref(loadJSON(LS.theme, 'dark'));
+      const sec = ref('intro');
+
+      /* ---------- SECTION NAV ---------- */
+      const sections = [
+        { id: 'intro', label: 'Overview', icon: '📟' },
+        { id: 'cli', label: 'CLI', icon: '⌨️' },
+        { id: 'modes', label: 'Modes', icon: '📚' },
+        { id: 'lic', label: 'Licensing', icon: '📜' },
+        { id: 'fs', label: 'File Systems', icon: '📁' },
+        { id: 'upgrade', label: 'Upgrade', icon: '⬆️' },
+        { id: 'backup', label: 'Backup', icon: '💾' },
+        { id: 'recover', label: 'Recovery', icon: '🛟' },
+        { id: 'arch', label: 'IOS XE Arch', icon: '🧬' },
+        { id: 'yang', label: 'YANG/RESTCONF', icon: '🧩' },
+        { id: 'harden', label: 'Hardening', icon: '🔒' },
+        { id: 'cmds', label: 'Commands', icon: '⌨️' },
+        { id: 'traps', label: 'Traps', icon: '⚠️' },
+        { id: 'quiz', label: 'Quiz', icon: '📝' },
+        { id: 'checklist', label: 'Checklist', icon: '✅' }
+      ];
+
+      /* ---------- CLI -------- */
+      const cliPick = ref('exec');
+      const cliVerdict = computed(() => {
+        if (cliPick.value === 'exec') return { cls: 'info', text: 'EXEC mode — runs show/ping/copy in privileged (#) mode. Command class for verification.' };
+        return { cls: 'info', text: 'Config mode — runs interface/router/hostname in (config)#. Command class for changes.' };
+      });
+
+      /* ---------- LICENSING ---------- */
+      const licPick = ref('smart');
+      const licVerdict = computed(() => {
+        if (licPick.value === 'classic') return { cls: 'info', text: 'Classic — PAK/license files, local entitlement, ~60-day eval, perpetual. Legacy.' };
+        return { cls: 'info', text: 'Smart Licensing — CSSM portal + registration token, call-home/HTTPS transport, SLUP ~90-day eval. The modern default.' };
+      });
+
+      /* ---------- FILE SYSTEM ---------- */
+      const fsPick = ref('nvram');
+      const fsVerdict = computed(() => {
+        const m = {
+          flash: 'flash: — holds the IOS image + files (large non-volatile storage).',
+          bootflash: 'bootflash: — holds the IOS XE image (boot flash).',
+          nvram: 'nvram: — holds the STARTUP-config (small, non-volatile).',
+          system: 'system: — holds the RUNNING-config (in RAM).'
+        };
+        return { cls: 'info', text: m[fsPick.value] };
+      });
+
+      /* ---------- CONFIG REGISTER ---------- */
+      const regPick = ref('x2102');
+      const regVerdict = computed(() => {
+        if (regPick.value === 'x2102') return { cls: 'info', text: '0x2102 — normal boot, loads startup-config. The default register.' };
+        if (regPick.value === 'x2142') return { cls: 'info', text: '0x2142 — IGNORES the startup-config. Used for password recovery.' };
+        return { cls: 'info', text: '0x2100 — boots straight to ROMMON (ROM monitor) for image recovery.' };
+      });
+
+      /* ---------- YANG ---------- */
+      const yangPick = ref('restconf');
+      const yangVerdict = computed(() => {
+        if (yangPick.value === 'restconf') return { cls: 'info', text: 'RESTCONF — HTTPS 443, JSON/XML, REST verbs (GET/PUT/POST/PATCH/DELETE). RFC 8040. Simpler, web-friendly.' };
+        return { cls: 'info', text: 'NETCONF — SSH 830, XML, RPC operations (get/edit-config). RFC 6241. Richer, supports notifications.' };
+      });
+
+      /* ---------- AAA ---------- */
+      const aaaPick = ref('tacacs');
+      const aaaVerdict = computed(() => {
+        if (aaaPick.value === 'tacacs') return { cls: 'info', text: 'TACACS+ — TCP 49, SEPARATES Authentication/Authorization/Accounting, encrypts ALL three. Cisco-preferred.' };
+        return { cls: 'info', text: 'RADIUS — UDP 1812/1813, combines auth + accounting, encrypts only the password. Standard for NAS.' };
+      });
+
+      /* ---------- COMMANDS ---------- */
+      const commands = [
+        {
+          key: 'cli', label: 'CLI/Modes',
+          show: "enable\nconfigure terminal\ninterface GigabitEthernet0/1\n ip address 10.0.0.1 255.255.255.0\n no shutdown\nend\ndo show running-config | include ip address\nterminal length 0"
+        },
+        {
+          key: 'lic', label: 'Licensing',
+          show: "show license\nshow license summary\nshow license feature\nlicense boot level network-advantage\nreload\n!\n! Smart Licensing\nlicense smart register idtoken TOKEN\nlicense smart deregister\nshow license status\nshow call-home"
+        },
+        {
+          key: 'fs', label: 'File Systems',
+          show: "show file systems\ndir bootflash:\ncopy running-config startup-config\ncopy tftp://10.0.0.5/ios.bin bootflash:\nshow flash:\nverify /md5 bootflash:ios.bin"
+        },
+        {
+          key: 'upg', label: 'Upgrade',
+          show: "copy tftp://10.0.0.5/ios-xe-new.bin bootflash:\nverify /md5 bootflash:ios-xe-new.bin\nboot system bootflash:ios-xe-new.bin\ncopy running-config startup-config\nreload\nshow version\nshow boot"
+        },
+        {
+          key: 'bak', label: 'Backup',
+          show: "archive\n path tftp://10.0.0.5/archive\n write-memory\n maximum 14\nshow archive\ncopy running-config tftp://10.0.0.5/r1-run.cfg\ncopy tftp://10.0.0.5/r1-run.cfg running-config"
+        },
+        {
+          key: 'rec', label: 'Recovery',
+          show: "confreg 0x2142\nboot\ncopy startup-config running-config\nenable secret NewPass\nconfig-register 0x2102\ncopy running-config startup-config\nreload"
+        },
+        {
+          key: 'yang', label: 'YANG/RESTCONF',
+          show: "conf t\n restconf\n netconf-yang\n ip http secure-server\nend\nshow restconf\nshow netconf-yang sessions\nshow netconf-yang datastore"
+        },
+        {
+          key: 'harden', label: 'Hardening',
+          show: "aaa new-model\naaa authentication login default group tacacs+ local\nusername admin privilege 15 secret StrongPass\nenable secret HashedSecret\nip ssh version 2\nline vty 0 4\n transport input ssh\n login local\nno ip http server\ncontrol-plane\n service-policy input COPP\nshow aaa\nshow control-plane\nshow ip ssh"
+        }
+      ];
+      const activeCmd = ref(commands[0].key);
+      const activeCommand = computed(() => commands.find(c => c.key === activeCmd.value));
+
+      /* ---------- TRAPS ---------- */
+      const traps = [
+        'EXEC mode = show/ping/copy (privileged #); Config mode = interface/router/hostname. Read the prompt.',
+        '`?` = context help; `?` right after a word (no space) = completion. `do` runs EXEC inside config.',
+        '`exit` = up one level; `end`/Ctrl+Z = back to EXEC. Privilege 15 = enable (full).',
+        'universalK9 = one image, features gated by license; 60-day eval (classic) / 90-day SLUP (smart).',
+        '`show license summary` = classic verify; `show license status` = Smart Licensing/registration.',
+        'Smart Licensing = CSSM portal + `license smart register idtoken`; transport = call-home/HTTPS.',
+        'running-config = system: (RAM); startup-config = nvram: (NVRAM). `copy run start` saves to NVRAM only.',
+        '`boot system flash:` is required on upgrade — image won\'t auto-boot; verify with `verify /md5`.',
+        'Configuration archive = `archive` + `path` + `write-memory` + `maximum`; `show archive` lists versions; `configure replace` applies.',
+        'Config register: 0x2102 normal, 0x2142 ignore config (recovery), 0x2100 ROMMON. Restore 0x2102 before reload.',
+        'Password recovery: break → 0x2142 → boot → copy start run → change password → restore 0x2102 → save.',
+        'IOS XE = modular daemons on Linux kernel; IOSd = classic IOS control plane; SMU = patch without full reload.',
+        'YANG = the data MODEL (tree); NETCONF/RESTCONF = the protocols. NETCONF SSH 830/XML/RPC; RESTCONF HTTPS 443/JSON/REST.',
+        'Enable: `restconf` + `netconf-yang`. Native model Cisco-IOS-XE-native mirrors the CLI; OpenConfig is multi-vendor.',
+        'TACACS+ separates A/A/A & encrypts all (TCP 49); RADIUS combines & encrypts password only (UDP 1812/1813).',
+        'CoPP protects the control plane; MPP protects the management plane; use SSH not Telnet; `enable secret` is hashed.',
+        'Use SNMPv3 (authenticated/encrypted), least privilege with privilege levels/roles, `no ip http server`.'
+      ];
+
+      /* ---------- QUIZ ---------- */
+      const quizRaw = [
+        { q: 'The `show` command runs in which mode?', opts: [{ text: 'EXEC (privileged)' }, { text: 'interface config' }, { text: 'router config' }, { text: 'line config' }], correct: 0 },
+        { q: 'Which command runs an EXEC command from inside config mode?', opts: [{ text: 'do' }, { text: 'run' }, { text: 'goto' }, { text: 'switch' }], correct: 0 },
+        { q: 'Which command exits config mode all the way back to EXEC?', opts: [{ text: 'end (or Ctrl+Z)' }, { text: 'exit once' }, { text: 'back' }, { text: 'quit once' }], correct: 0 },
+        { q: 'Privilege level 15 represents:', opts: [{ text: 'enable (full) access' }, { text: 'user mode' }, { text: 'no access' }, { text: 'line mode' }], correct: 0 },
+        { q: 'The universalK9 image means:', opts: [{ text: 'one image with features gated by license' }, { text: 'a separate image per feature' }, { text: 'no licensing required' }, { text: 'a hardware-only device' }], correct: 0 },
+        { q: 'Smart Licensing registers devices to:', opts: [{ text: 'CSSM via a registration token' }, { text: 'a local PAK file' }, { text: 'the DNS root' }, { text: 'an SNMP manager' }], correct: 0 },
+        { q: 'The running-config lives in:', opts: [{ text: 'system: (RAM)' }, { text: 'nvram:' }, { text: 'bootflash:' }, { text: 'tftp:' }], correct: 0 },
+        { q: 'The startup-config lives in:', opts: [{ text: 'nvram:' }, { text: 'system:' }, { text: 'flash:' }, { text: 'disk0:' }], correct: 0 },
+        { q: 'On an upgrade you MUST:', opts: [{ text: 'set `boot system flash:` to the new image' }, { text: 'do nothing else' }, { text: 'delete the old image first' }, { text: 'disable SNMP' }], correct: 0 },
+        { q: 'Verify image integrity before install with:', opts: [{ text: 'verify /md5' }, { text: 'show running-config' }, { text: 'ping' }, { text: 'traceroute' }], correct: 0 },
+        { q: 'The `archive` feature provides:', opts: [{ text: 'automatic, versioned config snapshots' }, { text: 'a firewall' }, { text: 'routing updates' }, { text: 'encrypted syslog' }], correct: 0 },
+        { q: 'Which config-register IGNORES the startup-config for recovery?', opts: [{ text: '0x2142' }, { text: '0x2102' }, { text: '0x2100' }, { text: '0x2202' }], correct: 0 },
+        { q: 'Boot to ROMMON uses which register?', opts: [{ text: '0x2100' }, { text: '0x2102' }, { text: '0x2142' }, { text: '0x0000' }], correct: 0 },
+        { q: 'In IOS XE, the classic IOS control plane runs in the ___ daemon:', opts: [{ text: 'IOSd' }, { text: 'fman' }, { text: 'hma' }, { text: 'syslogd' }], correct: 0 },
+        { q: 'An SMU in IOS XE is:', opts: [{ text: 'a patch applied without a full reload' }, { text: 'a complete new kernel' }, { text: 'a hardware replacement' }, { text: 'a licensing file' }], correct: 0 },
+        { q: 'NETCONF runs over ___ with ___:', opts: [{ text: 'SSH 830 / XML RPC' }, { text: 'HTTPS 443 / JSON REST' }, { text: 'UDP 161 / MIB' }, { text: 'TCP 22 / plaintext' }], correct: 0 },
+        { q: 'RESTCONF runs over ___ with ___:', opts: [{ text: 'HTTPS 443 / JSON REST verbs' }, { text: 'SSH 830 / XML RPC' }, { text: 'UDP 514 / syslog' }, { text: 'GRE / unicast' }], correct: 0 },
+        { q: 'The AAA protocol that SEPARATES auth/authorization/accounting and encrypts all three is:', opts: [{ text: 'TACACS+' }, { text: 'RADIUS' }, { text: 'LDAP' }, { text: 'Kerberos' }], correct: 0 }
+      ];
+      const quizQuestions = reactive(quizRaw.map(q => ({ ...q, ans: null })));
+      const quizDone = ref(false);
+      const quizScore = ref(loadJSON(LS.quiz, 0) || 0);
+      const allQuizAnswered = computed(() => quizQuestions.every(q => q.ans !== null));
+      function submitQuiz() {
+        if (!allQuizAnswered.value) return;
+        quizScore.value = quizQuestions.filter((q, i) => q.ans === q.correct).length;
+        quizDone.value = true;
+        save(LS.quiz, quizScore.value);
+      }
+      function resetQuiz() {
+        quizQuestions.forEach(q => q.ans = null);
+        quizDone.value = false;
+        quizScore.value = 0;
+        localStorage.removeItem(LS.quiz);
+      }
+
+      /* ---------- CHECKLIST ---------- */
+      const checklistRoot = loadJSON(LS.done, [
+        { t: 'CLI: EXEC vs config modes; help (?), Tab, `do`; end/Ctrl+Z; privilege 15', done: false },
+        { t: 'Config modes hierarchy: global → interface/line/router; prompts reveal the mode', done: false },
+        { t: 'Licensing: universalK9 one image, 60d eval, ipbase&lt;advantage; Smart Licensing CSSM + token, SLUP 90d', done: false },
+        { t: 'File systems: flash/bootflash/nvram(startup)/system(running); copy run start; verify /md5', done: false },
+        { t: 'Upgrade: copy → verify /md5 → boot system flash: → save → reload → show version', done: false },
+        { t: 'Backup: archive + path + write-memory + maximum; show archive; configure replace; off-box DR', done: false },
+        { t: 'Recovery: config-register 0x2102/0x2142/0x2100; ROMMON; emergency access platform console virtual', done: false },
+        { t: 'IOS XE = modular daemons on Linux; IOSd control plane; SMU patches without full reload', done: false },
+        { t: 'YANG = model; NETCONF SSH830/XML/RPC vs RESTCONF HTTPS443/JSON/REST; enable restconf + netconf-yang', done: false },
+        { t: 'Hardening: TACACS+ vs RADIUS; CoPP; MPP; SSH not Telnet; enable secret; SNMPv3; least privilege', done: false }
+      ]);
+      const checklist = reactive(checklistRoot);
+      const doneCount = computed(() => checklist.filter(c => c.done).length);
+      function saveChecklist() { save(LS.done, checklistRoot); }
+      function toggleDone(i) { checklistRoot[i].done = !checklistRoot[i].done; saveChecklist(); }
+
+      return {
+        theme, sec, sections,
+        cliPick, cliVerdict,
+        licPick, licVerdict,
+        fsPick, fsVerdict,
+        regPick, regVerdict,
+        yangPick, yangVerdict,
+        aaaPick, aaaVerdict,
+        commands, activeCmd, activeCommand,
+        traps,
+        quizQuestions, quizDone, quizScore, allQuizAnswered, submitQuiz, resetQuiz,
+        checklist, doneCount, saveChecklist, toggleDone
+      };
+    }
+  }).mount('#app');
+})();
+</script>
+</body>
+</html>

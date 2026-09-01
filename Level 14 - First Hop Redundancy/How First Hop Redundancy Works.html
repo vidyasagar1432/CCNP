@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How First Hop Redundancy Works — Deep Dive</title>
+<style>
+  :root {
+    --bg: #0f172a; --panel: #111c34; --card: #1e293b; --card-2: #16233d;
+    --text: #f8fafc; --muted: #94a3b8;
+    --blue: #38bdf8; --blue-dim: #0c4a6e;
+    --green: #34d399; --green-dim: #064e3b;
+    --amber: #fbbf24; --amber-dim: #78350f;
+    --red: #f87171; --red-dim: #7f1d1d;
+    --violet: #a78bfa; --violet-dim: #4c1d95;
+    --cyan: #22d3ee; --cyan-dim: #164e63;
+    --border: #334155; --hover: #263449; --code-bg: #0b1220;
+  }
+  #app[data-theme="light"] {
+    --bg: #f1f5f9; --panel: #ffffff; --card: #ffffff; --card-2: #f8fafc;
+    --text: #0f172a; --muted: #64748b;
+    --blue: #0284c7; --blue-dim: #bae6fd;
+    --green: #059669; --green-dim: #d1fae5;
+    --amber: #d97706; --amber-dim: #fef3c7;
+    --red: #dc2626; --red-dim: #fee2e2;
+    --violet: #7c3aed; --violet-dim: #ede9fe;
+    --cyan: #0891b2; --cyan-dim: #cffafe;
+    --border: #cbd5e1; --hover: #e2e8f0; --code-bg: #0b1220;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; }
+  #app { max-width: 1040px; margin: 0 auto; padding: 20px 18px 60px; }
+
+  header { position: sticky; top: 0; z-index: 30; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .lv-badge { background: var(--blue-dim); color: var(--blue); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .exam-badge { background: var(--violet-dim); color: var(--violet); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .head-actions { display: flex; align-items: center; gap: 8px; }
+  .btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: background 0.15s; }
+  .btn:hover { background: var(--hover); }
+  .btn.primary { background: var(--blue); color: #0f172a; border-color: var(--blue); }
+
+  nav { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 2px 16px; }
+  nav button.chip { border: 1px solid var(--border); background: var(--card); color: var(--muted); padding: 5px 11px; border-radius: 999px; cursor: pointer; font-size: 0.76rem; font-weight: 600; }
+  nav button.chip.active { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
+
+  section.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
+  section.panel h2 { font-size: 1.2rem; margin-bottom: 6px; }
+  section.panel h3 { font-size: 1rem; margin: 18px 0 10px; color: var(--blue); }
+  section.panel p { margin: 8px 0; }
+  .muted { color: var(--muted); }
+  .lead { color: var(--muted); font-size: 0.95rem; }
+
+  .grid { display: grid; gap: 12px; }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .g3 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .g4 { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .card h4 { font-size: 0.9rem; margin-bottom: 6px; }
+  .card .big { font-size: 1.3rem; font-weight: 700; font-family: 'Fira Code', ui-monospace, monospace; }
+
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85rem; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  tr:hover td { background: var(--hover); }
+
+  code, .mono { font-family: 'Fira Code', ui-monospace, monospace; }
+  .mono { font-size: 0.9rem; }
+  .chip-tag { display: inline-block; border-radius: 999px; padding: 1px 9px; font-size: 0.74rem; font-weight: 700; }
+  .b-blue { background: var(--blue-dim); color: var(--blue); }
+  .b-green { background: var(--green-dim); color: var(--green); }
+  .b-amber { background: var(--amber-dim); color: var(--amber); }
+  .b-red { background: var(--red-dim); color: var(--red); }
+  .b-violet { background: var(--violet-dim); color: var(--violet); }
+  .b-cyan { background: var(--cyan-dim); color: var(--cyan); }
+
+  .callout { border-left: 4px solid var(--amber); background: var(--card-2); border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 12px 0; font-size: 0.9rem; }
+  .callout.green { border-color: var(--green); }
+  .callout.red { border-color: var(--red); }
+  .callout.blue { border-color: var(--blue); }
+  .callout.violet { border-color: var(--violet); }
+
+  .row-fn { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 8px 0; }
+  .row-fn input[type="number"], .row-fn input[type="text"] { background: var(--code-bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-family: 'Fira Code', monospace; font-size: 0.9rem; }
+
+  .opt { display: flex; align-items: center; gap: 8px; padding: 6px 9px; margin: 3px 0; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; background: var(--card); font-size: 0.86rem; }
+  .opt.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .opt .letter { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex: 0 0 auto; }
+  .opt.sel .letter { background: var(--blue); color: #0f172a; }
+
+  #app pre, pre.cmd { background: var(--code-bg); color: #e2e8f0; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.82rem; line-height: 1.5; }
+
+  .trap-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  .trap-item:last-child { border-bottom: none; }
+  .trap-ico { color: var(--red); font-weight: 700; flex: 0 0 auto; }
+
+  .step-flow { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .step { border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 0.8rem; background: var(--card-2); }
+  .step .n { color: var(--blue); font-weight: 700; }
+
+  .verdict { border-radius: 8px; padding: 10px 14px; font-weight: 700; margin: 8px 0; }
+  .verdict.ok { background: var(--green-dim); color: var(--green); }
+  .verdict.bad { background: var(--red-dim); color: var(--red); }
+  .verdict.info { background: var(--blue-dim); color: var(--blue); }
+
+  .chk-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; margin: 5px 0; cursor: pointer; transition: opacity 0.15s; }
+  .chk-item.done { opacity: 0.55; text-decoration: line-through; }
+  .chk-box { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 5px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; }
+  .chk-item.done .chk-box { background: var(--green); border-color: var(--green); color: #0f172a; }
+
+  .sm-state { display: flex; align-items: center; gap: 4px; margin: 3px 0; }
+  .sm-state .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); flex: 0 0 auto; }
+  .sm-state.on .dot { background: var(--green); box-shadow: 0 0 0 3px var(--green-dim); }
+  .sm-state.cur .dot { background: var(--blue); box-shadow: 0 0 0 3px var(--blue-dim); }
+
+  .proto-cell { border: 1px solid var(--border); border-radius: 10px; padding: 9px 10px; background: var(--card); cursor: pointer; text-align: center; }
+  .proto-cell.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .proto-cell .pn { font-weight: 700; }
+  .proto-cell .pd { font-size: 0.75rem; color: var(--muted); }
+
+  .trk-item { display: flex; align-items: center; gap: 10px; padding: 7px 11px; border: 1px solid var(--border); border-radius: 8px; margin: 5px 0; cursor: pointer; background: var(--card); }
+  .trk-item.down { border-color: var(--red); }
+  .trk-item .tname { font-weight: 600; flex: 0 0 auto; }
+  .trk-item .tdec { color: var(--muted); font-size: 0.8rem; }
+  .trk-tgl { margin-left: auto; }
+</style>
+</head>
+<body>
+<div id="app" :data-theme="theme">
+  <header>
+    <h1><span class="lv-badge">L14</span> How First Hop Redundancy Works
+      <span class="exam-badge">ENCOR 350-401</span></h1>
+    <div class="head-actions">
+      <a class="btn" href="../Level 13 - IP Services/How IP Services Works.html">◀ IP Services</a>
+      <a class="btn" href="../Level 15 - NAT/How NAT Works.html">NAT ▶</a>
+      <a class="btn" href="../index.html">Flashcards</a>
+      <button class="btn" @click="theme = (theme==='dark'?'light':'dark')">{{ theme==='dark' ? '☀' : '🌙' }}</button>
+    </div>
+  </header>
+
+  <nav>
+    <button class="chip" v-for="s in sections" :key="s.id" :class="{active:sec===s.id}" @click="sec=s.id">{{ s.icon }} {{ s.label }}</button>
+  </nav>
+
+  <!-- 1. OVERVIEW -->
+  <section class="panel" v-show="sec==='intro'" id="intro">
+    <h2>🛡️ FHRP — What &amp; Why</h2>
+    <p class="lead">A <b>First Hop Redundancy Protocol (FHRP)</b> gives hosts a redundant default gateway by sharing a <b>Virtual IP (VIP)</b> + <b>Virtual MAC</b> across multiple routers. Hosts point at one VIP; the FHRP decides which physical device forwards and what happens when it dies.</p>
+
+    <div style="text-align:center;margin:6px 0" class="mono">
+       Hosts → Gateway 10.10.10.1<br>
+       ┌───────────── R1 ─────────────┐<br>
+       │  ┌─ R2 ──┐   ┌── R3 ──┐      │<br>
+       └──┴─ Active ┴─── backup ┴─────┘
+    </div>
+
+    <h3>The three FHRPs to know</h3>
+    <div class="grid g3">
+      <div class="card"><h4>HSRP</h4><span class="chip-tag b-blue">Cisco</span><div class="big">Active / Standby</div><p class="muted" style="margin:0">UDP 1985 · v1 .2 / v2 .102</p></div>
+      <div class="card"><h4>VRRP</h4><span class="chip-tag b-green">IETF open</span><div class="big">Master / Backup</div><p class="muted" style="margin:0">IP 112 · 224.0.0.18</p></div>
+      <div class="card"><h4>GLBP</h4><span class="chip-tag b-violet">Cisco + LB</span><div class="big">AVG + AVFs</div><p class="muted" style="margin:0">UDP 3222 · 224.0.0.102</p></div>
+    </div>
+
+    <h3>The core problem FHRPs solve</h3>
+    <div class="grid g2">
+      <div class="card">
+        <h4>Without an FHRP</h4>
+        <pre class="cmd">Host
+  |
+Gateway = 10.10.10.1
+  |
+Router      ← if this fails,
+              hosts lose the gateway
+</pre>
+      </div>
+      <div class="card">
+        <h4>With an FHRP</h4>
+        <pre class="cmd">         ┌── R1 ──┐
+Host ──LAN── R2 ──┐── Upstream
+         └── R3 ──┘
+
+VIP = 10.10.10.1 (hosts unchanged)
+FHRP picks the live router + MAC
+</pre>
+      </div>
+    </div>
+    <div class="callout green"><b>Key insight:</b> during a failover the host keeps the <u>same VIP</u>. The FHRP only changes <b>which physical device</b> backs that VIP — no host reconfiguration.</div>
+    <div class="callout blue"><b>Three facts to remember first:</b> HSRP → Active/Standby · VRRP → Master/Backup · GLBP → AVG/AVF + built-in load balancing.</div>
+  </section>
+
+  <!-- 2. HSRP -->
+  <section class="panel" v-show="sec==='hsrp'" id="hsrp">
+    <h2>🔥 Hot Standby Router Protocol (HSRP)</h2>
+    <p class="lead"><b>Cisco-developed</b> FHRP. One router is <b>Active</b> (forwards for the VIP), another is <b>Standby</b> (backup). Carried in <b>UDP 1985</b>.</p>
+
+    <h3>Versions (memorize)</h3>
+    <table>
+      <tr><th>Property</th><th>HSRPv1</th><th>HSRPv2</th></tr>
+      <tr><td>Multicast</td><td class="mono">224.0.0.2</td><td class="mono">224.0.0.102</td></tr>
+      <tr><td>Virtual MAC</td><td class="mono">0000.0c07.acXX</td><td class="mono">0000.0c9f.fXXX</td></tr>
+      <tr><td>Groups</td><td>0–255</td><td>0–4095</td></tr>
+    </table>
+    <div class="callout red"><b>Trap:</b> do <u>not</u> assume the multicast is always <code>224.0.0.2</code> — that is strictly <b>v1</b>. v2 uses <code>224.0.0.102</code>.</div>
+
+    <h3>Roles &amp; states</h3>
+    <div class="grid g2">
+      <div class="card">
+        <h4>Roles</h4>
+        <ul style="margin-left:18px;font-size:.85rem">
+          <li><b>Active</b> — forwards for the VIP</li>
+          <li><b>Standby</b> — backup, monitors Active</li>
+          <li><b>Listen / Speak / Learn</b> — transitions</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>State transition</h4>
+        <div class="step-flow">
+          <div class="step"><span class="n">1</span> Initial</div>
+          <div class="step"><span class="n">2</span> Learn</div>
+          <div class="step"><span class="n">3</span> Listen</div>
+          <div class="step"><span class="n">4</span> Speak</div>
+          <div class="step"><span class="n">5</span> Standby</div>
+          <div class="step"><span class="n">6</span> Active</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Election explorer</h3>
+    <p class="muted">Higher priority wins; on a tie the <b>highest IP address</b> wins.</p>
+    <div class="grid g4">
+      <div class="card"><h4>R1 priority</h4><div class="row-fn"><input type="number" v-model.number="hsrpPriA"></div></div>
+      <div class="card"><h4>R2 priority</h4><div class="row-fn"><input type="number" v-model.number="hsrpPriB"></div></div>
+      <div class="card"><h4>R1 IP</h4><div class="row-fn"><input type="text" v-model="hsrpIpA"></div></div>
+      <div class="card"><h4>R2 IP</h4><div class="row-fn"><input type="text" v-model="hsrpIpB"></div></div>
+    </div>
+    <div class="verdict" :class="hsrpVerdict.cls">{{ hsrpVerdict.text }}</div>
+
+    <h3>Virtual MAC calculator</h3>
+    <div class="grid g2">
+      <div class="card"><h4>Group number</h4><div class="row-fn"><input type="number" v-model.number="hsrpGroup"></div></div>
+      <div class="card"><h4>Version</h4>
+        <div class="row-fn">
+          <button class="btn" :class="{primary:hsrpVer==='v1'}" @click="hsrpVer='v1'">v1</button>
+          <button class="btn" :class="{primary:hsrpVer==='v2'}" @click="hsrpVer='v2'">v2</button>
+        </div>
+      </div>
+    </div>
+    <div class="verdict" :class="hsrpMac.cls">{{ hsrpMac.head }} <span class="mono">{{ hsrpMac.mac }}</span></div>
+
+    <h3>Timers, preemption &amp; tracking</h3>
+    <div class="grid g3">
+      <div class="card"><h4>Timers</h4><div class="big">3 / 10 s</div><p class="muted" style="margin:0">hello / hold · hold ≥ 3× hello</p></div>
+      <div class="card"><h4>Preempt</h4><div class="big" style="color:var(--red)">Off</div><p class="muted" style="margin:0">not needed for failover; needed to reclaim priority role</p></div>
+      <div class="card"><h4>Tracking</h4><div class="big">− pri</div><p class="muted" style="margin:0">tracked object fails → priority decremented</p></div>
+    </div>
+    <div class="callout red"><b>Trap:</b> priority <b>0</b> = a router <u>relinquishing</u> the Active role — lets the Standby take over without waiting the hold time.</div>
+    <div class="callout blue"><b>Load sharing</b> is done with <u>multiple HSRP groups</u> (e.g. VLAN 10 → R1 Active, VLAN 20 → R2 Active). HSRP does <b>not</b> load-balance one VIP across routers.</div>
+  </section>
+
+  <!-- 3. VRRP -->
+  <section class="panel" v-show="sec==='vrrp'" id="vrrp">
+    <h2>🧩 Virtual Router Redundancy Protocol (VRRP)</h2>
+    <p class="lead"><b>Open-standard (IETF)</b> FHRP, built for multi-vendor interoperability. Runs directly over <b>IP protocol 112</b> (no UDP).</p>
+
+    <h3>Quick facts</h3>
+    <div class="grid g4">
+      <div class="card"><h4>Multicast</h4><div class="big">.18</div><p class="muted" style="margin:0">224.0.0.18</p></div>
+      <div class="card"><h4>Protocol</h4><div class="big">112</div><p class="muted" style="margin:0">IP · TTL 255</p></div>
+      <div class="card"><h4>Virtual MAC</h4><div class="big" style="font-size:1rem">0000.5e00.01XX</div><p class="muted" style="margin:0">XX = VRID hex</p></div>
+      <div class="card"><h4>Default pri</h4><div class="big">100</div><p class="muted" style="margin:0">255 = IP owner · 0 = relinquish</p></div>
+    </div>
+
+    <h3>Versions &amp; roles</h3>
+    <div class="grid g2">
+      <div class="card"><h4>Versions</h4>
+        <ul style="margin-left:18px;font-size:.85rem">
+          <li><b>VRRPv2</b> — RFC 3768 (IPv4)</li>
+          <li><b>VRRPv3</b> — RFC 5798 (IPv4 + IPv6)</li>
+        </ul>
+        <div class="callout red" style="margin-top:8px"><b>Trap:</b> "VRRP = RFC 3768" alone is wrong — that is specifically <b>v2</b>. IPv6 needs v3.</div>
+      </div>
+      <div class="card"><h4>Roles</h4>
+        <ul style="margin-left:18px;font-size:.85rem">
+          <li><b>Master</b> — forwards + sends adverts</li>
+          <li><b>Backup</b> — monitors the Master</li>
+          <li><b>IP Address Owner</b> — its real IP = VIP → priority 255</li>
+        </ul>
+        <p class="muted" style="margin:8px 0 0">States: Initialize → Master / Backup (no Speak/Listen).</p>
+      </div>
+    </div>
+
+    <h3>Skew-time / Master-down calculator</h3>
+    <p class="muted">Skew = (256 − priority) / 256. Master-down = (3 × advert) + skew.</p>
+    <div class="grid g2">
+      <div class="card"><h4>Priority</h4><div class="row-fn"><input type="number" v-model.number="vrrpPri" min="1" max="255"></div></div>
+      <div class="card"><h4>Advertisement (s)</h4><div class="row-fn"><input type="number" v-model.number="vrrpAdvert" min="1"></div></div>
+    </div>
+    <div class="verdict" :class="vrrpVerdict.cls">{{ vrrpVerdict.text }}</div>
+    <div class="callout blue"><b>Why skew?</b> higher priority → smaller skew → faster takeover — so a high-priority Backup tends to win the election instead of many Backups hitting at once.</div>
+
+    <h3>VS HSRP (the key differences)</h3>
+    <table>
+      <tr><th>Feature</th><th>HSRP</th><th>VRRP</th></tr>
+      <tr><td>Standard</td><td>Cisco</td><td>IETF</td></tr>
+      <tr><td>Transport</td><td class="mono">UDP 1985</td><td class="mono">IP 112</td></tr>
+      <tr><td>Multicast</td><td class="mono">.2 (v1) / .102 (v2)</td><td class="mono">224.0.0.18</td></tr>
+      <tr><td>Roles</td><td>Active / Standby</td><td>Master / Backup</td></tr>
+      <tr><td>Preempt default</td><td>Disabled</td><td><b>Enabled</b></td></tr>
+      <tr><td>IP owner concept</td><td>No</td><td>Priority 255 = Address Owner</td></tr>
+    </table>
+  </section>
+
+  <!-- 4. GLBP -->
+  <section class="panel" v-show="sec==='glbp'" id="glbp">
+    <h2>⚖️ Gateway Load Balancing Protocol (GLBP)</h2>
+    <p class="lead"><b>Cisco-proprietary</b> FHRP with <b>built-in gateway load balancing</b> — multiple routers can <u>actively forward</u> for the <u>same VIP</u>. UDP 3222.</p>
+
+    <h3>Architecture</h3>
+    <div class="grid g2">
+      <div class="card"><h4>AVG — Active Virtual Gateway</h4>
+        <p style="font-size:.85rem">One per group. Manages the group, <b>answers ARP</b> for the VIP, assigns virtual MACs to forwarders.</p>
+        <p class="muted" style="margin:4px 0 0">(AVG ≠ the only forwarder.)</p>
+      </div>
+      <div class="card"><h4>AVF — Active Virtual Forwarder</h4>
+        <p style="font-size:.85rem">Actually forwards traffic for an assigned virtual MAC. Up to <b>4 active AVFs</b> per group.</p>
+      </div>
+    </div>
+
+    <h3>Virtual MAC</h3>
+    <p class="muted">Format <code>0007.b400.XXYY</code> → prefix <code>0007.b400</code>, group hex, forwarder <code>01–04</code>.</p>
+    <div class="verdict" :class="glbpMac.cls">{{ glbpMac.head }} <span class="mono">{{ glbpMac.a1 }}, {{ glbpMac.a2 }}, {{ glbpMac.a3 }}, {{ glbpMac.a4 }}</span></div>
+
+    <h3>How ARP distributes load</h3>
+    <div class="grid g2">
+      <div class="card"><h4>One VIP → many MACs</h4>
+        <pre class="cmd">Host A → VIP → 0007.b400.0a01 → R1 (AVF1)
+Host B → VIP → 0007.b400.0a02 → R2 (AVF2)
+Host C → VIP → 0007.b400.0a03 → R3 (AVF3)
+</pre>
+      </div>
+      <div class="card"><h4>Load-balancing methods</h4>
+        <div class="proto-cell" v-for="m in glbpModes" :key="m.key" :class="{sel:glbpMode===m.key}" @click="glbpMode=m.key">
+          <div class="pn">{{ m.name }}</div><div class="pd">{{ m.desc }}</div>
+        </div>
+        <div class="verdict" :class="glbpModeVerdict.cls" style="margin-top:8px">{{ glbpModeVerdict.text }}</div>
+      </div>
+    </div>
+
+    <h3>Priority vs Weighting (critical)</h3>
+    <div class="grid g2">
+      <div class="card"><h4>Priority</h4><div class="big">AVG</div><p class="muted" style="margin:0">elects the AVG (highest, then highest IP)</p></div>
+      <div class="card"><h4>Weighting</h4><div class="big">AVF</div><p class="muted" style="margin:0">controls AVF forwarding eligibility + tracking</p></div>
+    </div>
+    <div class="callout red"><b>Trap:</b> do <u>not</u> confuse them — <b>priority → AVG election</b>, <b>weighting → AVF forwarding</b>.</div>
+
+    <h3>Weighting &amp; thresholds calculator</h3>
+    <p class="muted">Weighting falls below the <b>lower</b> threshold → AVF becomes inactive; recovers above the <b>upper</b> threshold → active again.</p>
+    <div class="grid g4">
+      <div class="card"><h4>Base weight</h4><div class="row-fn"><input type="number" v-model.number="glbwBase"></div></div>
+      <div class="card"><h4>Decrement</h4><div class="row-fn"><input type="number" v-model.number="glbwDec"></div></div>
+      <div class="card"><h4>Lower</h4><div class="row-fn"><input type="number" v-model.number="glbwLower"></div></div>
+      <div class="card"><h4>Upper</h4><div class="row-fn"><input type="number" v-model.number="glbwUpper"></div></div>
+    </div>
+    <label class="trk-item" :class="{down:glbwTrackDown}">
+      <span class="tname">Tracked object fails</span>
+      <span class="tdec">toggle to decrement weighting</span>
+      <input type="checkbox" class="trk-tgl" v-model="glbwTrackDown">
+    </label>
+    <div class="verdict" :class="glbwVerdict.cls">{{ glbwVerdict.text }}</div>
+
+    <h3>Remaining GLBP facts</h3>
+    <table>
+      <tr><th>Item</th><th>Value</th></tr>
+      <tr><td>Transport / multicast</td><td class="mono">UDP 3222 · 224.0.0.102</td></tr>
+      <tr><td>Preempt default</td><td>Disabled</td></tr>
+      <tr><td>Timers</td><td>Hello 3s / Hold 10s</td></tr>
+      <tr><td>AVF states</td><td>Listen / Active / Disabled</td></tr>
+    </table>
+  </section>
+
+  <!-- 5. COMPARE -->
+  <section class="panel" v-show="sec==='compare'" id="compare">
+    <h2>🔍 Side-by-Side Comparison</h2>
+    <table>
+      <tr><th>Feature</th><th>HSRP</th><th>VRRP</th><th>GLBP</th></tr>
+      <tr><td>Vendor / standard</td><td>Cisco</td><td>IETF open</td><td>Cisco</td></tr>
+      <tr><td>IPv4 transport</td><td class="mono">UDP 1985</td><td class="mono">IP 112</td><td class="mono">UDP 3222</td></tr>
+      <tr><td>IPv4 multicast</td><td class="mono">.2 (v1) / .102 (v2)</td><td class="mono">224.0.0.18</td><td class="mono">224.0.0.102</td></tr>
+      <tr><td>Main role</td><td>Active</td><td>Master</td><td>AVG</td></tr>
+      <tr><td>Backup role</td><td>Standby</td><td>Backup</td><td>AVF</td></tr>
+      <tr><td>Default priority</td><td>100</td><td>100</td><td>100</td></tr>
+      <tr><td>Preemption default</td><td>Off</td><td><b>On</b></td><td>Off</td></tr>
+      <tr><td>Built-in load balancing</td><td>No</td><td>No</td><td><b>Yes</b></td></tr>
+      <tr><td>One VIP, many forwarders</td><td>No</td><td>No</td><td><b>Yes (≤4)</b></td></tr>
+      <tr><td>Virtual MAC</td><td class="mono">0000.0c07.acXX / 0000.0c9f.fXXX</td><td class="mono">0000.5e00.01XX</td><td class="mono">0007.b400.XX01–04</td></tr>
+      <tr><td>Timers</td><td>Hello 3 / Hold 10</td><td>Advert 1s + skew</td><td>Hello 3 / Hold 10</td></tr>
+    </table>
+
+    <h3>Virtual MAC + multicast memory table</h3>
+    <table>
+      <tr><th>Protocol</th><th>IPv4 Multicast</th><th>Virtual MAC</th></tr>
+      <tr><td>HSRPv1</td><td class="mono">224.0.0.2</td><td class="mono">0000.0c07.acXX</td></tr>
+      <tr><td>HSRPv2</td><td class="mono">224.0.0.102</td><td class="mono">0000.0c9f.fXXX</td></tr>
+      <tr><td>VRRP</td><td class="mono">224.0.0.18</td><td class="mono">0000.5e00.01XX</td></tr>
+      <tr><td>GLBP</td><td class="mono">224.0.0.102</td><td class="mono">0007.b400.XX01–04</td></tr>
+    </table>
+    <div class="callout blue"><b>Easy memory:</b> HSRPv1 → <code>.2</code>, VRRP → <code>.18</code>, HSRPv2 &amp; GLBP → <code>.102</code> — but v2 and GLBP differ in MAC format + protocol.</div>
+
+    <h3>Choosing the right FHRP</h3>
+    <table>
+      <tr><th>Requirement</th><th>Preferred</th></tr>
+      <tr><td>Cisco proprietary + simple redundancy</td><td>HSRP</td></tr>
+      <tr><td>Multi-vendor interoperability</td><td>VRRP</td></tr>
+      <tr><td>Built-in load balancing, one VIP</td><td>GLBP</td></tr>
+      <tr><td>Multiple VLANs active/standby distribution</td><td>HSRP / VRRP</td></tr>
+    </table>
+    <div class="callout green"><b>Load-sharing note:</b> HSRP/VRRP split traffic via <u>multiple groups/VRIDs</u>; only <b>GLBP</b> load-balances <u>within one group and one VIP</u>.</div>
+  </section>
+
+  <!-- 6. OBJECT TRACKING -->
+  <section class="panel" v-show="sec==='track'" id="track">
+    <h2>🎯 Object Tracking — reacting beyond the local interface</h2>
+    <p class="lead">Object tracking lets a feature (HSRP/VRRP/GLBP, a static route, PBR) react to the state of a <b>monitored object</b> — e.g. an upstream interface, a route, or an IP SLA probe — not just whether its own LAN interface is physically up.</p>
+    <div class="callout red"><b>Key rule:</b> creating a track object alone changes nothing — the object <u>must be referenced</u> by a consuming feature (e.g. <code>standby 10 track 1 decrement 20</code>).</div>
+
+    <h3>What you can track</h3>
+    <table>
+      <tr><th>Type</th><th>Monitors</th><th class="mono">Tracked object fails →</th></tr>
+      <tr><td>Interface line-protocol</td><td>L2 operational state</td><td class="mono">track 1 interface Gi0/1 line-protocol</td></tr>
+      <tr><td>Interface ip routing</td><td>IP-routing usability</td><td class="mono">track 2 interface Gi0/1 ip routing</td></tr>
+      <tr><td>IP route</td><td>route present/reachable</td><td class="mono">track 3 ip route 10.0.0.0 255.0.0.0 reachability</td></tr>
+      <tr><td>IP SLA</td><td>result of an operation</td><td class="mono">track 4 ip sla 10</td></tr>
+      <tr><td>Track list</td><td>AND / OR of other tracks</td><td class="mono">track 5 list boolean and</td></tr>
+    </table>
+
+    <h3>FHRP effect of tracking</h3>
+    <table>
+      <tr><th>Protocol</th><th>Tracking changes</th><th>Result</th></tr>
+      <tr><td>HSRP</td><td><b>Priority</b> decrement</td><td>another router can become Active</td></tr>
+      <tr><td>VRRP</td><td><b>Priority</b> change</td><td>another router can become Master</td></tr>
+      <tr><td>GLBP</td><td><b>Weighting</b> decrement</td><td>AVF can become inactive</td></tr>
+    </table>
+    <div class="callout red"><b>Memory rule:</b> HSRP → priority · VRRP → priority · <b>GLBP → weighting</b>.</div>
+
+    <h3>HSRP multi-track priority calculator</h3>
+    <p class="muted">Toggle each tracked object down / up to see the effective HSRP priority drop.</p>
+    <div class="grid g2">
+      <div class="card"><h4>Base priority</h4><div class="row-fn"><input type="number" v-model.number="trkBase"></div></div>
+    </div>
+    <label class="trk-item" :class="{down:trkItems[0].down}">
+      <span class="tname">Uplink Gi0/1</span><span class="tdec">decrement {{ trkItems[0].dec }}</span>
+      <input type="checkbox" class="trk-tgl" v-model="trkItems[0].down">
+    </label>
+    <label class="trk-item" :class="{down:trkItems[1].down}">
+      <span class="tname">IP SLA 8.8.8.8</span><span class="tdec">decrement {{ trkItems[1].dec }}</span>
+      <input type="checkbox" class="trk-tgl" v-model="trkItems[1].down">
+    </label>
+    <div class="verdict" :class="trkVerdict.cls">{{ trkVerdict.text }}</div>
+
+    <h3>Tracking &amp; upstream failure — the payoff</h3>
+    <pre class="cmd">Internet → R1 → Clients
+
+If R1's client-facing interface stays UP but the
+ISP link fails:
+  - without tracking → HSRP still sees R1 healthy → blackhole
+  - with IP SLA tracking → SLA fails → track DOWN
+      → HSRP priority drops → backup router becomes preferred
+</pre>
+    <div class="callout green"><b>Why this matters:</b> object tracking makes failover depend on actual <u>network reachability</u>, not merely "my local interface is up".</div>
+  </section>
+
+  <!-- 7. COMMANDS -->
+  <section class="panel" v-show="sec==='cmds'" id="cmds">
+    <h2>⌨️ CLI Commands</h2>
+    <div class="row-fn">
+      <button class="btn" v-for="c in commands" :key="c.key" :class="{primary:activeCmd===c.key}" @click="activeCmd=c.key">{{ c.label }}</button>
+    </div>
+    <pre class="cmd">{{ activeCommand.show }}</pre>
+    <div class="callout green" style="margin-top:6px"><b>Core verify trio:</b> <code>show standby</code>, <code>show vrrp</code>, <code>show glbp</code> (+ <code>show track</code> when tracking is involved).</div>
+  </section>
+
+  <!-- 8. TRAPS -->
+  <section class="panel" v-show="sec==='traps'" id="traps">
+    <h2>⚠️ Common Traps</h2>
+    <div v-for="t in traps" :key="t" class="trap-item"><span class="trap-ico">!</span><div>{{ t }}</div></div>
+  </section>
+
+  <!-- 9. QUIZ -->
+  <section class="panel" v-show="sec==='quiz'" id="quiz">
+    <h2>📝 Quiz ({{ quizQuestions.length }})</h2>
+    <div v-for="(q,qi) in quizQuestions" :key="qi" class="card" style="margin:12px 0">
+      <div style="font-weight:700;margin-bottom:8px">{{ qi+1 }}. {{ q.q }}</div>
+      <div v-for="(o,oi) in q.opts" :key="oi"
+           class="opt" :class="{sel:q.ans===oi}"
+           @click="q.ans=oi">
+        <span class="letter">{{ String.fromCharCode(65+oi) }}</span>{{ o.text }}
+      </div>
+    </div>
+    <div class="row-fn">
+      <button class="btn primary" @click="submitQuiz()" :disabled="!allQuizAnswered">Submit answers</button>
+      <button class="btn" @click="resetQuiz()">Reset</button>
+      <span class="muted" v-if="quizDone" style="font-weight:700">Score: {{ quizScore }} / {{ quizQuestions.length }}
+        ({{ Math.round(quizScore/quizQuestions.length*100) }}%)</span>
+    </div>
+    <div class="verdict" :class="quizDone ? (quizScore===quizQuestions.length?'ok':'info') : 'info'" v-if="quizDone">
+      {{ quizScore===quizQuestions.length ? '🎉 Perfect! All ' + quizQuestions.length + ' correct.' : 'Better luck next time — review the traps section.' }}
+    </div>
+  </section>
+
+  <!-- 10. CHECKLIST -->
+  <section class="panel" v-show="sec==='checklist'" id="checklist">
+    <h2>✅ Study Checklist</h2>
+    <p class="muted" style="margin-bottom:10px">{{ doneCount }} / {{ checklist.length }} complete</p>
+    <div v-for="(c,i) in checklist" :key="i" class="chk-item" :class="{done:c.done}" @click="toggleDone(i)">
+      <span class="chk-box">{{ c.done ? '✓' : '' }}</span>{{ c.t }}
+    </div>
+  </section>
+
+</div>
+
+<script src="../vue.global.prod.js"></script>
+<script>
+(() => {
+  const { createApp, ref, computed, reactive } = Vue;
+  const LS = {
+    theme: 'ccnp.fhrp.theme', done: 'ccnp.fhrp.done',
+    quiz: 'ccnp.fhrp.quiz'
+  };
+  function loadJSON(key, fb) {
+    try { const v = JSON.parse(localStorage.getItem(key)); return (v === null || v === undefined) ? fb : v; }
+    catch (e) { return fb; }
+  }
+  function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+  createApp({
+    setup() {
+      const theme = ref(loadJSON(LS.theme, 'dark'));
+      const sec = ref('intro');
+
+      /* ---------- SECTION NAV ---------- */
+      const sections = [
+        { id: 'intro', label: 'Overview', icon: '🛡️' },
+        { id: 'hsrp', label: 'HSRP', icon: '🔥' },
+        { id: 'vrrp', label: 'VRRP', icon: '🧩' },
+        { id: 'glbp', label: 'GLBP', icon: '⚖️' },
+        { id: 'compare', label: 'Comparison', icon: '🔍' },
+        { id: 'track', label: 'Object Tracking', icon: '🎯' },
+        { id: 'cmds', label: 'Commands', icon: '⌨️' },
+        { id: 'traps', label: 'Traps', icon: '⚠️' },
+        { id: 'quiz', label: 'Quiz', icon: '📝' },
+        { id: 'checklist', label: 'Checklist', icon: '✅' }
+      ];
+
+      /* ---------- HSRP ELECTION ---------- */
+      const hsrpPriA = ref(110);
+      const hsrpPriB = ref(100);
+      const hsrpIpA = ref('192.168.10.2');
+      const hsrpIpB = ref('192.168.10.3');
+      function cmpIP(a, b) {
+        const pa = (a||'').split('.').map(Number);
+        const pb = (b||'').split('.').map(Number);
+        if (pa.length !== 4 || pb.length !== 4 || pa.some(isNaN) || pb.some(isNaN)) return 0;
+        for (let i=0;i<4;i++){ if(pa[i]!==pb[i]) return pa[i]>pb[i]?1:-1; }
+        return 0;
+      }
+      const hsrpVerdict = computed(() => {
+        if (hsrpPriA.value > hsrpPriB.value) return { cls: 'ok', text: 'R1 wins (priority ' + hsrpPriA.value + ' &gt; ' + hsrpPriB.value + ') → R1 Active, R2 Standby.' };
+        if (hsrpPriB.value > hsrpPriA.value) return { cls: 'ok', text: 'R2 wins (priority ' + hsrpPriB.value + ' &gt; ' + hsrpPriA.value + ') → R2 Active, R1 Standby.' };
+        const c = cmpIP(hsrpIpA.value, hsrpIpB.value);
+        if (c > 0) return { cls: 'ok', text: 'Priorities tie — R1 has the higher IP ' + hsrpIpA.value + ' → R1 Active.' };
+        if (c < 0) return { cls: 'ok', text: 'Priorities tie — R2 has the higher IP ' + hsrpIpB.value + ' → R2 Active.' };
+        return { cls: 'bad', text: 'Priorities and IPs are equal — invalid (IPs must differ).' };
+      });
+
+      /* ---------- HSRP VIRTUAL MAC ---------- */
+      const hsrpGroup = ref(10);
+      const hsrpVer = ref('v1');
+      function padHex(n, w) { let h = Number(n).toString(16).toLowerCase(); while (h.length < w) h = '0' + h; return h; }
+      const hsrpMac = computed(() => {
+        let mac, head;
+        if (hsrpVer.value === 'v1') {
+          mac = '0000.0c07.ac' + padHex(hsrpGroup.value, 2);
+          head = 'HSRPv1 group ' + hsrpGroup.value + ' (0x' + padHex(hsrpGroup.value,2) + '):';
+        } else {
+          mac = '0000.0c9f.f' + padHex(hsrpGroup.value, 3);
+          head = 'HSRPv2 group ' + hsrpGroup.value + ':';
+        }
+        return { cls: 'info', head, mac };
+      });
+
+      /* ---------- VRRP SKEW ---------- */
+      const vrrpPri = ref(110);
+      const vrrpAdvert = ref(1);
+      const vrrpVerdict = computed(() => {
+        const p = Math.max(1, Math.min(255, vrrpPri.value));
+        const skew = (256 - p) / 256;
+        const masterDown = (3 * vrrpAdvert.value) + skew;
+        return { cls: 'info', text: 'Skew = (256−' + p + ')/256 = ' + skew.toFixed(3) + ' s · Master-down ≈ ' + (3*vrrpAdvert.value) + ' + ' + skew.toFixed(3) + ' = ' + masterDown.toFixed(3) + ' s.' };
+      });
+
+      /* ---------- GLBP LOAD-BALANCING ---------- */
+      const glbpModes = [
+        { key: 'round-robin', name: 'Round-Robin', desc: 'default · AVG rotates MAC in ARP replies (A→AVF1, B→AVF2, …)' },
+        { key: 'host-dependent', name: 'Host-Dependent', desc: 'same host → same virtual MAC consistently' },
+        { key: 'weighted', name: 'Weighted', desc: 'AVFs with higher weighting get more load' }
+      ];
+      const glbpMode = ref('round-robin');
+      const glbpModeVerdict = computed(() => {
+        const m = glbpModes.find(x => x.key === glbpMode.value);
+        return { cls: 'info', text: m.name + ': ' + m.desc };
+      });
+
+      /* ---------- GLBP VIRTUAL MAC ---------- */
+      const glbpGroup = ref(10);
+      const glbpMac = computed(() => {
+        const g = padHex(glbpGroup.value, 2);
+        const macs = [];
+        for (let i=1;i<=4;i++){ macs.push('0007.b400.' + g + '0' + i); }
+        return { cls: 'info', head: 'GLBP group ' + glbpGroup.value + ' virtual MACs:', a1: macs[0], a2: macs[1], a3: macs[2], a4: macs[3] };
+      });
+
+      /* ---------- GLBP WEIGHTING ---------- */
+      const glbwBase = ref(110);
+      const glbwDec = ref(40);
+      const glbwLower = ref(80);
+      const glbwUpper = ref(100);
+      const glbwTrackDown = ref(false);
+      const glbwVerdict = computed(() => {
+        const eff = glbwTrackDown.value ? glbwBase.value - glbwDec.value : glbwBase.value;
+        if (eff < glbwLower.value) return { cls: 'bad', text: 'Weighting ' + eff + ' &lt; lower ' + glbwLower.value + ' → AVF INACTIVE.' };
+        if (eff >= glbwUpper.value) return { cls: 'ok', text: 'Weighting ' + eff + ' ≥ upper ' + glbwUpper.value + ' → AVF active &amp; eligible to forward.' };
+        return { cls: 'info', text: 'Weighting ' + eff + ' is between lower ' + glbwLower.value + ' and upper ' + glbwUpper.value + ' — recovering, not yet forwarding.' };
+      });
+
+      /* ---------- HSRP MULTI-TRACK ---------- */
+      const trkBase = ref(110);
+      const trkItems = reactive([ { name: 'Uplink Gi0/1', dec: 20, down: false }, { name: 'IP SLA 8.8.8.8', dec: 15, down: false } ]);
+      const trkVerdict = computed(() => {
+        const eff = trkBase.value - trkItems.reduce((s, t) => s + (t.down ? t.dec : 0), 0);
+        const losses = trkItems.filter(t => t.down).map(t => t.dec);
+        const lossTxt = losses.length ? losses.join(' + ') : '0';
+        return { cls: (eff === trkBase.value) ? 'ok' : 'bad', text: 'Base ' + trkBase.value + ' minus failures (' + lossTxt + ') → effective HSRP priority = ' + eff + '.' };
+      });
+
+      /* ---------- COMMANDS ---------- */
+      const commands = [
+        {
+          key: 'hsrp', label: 'HSRP',
+          show: "interface GigabitEthernet0/0\n ip address 192.168.10.2 255.255.255.0\n standby 10 ip 192.168.10.1\n standby 10 priority 110\n standby 10 preempt\n standby 10 timers 1 3\n standby 10 track 1 decrement 20\n\n! HSRPv2\n standby version 2\n\nshow standby\nshow standby brief"
+        },
+        {
+          key: 'vrrp', label: 'VRRP',
+          show: "interface GigabitEthernet0/0\n ip address 192.168.10.2 255.255.255.0\n vrrp 10 ip 192.168.10.1\n vrrp 10 priority 110\n\n! VRRP preempt is enabled by default\n! exact CLI varies by platform/release\n\nshow vrrp\nshow vrrp brief"
+        },
+        {
+          key: 'glbp', label: 'GLBP',
+          show: "interface GigabitEthernet0/0\n ip address 10.0.0.2 255.255.255.0\n glbp 10 ip 10.0.0.1\n glbp 10 priority 110\n glbp 10 preempt\n glbp 10 load-balancing round-robin\n glbp 10 weighting 110 lower 80 upper 100\n glbp 10 track 1 decrement 40\n\nshow glbp\nshow glbp brief\nshow ip arp | include 0007.b400"
+        },
+        {
+          key: 'track', label: 'Object Track',
+          show: "track 1 interface GigabitEthernet0/1 line-protocol\ntrack 2 ip sla 10\ntrack 3 ip route 0.0.0.0 0.0.0.0 reachability\ntrack 4 list boolean and\n\n! IP SLA feeding a track\nip sla 10\n icmp-echo 8.8.8.8\n frequency 5\nip sla schedule 10 life forever start-time now\n\ntrack 2 ip sla 10\n\n! tracked static route\nip route 0.0.0.0 0.0.0.0 10.0.0.1 track 1\n\nshow track"
+        }
+      ];
+      const activeCmd = ref(commands[0].key);
+      const activeCommand = computed(() => commands.find(c => c.key === activeCmd.value));
+
+      /* ---------- TRAPS ---------- */
+      const traps = [
+        'HSRP: v1 multicast = 224.0.0.2, v2 = 224.0.0.102 — don\'t assume .2 for every HSRP.',
+        'HSRP virtual MAC: v1 = 0000.0c07.acXX, v2 = 0000.0c9f.fXXX.',
+        'HSRP UDP 1985 · VRRP IP protocol 112 (no UDP) · GLBP UDP 3222.',
+        'VRRP multicast = 224.0.0.18, not HSRP\'s .2/.102.',
+        'VRRP = IETF standard; RFC 3768 is v2, RFC 5798 is v3 (adds IPv6).',
+        'VRRP priority 255 = IP Address Owner; priority 0 = relinquishing Master role.',
+        'VRRP preemption enabled by default; HSRP & GLBP preemption disabled by default.',
+        'VRRP master-down = (3 × advert) + skew, skew = (256 − priority)/256 — not just 3 × advert.',
+        'VRRP advertisements use TTL 255 to reject off-link packets.',
+        'GLBP = AVG (manages + answers ARP) and AVFs (forward) — not "one Active + Standbys".',
+        'GLBP priority → AVG election; GLBP weighting → AVF forwarding eligibility. Don\'t mix them.',
+        'GLBP tracking decrements WEIGHTING, not priority (HSRP/VRRP use priority).',
+        'GLBP load balancing: round-robin (default), host-dependent, weighted.',
+        'Only GLBP gives built-in load balancing within one VIP/group; HSRP/VRRP use multiple groups.',
+        'Creating a track object alone does nothing — it must be referenced by a feature.', 
+        'GLBP weighting is governed by lower/upper thresholds, not just "weighting = 0".',
+        'Interface UP ≠ upstream reachable — use IP SLA / route tracking to detect path failure.',
+        'HSRP preempt is required for priority-based role recovery, but NOT for basic failover.'
+      ];
+
+      /* ---------- QUIZ ---------- */
+      const quizRaw = [
+        { q: 'Which FHRP is an open/IETF standard?', opts: [{ text: 'HSRP' }, { text: 'VRRP' }, { text: 'GLBP' }, { text: 'MHSRP' }], correct: 1 },
+        { q: 'HSRPv1 uses which multicast address?', opts: [{ text: '224.0.0.1' }, { text: '224.0.0.2' }, { text: '224.0.0.18' }, { text: '224.0.0.102' }], correct: 1 },
+        { q: 'HSRP carries its messages over:', opts: [{ text: 'UDP 1985' }, { text: 'UDP 3222' }, { text: 'IP protocol 112' }, { text: 'TCP 80' }], correct: 0 },
+        { q: 'In HSRP, two routers with equal priority — who becomes Active?', opts: [{ text: 'the one with the higher IP' }, { text: 'the one configured first' }, { text: 'the one with the lower IP' }, { text: 'the one with the higher MAC' }], correct: 0 },
+        { q: 'Which FHRP has preemption ENABLED by default?', opts: [{ text: 'HSRP' }, { text: 'GLBP' }, { text: 'VRRP' }, { text: 'MHSRP' }], correct: 2 },
+        { q: 'VRRP IPv4 runs over:', opts: [{ text: 'UDP 1985' }, { text: 'IP protocol 112' }, { text: 'UDP 3222' }, { text: 'TCP 179' }], correct: 1 },
+        { q: 'What does VRRP priority 255 indicate?', opts: [{ text: 'Master is relinquishing' }, { text: 'the IP Address Owner' }, { text: 'the highest configured value' }, { text: 'a misconfiguration' }], correct: 1 },
+        { q: 'Which FHRP provides built-in load balancing within ONE virtual IP?', opts: [{ text: 'HSRP' }, { text: 'VRRP' }, { text: 'GLBP' }, { text: 'MHSRP' }], correct: 2 },
+        { q: 'GLBP uses which UDP port?', opts: [{ text: '1985' }, { text: '3222' }, { text: '112' }, { text: '520' }], correct: 1 },
+        { q: 'In GLBP, which role answers ARP for the virtual IP?', opts: [{ text: 'AVF' }, { text: 'AVG' }, { text: 'Standby' }, { text: 'Master' }], correct: 1 },
+        { q: 'GLBP weighting controls:', opts: [{ text: 'AVG election' }, { text: 'AVF forwarding eligibility' }, { text: 'which host uses which gateway' }, { text: 'the hello interval' }], correct: 1 },
+        { q: 'GLBP tracking changes:', opts: [{ text: 'priority' }, { text: 'weighting' }, { text: 'VRID' }, { text: 'multicast address' }], correct: 1 },
+        { q: 'A GLBP AVF becomes inactive when its weighting:', opts: [{ text: 'reaches 0' }, { text: 'falls below the lower threshold' }, { text: 'exceeds the upper threshold' }, { text: 'equals the base value' }], correct: 1 },
+        { q: 'VRRP virtual MAC for VRID 10 (0x0A) is:', opts: [{ text: '0000.5e00.010a' }, { text: '0000.0c07.ac0a' }, { text: '0000.0c9f.f00a' }, { text: '0007.b400.0a01' }], correct: 0 },
+        { q: 'Object tracking must be ___ to affect HSRP priority.', opts: [{ text: 'referenced by the feature' }, { text: 'set to priority 255' }, { text: 'configured on every router' }, { text: 'disabled after failover' }], correct: 0 }
+      ];
+      const quizQuestions = reactive(quizRaw.map(q => ({ ...q, ans: null })));
+      const quizDone = ref(false);
+      const quizScore = ref(loadJSON(LS.quiz, 0) || 0);
+      const allQuizAnswered = computed(() => quizQuestions.every(q => q.ans !== null));
+      function submitQuiz() {
+        if (!allQuizAnswered.value) return;
+        quizScore.value = quizQuestions.filter((q, i) => q.ans === q.correct).length;
+        quizDone.value = true;
+        save(LS.quiz, quizScore.value);
+      }
+      function resetQuiz() {
+        quizQuestions.forEach(q => q.ans = null);
+        quizDone.value = false;
+        quizScore.value = 0;
+        localStorage.removeItem(LS.quiz);
+      }
+
+      /* ---------- CHECKLIST ---------- */
+      const checklistRoot = loadJSON(LS.done, [
+        { t: 'FHRP purpose: shared VIP + virtual MAC; hosts keep one gateway; failover changes only the physical device', done: false },
+        { t: 'HSRP: Cisco, UDP 1985, Active/Standby, v1 .2/0000.0c07.acXX/groups 0-255, v2 .102/0000.0c9f.fXXX/0-4095', done: false },
+        { t: 'HSRP states: Initial→Learn→Listen→Speak→Standby→Active; election = priority then higher IP; preempt off by default', done: false },
+        { t: 'HSRP timers hello 3s / hold 10s (hold ≥ 3× hello); priority 0 = relinquishing; tracking decrements priority', done: false },
+        { t: 'VRRP: IETF, IP 112, multicast 224.0.0.18, TTL 255, no UDP; Master/Backup', done: false },
+        { t: 'VRRP v2 = RFC 3768 (IPv4), v3 = RFC 5798 (IPv6); priority 255 = IP Address Owner, 0 = relinquish', done: false },
+        { t: 'VRRP preemption on by default; skew = (256-priority)/256; master-down = 3×advert + skew', done: false },
+        { t: 'GLBP: Cisco, UDP 3222, multicast 224.0.0.102, MAC prefix 0007.b400; 1 AVG + up to 4 AVFs', done: false },
+        { t: 'GLBP priority → AVG election (highest, then IP); weighting → AVF forwarding; tracking decrements weighing', done: false },
+        { t: 'GLBP load balancing: round-robin (default), host-dependent, weighted; weighting lower/upper thresholds', done: false },
+        { t: 'Comparison: HSRP (Cisco/UDP 1985/Active/off), VRRP (open/IP112/Master/on), GLBP (Cisco/UDP 3222/AVG+AVF/off/LB)', done: false },
+        { t: 'Memory: HSRPv1→.2, VRRP→.18, HSRPv2→.102, GLBP→.102 (different MAC + protocol)', done: false },
+        { t: 'Object tracking: types (interface, route, IP SLA, track list); must be referenced; HSRP/VRRP→priority, GLBP→weighting', done: false },
+        { t: 'Troubleshoot: check interface/VLAN → FHRP group/VIP/version → priority/preempt/timers → tracking → show standby/vrrp/glbp/track', done: false }
+      ]);
+      const checklist = reactive(checklistRoot);
+      const doneCount = computed(() => checklist.filter(c => c.done).length);
+      function saveChecklist() { save(LS.done, checklistRoot); }
+      function toggleDone(i) { checklistRoot[i].done = !checklistRoot[i].done; saveChecklist(); }
+
+      return {
+        theme, sec, sections,
+        hsrpPriA, hsrpPriB, hsrpIpA, hsrpIpB, hsrpVerdict,
+        hsrpGroup, hsrpVer, hsrpMac,
+        vrrpPri, vrrpAdvert, vrrpVerdict,
+        glbpModes, glbpMode, glbpModeVerdict, glbpGroup, glbpMac,
+        glbwBase, glbwDec, glbwLower, glbwUpper, glbwTrackDown, glbwVerdict,
+        trkBase, trkItems, trkVerdict,
+        commands, activeCmd, activeCommand,
+        traps,
+        quizQuestions, quizDone, quizScore, allQuizAnswered, submitQuiz, resetQuiz,
+        checklist, doneCount, saveChecklist, toggleDone
+      };
+    }
+  }).mount('#app');
+})();
+</script>
+</body>
+</html>

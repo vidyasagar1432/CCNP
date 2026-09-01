@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How VPN Technologies Work — Deep Dive</title>
+<style>
+  :root {
+    --bg: #0f172a; --panel: #111c34; --card: #1e293b; --card-2: #16233d;
+    --text: #f8fafc; --muted: #94a3b8;
+    --blue: #38bdf8; --blue-dim: #0c4a6e;
+    --green: #34d399; --green-dim: #064e3b;
+    --amber: #fbbf24; --amber-dim: #78350f;
+    --red: #f87171; --red-dim: #7f1d1d;
+    --violet: #a78bfa; --violet-dim: #4c1d95;
+    --cyan: #22d3ee; --cyan-dim: #164e63;
+    --border: #334155; --hover: #263449; --code-bg: #0b1220;
+  }
+  #app[data-theme="light"] {
+    --bg: #f1f5f9; --panel: #ffffff; --card: #ffffff; --card-2: #f8fafc;
+    --text: #0f172a; --muted: #64748b;
+    --blue: #0284c7; --blue-dim: #bae6fd;
+    --green: #059669; --green-dim: #d1fae5;
+    --amber: #d97706; --amber-dim: #fef3c7;
+    --red: #dc2626; --red-dim: #fee2e2;
+    --violet: #7c3aed; --violet-dim: #ede9fe;
+    --cyan: #0891b2; --cyan-dim: #cffafe;
+    --border: #cbd5e1; --hover: #e2e8f0; --code-bg: #0b1220;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; }
+  #app { max-width: 1040px; margin: 0 auto; padding: 20px 18px 60px; }
+
+  header { position: sticky; top: 0; z-index: 30; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .lv-badge { background: var(--blue-dim); color: var(--blue); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .exam-badge { background: var(--violet-dim); color: var(--violet); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .head-actions { display: flex; align-items: center; gap: 8px; }
+  .btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: background 0.15s; }
+  .btn:hover { background: var(--hover); }
+  .btn.primary { background: var(--blue); color: #0f172a; border-color: var(--blue); }
+
+  nav { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 2px 16px; }
+  nav button.chip { border: 1px solid var(--border); background: var(--card); color: var(--muted); padding: 5px 11px; border-radius: 999px; cursor: pointer; font-size: 0.76rem; font-weight: 600; }
+  nav button.chip.active { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
+
+  section.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
+  section.panel h2 { font-size: 1.2rem; margin-bottom: 6px; }
+  section.panel h3 { font-size: 1rem; margin: 18px 0 10px; color: var(--blue); }
+  section.panel p { margin: 8px 0; }
+  .muted { color: var(--muted); }
+  .lead { color: var(--muted); font-size: 0.95rem; }
+
+  .grid { display: grid; gap: 12px; }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .g3 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .g4 { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .card h4 { font-size: 0.9rem; margin-bottom: 6px; }
+  .card .big { font-size: 1.3rem; font-weight: 700; font-family: 'Fira Code', ui-monospace, monospace; }
+
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85rem; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  tr:hover td { background: var(--hover); }
+
+  code, .mono { font-family: 'Fira Code', ui-monospace, monospace; }
+  .mono { font-size: 0.9rem; }
+  .chip-tag { display: inline-block; border-radius: 999px; padding: 1px 9px; font-size: 0.74rem; font-weight: 700; }
+  .b-blue { background: var(--blue-dim); color: var(--blue); }
+  .b-green { background: var(--green-dim); color: var(--green); }
+  .b-amber { background: var(--amber-dim); color: var(--amber); }
+  .b-red { background: var(--red-dim); color: var(--red); }
+  .b-violet { background: var(--violet-dim); color: var(--violet); }
+  .b-cyan { background: var(--cyan-dim); color: var(--cyan); }
+
+  .callout { border-left: 4px solid var(--amber); background: var(--card-2); border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 12px 0; font-size: 0.9rem; }
+  .callout.green { border-color: var(--green); }
+  .callout.red { border-color: var(--red); }
+  .callout.blue { border-color: var(--blue); }
+  .callout.violet { border-color: var(--violet); }
+
+  .row-fn { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 8px 0; }
+  .row-fn input[type="number"], .row-fn input[type="text"] { background: var(--code-bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-family: 'Fira Code', monospace; font-size: 0.9rem; }
+
+  .opt { display: flex; align-items: center; gap: 8px; padding: 6px 9px; margin: 3px 0; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; background: var(--card); font-size: 0.86rem; }
+  .opt.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .opt .letter { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex: 0 0 auto; }
+  .opt.sel .letter { background: var(--blue); color: #0f172a; }
+
+  #app pre, pre.cmd { background: var(--code-bg); color: #e2e8f0; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.82rem; line-height: 1.5; }
+
+  .trap-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  .trap-item:last-child { border-bottom: none; }
+  .trap-ico { color: var(--red); font-weight: 700; flex: 0 0 auto; }
+
+  .step-flow { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .step { border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 0.8rem; background: var(--card-2); }
+  .step .n { color: var(--blue); font-weight: 700; }
+
+  .verdict { border-radius: 8px; padding: 10px 14px; font-weight: 700; margin: 8px 0; }
+  .verdict.ok { background: var(--green-dim); color: var(--green); }
+  .verdict.bad { background: var(--red-dim); color: var(--red); }
+  .verdict.info { background: var(--blue-dim); color: var(--blue); }
+
+  .chk-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; margin: 5px 0; cursor: pointer; transition: opacity 0.15s; }
+  .chk-item.done { opacity: 0.55; text-decoration: line-through; }
+  .chk-box { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 5px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; }
+  .chk-item.done .chk-box { background: var(--green); border-color: var(--green); color: #0f172a; }
+
+  .proto-cell { border: 1px solid var(--border); border-radius: 10px; padding: 9px 10px; background: var(--card); cursor: pointer; text-align: center; }
+  .proto-cell.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .proto-cell .pn { font-weight: 700; }
+  .proto-cell .pd { font-size: 0.75rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<div id="app" :data-theme="theme">
+  <header>
+    <h1><span class="lv-badge">L18</span> How VPN Technologies Work
+      <span class="exam-badge">ENCOR 350-401</span></h1>
+    <div class="head-actions">
+      <a class="btn" href="../Level 17 - Security/How Security Works.html">◀ Security</a>
+      <a class="btn" href="../Level 19 - Multicast/How Multicast Works.html">Multicast ▶</a>
+      <a class="btn" href="../index.html">Flashcards</a>
+      <button class="btn" @click="theme = (theme==='dark'?'light':'dark')">{{ theme==='dark' ? '☀' : '🌙' }}</button>
+    </div>
+  </header>
+
+  <nav>
+    <button class="chip" v-for="s in sections" :key="s.id" :class="{active:sec===s.id}" @click="sec=s.id">{{ s.icon }} {{ s.label }}</button>
+  </nav>
+
+  <!-- 1. OVERVIEW -->
+  <section class="panel" v-show="sec==='intro'" id="intro">
+    <h2>🌐 VPN Technologies — the whole picture</h2>
+    <p class="lead">Two foundational pieces build everything: <b>GRE = transport</b>, <b>IPsec = encryption</b>. Then enterprise solutions combine them (DMVPN, FlexVPN, GET VPN, SSL VPN…).</p>
+
+    <h3>Protocol &amp; port numbers (memorize)</h3>
+    <table>
+      <tr><th>Item</th><th>Value</th><th>Role</th></tr>
+      <tr><td>GRE</td><td class="mono">IP protocol 47</td><td>gre tunnel transport</td></tr>
+      <tr><td>AH</td><td class="mono">IP protocol 51</td><td>integrity+auth only (no encrypt)</td></tr>
+      <tr><td>ESP</td><td class="mono">IP protocol 50</td><td>confidentiality+integrity+auth</td></tr>
+      <tr><td>IKE</td><td class="mono">UDP 500</td><td>key exchange</td></tr>
+      <tr><td>NAT-T (ESP-in-UDP)</td><td class="mono">UDP 4500</td><td>IPsec through NAT</td></tr>
+      <tr><td>GDOI (GET VPN)</td><td class="mono">UDP 848</td><td>group key management</td></tr>
+      <tr><td>SSL/TLS</td><td class="mono">TCP 443</td><td>SSL VPN</td></tr>
+      <tr><td>DTLS</td><td class="mono">UDP 443</td><td>SSL VPN low-latency</td></tr>
+    </table>
+
+    <h3>The technology family</h3>
+    <div class="grid g3">
+      <div class="card"><h4>GRE</h4><span class="chip-tag b-blue">transport</span><p class="muted" style="margin:0">any L3 + multicast, no encryption</p></div>
+      <div class="card"><h4>IPsec</h4><span class="chip-tag b-green">encrypt</span><p class="muted" style="margin:0">ESP/AH + IKE, point-to-point</p></div>
+      <div class="card"><h4>DMVPN</h4><span class="chip-tag b-amber">mGRE+NHRP</span><p class="muted" style="margin:0">dynamic hub/spoke over Internet</p></div>
+      <div class="card"><h4>FlexVPN</h4><span class="chip-tag b-violet">IKEv2</span><p class="muted" style="margin:0">unified S2S/RA/hub-spoke</p></div>
+      <div class="card"><h4>GET VPN</h4><span class="chip-tag b-cyan">GDOI</span><p class="muted" style="margin:0">tunnel-free any-to-any on MPLS</p></div>
+      <div class="card"><h4>SSL VPN</h4><span class="chip-tag b-red">443</span><p class="muted" style="margin:0">remote users / clientless</p></div>
+    </div>
+    <div class="callout blue"><b>GRE ≠ encryption.</b> GRE alone is not secure — pair it with IPsec. That's the classic site-to-site recipe.</div>
+  </section>
+
+  <!-- 2. GRE -->
+  <section class="panel" v-show="sec==='gre'" id="gre">
+    <h2>🧸 GRE — Generic Routing Encapsulation</h2>
+    <p class="lead">A virtual L3 <b>tunnel interface</b> that carries <b>any L3 payload</b> (IPv4, IPv6, multicast). <b>No encryption, no reliability</b> — usually wrapped with IPsec.</p>
+
+    <h3>It carries multicast + routing</h3>
+    <div class="card"><p style="margin:0">Because GRE is a normal virtual interface, <b>OSPF / EIGRP / BGP</b> and <b>multicast</b> run over it — IPsec alone cannot do this directly.</p></div>
+    <div class="callout red"><b>Trap:</b> GRE is <b>IP protocol 47</b> — NOT TCP/UDP. There's no GRE port number.</div>
+
+    <h3>MTU / overhead calculator</h3>
+    <p class="muted">GRE adds <b>4 bytes + 20-byte outer IP = ~24 bytes</b>. Adding IPsec ESP adds more overhead.</p>
+    <div class="grid g3">
+      <div class="card"><h4>Interface MTU</h4><div class="row-fn"><input type="number" v-model.number="greMtu" min="576"></div></div>
+      <div class="proto-cell" :class="{sel:greEsp}" @click="greEsp=!greEsp"><div class="pn">+ IPsec ESP</div><div class="pd">{{ greEsp ? 'adds ESP overhead' : 'plain GRE' }}</div></div>
+    </div>
+    <div class="verdict" :class="greVerdict.cls">{{ greVerdict.text }}</div>
+    <div class="callout blue"><b>MTU fix:</b> reduce tunnel <code>ip mtu</code> and shrink TCP MSS (<code>ip tcp adjust-mss</code>) to avoid fragmentation. GRE keepalives (<code>keepalive 10 3</code>) detect black-hole tunnels between direct peers.</div>
+  </section>
+
+  <!-- 3. IPSEC -->
+  <section class="panel" v-show="sec==='ipsec'" id="ipsec">
+    <h2>🔐 IPsec — protocols, modes, IKE</h2>
+    <p class="lead">IPsec supplies the actual encryption/authentication. Two protocols: <b>AH (51)</b> and <b>ESP (50)</b>.</p>
+
+    <h3>AH vs ESP</h3>
+    <div class="grid g2">
+      <div class="card"><h4>AH — protocol 51</h4><p style="font-size:.85rem">integrity + authentication only. <b>Does NOT encrypt.</b> No NAT traversal.</p></div>
+      <div class="card"><h4>ESP — protocol 50</h4><p style="font-size:.85rem">confidentiality + integrity + auth. <b>The standard for real encryption.</b> NAT-T wraps it in UDP 4500.</p></div>
+    </div>
+
+    <h3>Mode selector</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:ipsecMode==='transport'}" @click="ipsecMode='transport'">
+        <div class="pn">Transport</div><div class="pd">protects only the payload (IP headers visible) — host-to-host / GRE</div>
+      </div>
+      <div class="proto-cell" :class="{sel:ipsecMode==='tunnel'}" @click="ipsecMode='tunnel'">
+        <div class="pn">Tunnel</div><div class="pd">wraps the entire IP packet in a new outer header — site-to-site</div>
+      </div>
+    </div>
+    <div class="verdict" :class="ipsecModeVerdict.cls">{{ ipsecModeVerdict.text }}</div>
+
+    <h3>Transform-set builder</h3>
+    <p class="muted">A transform set pairs an <b>encryption</b> algorithm with an <b>integrity</b> algorithm.</p>
+    <div class="grid g2">
+      <div class="card"><h4>Encryption</h4>
+        <div class="row-fn">
+          <button class="btn" v-for="e in tspEnc" :key="e.key" :class="{primary:tspE===e.key}" @click="tspE=e.key">{{ e.key }}</button>
+        </div>
+      </div>
+      <div class="card"><h4>Integrity</h4>
+        <div class="row-fn">
+          <button class="btn" v-for="i in tspInt" :key="i.key" :class="{primary:tspI===i.key}" @click="tspI=i.key">{{ i.key }}</button>
+        </div>
+      </div>
+    </div>
+    <div class="verdict" :class="tspVerdict.cls">{{ tspVerdict.text }}</div>
+
+    <h3>IKE phases (IKEv1)</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> Phase 1 → ISAKMP SA (main 6 msgs / aggressive 3 msgs)</div>
+      <div class="step"><span class="n">2</span> Phase 2 → IPsec SA (quick mode)</div>
+    </div>
+    <div class="callout red"><b>Traps:</b> ESP(50) encrypts, AH(51) doesn't. Tunnel mode for site-to-site. IKE = UDP 500, NAT-T = UDP 4500. Transform set = encryption + integrity (e.g. <code>esp-aes esp-sha-hmac</code>). IKEv2 is modern/preferred.</div>
+  </section>
+
+  <!-- 4. SITE-TO-SITE + IKEv2 + VTI -->
+  <section class="panel" v-show="sec==='site2site'" id="site2site">
+    <h2>🏢 Site-to-Site + IKEv2 + VTI</h2>
+    <p class="lead">Secures traffic between two fixed sites over a shared underlay.</p>
+
+    <h3>Recipe selector</h3>
+    <div class="grid g3">
+      <div class="proto-cell" v-for="r in s2sRecipes" :key="r.key" :class="{sel:s2sPick===r.key}" @click="s2sPick=r.key">
+        <div class="pn">{{ r.name }}</div><div class="pd">{{ r.desc }}</div>
+      </div>
+    </div>
+    <div class="verdict" :class="s2sVerdict.cls">{{ s2sVerdict.text }}</div>
+
+    <h3>Interesting traffic (policy-based)</h3>
+    <div class="card"><p style="margin:0">In classic (crypto map) IPsec, the ACL defines what the tunnel protects. <b>Both sides must define mirror-image ACLs.</b> Only matching traffic is encrypted. <b>No interesting traffic = no IPsec SA</b>, even if IKE is up — a top trap.</p></div>
+
+    <h3>IKEv1 vs IKEv2</h3>
+    <table>
+      <tr><th>Aspect</th><th>IKEv1</th><th>IKEv2</th></tr>
+      <tr><td>Standard</td><td>legacy</td><td><b>RFC 7296 (modern)</b></td></tr>
+      <tr><td>Exchanges</td><td>phase 1 + phase 2 (4-6 msgs)</td><td>single IKE_SA (IKE_SA_INIT + IKE_AUTH)</td></tr>
+      <tr><td>Modes</td><td>main / aggressive</td><td>none — fixed INIT/AUTH</td></tr>
+      <tr><td>NAT-T</td><td>add-on</td><td><b>built-in</b></td></tr>
+      <tr><td>EAP</td><td>not native</td><td><b>native</b></td></tr>
+      <tr><td>Rekey</td><td>separate phase</td><td>CREATE_CHILD_SA</td></tr>
+    </table>
+    <div class="callout blue"><b>IKEv2 flow:</b> IKE_SA_INIT → IKE_AUTH (builds first child SA) → CREATE_CHILD_SA (rekey/extra) → INFORMATIONAL (delete/error/liveness/DPD). <b>IKE SA lifetime = 86400s (24h)</b>, <b>Child SA = 3600s (1h)</b> on Cisco.</div>
+
+    <h3>VTI — route-based IPsec</h3>
+    <table>
+      <tr><th>Feature</th><th>Policy-based (crypto map)</th><th>Route-based (VTI)</th></tr>
+      <tr><td>Encryption trigger</td><td>interesting-traffic ACL</td><td><b>route toward tunnel</b></td></tr>
+      <tr><td>Interface</td><td>physical + crypto map</td><td>dedicated virtual tunnel</td></tr>
+      <tr><td>Routing / multicast</td><td>difficult</td><td><b>natural</b></td></tr>
+      <tr><td>Mirror ACLs</td><td>required</td><td>none</td></tr>
+    </table>
+    <div class="callout red"><b>Trap:</b> VTI uses <code>tunnel mode ipsec ipv4</code> (NOT <code>gre multipoint</code>) and binds IPsec via <code>tunnel protection ipsec profile</code>. Routing triggers encryption, not an ACL.</div>
+  </section>
+
+  <!-- 5. DMVPN -->
+  <section class="panel" v-show="sec==='dmvpn'" id="dmvpn">
+    <h2>🕸️ DMVPN — Dynamic Multipoint VPN</h2>
+    <p class="lead">Dynamic hub-and-spoke over the Internet. Three building blocks: <b>mGRE + NHRP + IPsec</b>.</p>
+
+    <h3>The three building blocks (memorize)</h3>
+    <div class="grid g3">
+      <div class="card"><h4>mGRE</h4><div class="big" style="font-size:1rem">multipoint GRE</div><p class="muted" style="margin:0">one tunnel interface, many destinations</p></div>
+      <div class="card"><h4>NHRP</h4><div class="big" style="font-size:1rem">resolution</div><p class="muted" style="margin:0">resolves spokes' public IPs; hub = NHS</p></div>
+      <div class="card"><h4>IPsec</h4><div class="big" style="font-size:1rem">encrypt</div><p class="muted" style="margin:0">protects the mGRE tunnel</p></div>
+    </div>
+
+    <h3>Spoke-to-spoke shortcut</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> spokes NHRP-register with hub (NHS)</div>
+      <div class="step"><span class="n">2</span> Spoke A wants B → NHRP resolution query to hub</div>
+      <div class="step"><span class="n">3</span> hub replies "B is at X.X.X.X"</div>
+      <div class="step"><span class="n">4</span> A builds direct IPsec GRE tunnel to B</div>
+      <div class="step"><span class="n">5</span> data flows directly — no hub hair-pinning</div>
+    </div>
+    <div class="callout green"><b>Key idea:</b> <b>control stays at the hub; data goes directly between spokes</b> (phase 2+).</div>
+
+    <h3>DMVPN phases</h3>
+    <div class="grid g3">
+      <div class="card"><h4>Phase 1</h4><p class="muted" style="margin:0">hub-and-spoke only, no shortcuts</p></div>
+      <div class="card"><h4>Phase 2</h4><p class="muted" style="margin:0">spoke-to-spoke shortcuts (<b>default</b>)</p></div>
+      <div class="card"><h4>Phase 3</h4><p class="muted" style="margin:0">NHRP redirect / best-path routing</p></div>
+    </div>
+    <pre class="cmd">! spoke
+interface Tunnel0
+ ip nhrp map 10.255.0.1 203.0.113.1
+ ip nhrp network-id 1
+ ip nhrp nhs 10.255.0.1
+ tunnel source GigabitEthernet0/0
+ tunnel mode gre multipoint
+ tunnel protection ipsec profile DMVPN-PROF
+</pre>
+    <div class="callout red"><b>Trap:</b> DMVPN = <b>mGRE + NHRP + IPsec</b>. NHRP resolves spoke public IPs via the hub (NHS). Data goes spoke-to-spoke (phase 2+).</div>
+  </section>
+
+  <!-- 6. FLEXVPN -->
+  <section class="panel" v-show="sec==='flex'" id="flex">
+    <h2>🧩 FlexVPN — IKEv2 profile framework</h2>
+    <p class="lead">Cisco's <b>IKEv2-based</b> unified VPN framework handling <b>site-to-site, remote access, hub-and-spoke, and spoke-to-spoke</b> with the same IKEv2 <b>profile</b> building blocks.</p>
+
+    <h3>IKEv2 profile chain (memorize)</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> crypto ikev2 proposal (enc+int+DH)</div>
+      <div class="step"><span class="n">2</span> crypto ikev2 policy (proposal+lifetime)</div>
+      <div class="step"><span class="n">3</span> crypto ikev2 keyring (PSKs)</div>
+      <div class="step"><span class="n">4</span> crypto ikev2 profile (match+auth+keyring)</div>
+      <div class="step"><span class="n">5</span> crypto ipsec profile (transform+ikev2)</div>
+    </div>
+    <pre class="cmd">crypto ikev2 proposal FlexProp
+ encryption aes-gcm-256
+ integrity sha256
+ group 14
+crypto ikev2 profile FlexProfile
+ match identity remote address 0.0.0.0
+ authentication remote pre-share
+ authentication local pre-share
+ keyring local FlexKeys
+crypto ipsec profile FlexIPsec
+ set transform-set AES-SHA
+ set ikev2-profile FlexProfile
+interface Tunnel0
+ tunnel protection ipsec profile FlexIPsec
+</pre>
+    <div class="callout blue"><b>FlexVPN vs DMVPN:</b> DMVPN is NHRP + mGRE (hub-spoke focus, IKEv1 or v2). <b>FlexVPN is IKEv2-native, profile-driven, and adds remote access mode</b> — unified/simpler. FlexVPN can run hub-spoke using NHRP too.</div>
+  </section>
+
+  <!-- 7. GET VPN -->
+  <section class="panel" v-show="sec==='get'" id="get">
+    <h2>🎯 GET VPN — tunnel-free any-to-any</h2>
+    <p class="lead">Encrypts <b>any-to-any</b> over an MPLS/IP backbone <b>without tunnel interfaces</b>. All group routers share a common <b>group key</b> managed via <b>GDOI</b>.</p>
+
+    <h3>GDOI model</h3>
+    <div class="grid g3">
+      <div class="card"><h4>Key Server (KS)</h4><p class="muted" style="margin:0">manages + distributes group keys</p></div>
+      <div class="card"><h4>Member</h4><p class="muted" style="margin:0">group router that encrypts</p></div>
+      <div class="card"><h4>GDOI</h4><p class="muted" style="margin:0">group key mgmt · <b>UDP 848</b></p></div>
+    </div>
+
+    <h3>TEK vs KEK (memorize)</h3>
+    <div class="grid g2">
+      <div class="card"><h4>TEK — Traffic Encryption Key</h4><p class="muted" style="margin:0">encrypts the actual data between members</p></div>
+      <div class="card"><h4>KEK — Key Encryption Key</h4><p class="muted" style="margin:0">protects TEK distribution</p></div>
+    </div>
+
+    <h3>How it works</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> member registers with KS (GDOI UDP 848)</div>
+      <div class="step"><span class="n">2</span> KS sends KEK + TEK</div>
+      <div class="step"><span class="n">3</span> member A encrypts directly to B with shared TEK</div>
+      <div class="step"><span class="n">4</span> no tunnel built between them</div>
+    </div>
+    <div class="callout red"><b>Trap:</b> GET VPN has <u>no tunnel interfaces</u> and <u>no overlay routing</u> — underlay routes natively. GDOI = <b>UDP 848</b>. <b>COOP</b> provides redundant key servers (HA).</div>
+  </section>
+
+  <!-- 8. SSL VPN + RA -->
+  <section class="panel" v-show="sec==='ssl'" id="ssl">
+    <h2>🌍 SSL VPN + Remote Access</h2>
+    <p class="lead">Lets individual users connect over the Internet. SSL VPN rides <b>TCP 443 (TLS)</b> — the big advantage is it gets through most firewalls/NAT.</p>
+
+    <h3>Client-based vs clientless</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:raMode==='client'}" @click="raMode='client'">
+        <div class="pn">Client (AnyConnect)</div><div class="pd">software client, full network access (full-tunnel)</div>
+      </div>
+      <div class="proto-cell" :class="{sel:raMode==='clientless'}" @click="raMode='clientless'">
+        <div class="pn">Clientless (portal)</div><div class="pd">browser only, app-centric access, zero install</div>
+      </div>
+    </div>
+    <div class="verdict" :class="raVerdict.cls">{{ raVerdict.text }}</div>
+
+    <h3>Client-based transports</h3>
+    <table>
+      <tr><th>Transport</th><th>Details</th></tr>
+      <tr><td>IPsec RA</td><td class="mono">UDP 500 / 4500 · strong control</td></tr>
+      <tr><td>SSL / AnyConnect</td><td class="mono">TLS TCP 443 · DTLS UDP 443 · firewall-friendly</td></tr>
+    </table>
+
+    <h3>Full-tunnel vs split-tunnel</h3>
+    <div class="grid g2">
+      <div class="card"><h4>Full-tunnel</h4><p class="muted" style="margin:0">all client traffic toward corporate (better security/filtering; more headend load)</p></div>
+      <div class="card"><h4>Split-tunnel</h4><p class="muted" style="margin:0">only corporate subnets through VPN; local Internet direct (better performance)</p></div>
+    </div>
+    <div class="callout blue"><b>Security triad:</b> AAA (RADIUS/LDAP) + MFA (token/cert/SMS) + posture (AnyConnect endpoint check) + group policy (split/full, ACLs). <b>DTLS (UDP 443)</b> = lower latency for real-time voice/video.</div>
+  </section>
+
+  <!-- 9. COMPARE -->
+  <section class="panel" v-show="sec==='compare'" id="compare">
+    <h2>⚖️ Choosing the right VPN</h2>
+
+    <h3>Technology matrix</h3>
+    <table>
+      <tr><th>Tech</th><th>Building blocks</th><th>Best for</th></tr>
+      <tr><td>GRE</td><td class="mono">IP proto 47</td><td>transport, multicast, routing</td></tr>
+      <tr><td>IPsec</td><td class="mono">ESP/AH + IKE</td><td>point-to-point confidentiality</td></tr>
+      <tr><td>DMVPN</td><td class="mono">mGRE + NHRP + IPsec</td><td>dynamic hub/spoke over Internet</td></tr>
+      <tr><td>FlexVPN</td><td class="mono">IKEv2 profiles</td><td>unified S2S/RA/hub-spoke</td></tr>
+      <tr><td>GET VPN</td><td class="mono">GDOI group key</td><td>tunnel-free any-to-any on MPLS</td></tr>
+      <tr><td>SSL VPN</td><td class="mono">TLS/DTLS 443</td><td>remote user / clientless</td></tr>
+    </table>
+
+    <h3>Decision table (scenario questions)</h3>
+    <table>
+      <tr><th>Requirement</th><th>Choice</th></tr>
+      <tr><td>Encryption between two fixed sites</td><td><b>IPsec</b> (or GRE over IPsec)</td></tr>
+      <tr><td>Carry multicast + routing protocols</td><td><b>GRE over IPsec</b></td></tr>
+      <tr><td>Dynamic branches over Internet, no hub bottleneck</td><td><b>DMVPN</b></td></tr>
+      <tr><td>One framework for site-to-site + remote access</td><td><b>FlexVPN</b></td></tr>
+      <tr><td>Any-to-any encryption over MPLS without tunnels</td><td><b>GET VPN</b></td></tr>
+      <tr><td>Remote users from anywhere, minimal client friction</td><td><b>SSL VPN</b></td></tr>
+    </table>
+    <div class="callout red"><b>How to choose:</b> GRE alone doesn't encrypt → pair with IPsec. Dynamic spokes → DMVPN/FlexVPN. Users → SSL. MPLS any-to-any → GET VPN.</div>
+  </section>
+
+  <!-- 10. COMMANDS -->
+  <section class="panel" v-show="sec==='cmds'" id="cmds">
+    <h2>⌨️ CLI Commands</h2>
+    <div class="row-fn">
+      <button class="btn" v-for="c in commands" :key="c.key" :class="{primary:activeCmd===c.key}" @click="activeCmd=c.key">{{ c.label }}</button>
+    </div>
+    <pre class="cmd">{{ activeCommand.show }}</pre>
+  </section>
+
+  <!-- 11. TRAPS -->
+  <section class="panel" v-show="sec==='traps'" id="traps">
+    <h2>⚠️ Common Traps</h2>
+    <div v-for="t in traps" :key="t" class="trap-item"><span class="trap-ico">!</span><div>{{ t }}</div></div>
+  </section>
+
+  <!-- 12. QUIZ -->
+  <section class="panel" v-show="sec==='quiz'" id="quiz">
+    <h2>📝 Quiz ({{ quizQuestions.length }})</h2>
+    <div v-for="(q,qi) in quizQuestions" :key="qi" class="card" style="margin:12px 0">
+      <div style="font-weight:700;margin-bottom:8px">{{ qi+1 }}. {{ q.q }}</div>
+      <div v-for="(o,oi) in q.opts" :key="oi"
+           class="opt" :class="{sel:q.ans===oi}"
+           @click="q.ans=oi">
+        <span class="letter">{{ String.fromCharCode(65+oi) }}</span>{{ o.text }}
+      </div>
+    </div>
+    <div class="row-fn">
+      <button class="btn primary" @click="submitQuiz()" :disabled="!allQuizAnswered">Submit answers</button>
+      <button class="btn" @click="resetQuiz()">Reset</button>
+      <span class="muted" v-if="quizDone" style="font-weight:700">Score: {{ quizScore }} / {{ quizQuestions.length }}
+        ({{ Math.round(quizScore/quizQuestions.length*100) }}%)</span>
+    </div>
+    <div class="verdict" :class="quizDone ? (quizScore===quizQuestions.length?'ok':'info') : 'info'" v-if="quizDone">
+      {{ quizScore===quizQuestions.length ? '🎉 Perfect! All ' + quizQuestions.length + ' correct.' : 'Better luck next time — review the traps section.' }}
+    </div>
+  </section>
+
+  <!-- 13. CHECKLIST -->
+  <section class="panel" v-show="sec==='checklist'" id="checklist">
+    <h2>✅ Study Checklist</h2>
+    <p class="muted" style="margin-bottom:10px">{{ doneCount }} / {{ checklist.length }} complete</p>
+    <div v-for="(c,i) in checklist" :key="i" class="chk-item" :class="{done:c.done}" @click="toggleDone(i)">
+      <span class="chk-box">{{ c.done ? '✓' : '' }}</span>{{ c.t }}
+    </div>
+  </section>
+
+</div>
+
+<script src="../vue.global.prod.js"></script>
+<script>
+(() => {
+  const { createApp, ref, computed, reactive } = Vue;
+  const LS = {
+    theme: 'ccnp.vpn.theme', done: 'ccnp.vpn.done',
+    quiz: 'ccnp.vpn.quiz'
+  };
+  function loadJSON(key, fb) {
+    try { const v = JSON.parse(localStorage.getItem(key)); return (v === null || v === undefined) ? fb : v; }
+    catch (e) { return fb; }
+  }
+  function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+  createApp({
+    setup() {
+      const theme = ref(loadJSON(LS.theme, 'dark'));
+      const sec = ref('intro');
+
+      /* ---------- SECTION NAV ---------- */
+      const sections = [
+        { id: 'intro', label: 'Overview', icon: '🌐' },
+        { id: 'gre', label: 'GRE', icon: '🧸' },
+        { id: 'ipsec', label: 'IPsec', icon: '🔐' },
+        { id: 'site2site', label: 'S2S/IKEv2/VTI', icon: '🏢' },
+        { id: 'dmvpn', label: 'DMVPN', icon: '🕸️' },
+        { id: 'flex', label: 'FlexVPN', icon: '🧩' },
+        { id: 'get', label: 'GET VPN', icon: '🎯' },
+        { id: 'ssl', label: 'SSL/Remote Access', icon: '🌍' },
+        { id: 'compare', label: 'Comparison', icon: '⚖️' },
+        { id: 'cmds', label: 'Commands', icon: '⌨️' },
+        { id: 'traps', label: 'Traps', icon: '⚠️' },
+        { id: 'quiz', label: 'Quiz', icon: '📝' },
+        { id: 'checklist', label: 'Checklist', icon: '✅' }
+      ];
+
+      /* ---------- GRE MTU ---------- */
+      const greMtu = ref(1500);
+      const greEsp = ref(true);
+      const greVerdict = computed(() => {
+        const base = greMtu.value - 24; // GRE 4B + outer IP 20B
+        const eff = greEsp.value ? base - 52 : base; // rough ESP overhead
+        if (!Number.isInteger(greMtu.value) || greMtu.value < 576) return { cls: 'bad', text: 'MTU must be ≥ 576.' };
+        return { cls: 'info', text: 'Interface MTU ' + greMtu.value + ' → GRE overhead ~24B → effective payload ≈ ' + base + 'B' + (greEsp.value ? ' · +IPsec ESP → ≈ ' + eff + 'B payload. Set ip mtu + ip tcp adjust-mss below this.' : '. Set ip mtu + ip tcp adjust-mss below this.') };
+      });
+
+      /* ---------- IPSEC MODE ---------- */
+      const ipsecMode = ref('tunnel');
+      const ipsecModeVerdict = computed(() => {
+        if (ipsecMode.value === 'tunnel') return { cls: 'info', text: 'Tunnel mode — wraps the whole IP packet in a new outer header. Used for site-to-site.' };
+        return { cls: 'info', text: 'Transport mode — protects only the payload (IP headers visible). Used host-to-host / GRE.' };
+      });
+
+      /* ---------- TRANSFORM SET ---------- */
+      const tspEnc = [
+        { key: 'esp-null', label: 'no-encrypt' }, { key: 'esp-aes', label: 'esp-aes' },
+        { key: 'esp-aes-gcm-256', label: 'aes-gcm-256' }
+      ];
+      const tspInt = [
+        { key: 'none', label: 'esp-sha-hmac' }, { key: 'sha256', label: 'sha256' }
+      ];
+      const tspE = ref('esp-aes');
+      const tspI = ref('sha256');
+      const tspVerdict = computed(() => {
+        const e = tspEnc.find(x => x.key === tspE.value);
+        const i = tspInt.find(x => x.key === tspI.value);
+        const name = 'crypto ipsec transform-set TS ' + e.label + ' ' + i.label;
+        return { cls: 'info', text: name + '  — transform set = encryption + integrity pair.' };
+      });
+
+      /* ---------- S2S RECIPE ---------- */
+      const s2sRecipes = [
+        { key: 'ipsec', name: 'Pure IPsec', desc: 'interesting-traffic ACL; no multicast/routing' },
+        { key: 'gre', name: 'GRE over IPsec', desc: 'GRE tunnel + IPsec; routing/multicast + crypto (classic preferred)' },
+        { key: 'flex', name: 'FlexVPN/IKEv2', desc: 'profiles; modern/simpler' }
+      ];
+      const s2sPick = ref('gre');
+      const s2sVerdict = computed(() => {
+        const r = s2sRecipes.find(x => x.key === s2sPick.value);
+        const note = s2sPick.value === 'gre' ? ' — the classic recipe: GRE carries routing/multicast, IPsec encrypts.' : (s2sPick.value === 'flex' ? ' — IKEv2 profiles unify config.' : ' — simple, but no multicast; needs mirror ACLs.');
+        return { cls: 'info', text: r.name + note };
+      });
+
+      /* ---------- REMOTE ACCESS ---------- */
+      const raMode = ref('client');
+      const raVerdict = computed(() => {
+        if (raMode.value === 'client') return { cls: 'info', text: 'Client-based (AnyConnect): installs a full tunnel, complete network access, corporate control. Transports: IPsec (UDP 500/4500) or SSL/DTLS (443).' };
+        return { cls: 'info', text: 'Clientless (portal): browser-only access to internal apps, zero install, fine-grained app access over HTTPS.' };
+      });
+
+      /* ---------- COMMANDS ---------- */
+      const commands = [
+        {
+          key: 'gre', label: 'GRE',
+          show: "interface Tunnel0\n ip address 10.10.10.1 255.255.255.252\n tunnel source GigabitEthernet0/0\n tunnel destination 203.0.113.2\n ip mtu 1400\n ip tcp adjust-mss 1360\n keepalive 10 3\n! routing protocol over the tunnel (carries multicast)\nrouter ospf 1\n network 10.10.10.0 0.0.0.3 area 0\n\nshow interface Tunnel0\nshow ip interface brief | include Tunnel"
+        },
+        {
+          key: 'ipsec', label: 'IPsec (crypto map)',
+          show: "crypto isakmp policy 10\n encryption aes\n authentication pre-share\n group 14\ncrypto isakmp key MySecret address 203.0.113.2\ncrypto ipsec transform-set TS esp-aes esp-sha-hmac\naccess-list 100 permit ip 10.0.0.0 0.0.0.255 10.1.0.0 0.0.0.255\ncrypto map CM 10 ipsec-isakmp\n set peer 203.0.113.2\n set transform-set TS\n match address 100\ninterface GigabitEthernet0/0\n crypto map CM\n\nshow crypto isakmp sa\nshow crypto ipsec sa\nshow crypto map"
+        },
+        {
+          key: 'ikev2', label: 'IKEv2 / VTI',
+          show: "crypto ikev2 proposal FlexProp\n encryption aes-gcm-256\n integrity sha256\n group 14\ncrypto ikev2 policy FlexPol\n proposal FlexProp\ncrypto ikev2 keyring FlexKeys\n peer any\n  pre-shared-key address 0.0.0.0 0.0.0.0 key MySecret\ncrypto ikev2 profile FlexProfile\n match identity remote address 0.0.0.0\n authentication remote pre-share\n authentication local pre-share\n keyring local FlexKeys\ncrypto ipsec transform-set AES-SHA esp-aes esp-sha-hmac\ncrypto ipsec profile FlexIPsec\n set transform-set AES-SHA\n set ikev2-profile FlexProfile\n\ninterface Tunnel0   ! VTI - route-based IPsec\n ip address 10.10.10.1 255.255.255.252\n tunnel mode ipsec ipv4\n tunnel protection ipsec profile FlexIPsec\n\nshow crypto ikev2 sa\nshow crypto ipsec sa\nshow crypto session"
+        },
+        {
+          key: 'dmvpn', label: 'DMVPN',
+          show: "! hub\ninterface Tunnel0\n ip nhrp network-id 1\n ip nhrp redirect\n tunnel source GigabitEthernet0/0\n tunnel mode gre multipoint\n tunnel protection ipsec profile DMVPN-PROF\n\ncrypto ipsec profile DMVPN-PROF\n set transform-set AES-SHA\n\n! spoke\ninterface Tunnel0\n ip nhrp map 10.255.0.1 203.0.113.1\n ip nhrp network-id 1\n ip nhrp nhs 10.255.0.1\n tunnel source GigabitEthernet0/0\n tunnel mode gre multipoint\n tunnel protection ipsec profile DMVPN-PROF\n\nshow dmvpn\nshow ip nhrp\nshow crypto session"
+        },
+        {
+          key: 'getvpn', label: 'GET VPN',
+          show: "! Key Server\ncrypto gdoi group ENCRYPT\n identity number 98765\n server local\n  rekey\n   lifetime seconds 86400\n  address ipv4 203.0.113.1\n  authorization address ipv4 203.0.113.1\n\n! Member (group router)\ncrypto gdoi group ENCRYPT\n identity number 98765\n server address ipv4 203.0.113.1\n! protect traffic (group policy)\ncrypto ipsec transform-set TS esp-aes esp-sha-hmac\ncrypto map GDOI 10 gdoi\n set group ENCRYPT\n\nshow crypto gdoi group\nshow crypto gdoi ks\nshow crypto gdoi member\nshow crypto ipsec sa"
+        },
+        {
+          key: 'ssl', label: 'ASA Remote Access',
+          show: "! ASA remote-access headend (representative)\ncrypto ikev2 enable outside\ngroup-policy RA internal\ngroup-policy RA attributes\n vpn-tunnel-protocol ikev2 ssl-client\n split-tunnel-policy tunnelspecified\n split-tunnel-network-list value SPLIT-ACL\ntunnel-group RA type remote-access\ntunnel-group RA general-attributes\n address-pool POOL\n default-group-policy RA\n\nshow vpn-sessiondb anyconnect\nshow vpn-sessiondb ikev2\nshow tunnel-group\nshow crypto ikev2 sa"
+        }
+      ];
+      const activeCmd = ref(commands[0].key);
+      const activeCommand = computed(() => commands.find(c => c.key === activeCmd.value));
+
+      /* ---------- TRAPS ---------- */
+      const traps = [
+        'GRE = IP protocol 47 (not TCP/UDP); GRE has no encryption — pair with IPsec for security.',
+        'GRE carries multicast + routing protocols directly (virtual interface), which IPsec alone cannot.',
+        'GRE overhead ≈ 24B (4B GRE + 20B outer IP); fix MTU with ip mtu + ip tcp adjust-mss.',
+        'ESP = protocol 50 (encrypts); AH = protocol 51 (integrity only, no encrypt, no NAT-T).',
+        'IKE = UDP 500; NAT-T/ESP-in-UDP = UDP 4500. GDOI (GET VPN) = UDP 848.',
+        'Transform set = encryption + integrity pair (e.g. esp-aes esp-sha-hmac).',
+        'IPsec: tunnel mode for site-to-site (wraps whole packet); transport mode protects only payload.',
+        'IKEv1 = phase 1 (main 6msgs/aggressive 3msgs) + phase 2 (quick); IKEv2 = IKE_SA_INIT + IKE_AUTH (RFC 7296).',
+        'IKEv2 has no main/aggressive modes; built-in NAT-T and EAP; IKE SA 86400s, Child SA 3600s.',
+        'Site-to-site: interesting-traffic ACL must be mirror on both sides; NO interesting traffic = NO IPsec SA.',
+        'VTI is route-based IPsec (tunnel mode ipsec ipv4) — routing triggers encryption, not an ACL.',
+        'DMVPN = mGRE + NHRP + IPsec; control at hub, data goes direct spoke-to-spoke (phase 2+).',
+        'FlexVPN = IKEv2 profile model (proposal→policy→keyring→profile→ipsec profile), not crypto map/ISAKMP.',
+        'GET VPN: no tunnels, GDOI group key, works over MPLS; TEK encrypts data, KEK protects key distribution.',
+        'SSL VPN = TLS TCP 443 + DTLS UDP 443; firewall-friendly; clientless (portal) vs AnyConnect (full tunnel).',
+        'Remote access: IPsec RA uses UDP 500/4500; SSL/AnyConnect uses 443; split-tunnel vs full-tunnel tradeoff.',
+        'Choose by topology: fixed sites → IPsec; multicast+route → GRE over IPsec; dynamic spokes → DMVPN/FlexVPN; MPLS any-to-any → GET.'
+      ];
+
+      /* ---------- QUIZ ---------- */
+      const quizRaw = [
+        { q: 'GRE uses which IP protocol number?', opts: [{ text: '47' }, { text: '50' }, { text: '51' }, { text: '6' }], correct: 0 },
+        { q: 'Which IPsec protocol provides confidentiality (encryption)?', opts: [{ text: 'ESP (50)' }, { text: 'AH (51)' }, { text: 'GRE (47)' }, { text: 'IKE (500)' }], correct: 0 },
+        { q: 'GRE over IPsec is preferred over pure IPsec mainly because GRE:', opts: [{ text: 'carries multicast + routing protocols' }, { text: 'adds encryption' }, { text: 'removes the need for IPsec' }, { text: 'uses port 500' }], correct: 0 },
+        { q: 'IKE uses which UDP port?', opts: [{ text: '500' }, { text: '4500' }, { text: '848' }, { text: '443' }], correct: 0 },
+        { q: 'NAT-T (ESP in UDP) uses which port?', opts: [{ text: '4500' }, { text: '500' }, { text: '848' }, { text: '1701' }], correct: 0 },
+        { q: 'For site-to-site, IPsec normally operates in which mode?', opts: [{ text: 'tunnel' }, { text: 'transport' }, { text: 'promiscuous' }, { text: 'broadcast' }], correct: 0 },
+        { q: 'In classic policy-based IPsec, encryption triggers on:', opts: [{ text: 'interesting-traffic ACL match (mirror on both sides)' }, { text: 'a route toward a tunnel interface' }, { text: 'any multicast traffic' }, { text: 'the IKE peer responding' }], correct: 0 },
+        { q: 'Which VPN uses mGRE + NHRP + IPsec?', opts: [{ text: 'DMVPN' }, { text: 'GET VPN' }, { text: 'SSL VPN' }, { text: 'FlexVPN only' }], correct: 0 },
+        { q: 'In DMVPN, which device is the NHRP Next Hop Server (NHS)?', opts: [{ text: 'the hub' }, { text: 'each spoke' }, { text: 'the Key Server' }, { text: 'the RADIUS server' }], correct: 0 },
+        { q: 'FlexVPN is based on which protocol?', opts: [{ text: 'IKEv2 profiles' }, { text: 'IKEv1 crypto maps' }, { text: 'NHRP only' }, { text: 'L2TP' }], correct: 0 },
+        { q: 'GET VPN uses which protocol for group key management?', opts: [{ text: 'GDOI (UDP 848)' }, { text: 'IKE over EVERY tunnel' }, { text: 'SSH' }, { text: 'NHRP' }], correct: 0 },
+        { q: 'In GET VPN, which key encrypts the actual data?', opts: [{ text: 'TEK' }, { text: 'KEK' }, { text: 'ISAKMP' }, { text: 'pre-shared key' }], correct: 0 },
+        { q: 'THE main advantage of SSL VPN over IPsec remote access is:', opts: [{ text: 'it passes through most firewalls/NAT via TLS 443' }, { text: 'stronger encryption' }, { text: 'it never needs a client' }, { text: 'faster routing' }], correct: 0 },
+        { q: 'AnyConnect can use which low-latency transport on UDP 443?', opts: [{ text: 'DTLS' }, { text: 'ESP' }, { text: 'AH' }, { text: 'GDOI' }], correct: 0 },
+        { q: 'Which VPN is best for any-to-any encryption over MPLS WITHOUT tunnel interfaces?', opts: [{ text: 'GET VPN' }, { text: 'DMVPN' }, { text: 'SSL VPN' }, { text: 'IPsec crypto map' }], correct: 0 },
+        { q: 'A VTI encrypts traffic based on:', opts: [{ text: 'a route toward the tunnel (route-based)' }, { text: 'an interesting-traffic ACL' }, { text: 'the DHCP lease' }, { text: 'the multicast group' }], correct: 0 }
+      ];
+      const quizQuestions = reactive(quizRaw.map(q => ({ ...q, ans: null })));
+      const quizDone = ref(false);
+      const quizScore = ref(loadJSON(LS.quiz, 0) || 0);
+      const allQuizAnswered = computed(() => quizQuestions.every(q => q.ans !== null));
+      function submitQuiz() {
+        if (!allQuizAnswered.value) return;
+        quizScore.value = quizQuestions.filter((q, i) => q.ans === q.correct).length;
+        quizDone.value = true;
+        save(LS.quiz, quizScore.value);
+      }
+      function resetQuiz() {
+        quizQuestions.forEach(q => q.ans = null);
+        quizDone.value = false;
+        quizScore.value = 0;
+        localStorage.removeItem(LS.quiz);
+      }
+
+      /* ---------- CHECKLIST ---------- */
+      const checklistRoot = loadJSON(LS.done, [
+        { t: 'Numbers: GRE=47, AH=51, ESP=50, IKE=UDP500, NAT-T=UDP4500, GDOI=UDP848, TLS=TCP443, DTLS=UDP443', done: false },
+        { t: 'GRE: any L3 + multicast + routing over virtual interface; no encryption; ~24B overhead; MTU/MSS tuning', done: false },
+        { t: 'IPsec: ESP encrypts, AH doesn\'t; tunnel mode (site-to-site) vs transport (payload only)', done: false },
+        { t: 'Transform set = encryption + integrity pair; IKE phases: v1 main/aggressive + quick, v2 INIT+AUTH (RFC 7296)', done: false },
+        { t: 'S2S: interesting-traffic ACL mirror required; no interesting traffic = no IPsec SA; GRE-over-IPsec = classic', done: false },
+        { t: 'IKEv1 vs IKEv2: v2 single IKE_SA, native NAT-T + EAP, CREATE_CHILD_SA rekey; IKE 86400s, Child 3600s', done: false },
+        { t: 'VTI: route-based IPsec, tunnel mode ipsec ipv4, tunnel protection ipsec profile; no mirror ACLs', done: false },
+        { t: 'DMVPN: mGRE + NHRP + IPsec; control at hub, data direct spoke-to-spoke (phase 2); register via NHS', done: false },
+        { t: 'FlexVPN: IKEv2 profile chain (proposal→policy→keyring→profile→ipsec profile); unifies S2S/RA/hub/spoke', done: false },
+        { t: 'GET VPN: GDOI group key, no tunnels, TEK (data) vs KEK (key dist), best on MPLS; COOP for HA', done: false },
+        { t: 'SSL VPN: TLS 443 + DTLS 443; clientless portal vs AnyConnect full tunnel; split vs full tunnel', done: false },
+        { t: 'Remote access: IPsec RA UDP 500/4500 vs SSL 443; security = AAA + MFA + posture + group policy', done: false },
+        { t: 'Choose: fixed→IPsec, multicast+route→GRE over IPsec, dynamic spokes→DMVPN/FlexVPN, MPLS→GET, users→SSL', done: false }
+      ]);
+      const checklist = reactive(checklistRoot);
+      const doneCount = computed(() => checklist.filter(c => c.done).length);
+      function saveChecklist() { save(LS.done, checklistRoot); }
+      function toggleDone(i) { checklistRoot[i].done = !checklistRoot[i].done; saveChecklist(); }
+
+      return {
+        theme, sec, sections,
+        greMtu, greEsp, greVerdict,
+        ipsecMode, ipsecModeVerdict,
+        tspEnc, tspInt, tspE, tspI, tspVerdict,
+        s2sRecipes, s2sPick, s2sVerdict,
+        raMode, raVerdict,
+        commands, activeCmd, activeCommand,
+        traps,
+        quizQuestions, quizDone, quizScore, allQuizAnswered, submitQuiz, resetQuiz,
+        checklist, doneCount, saveChecklist, toggleDone
+      };
+    }
+  }).mount('#app');
+})();
+</script>
+</body>
+</html>

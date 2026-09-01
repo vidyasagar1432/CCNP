@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How OSPF Works — Deep Dive</title>
+<style>
+  :root {
+    --bg: #0f172a; --panel: #111c34; --card: #1e293b; --card-2: #16233d;
+    --text: #f8fafc; --muted: #94a3b8;
+    --blue: #38bdf8; --blue-dim: #0c4a6e;
+    --green: #34d399; --green-dim: #064e3b;
+    --amber: #fbbf24; --amber-dim: #78350f;
+    --red: #f87171; --red-dim: #7f1d1d;
+    --violet: #a78bfa; --violet-dim: #4c1d95;
+    --cyan: #22d3ee; --cyan-dim: #164e63;
+    --border: #334155; --hover: #263449; --code-bg: #0b1220;
+  }
+  #app[data-theme="light"] {
+    --bg: #f1f5f9; --panel: #ffffff; --card: #ffffff; --card-2: #f8fafc;
+    --text: #0f172a; --muted: #64748b;
+    --blue: #0284c7; --blue-dim: #bae6fd;
+    --green: #059669; --green-dim: #d1fae5;
+    --amber: #d97706; --amber-dim: #fef3c7;
+    --red: #dc2626; --red-dim: #fee2e2;
+    --violet: #7c3aed; --violet-dim: #ede9fe;
+    --cyan: #0891b2; --cyan-dim: #cffafe;
+    --border: #cbd5e1; --hover: #e2e8f0; --code-bg: #0b1220;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; }
+  #app { max-width: 1040px; margin: 0 auto; padding: 20px 18px 60px; }
+
+  header { position: sticky; top: 0; z-index: 30; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .lv-badge { background: var(--blue-dim); color: var(--blue); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .exam-badge { background: var(--violet-dim); color: var(--violet); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .head-actions { display: flex; align-items: center; gap: 8px; }
+  .btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: background 0.15s; }
+  .btn:hover { background: var(--hover); }
+  .btn.primary { background: var(--blue); color: #0f172a; border-color: var(--blue); }
+
+  nav { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 2px 16px; }
+  nav button.chip { border: 1px solid var(--border); background: var(--card); color: var(--muted); padding: 5px 11px; border-radius: 999px; cursor: pointer; font-size: 0.76rem; font-weight: 600; }
+  nav button.chip.active { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
+
+  section.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
+  section.panel h2 { font-size: 1.2rem; margin-bottom: 6px; }
+  section.panel h3 { font-size: 1rem; margin: 18px 0 10px; color: var(--blue); }
+  section.panel p { margin: 8px 0; }
+  .muted { color: var(--muted); }
+  .lead { color: var(--muted); font-size: 0.95rem; }
+
+  .grid { display: grid; gap: 12px; }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .g3 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .g4 { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .card h4 { font-size: 0.9rem; margin-bottom: 6px; }
+  .card .big { font-size: 1.3rem; font-weight: 700; font-family: 'Fira Code', ui-monospace, monospace; }
+
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85rem; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  tr:hover td { background: var(--hover); }
+
+  code, .mono { font-family: 'Fira Code', ui-monospace, monospace; }
+  .mono { font-size: 0.9rem; }
+  .chip { display: inline-block; border-radius: 999px; padding: 1px 9px; font-size: 0.74rem; font-weight: 700; }
+  .b-blue { background: var(--blue-dim); color: var(--blue); }
+  .b-green { background: var(--green-dim); color: var(--green); }
+  .b-amber { background: var(--amber-dim); color: var(--amber); }
+  .b-red { background: var(--red-dim); color: var(--red); }
+  .b-violet { background: var(--violet-dim); color: var(--violet); }
+  .b-cyan { background: var(--cyan-dim); color: var(--cyan); }
+
+  .callout { border-left: 4px solid var(--amber); background: var(--card-2); border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 12px 0; font-size: 0.9rem; }
+  .callout.green { border-color: var(--green); }
+  .callout.red { border-color: var(--red); }
+  .callout.blue { border-color: var(--blue); }
+  .callout.violet { border-color: var(--violet); }
+
+  .bar { height: 12px; background: var(--card-2); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; display: flex; margin: 4px 0 8px; }
+  .bar > div { height: 100%; }
+  .seg-blue { background: var(--blue); }
+  .seg-green { background: var(--green); }
+  .seg-violet { background: var(--violet); }
+  .seg-amber { background: var(--amber); }
+  .seg-red { background: var(--red); }
+
+  .row-fn { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 8px 0; }
+  .row-fn input[type="number"], .row-fn input[type="text"] { background: var(--code-bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-family: 'Fira Code', monospace; font-size: 0.9rem; }
+
+  .opt { display: flex; align-items: center; gap: 8px; padding: 6px 9px; margin: 3px 0; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; background: var(--card); font-size: 0.86rem; }
+  .opt.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .opt .letter { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex: 0 0 auto; }
+  .opt.sel .letter { background: var(--blue); color: #0f172a; }
+
+  #app pre, pre.cmd { background: var(--code-bg); color: #e2e8f0; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.82rem; line-height: 1.5; }
+
+  .trap-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  .trap-item:last-child { border-bottom: none; }
+  .trap-ico { color: var(--red); font-weight: 700; flex: 0 0 auto; }
+
+  .step-flow { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .step { border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 0.8rem; background: var(--card-2); }
+  .step .n { color: var(--blue); font-weight: 700; }
+
+  .verdict { border-radius: 8px; padding: 10px 14px; font-weight: 700; margin: 8px 0; }
+  .verdict.ok { background: var(--green-dim); color: var(--green); }
+  .verdict.bad { background: var(--red-dim); color: var(--red); }
+  .verdict.info { background: var(--blue-dim); color: var(--blue); }
+
+  .chk-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; margin: 5px 0; cursor: pointer; transition: opacity 0.15s; }
+  .chk-item.done { opacity: 0.55; text-decoration: line-through; }
+  .chk-box { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 5px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; }
+  .chk-item.done .chk-box { background: var(--green); border-color: var(--green); color: #0f172a; }
+
+  /* OSPF-specific */
+  .sm-state { display: flex; align-items: center; gap: 4px; margin: 3px 0; }
+  .sm-state .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); flex: 0 0 auto; }
+  .sm-state.on .dot { background: var(--green); box-shadow: 0 0 0 3px var(--green-dim); }
+  .sm-state.cur .dot { background: var(--blue); box-shadow: 0 0 0 3px var(--blue-dim); }
+
+  .net { display: flow-root; }
+  .node { display: inline-block; border: 1px solid var(--border); border-radius: 10px; padding: 7px 12px; background: var(--card); text-align: center; min-width: 56px; font-family: 'Fira Code', monospace; font-size: 0.8rem; }
+  .node.settled { border-color: var(--green); background: var(--green-dim); }
+  .node.cur { border-color: var(--blue); background: var(--blue-dim); }
+  .node .nd { font-weight: 700; }
+  .edge { color: var(--muted); font-family: 'Fira Code', monospace; font-size: 0.75rem; }
+
+  .lsa-row { display: flex; align-items: center; gap: 10px; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+  .lsa-num { font-family: 'Fira Code', monospace; font-weight: 700; color: var(--blue); min-width: 26px; }
+
+  .area-cell { border: 1px solid var(--border); border-radius: 10px; padding: 9px 10px; background: var(--card); cursor: pointer; text-align: center; }
+  .area-cell.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .area-cell .an { font-weight: 700; }
+  .area-cell .ad { font-size: 0.75rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<div id="app" :data-theme="theme">
+  <header>
+    <h1><span class="lv-badge">L10</span> How OSPF Works
+      <span class="exam-badge">ENCOR 350-401</span></h1>
+    <div class="head-actions">
+      <a class="btn" href="../Level 09 - Routing Fundamentals/How Routing Works.html">◀ Routing</a>
+      <a class="btn" href="../Level 11 - EIGRP/How EIGRP Works.html">EIGRP ▶</a>
+      <a class="btn" href="../index.html">Flashcards</a>
+      <button class="btn" @click="theme = (theme==='dark'?'light':'dark')">{{ theme==='dark' ? '☀' : '🌙' }}</button>
+    </div>
+  </header>
+
+  <nav>
+    <button class="chip" v-for="s in sections" :key="s.id" :class="{active:sec===s.id}" @click="sec=s.id">{{ s.icon }} {{ s.label }}</button>
+  </nav>
+
+  <!-- 1. PROTOCOL BASICS -->
+  <section class="panel" v-show="sec==='proto'" id="proto">
+    <h2>🌐 OSPF Basics (v2 &amp; v3)</h2>
+    <p class="lead"><b>OSPF</b> (Open Shortest Path First, RFC 2328) is an <b>open-standard, link-state IGP</b> with AD <b>110</b>. Routers flood <b>LSAs</b> to build a shared <b>LSDB</b>, then each runs <b>Dijkstra SPF</b> to compute its shortest-path tree — fast convergence, loop-free by construction.</p>
+
+    <h3>The three tables</h3>
+    <table>
+      <tr><th>Table</th><th>Holds</th><th class="mono">Command</th></tr>
+      <tr><td>Neighbor</td><td>adjacent routers + state</td><td class="mono">show ip ospf neighbor</td></tr>
+      <tr><td>LSDB</td><td>all LSAs (topology map)</td><td class="mono">show ip ospf database</td></tr>
+      <tr><td>Routing</td><td>best routes (SPF output)</td><td class="mono">show ip route ospf</td></tr>
+    </table>
+
+    <h3>Hello protocol &amp; facts</h3>
+    <div class="grid g3">
+      <div class="card"><h4>Hello / Dead</h4><div class="big">10 / 40 s</div><p class="muted" style="margin:0">broadcast &amp; P2P · NBMA is 30 / 120</p></div>
+      <div class="card"><h4>Multicast</h4><div class="big">.5 / .6</div><p class="muted" style="margin:0">224.0.0.5 all · 224.0.0.6 DR/BDR</p></div>
+      <div class="card"><h4>Port / Protocol</h4><div class="big">89</div><p class="muted" style="margin:0">IP protocol 89 · unicast on NBMA</p></div>
+      <div class="card"><h4>Cost formula</h4><div class="big">ref ÷ BW</div><p class="muted" style="margin:0">default reference 100 Mbps</p></div>
+      <div class="card"><h4>AD</h4><div class="big">110</div><p class="muted" style="margin:0">higher-AD neighbors not used</p></div>
+      <div class="card"><h4>Design</h4><div class="big">link-state</div><p class="muted" style="margin:0">LSDB + SPF per router</p></div>
+    </div>
+
+    <h3>v2 vs v3 (exam table)</h3>
+    <table>
+      <tr><th>Item</th><th>OSPFv2</th><th>OSPFv3</th></tr>
+      <tr><td>Address family</td><td>IPv4</td><td>IPv6</td></tr>
+      <tr><td>LSA addresses</td><td>in header</td><td>prefix options in payload</td></tr>
+      <tr><td>Per-link prefixes</td><td>no</td><td>yes (AF-agnostic)</td></tr>
+      <tr><td>Authentication</td><td>MD5/SHA in header</td><td><b>IPv6 AH / ESP / IPsec</b></td></tr>
+      <tr><td>Router ID</td><td>32-bit required</td><td>32-bit still required</td></tr>
+    </table>
+    <div class="callout red"><b>Trap:</b> OSPFv3 has <u>no</u> OSPF-native authentication — the exam answer is IPsec/AH, not OSPF keys. And <code>ipv6 unicast-routing</code> must be on globally.</div>
+
+    <h3>Cost explorer</h3>
+    <p class="muted">OSPF cost = reference bandwidth ÷ interface bandwidth (floors at 1).</p>
+    <div class="grid g2">
+      <div class="card"><h4>Interface bandwidth (Mbps)</h4>
+        <div class="row-fn">
+          <button class="btn" v-for="b in costBws" :key="b" :class="{primary:costIfBw===b}" @click="costIfBw=b">{{ b }}</button>
+        </div>
+      </div>
+      <div class="card"><h4>Reference bandwidth (Mbps)</h4>
+        <div class="row-fn">
+          <button class="btn" v-for="r in costRefs" :key="r" :class="{primary:costRefBw===r}" @click="costRefBw=r">{{ r }}</button>
+        </div>
+      </div>
+    </div>
+    <div class="verdict" :class="costVerdict.cls">{{ costVerdict.text }}</div>
+    <div class="callout blue"><b>Why tune?</b> At default 100 Mbps reference, a 100 Mbps, 1 Gbps and 10 Gbps link all cost <b>1</b> — use <code>auto-cost reference-bandwidth 1000</code> to keep fast links distinct.</div>
+  </section>
+
+  <!-- 2. ROUTER ID -->
+  <section class="panel" v-show="sec==='rid'" id="rid">
+    <h2>🪪 Router ID — who is this router</h2>
+    <p class="lead">The <b>32-bit Router ID (RID)</b> uniquely identifies an OSPF router in the LSDB — it appears in LSA headers, Hellos, and DR/BDR election. Stable RIDs prevent duplicate-router confusion.</p>
+
+    <h3>Election order (memorize)</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> Explicitly configured <code>router-id</code></div>
+      <div class="step"><span class="n">2</span> Highest IPv4 loopback</div>
+      <div class="step"><span class="n">3</span> Highest IPv4 physical interface</div>
+      <div class="step"><span class="n">4</span> None → OSPF may refuse to start</div>
+    </div>
+    <div class="callout red"><b>Trap:</b> RID election uses <u>highest</u>, not lowest. And changing <code>router-id</code> needs <code>clear ip ospf process</code> to take effect.</div>
+
+    <h3>Election explorer</h3>
+    <div class="grid g3">
+      <div class="card"><h4>Configured router-id</h4>
+        <div class="row-fn"><input type="text" v-model="ridCfg" @input="ridInput"></div>
+      </div>
+      <div class="card"><h4>Highest loopback</h4>
+        <div class="row-fn"><input type="text" v-model="ridLoop" @input="ridInput"></div>
+      </div>
+      <div class="card"><h4>Highest physical IPv4</h4>
+        <div class="row-fn"><input type="text" v-model="ridPhy" @input="ridInput"></div>
+      </div>
+    </div>
+    <div class="verdict" :class="ridVerdict.cls">{{ ridVerdict.text }}</div>
+
+    <h3>RID &amp; operations</h3>
+    <ul>
+      <li>Neighbor identity in <code>show ip ospf neighbor</code> = <b>RID</b>, not interface IP.</li>
+      <li>DR/BDR tie-break uses <b>highest RID</b> when priority is equal.</li>
+      <li>Duplicate RIDs → neighbors flap / never form — RID must be unique per area/domain.</li>
+      <li>OSPFv3 still needs a <b>32-bit RID even with no IPv4</b> — configure it manually.</li>
+    </ul>
+  </section>
+
+  <!-- 3. NEIGHBOR STATES -->
+  <section class="panel" v-show="sec==='nbr'" id="nbr">
+    <h2>🤝 Neighbor States</h2>
+    <p class="lead">OSPF neighbors progress through a <b>state machine</b> as they discover, negotiate, and synchronize LSDBs. Stable states are <b>2-Way</b> (multi-access non-DR) and <b>Full</b> (adjacency).</p>
+
+    <h3>State machine stepper</h3>
+    <div class="sm-state" v-for="(s,si) in nbrStates" :key="s.name"
+         :class="{on: si &lt; nbrStep, cur: si === nbrStep}">
+      <span class="dot"></span>
+      <b style="min-width:70px">{{ s.name }}</b>
+      <span class="muted">{{ s.desc }}</span>
+    </div>
+    <div class="row-fn">
+      <button class="btn" @click="nbrStep = Math.max(0, nbrStep-1)">◀ Back</button>
+      <button class="btn primary" @click="nbrStep = Math.min(nbrStates.length-1, nbrStep+1)">Next ▶</button>
+      <button class="btn" @click="nbrStep = 7">Jump to Full</button>
+      <span class="muted">Step {{ nbrStep }} / {{ nbrStates.length-1 }} — {{ nbrStates[nbrStep].what }}</span>
+    </div>
+
+    <h3>Three phases</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">Discovery</span> Init → 2-Way (mutual hello visibility)</div>
+      <div class="step"><span class="n">Synchronize</span> ExStart → Exchange → Loading (DBD + LSA exchange)</div>
+      <div class="step"><span class="n">Established</span> Full — LSDBs identical, SPF can run</div>
+    </div>
+
+    <h3>DR/BDR twist on broadcast</h3>
+    <table>
+      <tr><th>Neighbor pair</th><th>State</th></tr>
+      <tr><td>DR ↔ DROther</td><td><span class="chip b-green">Full</span></td></tr>
+      <tr><td>BDR ↔ DROther</td><td><span class="chip b-green">Full</span></td></tr>
+      <tr><td>DROther ↔ DROther</td><td><span class="chip b-amber">2-Way (normal)</span></td></tr>
+      <tr><td>Point-to-point</td><td><span class="chip b-green">Full (no DR)</span></td></tr>
+    </table>
+
+    <h3>Stuck-state diagnosis</h3>
+    <table>
+      <tr><th>Stuck state</th><th>Most likely cause</th></tr>
+      <tr><td>Init</td><td>one-way link / ACL / multicast blocked</td></tr>
+      <tr><td>2-Way (stuck)</td><td>DR/BDR not being elected</td></tr>
+      <tr><td><b>ExStart</b></td><td><b>MTU mismatch</b> (the classic)</td></tr>
+      <tr><td>Exchange</td><td>DBD negotiation / MTU</td></tr>
+      <tr><td>Loading</td><td>LSA request never fulfilled</td></tr>
+    </table>
+    <div class="callout red"><b>Memorize:</b> stuck <b>ExStart</b> = <b>MTU mismatch</b>. Dead = <b>4 × hello</b>. DROthers staying 2-Way is normal — do not "fix" it.</div>
+  </section>
+
+  <!-- 4. DR BDR -->
+  <section class="panel" v-show="sec==='dr'" id="dr">
+    <h2>💠 DR / BDR</h2>
+    <p class="lead">On <b>multi-access (broadcast/NBMA)</b> networks, a Designated Router (DR) and Backup DR (BDR) cut full adjacencies from N×(N−1)/2 down to N. <b>Point-to-point links elect no DR/BDR.</b> Election is <b>priority first, then RID</b>.</p>
+
+    <h3>Adjacency count explorer</h3>
+    <p class="muted">How many full adjacencies on the segment?</p>
+    <div class="row-fn">
+      <label class="muted">Routers: {{ drCount }}</label>
+      <input type="range" min="2" max="12" v-model.number="drCount">
+    </div>
+    <div class="grid g3">
+      <div class="card"><h4>Without DR</h4><div class="big">{{ drFull }}</div><p class="muted" style="margin:0">N×(N−1)/2</p></div>
+      <div class="card"><h4>With DR/BDR</h4><div class="big">{{ drWith }}</div><p class="muted" style="margin:0">each router → DR &amp; BDR</p></div>
+      <div class="card"><h4>Saved adjacencies</h4><div class="big">{{ drSaved }}</div><p class="muted" style="margin:0">reduction via DR hub</p></div>
+    </div>
+
+    <h3>Election rules</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> Highest interface priority (0–255, default 1)</div>
+      <div class="step"><span class="n">2</span> Tie → highest Router ID</div>
+      <div class="step"><span class="n">3</span> Election is non-preemptive</div>
+    </div>
+    <div class="callout amber"><b>Non-preemptive:</b> a higher-priority router joining later does <u>not</u> take over until a full election reset (link down / OSPF restart).</div>
+
+    <h3>Roles &amp; failure</h3>
+    <table>
+      <tr><th>Role</th><th>Adjacency behavior</th></tr>
+      <tr><td>DR</td><td>Full with BDR + all DROthers; floods to segment</td></tr>
+      <tr><td>BDR</td><td>Full with DR + DROthers; silent until DR fails</td></tr>
+      <tr><td>DROther</td><td>2-Way with DROthers; Full with DR+BDR only</td></tr>
+    </table>
+    <div class="callout green"><b>DR dies → BDR becomes DR → a new BDR is elected among DROthers.</b> DROthers never send LSAs to each other — via DR/BDR (multicast 224.0.0.6).</div>
+    <div class="callout red"><b>Trap:</b> priority <b>0</b> = never a DR/BDR. P2P = no DR at all (straight to Full). Both election criteria are "highest", don't invert.</div>
+  </section>
+
+  <!-- 5. LSA TYPES -->
+  <section class="panel" v-show="sec==='lsa'" id="lsa">
+    <h2>🗂️ LSA Types</h2>
+    <p class="lead"><b>LSAs (Link State Advertisements)</b> are the building blocks of the LSDB. Each type describes a different part of topology or reachability — who originates it and where it lives matters. Memorize Types 1–7.</p>
+
+    <h3>The LSA table</h3>
+    <div class="lsa-row" v-for="l in lsas" :key="l.t">
+      <span class="lsa-num">T{{ l.t }}</span>
+      <span style="min-width:120px"><b>{{ l.name }}</b></span>
+      <span class="chip" :class="l.cls">{{ l.origin }}</span>
+      <span class="muted">{{ l.role }}</span>
+    </div>
+
+    <h3>Route codes produced</h3>
+    <table>
+      <tr><th>LSA</th><th>Route code</th><th>Meaning</th></tr>
+      <tr><td>Type 1 / 2</td><td class="mono">O</td><td>intra-area</td></tr>
+      <tr><td>Type 3</td><td class="mono">O IA</td><td>inter-area</td></tr>
+      <tr><td>Type 5</td><td class="mono">O E1 / O E2</td><td>external</td></tr>
+      <tr><td>Type 7</td><td class="mono">O N1 / O N2</td><td>NSSA external</td></tr>
+    </table>
+    <div class="callout blue"><b>E1 vs E2:</b> E2 = external cost only (default); E1 = total cost includes the path cost to the ASBR. Same idea for N1/N2.</div>
+
+    <div class="callout red"><b>Traps:</b> Type 2 is originated by the <b>DR</b>, not every router. Type 4 tells you <b>how to reach the ASBR</b>. Type 5 is domain-wide but blocked in stub areas (why NSSA/Type 7 exists). Type 7→5 translation happens at the <b>ABR</b>, not the ASBR.</div>
+  </section>
+
+  <!-- 6. SPF ALGORITHM -->
+  <section class="panel" v-show="sec==='spf'" id="spf">
+    <h2>🌳 SPF Algorithm (Dijkstra)</h2>
+    <p class="lead">OSPF runs <b>Dijkstra's shortest-path-first (SPF)</b> over its LSDB, rooted at itself. Because every router has the same LSDB, each derives the same loop-free shortest paths deterministically. SPF runs <b>per-area</b>.</p>
+
+    <h3>Step through Dijkstra</h3>
+    <p class="muted">Topology: R1 (root) — R2(1) · R3(5); R2–R3(2); R2–R4(3); R3–R4(1). Watch SPF find the shortest tree.</p>
+    <div class="net">
+      <span class="node" :class="{'settled':isSettled('R1'), 'cur':isCur('R1')}"><span class="nd">R1</span><br><span class="muted">{{ distOf('R1') }}</span></span>
+      <span class="edge">—1—</span>
+      <span class="node" :class="{'settled':isSettled('R2'), 'cur':isCur('R2')}"><span class="nd">R2</span><br><span class="muted">{{ distOf('R2') }}</span></span>
+      <span class="edge">—3—</span>
+      <span class="node" :class="{'settled':isSettled('R4'), 'cur':isCur('R4')}"><span class="nd">R4</span><br><span class="muted">{{ distOf('R4') }}</span></span>
+    </div>
+    <div class="net" style="margin-top:6px">
+      <span class="node" style="visibility:hidden">R1</span>
+      <span class="edge"> \&nbsp;5</span>
+      <span class="node" :class="{'settled':isSettled('R3'), 'cur':isCur('R3')}"><span class="nd">R3</span><br><span class="muted">{{ distOf('R3') }}</span></span>
+      <span class="edge">—1—</span>
+    </div>
+    <div class="row-fn">
+      <button class="btn" @click="spfStep = Math.max(0, spfStep-1)">◀ Prev</button>
+      <button class="btn primary" @click="spfStep = Math.min(spfSteps.length-1, spfStep+1)">Next ▶</button>
+      <span class="muted">Step {{ spfStep+1 }} / {{ spfSteps.length }}</span>
+    </div>
+    <div class="verdict info">{{ spfCur.note }}</div>
+    <p class="muted" style="font-size:.8rem">Green = finalized · Blue = current pick · the number under each node is its tentative shortest cost from R1.</p>
+
+    <h3>Flooding ≠ SPF</h3>
+    <table>
+      <tr><th>Function</th><th>Responsibility</th></tr>
+      <tr><td>Flooding</td><td>distributes LSAs (facts) across the area</td></tr>
+      <tr><td>SPF</td><td>each router computes its own tree independently</td></tr>
+      <tr><td>ABR</td><td>advertises Type 3/4/5 summaries between areas</td></tr>
+    </table>
+    <div class="callout blue"><b>Fast convergence:</b> <code>timers throttle spf</code> (initial/hold/max) + <b>Incremental SPF (ISPF)</b> recalc only affected subtrees. A flap in one area does not recompute all areas.</div>
+  </section>
+
+  <!-- 7. AREAS -->
+  <section class="panel" v-show="sec==='areas'" id="areas">
+    <h2>🗺️ Areas &amp; Backbone</h2>
+    <p class="lead"><b>Areas</b> partition the domain to bound flooding and SPF. Each keeps its own LSDB; <b>Area 0 (backbone)</b> is mandatory transit and all areas must connect to it (directly or via virtual link).</p>
+
+    <h3>Router roles</h3>
+    <table>
+      <tr><th>Role</th><th>Definition</th></tr>
+      <tr><td>Internal router</td><td>all interfaces in one area</td></tr>
+      <tr><td><b>ABR</b></td><td>interfaces in ≥2 areas, at least one is area 0</td></tr>
+      <tr><td>Backbone router</td><td>has an interface in area 0</td></tr>
+      <tr><td><b>ASBR</b></td><td>redistributes routes from outside OSPF</td></tr>
+    </table>
+
+    <h3>Why areas help (scale story)</h3>
+    <table>
+      <tr><th>Without areas</th><th>With areas</th></tr>
+      <tr><td>one giant LSDB domain-wide</td><td>per-area LSDB only</td></tr>
+      <tr><td>every flap → full-domain SPF</td><td>flap contained to its area</td></tr>
+      <tr><td>no summaries</td><td>Type-3/4/5 summaries at ABR</td></tr>
+      <tr><td>high CPU / memory</td><td>bounded CPU / memory</td></tr>
+    </table>
+
+    <h3>LSA flow across areas</h3>
+    <pre class="cmd">Internal (Type 1/2) --&gt; ABR generates Type 3 --&gt; next area
+ASBR generates Type 5 --&gt; flooded domain-wide (except stubs)
+ASBR in NSSA --&gt; Type 7 --&gt; ABR converts to Type 5</pre>
+    <div class="callout red"><b>Trap:</b> ABR = interface in ≥2 areas, one in area 0 — the standard exam definition. All areas must touch area 0 (or virtual link). Area can be a number or dotted-decimal, and all routers in an area must agree on the area ID + parameters.</div>
+  </section>
+
+  <!-- 8. AREA TYPES -->
+  <section class="panel" v-show="sec==='areatype'" id="areatype">
+    <h2>🧱 Stub &amp; Totally Stubby Areas</h2>
+    <p class="lead">A <b>stub area</b> blocks Type 5 (external) LSAs; the ABR injects a <b>default route</b> so outbound traffic still works. A <b>totally stubby area</b> also blocks Type 3 inter-area summaries — the smallest possible LSDB.</p>
+
+    <h3>Area-type filter explorer</h3>
+    <p class="muted">What LSAs get through in each area type?</p>
+    <div class="grid g4">
+      <div class="area-cell" v-for="a in areaTypes" :key="a.key"
+           :class="{sel:areaSel===a.key}" @click="areaSel=a.key">
+        <div class="an">{{ a.name }}</div>
+        <div class="ad">{{ a.tag }}</div>
+      </div>
+    </div>
+    <table>
+      <tr><th>LSA</th><th v-for="a in areaTypes" :key="'h'+a.key">{{ a.short }}</th></tr>
+      <tr v-for="l in areaBlocks" :key="l.name">
+        <td>{{ l.name }}</td>
+        <td v-for="a in areaTypes" :key="'c'+a.key">
+          <span class="chip" :class="l.allowed[a.key] ? 'b-green' : 'b-red'">{{ l.allowed[a.key] ? 'allowed' : 'blocked' }}</span>
+        </td>
+      </tr>
+    </table>
+    <div class="verdict" :class="areaVerdict.cls">{{ areaVerdict.text }}</div>
+
+    <h3>Config</h3>
+    <pre class="cmd">! Stub — all routers in the area:
+router ospf 1
+ area 2 stub
+ area 2 default-cost 10          ! cost of the injected default
+
+! Totally stubby — ONLY the ABR uses no-summary:
+router ospf 1
+ area 3 stub no-summary</pre>
+    <div class="callout red"><b>Traps:</b> stub/totally stubby <u>cannot contain an ASBR</u>, <u>cannot be area 0</u>, and <u>no virtual link traversal</u>. All routers in the area must be configured the same, or adjacencies fail. Injected default route code = <b>O*IA</b>.</div>
+  </section>
+
+  <!-- 9. NSSA -->
+  <section class="panel" v-show="sec==='nssa'" id="nssa">
+    <h2>🔁 NSSA — stub + local ASBR</h2>
+    <p class="lead">A <b>Not-So-Stubby Area (NSSA)</b> is a stub area that allows an <b>ASBR</b>: external routes enter as <b>Type 7</b> LSAs (flooded only in the NSSA), then the <b>ABR translates them to Type 5</b> at the exit. It still blocks inbound Type 5.</p>
+
+    <h3>Type 7 → Type 5 translation flow</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">ASBR</span> redistributes → Type 7 (NSSA only)</div>
+      <div class="step"><span class="n">ABR</span> sees Type 7 → generates Type 5</div>
+      <div class="step"><span class="n">Domain</span> Type 5 flooded to the rest of OSPF</div>
+    </div>
+    <div class="callout blue"><b>P-bit</b> (propagate bit) marks which Type 7 LSAs are eligible to be translated. If multiple ABRs exist, only <u>one</u> translates (the elected one).</div>
+
+    <h3>Stub vs NSSA</h3>
+    <table>
+      <tr><th>Item</th><th>Stub</th><th>NSSA</th></tr>
+      <tr><td>ASBR inside</td><td>no</td><td><b>yes</b></td></tr>
+      <tr><td>External from inside</td><td>n/a</td><td>Type 7 → translated to 5</td></tr>
+      <tr><td>External from outside</td><td>blocked</td><td>blocked (Type 5)</td></tr>
+      <tr><td>Default route</td><td>auto-injected</td><td>optional (<code>default-information-originate</code>)</td></tr>
+      <tr><td>Route codes</td><td>—</td><td><b>O N1 / O N2</b></td></tr>
+    </table>
+
+    <h3>Config</h3>
+    <pre class="cmd">! ASBR inside the NSSA:
+router ospf 1
+ area 5 nssa
+ redistribute static subnets          ! produces Type 7
+
+! ABR:
+router ospf 1
+ area 5 nssa translate type7
+ area 5 nssa default-information-originate</pre>
+    <div class="callout red"><b>Traps:</b> NSSA = stub + local ASBR. Type 5 still blocked from entering. Default is <u>optional</u> (vs automatic in stub). Translation happens on the <b>ABR</b>, not the ASBR. Cannot be area 0; no virtual link through it.</div>
+  </section>
+
+  <!-- 10. VIRTUAL LINKS -->
+  <section class="panel" v-show="sec==='vlink'" id="vlink">
+    <h2>🪢 Virtual Links</h2>
+    <p class="lead">A <b>virtual link</b> is a logical OSPF tunnel that <b>connects an isolated area to Area 0</b> through a transit area — or <b>patches a discontiguous Area 0</b>. It is a <b>last-resort repair</b>, not a design tool.</p>
+
+    <h3>The two use cases</h3>
+    <div class="grid g2">
+      <div class="card"><h4>Isolated area → Area 0</h4><p class="muted" style="margin:0">an area physically separated from the backbone gets a virtual link through a transit area.</p></div>
+      <div class="card"><h4>Discontiguous Area 0</h4><p class="muted" style="margin:0">a split backbone is stitched back together via a virtual link.</p></div>
+    </div>
+
+    <h3>Config (on BOTH endpoint ABRs)</h3>
+    <pre class="cmd">router ospf 1
+ area 2 virtual-link 1.1.1.1        ! 1.1.1.1 = the peer ABR's router-id
+
+! Auth on the virtual link
+ area 2 virtual-link 2.2.2.2 authentication message-digest
+ area 2 virtual-link 2.2.2.2 message-digest-key 1 md5 secret</pre>
+    <p class="muted">Identified by <b>router-IDs</b>, not interface IPs. Cost = the transit-area path cost between the two ABRs.</p>
+
+    <h3>Constraints checklist</h3>
+    <ul>
+      <li>Transit area <b>must be standard</b> — not stub / totally stubby / NSSA.</li>
+      <li><b>Area 0 cannot be the transit area.</b></li>
+      <li>Both endpoints must be <b>ABRs</b>.</li>
+      <li>Repair mechanism only — design answers should avoid it unless fixing a break.</li>
+    </ul>
+    <div class="callout green"><b>Verify:</b> <code>show ip ospf virtual-links</code> — state shows <b>Up / DOWN</b>.</div>
+  </section>
+
+  <!-- 11. AUTHENTICATION -->
+  <section class="panel" v-show="sec==='auth'" id="auth">
+    <h2>🔐 OSPF Authentication</h2>
+    <p class="lead">OSPF authentication validates the <b>origin of Hello / LSA packets</b>, stopping rogue routers or injected LSAs. OSPFv2 supports null, plaintext, and MD5/HMAC-SHA; <b>OSPFv3 has no OSPF-level auth</b> — it relies on IPv6 AH/ESP (IPsec).</p>
+
+    <h3>OSPFv2 authentication types</h3>
+    <table>
+      <tr><th>Type</th><th>Value</th><th>Security</th><th>Notes</th></tr>
+      <tr><td>Null</td><td>0</td><td><span class="chip b-red">none</span></td><td>default</td></tr>
+      <tr><td>Plaintext (Simple)</td><td>1</td><td><span class="chip b-amber">weak</span></td><td>sent in clear</td></tr>
+      <tr><td>MD5 / HMAC-SHA</td><td>2</td><td><span class="chip b-green">strong</span></td><td>recommended; key not in packet</td></tr>
+      <tr><td>Cryptographic (SHA-256+)</td><td>2+</td><td><span class="chip b-green">strongest</span></td><td>newer IOS/XE</td></tr>
+    </table>
+
+    <h3>Config levels</h3>
+    <pre class="cmd">! Per interface
+interface Gi0/1
+ ip ospf authentication message-digest
+ ip ospf message-digest-key 1 md5 SecretKey123
+
+! Per area (all interfaces in the area)
+router ospf 1
+ area 0 authentication message-digest</pre>
+
+    <h3>v2 vs v3 auth (exam favorite)</h3>
+    <table>
+      <tr><th>Version</th><th>Native auth</th><th>Real protection</th></tr>
+      <tr><td>OSPFv2</td><td>MD5/SHA in header</td><td>yes (in-band)</td></tr>
+      <tr><td>OSPFv3</td><td>none</td><td>IPv6 AH / ESP / IPsec</td></tr>
+    </table>
+    <div class="callout red"><b>Trap:</b> auth mismatch → neighbor <b>stuck in INIT</b> (hellos dropped), never reaches 2-Way. Key rotation uses key ID + sequence number — add the new key first, keep both briefly.</div>
+  </section>
+
+  <!-- 12. SUMMARIZATION -->
+  <section class="panel" v-show="sec==='sum'" id="sum">
+    <h2>🧮 OSPF Summarization</h2>
+    <p class="lead">OSPF summarizes <b>only at boundaries</b>: the <b>ABR</b> aggregates inter-area routes (<code>area X range</code>), the <b>ASBR</b> aggregates external routes (<code>summary-address</code>). <b>OSPF cannot summarize inside an area</b> — intra-area LSAs are always exact.</p>
+
+    <h3>Where to summarize (memorize)</h3>
+    <table>
+      <tr><th>Location</th><th>Command</th><th>Aggregates</th></tr>
+      <tr><td><b>ABR</b></td><td class="mono">area X range &lt;net&gt; &lt;mask&gt;</td><td>inter-area routes (Type 3)</td></tr>
+      <tr><td><b>ASBR</b></td><td class="mono">summary-address &lt;net&gt; &lt;mask&gt;</td><td>external redistributed (Type 5/7)</td></tr>
+      <tr><td>Inside an area</td><td>not possible</td><td>intra-area must be exact</td></tr>
+    </table>
+
+    <h3>Config</h3>
+    <pre class="cmd">! ABR: inter-area summarization
+router ospf 1
+ area 1 range 10.1.0.0 255.255.0.0
+ area 1 range 10.1.0.0 255.255.0.0 not-advertise   ! filter/suppress
+
+! ASBR: external summarization
+router ospf 1
+ summary-address 10.2.0.0 255.255.0.0
+ redistribute static subnets</pre>
+
+    <h3>Benefits</h3>
+    <div class="grid g3">
+      <div class="card"><h4>Smaller LSDB</h4><p class="muted" style="margin:0">fewer Type 3/5 LSAs</p></div>
+      <div class="card"><h4>Less SPF CPU</h4><p class="muted" style="margin:0">shorter SPF runs</p></div>
+      <div class="card"><h4>Stability</h4><p class="muted" style="margin:0">flaps contained at the boundary</p></div>
+    </div>
+    <div class="callout red"><b>Loop/black-hole note:</b> the router advertising an aggregate needs to discard traffic to covered ranges it lacks (Null0 / <code>discard-route</code>) to avoid loops. And OSPF summarization ≠ auto-summarization.</div>
+  </section>
+
+  <!-- 13. TROUBLESHOOTING -->
+  <section class="panel" v-show="sec==='trouble'" id="trouble">
+    <h2>🔧 OSPF Troubleshooting</h2>
+    <p class="lead">Follow the layer model: <b>interface → neighbor → LSDB → routes → forwarding</b>. Most exam scenarios hang on neighbor-state issues (MTU, hello/dead, area, network type, auth) or area/type misconfiguration.</p>
+
+    <h3>Fault → state → fix explorer</h3>
+    <p class="muted">Pick a common fault to recall its stuck state and fix.</p>
+    <div class="grid g3">
+      <div class="area-cell" v-for="f in faults" :key="f.name"
+           :class="{sel:faultSel===f.name}" @click="faultSel=f.name">
+        <div class="an">{{ f.name }}</div>
+        <div class="ad">state: {{ f.state }}</div>
+      </div>
+    </div>
+    <div class="verdict" :class="faultVerdict.cls">{{ faultSel }} — stuck in <b>{{ faultObj.state }}</b>. {{ faultObj.fix }}</div>
+
+    <h3>Parameter mismatch list (memorize)</h3>
+    <div class="grid g3">
+      <div class="card"><h4>Must match</h4>
+        <ul style="margin-left:18px;font-size:.85rem">
+          <li>Hello / Dead timers</li><li>Area ID</li><li>Network type</li>
+          <li>Auth type + key</li><li>MTU</li><li>Subnet / address family</li><li>Stub flag</li>
+        </ul>
+      </div>
+      <div class="card"><h4>The top causes</h4>
+        <ul style="margin-left:18px;font-size:.85rem">
+          <li>MTU mismatch → ExStart</li><li>hello/dead → Down/Init</li>
+          <li>auth → Init</li><li>stub flag → no adjacency</li>
+          <li>DR → 2-Way stuck</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>The `show` progression</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> <code>show ip interface brief</code> — link up?</div>
+      <div class="step"><span class="n">2</span> <code>show ip ospf neighbor</code> — adjacency?</div>
+      <div class="step"><span class="n">3</span> <code>show ip ospf database</code> — LSDB sync?</div>
+      <div class="step"><span class="n">4</span> <code>show ip route ospf</code> — SPF routes?</div>
+      <div class="step"><span class="n">5</span> <code>show ip cef</code> / <code>ping</code> — forwarding?</div>
+    </div>
+    <div class="callout red"><b>MTU mismatch → stuck ExStart</b> is the single most-tested OSPF fault. <code>clear ip ospf process</code> reconverges (brief outage) — a maintenance action, not a config fix.</div>
+  </section>
+
+  <!-- 14. COMMANDS -->
+  <section class="panel" v-show="sec==='cmds'" id="cmds">
+    <h2>⌨️ CLI Commands</h2>
+    <div class="row-fn">
+      <button class="btn" v-for="c in commands" :key="c.key" :class="{primary:activeCmd===c.key}" @click="activeCmd=c.key">{{ c.label }}</button>
+    </div>
+    <pre class="cmd">{{ activeCommand.show }}</pre>
+    <div class="callout green" style="margin-top:6px"><b>Core verify trio:</b> <code>show ip ospf neighbor</code> (adjacency), <code>show ip ospf database</code> (LSDB), and <code>show ip route ospf</code> (routes) cover most OSPF issues.</div>
+  </section>
+
+  <!-- 15. TRAPS -->
+  <section class="panel" v-show="sec==='traps'" id="traps">
+    <h2>⚠️ Common Traps</h2>
+    <div v-for="t in traps" :key="t" class="trap-item"><span class="trap-ico">!</span><div>{{ t }}</div></div>
+  </section>
+
+  <!-- 16. QUIZ -->
+  <section class="panel" v-show="sec==='quiz'" id="quiz">
+    <h2>📝 Quiz ({{ quizQuestions.length }})</h2>
+    <div v-for="(q,qi) in quizQuestions" :key="qi" class="card" style="margin:12px 0">
+      <div style="font-weight:700;margin-bottom:8px">{{ qi+1 }}. {{ q.q }}</div>
+      <div v-for="(o,oi) in q.opts" :key="oi"
+           class="opt" :class="{sel:q.ans===oi}"
+           @click="q.ans=oi">
+        <span class="letter">{{ String.fromCharCode(65+oi) }}</span>{{ o.text }}
+      </div>
+    </div>
+    <div class="row-fn">
+      <button class="btn primary" @click="submitQuiz()" :disabled="!allQuizAnswered">Submit answers</button>
+      <button class="btn" @click="resetQuiz()">Reset</button>
+      <span class="muted" v-if="quizDone" style="font-weight:700">Score: {{ quizScore }} / {{ quizQuestions.length }}
+        ({{ Math.round(quizScore/quizQuestions.length*100) }}%)</span>
+    </div>
+    <div class="verdict" :class="quizDone ? (quizScore===quizQuestions.length?'ok':'info') : 'info'" v-if="quizDone">
+      {{ quizScore===quizQuestions.length ? '🎉 Perfect! All ' + quizQuestions.length + ' correct.' : 'Better luck next time — review the traps section.' }}
+    </div>
+  </section>
+
+  <!-- 17. CHECKLIST -->
+  <section class="panel" v-show="sec==='checklist'" id="checklist">
+    <h2>✅ Study Checklist</h2>
+    <p class="muted" style="margin-bottom:10px">{{ doneCount }} / {{ checklist.length }} complete</p>
+    <div v-for="(c,i) in checklist" :key="i" class="chk-item" :class="{done:c.done}" @click="toggleDone(i)">
+      <span class="chk-box">{{ c.done ? '✓' : '' }}</span>{{ c.t }}
+    </div>
+  </section>
+
+</div>
+
+<script src="../vue.global.prod.js"></script>
+<script>
+(() => {
+  const { createApp, ref, computed, reactive } = Vue;
+  const LS = {
+    theme: 'ccnp.ospf.theme', done: 'ccnp.ospf.done',
+    quiz: 'ccnp.ospf.quiz'
+  };
+  function loadJSON(key, fb) {
+    try { const v = JSON.parse(localStorage.getItem(key)); return (v === null || v === undefined) ? fb : v; }
+    catch (e) { return fb; }
+  }
+  function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+  function shuffle(a) {
+    const x = a.slice();
+    for (let i = x.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [x[i], x[j]] = [x[j], x[i]];
+    }
+    return x;
+  }
+
+  createApp({
+    setup() {
+      const theme = ref(loadJSON(LS.theme, 'dark'));
+      const sec = ref('proto');
+
+      /* ---------- SECTION NAV ---------- */
+      const sections = [
+        { id: 'proto', label: 'Basics', icon: '🌐' },
+        { id: 'rid', label: 'Router ID', icon: '🪪' },
+        { id: 'nbr', label: 'Neighbor States', icon: '🤝' },
+        { id: 'dr', label: 'DR / BDR', icon: '💠' },
+        { id: 'lsa', label: 'LSA Types', icon: '🗂️' },
+        { id: 'spf', label: 'SPF Algorithm', icon: '🌳' },
+        { id: 'areas', label: 'Areas', icon: '🗺️' },
+        { id: 'areatype', label: 'Stub / Totally', icon: '🧱' },
+        { id: 'nssa', label: 'NSSA', icon: '🔁' },
+        { id: 'vlink', label: 'Virtual Links', icon: '🪢' },
+        { id: 'auth', label: 'Authentication', icon: '🔐' },
+        { id: 'sum', label: 'Summarization', icon: '🧮' },
+        { id: 'trouble', label: 'Troubleshooting', icon: '🔧' },
+        { id: 'cmds', label: 'Commands', icon: '⌨️' },
+        { id: 'traps', label: 'Traps', icon: '⚠️' },
+        { id: 'quiz', label: 'Quiz', icon: '📝' },
+        { id: 'checklist', label: 'Checklist', icon: '✅' }
+      ];
+
+      /* ---------- COST EXPLORER ---------- */
+      const costBws = [10, 100, 1000, 10000];
+      const costRefs = [100, 1000];
+      const costIfBw = ref(1000);
+      const costRefBw = ref(1000);
+      const costVerdict = computed(() => {
+        const raw = costRefBw.value / costIfBw.value;
+        const c = Math.max(1, Math.round(raw));
+        let note = '';
+        if (costIfBw.value >= costRefBw.value) note = ' (at/above reference — cost floors at 1)';
+        let rec = '';
+        if (costIfBw.value === 1000 && costRefBw.value === 100) rec = ' → Raising reference to 1000 makes this 1 Gbps link distinct (cost 1→ still 1, but separates from 10 Gbps).';
+        return { cls: 'ok', text: 'OSPF cost = ' + costRefBw.value + ' ÷ ' + costIfBw.value + ' = ' + raw + ' → ' + c + note + rec };
+      });
+
+      /* ---------- ROUTER ID EXPLORER ---------- */
+      const ridCfg = ref('192.0.2.1');
+      const ridLoop = ref('10.255.255.1');
+      const ridPhy = ref('');
+      const ridIPs = computed(() => [ridCfg.value, ridLoop.value, ridPhy.value].map(s => s.trim()).filter(s => s !== ''));
+      function parseIP(s) { const p = s.split('.').map(Number); return p.length === 4 && p.every(x => !isNaN(x) && x >= 0 && x <= 255) ? (((p[0]*256+p[1])*256)+p[2])*256+p[3] : -Infinity; }
+      const ridVerdict = computed(() => {
+        if (ridCfg.value.trim() !== '') return { cls: 'ok', text: 'Router ID = ' + ridCfg.value.trim() + ' (explicitly configured — highest precedence).' };
+        if (ridLoop.value.trim() !== '') return { cls: 'ok', text: 'Router ID = ' + ridLoop.value.trim() + ' (highest loopback IPv4 — loopbacks chosen before physical interfaces).' };
+        if (ridPhy.value.trim() !== '') return { cls: 'ok', text: 'Router ID = ' + ridPhy.value.trim() + ' (highest physical interface IPv4).' };
+        return { cls: 'bad', text: 'No IPv4 address and no configured router-id → OSPF may refuse to start (especially OSPFv3). Configure router-id explicitly.' };
+      });
+      function ridInput() {}
+
+      /* ---------- NEIGHBOR STATES ---------- */
+      const nbrStates = [
+        { name: 'Down', desc: 'no hellos received', what: 'initial state' },
+        { name: 'Attempt', desc: 'actively contacting (NBMA only)', what: 'NBMA-only contact' },
+        { name: 'Init', desc: 'hello seen, but I am not in its hello', what: 'discovery, one-way' },
+        { name: '2-Way', desc: 'both see each other in hellos', what: 'neighbor (not adjacency)' },
+        { name: 'ExStart', desc: 'elect primary/secondary, start DBD', what: 'adjacency start' },
+        { name: 'Exchange', desc: 'exchanging DBDs', what: 'database description' },
+        { name: 'Loading', desc: 'requesting + receiving LSAs', what: 'filling gaps' },
+        { name: 'Full', desc: 'LSDBs identical', what: 'adjacency formed — SPF can run' }
+      ];
+      const nbrStep = ref(7);
+
+      /* ---------- DR / BDR ---------- */
+      const drCount = ref(5);
+      const drFull = computed(() => drCount.value * (drCount.value - 1) / 2);
+      const drWith = computed(() => drCount.value);
+      const drSaved = computed(() => drFull.value - drWith.value);
+
+      /* ---------- LSA TYPES ---------- */
+      const lsas = [
+        { t: 1, name: 'Router', origin: 'every router', cls: 'b-blue', role: 'its links in an area (intra-area)' },
+        { t: 2, name: 'Network', origin: 'DR', cls: 'b-green', role: 'broadcast/NBMA segment + attached routers' },
+        { t: 3, name: 'Summary', origin: 'ABR', cls: 'b-amber', role: 'routes from other areas (inter-area)' },
+        { t: 4, name: 'ASBR-Summary', origin: 'ABR', cls: 'b-violet', role: 'how to reach an ASBR' },
+        { t: 5, name: 'AS-external', origin: 'ASBR', cls: 'b-red', role: 'redistributed routes from outside OSPF' },
+        { t: 6, name: 'Group-membership', origin: 'MOSPF', cls: 'b-cyan', role: 'obsolete — not on exam' },
+        { t: 7, name: 'NSSA-external', origin: 'ASBR in NSSA', cls: 'b-green', role: 'external routes in a Not-So-Stubby Area' },
+        { t: 8, name: '—', origin: 'v3', cls: 'b-cyan', role: 'OSPFv3 link-local (v2 n/a)' },
+        { t: '9/10/11', name: 'Opaque', origin: 'varies', cls: 'b-blue', role: 'TE, graceful-restart, extensions' }
+      ];
+
+      /* ---------- SPF ALGORITHM ---------- */
+      const spfNodes = ['R1', 'R2', 'R3', 'R4'];
+      const spfEdges = [
+        { a: 'R1', b: 'R2', c: 1 }, { a: 'R1', b: 'R3', c: 5 },
+        { a: 'R2', b: 'R3', c: 2 }, { a: 'R2', b: 'R4', c: 3 },
+        { a: 'R3', b: 'R4', c: 1 }
+      ];
+      function computeSpfSteps() {
+        const adj = {}; spfNodes.forEach(n => adj[n] = []);
+        spfEdges.forEach(e => { adj[e.a].push({ to: e.b, c: e.c }); adj[e.b].push({ to: e.a, c: e.c }); });
+        const dist = {}; spfNodes.forEach(n => dist[n] = Infinity);
+        const settled = {};
+        dist['R1'] = 0;
+        const steps = [];
+        const snap = (note) => steps.push({ note, settled: Object.keys(settled).filter(k => settled[k]), dist: Object.assign({}, dist) });
+        snap('Start: dist(R1)=0, all others ∞.');
+        for (let i = 0; i < spfNodes.length; i++) {
+          let u = null, best = Infinity;
+          spfNodes.forEach(n => { if (!settled[n] && dist[n] < best) { best = dist[n]; u = n; } });
+          if (u === null) break;
+          settled[u] = true;
+          adj[u].forEach(e => { if (!settled[e.to]) dist[e.to] = Math.min(dist[e.to], dist[u] + e.c); });
+          snap('Pick ' + u + ' (shortest tentative cost ' + dist[u] + '); relax its neighbors.');
+        }
+        return steps;
+      }
+      const spfSteps = computeSpfSteps();
+      const spfStep = ref(0);
+      const spfCur = computed(() => spfSteps[Math.min(spfStep.value, spfSteps.length - 1)]);
+      function isSettled(n) { return spfCur.value.settled.indexOf(n) >= 0; }
+      function isCur(n) {
+        const settled = spfCur.value.settled;
+        if (settled.length === 0) return n === 'R1';
+        return false;
+      }
+      function distOf(n) {
+        const d = spfCur.value.dist[n];
+        return d === Infinity ? '∞' : d;
+      }
+
+      /* ---------- AREA TYPES ---------- */
+      const areaTypes = [
+        { key: 'normal', name: 'Normal', short: 'Normal', tag: 'all LSAs' },
+        { key: 'stub', name: 'Stub', short: 'Stub', tag: 'blocks T5' },
+        { key: 'totally', name: 'Totally Stubby', short: 'Totally', tag: 'blocks T3+4+5' },
+        { key: 'nssa', name: 'NSSA', short: 'NSSA', tag: 'blocks T5, allows T7' }
+      ];
+      const areaSel = ref('stub');
+      const areaBlocks = [
+        { name: 'Type 1 Router', allowed: { normal: true, stub: true, totally: true, nssa: true } },
+        { name: 'Type 2 Network', allowed: { normal: true, stub: true, totally: true, nssa: true } },
+        { name: 'Type 3 Summary', allowed: { normal: true, stub: true, totally: false, nssa: true } },
+        { name: 'Type 4 ASBR-Summary', allowed: { normal: true, stub: false, totally: false, nssa: false } },
+        { name: 'Type 5 External', allowed: { normal: true, stub: false, totally: false, nssa: false } },
+        { name: 'Type 7 NSSA-external', allowed: { normal: false, stub: false, totally: false, nssa: true } }
+      ];
+      const areaVerdict = computed(() => {
+        const a = areaTypes.find(x => x.key === areaSel.value);
+        let txt = '';
+        if (areaSel.value === 'normal') txt = 'Normal area: all LSA types flow freely — full LSDB.';
+        if (areaSel.value === 'stub') txt = 'Stub: blocks Type 4+5, injects a default (Type 3). No ASBR inside, cannot be area 0.';
+        if (areaSel.value === 'totally') txt = 'Totally stubby: blocks Type 3+4+5 — only intra-area + the injected default (O*IA). Smallest LSDB.';
+        if (areaSel.value === 'nssa') txt = 'NSSA: blocks inbound Type 5 but allows a local ASBR injecting Type 7 (translated to Type 5 by the ABR).';
+        return { cls: 'info', text: a.name + ' — ' + txt };
+      });
+
+      /* ---------- TROUBLESHOOTING FAULTS ---------- */
+      const faults = [
+        { name: 'MTU mismatch', state: 'ExStart', fix: 'match MTU both sides (mtu / ip ospf mtu-ignore)' },
+        { name: 'Hello/dead mismatch', state: 'Down/Init', fix: 'match timers on both sides' },
+        { name: 'Auth mismatch', state: 'Init', fix: 'match auth type + key' },
+        { name: 'Network type mismatch', state: 'neighbor issues', fix: 'match broadcast vs point-to-point' },
+        { name: 'Stub flag mismatch', state: 'no adjacency', fix: 'match area type on all routers' },
+        { name: 'DR election issue', state: '2-Way stuck', fix: 'adjust priorities or use point-to-point' }
+      ];
+      const faultSel = ref('MTU mismatch');
+      const faultObj = computed(() => faults.find(f => f.name === faultSel.value) || faults[0]);
+      const faultVerdict = computed(() => ({ cls: 'info', text: '' }));
+
+      /* ---------- COMMANDS ---------- */
+      const commands = [
+        {
+          key: 'neighbor', label: 'Neighbors',
+          show: "show ip ospf neighbor\nshow ip ospf neighbor detail\nshow ip ospf neighbor 10.0.0.1\nshow ip ospf interface Gi0/1   ! hello/dead, network type, area\n\n! states: Down / Attempt / Init / 2-Way / ExStart / Exchange / Loading / Full"
+        },
+        {
+          key: 'lsa', label: 'LSDB / LSA',
+          show: "show ip ospf database\nshow ip ospf database router          ! Type 1\nshow ip ospf database network         ! Type 2\nshow ip ospf database summary          ! Type 3\nshow ip ospf database asbr-summary     ! Type 4\nshow ip ospf database external         ! Type 5\nshow ip ospf database nssa-external    ! Type 7\nshow ip ospf database link-state       ! ages / sequence"
+        },
+        {
+          key: 'spf', label: 'SPF',
+          show: "show ip ospf          ! SPF stats: \"SPF algorithm executed X times\"\nshow ip ospf spf      ! per-run timing\nshow ip ospf statistics\n\nrouter ospf 1\n timers throttle spf 50 1000 5000    ! initial/hold/max (ms)\n timers lsa-interval 5"
+        },
+        {
+          key: 'areas', label: 'Areas & types',
+          show: "router ospf 1\n network 10.1.0.0 0.0.255.255 area 0\n network 10.2.0.0 0.0.255.255 area 1\n\n! stub area\n area 2 stub\n area 2 default-cost 10\n\n! totally stubby (ABR only)\n area 3 stub no-summary\n\n! NSSA\n area 5 nssa\n area 5 nssa translate type7\n area 5 nssa default-information-originate\n\nshow ip ospf interface brief"
+        },
+        {
+          key: 'rid', label: 'Router ID',
+          show: "router ospf 1\n router-id 1.1.1.1\n\n! force the change immediately\nclear ip ospf process\n\nshow ip ospf | include Router ID\nshow ip ospf neighbor            ! neighbor column = RIDs\nshow ip ospf database router"
+        },
+        {
+          key: 'dr', label: 'DR / BDR',
+          show: "interface Gi0/1\n ip ospf priority 200\n ip ospf network point-to-point      ! avoids DR on P2P\n\nshow ip ospf neighbor                ! state FULL/2WAY + DR/BDR flags\nshow ip ospf interface Gi0/1"
+        },
+        {
+          key: 'vlink', label: 'Virtual link',
+          show: "router ospf 1\n area 2 virtual-link 1.1.1.1\n area 2 virtual-link 2.2.2.2 authentication message-digest\n\nshow ip ospf virtual-links          ! state: Up / DOWN\nshow ip ospf | include Virtual"
+        },
+        {
+          key: 'auth', label: 'Authentication',
+          show: "! interface mode (v2)\ninterface Gi0/1\n ip ospf authentication message-digest\n ip ospf message-digest-key 1 md5 SecretKey123\n\n! area mode\nrouter ospf 1\n area 0 authentication message-digest\n\nshow ip ospf interface Gi0/1        ! auth type shown\nshow ip ospf | include Authentication"
+        },
+        {
+          key: 'sum', label: 'Summarization',
+          show: "! ABR: inter-area\nrouter ospf 1\n area 1 range 10.1.0.0 255.255.0.0\n area 1 range 10.1.0.0 255.255.0.0 not-advertise\n\n! ASBR: external\nrouter ospf 1\n summary-address 10.2.0.0 255.255.0.0\n\nshow ip ospf database summary\nshow ip ospf database external"
+        },
+        {
+          key: 'trouble', label: 'Troubleshoot',
+          show: "show ip ospf neighbor\nshow ip ospf neighbor detail\nshow ip ospf interface brief\nshow ip ospf database\nshow ip route ospf\nshow ip cef &lt;prefix&gt;\nshow ip protocols | include OSPF\n\ndebug ip ospf events        ! careful in production\n\n! maintenance (reconverges)\nclear ip ospf process\nclear ip ospf neighbor\nclear ip ospf counters"
+        }
+      ];
+      const activeCmd = ref(commands[0].key);
+      const activeCommand = computed(() => commands.find(c => c.key === activeCmd.value));
+
+      /* ---------- TRAPS ---------- */
+      const traps = [
+        'Hello 10 s / dead 40 s (broadcast & P2P); NBMA is 30 / 120. Dead = 4× hello.',
+        'OSPF AD = 110 — vs EIGRP 90, RIP 120.',
+        '224.0.0.5 = all OSPF routers; 224.0.0.6 = DR/BDR only.',
+        'Stuck ExStart = MTU mismatch — the single most-tested OSPF fault.',
+        'OSPFv2 = IPv4, OSPFv3 = IPv6; OSPFv3 has no native auth (IPv6 AH/ESP/IPsec).',
+        'network command uses wildcard (inverted) mask, not subnet mask.',
+        'Cost reference default is 100 Mbps — two fast links both cost 1 unless tuned.',
+        'Router ID: explicit > highest loopback > highest physical; highest wins; restart needed after change.',
+        'Type 2 (Network) LSA is originated by the DR, not every router.',
+        'Type 4 tells how to reach the ASBR; Type 5 domain-wide but blocked in stub areas.',
+        'NSSA = stub + local ASBR; Type 7 → Type 5 translation at the ABR, not the ASBR.',
+        'E2 default; E1 includes path cost to the ASBR. Same for N1/N2.',
+        'Stub/totally-stubby/NSSA: no ASBR (except NSSA), not area 0, no virtual link traversal, all routers must match.',
+        'DR/BDR election: highest priority, then highest RID — both "highest"; non-preemptive; priority 0 = never eligible.',
+        'DROthers stay 2-Way with each other — normal, do not "fix".',
+        'P2P links elect no DR/BDR — straight to Full.',
+        'Virtual link: rides a standard transit area (not stub/NSSA/totally); area 0 cannot be the transit area.',
+        'Auth mismatch → neighbor stuck in INIT.',
+        'OSPF cannot summarize inside an area — intra-area LSAs are always exact.',
+        'SPF is per-area — a flap in one area doesn\'t recompute all areas.',
+        'clear ip ospf process reconverges the domain — maintenance, not a config fix.'
+      ];
+
+      /* ---------- QUIZ ---------- */
+      const quizRaw = [
+        { q: 'What is the default AD of OSPF?', opts: [{ text: '90' }, { text: '110' }, { text: '120' }, { text: '170' }], correct: 1 },
+        { q: 'On broadcast networks, OSPF Hellos are sent every ___ and the dead timer is ___.', opts: [{ text: '10s / 40s' }, { text: '30s / 120s' }, { text: '10s / 20s' }, { text: '30s / 40s' }], correct: 0 },
+        { q: 'Which multicast address do DR/BDR use?', opts: [{ text: '224.0.0.1' }, { text: '224.0.0.5' }, { text: '224.0.0.6' }, { text: '224.0.0.9' }], correct: 2 },
+        { q: 'Router ID election order is:', opts: [{ text: 'configured > highest loopback > highest physical' }, { text: 'lowest loopback > configured > physical' }, { text: 'physical > loopback > configured' }, { text: 'highest interface MAC > physical' }], correct: 0 },
+        { q: 'A neighbor stuck in ExStart most likely indicates:', opts: [{ text: 'auth mismatch' }, { text: 'hello/dead mismatch' }, { text: 'MTU mismatch' }, { text: 'DR election issue' }], correct: 2 },
+        { q: 'Which LSA type is originated by the DR?', opts: [{ text: 'Type 1 Router' }, { text: 'Type 2 Network' }, { text: 'Type 3 Summary' }, { text: 'Type 5 External' }], correct: 1 },
+        { q: 'Which route code marks an inter-area OSPF route?', opts: [{ text: 'O' }, { text: 'O IA' }, { text: 'O E1' }, { text: 'O N1' }], correct: 1 },
+        { q: 'A totally stubby area blocks which LSAs?', opts: [{ text: 'Type 1+2' }, { text: 'Type 3+4+5' }, { text: 'Type 5 only' }, { text: 'Type 7' }], correct: 1 },
+        { q: 'How does OSPFv3 authenticate?', opts: [{ text: 'MD5 in the header' }, { text: 'plaintext' }, { text: 'IPv6 AH/ESP via IPsec' }, { text: 'OSPF has no auth' }], correct: 2 },
+        { q: 'What is the difference between stub and NSSA?', opts: [{ text: 'NSSA allows a local ASBR' }, { text: 'stub allows a local ASBR' }, { text: 'NSSA blocks Type 7' }, { text: 'they are identical' }], correct: 0 },
+        { q: 'Which command summarizes inter-area routes at an ABR?', opts: [{ text: 'summary-address' }, { text: 'area X range' }, { text: 'aggregate-address' }, { text: 'ip summary-address' }], correct: 1 },
+        { q: 'DR failure causes:', opts: [{ text: 'a new election among all routers' }, { text: 'BDR promotes to DR, new BDR elected' }, { text: 'the segment goes down' }, { text: 'DROthers take over' }], correct: 1 },
+        { q: 'Which LSA type carries external routes inside an NSSA?', opts: [{ text: 'Type 3' }, { text: 'Type 5' }, { text: 'Type 7' }, { text: 'Type 2' }], correct: 2 },
+        { q: 'A virtual link cannot traverse which area type?', opts: [{ text: 'normal' }, { text: 'stub / NSSA / totally stubby' }, { text: 'backbone' }, { text: 'area with an ASBR' }], correct: 1 },
+        { q: 'SPF runs:', opts: [{ text: 'once for the whole domain' }, { text: 'per area' }, { text: 'per router pair' }, { text: 'only on a flap' }], correct: 1 }
+      ];
+      const quizQuestions = reactive(quizRaw.map(q => ({ ...q, ans: null })));
+      const quizDone = ref(false);
+      const quizScore = ref(loadJSON(LS.quiz, 0) || 0);
+      const allQuizAnswered = computed(() => quizQuestions.every(q => q.ans !== null));
+      function submitQuiz() {
+        if (!allQuizAnswered.value) return;
+        quizScore.value = quizQuestions.filter((q, i) => q.ans === q.correct).length;
+        quizDone.value = true;
+        save(LS.quiz, quizScore.value);
+      }
+      function resetQuiz() {
+        quizQuestions.forEach(q => q.ans = null);
+        quizDone.value = false;
+        quizScore.value = 0;
+        localStorage.removeItem(LS.quiz);
+      }
+
+      /* ---------- CHECKLIST ---------- */
+      const checklistRoot = loadJSON(LS.done, [
+        { t: 'Explain OSPF as link-state IGP: LSDB + per-router Dijkstra SPF, AD 110, three tables (neighbor/LSDB/route)', done: false },
+        { t: 'Recall hello/dead/network facts: 10/40s, NBMA 30/120, multicast .5/.6, port 89, cost = ref ÷ BW (100 Mbps default)', done: false },
+        { t: 'Contrast OSPFv2 vs OSPFv3: AF, LSA address encoding, multiple prefixes, auth (IPsec for v3), 32-bit RID', done: false },
+        { t: 'Router ID election: explicit > highest loopback > highest physical; highest wins; clear ip ospf process to apply change', done: false },
+        { t: 'Neighbor state machine: Down→Init→2-Way→ExStart→Exchange→Loading→Full; DBD sync; stuck ExStart = MTU', done: false },
+        { t: 'DR/BDR: why (adjacency math), election = priority then RID, non-preemptive, priority 0, P2P = none, DROther↔DROther 2-Way', done: false },
+        { t: 'LSA types: originator + scope for 1/2/3/4/5/7 and route codes O, O IA, O E1/E2, O N1/N2', done: false },
+        { t: 'SPF/Dijkstra: wall-clock shortest path tree, per-area, flooding ≠ SPF, throttle + ISPF for fast convergence', done: false },
+        { t: 'Areas: area 0 mandatory transit, ABR (≥2 areas, one is 0), ASBR, LSA flow across areas, per-area LSDB/SPF', done: false },
+        { t: 'Stub vs totally stubby vs NSSA: what each blocks/injects, no ASBR (except NSSA), not area 0, no vlink transit', done: false },
+        { t: 'NSSA: Type 7 in, ABR translates to Type 5, P-bit, only one ABR translates, default optional', done: false },
+        { t: 'Virtual link: isolated area→0 or patch backbone; standard transit only; peer RIDs; show ip ospf virtual-links', done: false },
+        { t: 'Authentication: v2 null/plaintext/MD5-SHA (type 2 recommended), per interface/area/vlink; v3 = IPv6 AH/ESP', done: false },
+        { t: 'Summarization: ABR area X range (inter-area), ASBR summary-address (external), cannot inside an area', done: false },
+        { t: 'Troubleshoot flow: interface → neighbor → LSDB → routes → forwarding; match MTU/timers/area/network/auth/stub', done: false }
+      ]);
+      const checklist = reactive(checklistRoot);
+      const doneCount = computed(() => checklist.filter(c => c.done).length);
+      function saveChecklist() { save(LS.done, checklistRoot); }
+      function toggleDone(i) { checklistRoot[i].done = !checklistRoot[i].done; saveChecklist(); }
+
+      return {
+        theme, sec, sections,
+        costBws, costRefs, costIfBw, costRefBw, costVerdict,
+        ridCfg, ridLoop, ridPhy, ridVerdict, ridInput,
+        nbrStates, nbrStep,
+        drCount, drFull, drWith, drSaved,
+        lsas,
+        spfNodes, spfEdges, spfSteps, spfStep, spfCur, isSettled, isCur, distOf,
+        areaTypes, areaSel, areaBlocks, areaVerdict,
+        faults, faultSel, faultObj, faultVerdict,
+        commands, activeCmd, activeCommand,
+        traps,
+        quizQuestions, quizDone, quizScore, allQuizAnswered, submitQuiz, resetQuiz,
+        checklist, doneCount, saveChecklist, toggleDone
+      };
+    }
+  }).mount('#app');
+})();
+</script>
+</body>
+</html>

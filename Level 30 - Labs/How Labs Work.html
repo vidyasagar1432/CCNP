@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Labs Work — Deep Dive</title>
+<style>
+  :root {
+    --bg: #0f172a; --panel: #111c34; --card: #1e293b; --card-2: #16233d;
+    --text: #f8fafc; --muted: #94a3b8;
+    --blue: #38bdf8; --blue-dim: #0c4a6e;
+    --green: #34d399; --green-dim: #064e3b;
+    --amber: #fbbf24; --amber-dim: #78350f;
+    --red: #f87171; --red-dim: #7f1d1d;
+    --violet: #a78bfa; --violet-dim: #4c1d95;
+    --cyan: #22d3ee; --cyan-dim: #164e63;
+    --border: #334155; --hover: #263449; --code-bg: #0b1220;
+  }
+  #app[data-theme="light"] {
+    --bg: #f1f5f9; --panel: #ffffff; --card: #ffffff; --card-2: #f8fafc;
+    --text: #0f172a; --muted: #64748b;
+    --blue: #0284c7; --blue-dim: #e0f2fe;
+    --green: #059669; --green-dim: #d1fae5;
+    --amber: #d97706; --amber-dim: #fef3c7;
+    --red: #dc2626; --red-dim: #fee2e2;
+    --violet: #7c3aed; --violet-dim: #ede9fe;
+    --cyan: #0891b2; --cyan-dim: #cffafe;
+    --border: #cbd5e1; --hover: #e2e8f0; --code-bg: #0b1220;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; }
+  #app { max-width: 1040px; margin: 0 auto; padding: 20px 18px 60px; }
+
+  header { position: sticky; top: 0; z-index: 30; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .lv-badge { background: var(--blue-dim); color: var(--blue); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .exam-badge { background: var(--violet-dim); color: var(--violet); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .cap-badge { background: var(--green-dim); color: var(--green); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .head-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: background 0.15s; }
+  .btn:hover { background: var(--hover); }
+  .btn.primary { background: var(--blue); color: #0f172a; border-color: var(--blue); }
+
+  nav { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 2px 16px; }
+  nav button.chip { border: 1px solid var(--border); background: var(--card); color: var(--muted); padding: 5px 11px; border-radius: 999px; cursor: pointer; font-size: 0.76rem; font-weight: 600; }
+  nav button.chip.active { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
+
+  section.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
+  section.panel h2 { font-size: 1.2rem; margin-bottom: 6px; }
+  section.panel h3 { font-size: 1rem; margin: 18px 0 10px; color: var(--blue); }
+  section.panel p { margin: 8px 0; }
+  .muted { color: var(--muted); }
+  .lead { color: var(--muted); font-size: 0.95rem; }
+
+  .grid { display: grid; gap: 12px; }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .g3 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .g4 { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .card h4 { font-size: 0.9rem; margin-bottom: 6px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85rem; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  tr:hover td { background: var(--hover); }
+
+  code, .mono { font-family: 'Fira Code', ui-monospace, monospace; }
+  .mono { font-size: 0.9rem; }
+  .chip-tag { display: inline-block; border-radius: 999px; padding: 1px 9px; font-size: 0.74rem; font-weight: 700; }
+  .b-blue { background: var(--blue-dim); color: var(--blue); }
+  .b-green { background: var(--green-dim); color: var(--green); }
+  .b-amber { background: var(--amber-dim); color: var(--amber); }
+  .b-red { background: var(--red-dim); color: var(--red); }
+  .b-violet { background: var(--violet-dim); color: var(--violet); }
+  .b-cyan { background: var(--cyan-dim); color: var(--cyan); }
+
+  .callout { border-left: 4px solid var(--amber); background: var(--card-2); border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 12px 0; font-size: 0.9rem; }
+  .callout.green { border-color: var(--green); }
+  .callout.red { border-color: var(--red); }
+  .callout.blue { border-color: var(--blue); }
+  .callout.violet { border-color: var(--violet); }
+
+  .row-fn { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 8px 0; }
+
+  .opt { display: flex; align-items: center; gap: 8px; padding: 6px 9px; margin: 3px 0; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; background: var(--card); font-size: 0.86rem; }
+  .opt.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .opt .letter { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex: 0 0 auto; }
+  .opt.sel .letter { background: var(--blue); color: #0f172a; }
+
+  #app pre, pre.cmd { background: var(--code-bg); color: #e2e8f0; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.82rem; line-height: 1.5; }
+
+  .trap-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  .trap-item:last-child { border-bottom: none; }
+  .trap-ico { color: var(--red); font-weight: 700; flex: 0 0 auto; }
+
+  .step-flow { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .step { border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 0.8rem; background: var(--card-2); }
+  .step .n { color: var(--blue); font-weight: 700; }
+
+  .verdict { border-radius: 8px; padding: 10px 14px; font-weight: 700; margin: 8px 0; }
+  .verdict.ok { background: var(--green-dim); color: var(--green); }
+  .verdict.bad { background: var(--red-dim); color: var(--red); }
+  .verdict.info { background: var(--blue-dim); color: var(--blue); }
+
+  .chk-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; margin: 5px 0; cursor: pointer; transition: opacity 0.15s; }
+  .chk-item.done { opacity: 0.55; text-decoration: line-through; }
+  .chk-box { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 5px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; }
+  .chk-item.done .chk-box { background: var(--green); border-color: var(--green); color: #0f172a; }
+
+  .proto-cell { border: 1px solid var(--border); border-radius: 10px; padding: 9px 10px; background: var(--card); cursor: pointer; text-align: center; }
+  .proto-cell.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .proto-cell .pn { font-weight: 700; }
+  .proto-cell .pd { font-size: 0.75rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<div id="app" :data-theme="theme">
+  <header>
+    <h1><span class="lv-badge">L30</span> How Labs Work <span class="cap-badge">CAPSTONE</span>
+      <span class="exam-badge">ENCOR 350-401</span></h1>
+    <div class="head-actions">
+      <a class="btn" href="../Level 29 - Troubleshooting/How Troubleshooting Works.html">◀ TShoot</a>
+      <a class="btn" href="../index.html">Flashcards ▶</a>
+      <button class="btn" @click="theme = (theme==='dark'?'light':'dark')">{{ theme==='dark' ? '☀' : '🌙' }}</button>
+    </div>
+  </header>
+
+  <nav>
+    <button class="chip" v-for="s in sections" :key="s.id" :class="{active:sec===s.id}" @click="sec=s.id">{{ s.icon }} {{ s.label }}</button>
+  </nav>
+
+  <!-- 1. OVERVIEW -->
+  <section class="panel" v-show="sec==='intro'" id="intro">
+    <h2>🧪 Labs — consolidating the whole CCNP path</h2>
+    <p class="lead">The final level ties the entire ENCOR curriculum together through <b>hands-on lab scenarios</b>: choose a <b>platform</b>, then build <b>design labs</b> (campus/branch/ISP/DC), drill <b>protocol labs</b>, and finish with <b>automation + end-to-end</b> integration.</p>
+
+    <h3>The 4 building blocks</h3>
+    <div class="grid g4">
+      <div class="card"><h4>Platform</h4><span class="chip-tag b-blue">PT · CML · GNS3 · EVE-NG</span></div>
+      <div class="card"><h4>Design</h4><span class="chip-tag b-green">Campus · Branch · ISP · DC</span></div>
+      <div class="card"><h4>Protocols</h4><span class="chip-tag b-amber">OSPF · BGP · MPLS · VPN · SD-WAN</span></div>
+      <div class="card"><h4>Automate</h4><span class="chip-tag b-violet">Python · Ansible · APIs · E2E</span></div>
+    </div>
+    <div class="callout green"><b>Strategy: use a free/low-fidelity tool (Packet Tracer) for ENCOR basics + CLI practice, then a real-image platform (CML/GNS3/EVE-NG) for the deep lab scenarios.</b></div>
+  </section>
+
+  <!-- 2. PLATFORMS -->
+  <section class="panel" v-show="sec==='plat'" id="plat">
+    <h2>🖥️ Lab Platforms</h2>
+    <p class="lead">Pick the right sandbox: fidelity vs cost vs scale.</p>
+
+    <h3>Platform picker</h3>
+    <div class="grid g4">
+      <div class="proto-cell" :class="{sel:platPick==='pt'}" @click="platPick='pt'"><div class="pn">Packet Tracer</div><div class="pd">free · low fidelity</div></div>
+      <div class="proto-cell" :class="{sel:platPick==='cml'}" @click="platPick='cml'"><div class="pn">CML</div><div class="pd">licensed · real IOS</div></div>
+      <div class="proto-cell" :class="{sel:platPick==='gns3'}" @click="platPick='gns3'"><div class="pn">GNS3</div><div class="pd">free · images + VM</div></div>
+      <div class="proto-cell" :class="{sel:platPick==='eve'}" @click="platPick='eve'"><div class="pn">EVE-NG</div><div class="pd">web · multi-vendor</div></div>
+    </div>
+    <div class="verdict" :class="platVerdict.cls">{{ platVerdict.text }}</div>
+    <table>
+      <tr><th>Tool</th><th>Fidelity</th><th>Cost</th><th>Images</th><th>Best for</th></tr>
+      <tr><td>Packet Tracer</td><td>low</td><td>free</td><td>simulated</td><td>ENCOR basics, <b>no DMVPN/MPLS/QoS depth</b></td></tr>
+      <tr><td>CML (ex-VIRL)</td><td>high</td><td>licensed</td><td>real IOS-XE/NX-OS</td><td><b>CCNP/CCIE</b>, API + NETCONF, snapshots</td></tr>
+      <tr><td>GNS3</td><td>high</td><td>free</td><td>real + VMs + Docker</td><td>CCNP labs, Dynamips IOs / QEMU IOS-XE</td></tr>
+      <tr><td>EVE-NG</td><td>high</td><td>free tier</td><td>multi-vendor</td><td><b>large</b> multi-vendor topologies, web + API</td></tr>
+    </table>
+    <div class="callout blue"><b>CML = highest fidelity for serious exam prep (real IOS, snapshots, REST/NETCONF automation). GNS3 free + flexible (Dynamips = IOS, QEMU = IOS-XE, plus Docker). EVE-NG scales big topologies from the browser.</b></div>
+  </section>
+
+  <!-- 3. DESIGN LABS -->
+  <section class="panel" v-show="sec==='design'" id="design">
+    <h2>🏗️ Design Labs</h2>
+    <p class="lead">Four reference designs: campus, branch, ISP, and data center.</p>
+
+    <div class="grid g4">
+      <div class="proto-cell" :class="{sel:dsPick==='campus'}" @click="dsPick='campus'"><div class="pn">Campus</div><div class="pd">access/dist/core</div></div>
+      <div class="proto-cell" :class="{sel:dsPick==='branch'}" @click="dsPick='branch'"><div class="pn">Branch</div><div class="pd">WAN + VPN + failover</div></div>
+      <div class="proto-cell" :class="{sel:dsPick==='isp'}" @click="dsPick='isp'"><div class="pn">ISP</div><div class="pd">eBGP + MPLS</div></div>
+      <div class="proto-cell" :class="{sel:dsPick==='dc'}" @click="dsPick='dc'"><div class="pn">Data Center</div><div class="pd">NX-OS · vPC · VXLAN</div></div>
+    </div>
+    <div class="verdict" :class="dsVerdict.cls">{{ dsVerdict.text }}</div>
+    <table>
+      <tr><th>Design</th><th>Key stack</th><th>Verification</th></tr>
+      <tr><td>Campus</td><td>VLAN → trunk → EtherChannel → SVI → routing → FHRP</td><td>show vlan · etherchannel summary · show standby brief</td></tr>
+      <tr><td>Branch</td><td>dual WAN + DMVPN/IPsec tunnel + SLA track failover</td><td>show ip nhrp · show crypto session · show track</td></tr>
+      <tr><td>ISP</td><td>IGP (OSPF) + iBGP/eBGP + MPLS LDP + MP-BGP L3VPN</td><td>show ip bgp summary · show mpls ldp bindings</td></tr>
+      <tr><td>Data Center</td><td>spine-leaf NX-OS + vPC + VXLAN NVE/VNI + OTV</td><td>show vpc · show nve peers · show ip vrf</td></tr>
+    </table>
+    <div class="callout red"><b>Campus: L1→L2→L3 methodical order. Branch: dual WAN needs track+route for failover. ISP: eBGP=different AS, iBGP=next-hop-self. DC: NX-OS `feature` commands first; vPC = active-active (not standby).</b></div>
+  </section>
+
+  <!-- 4. PROTOCOL LABS -->
+  <section class="panel" v-show="sec==='proto'" id="proto">
+    <h2>⚙️ Protocol Labs</h2>
+    <p class="lead">Drill each protocol hands-on. Pick the lab.</p>
+
+    <div class="grid g3">
+      <div class="proto-cell" :class="{sel:prPick==='ospf'}" @click="prPick='ospf'"><div class="pn">Multi-Area OSPF</div><div class="pd">ABR · LSA · stub</div></div>
+      <div class="proto-cell" :class="{sel:prPick==='bgp'}" @click="prPick='bgp'"><div class="pn">Advanced BGP</div><div class="pd">RR · attrs · filters</div></div>
+      <div class="proto-cell" :class="{sel:prPick==='mpls'}" @click="prPick='mpls'"><div class="pn">MPLS</div><div class="pd">LDP · L3VPN</div></div>
+      <div class="proto-cell" :class="{sel:prPick==='dmvpn'}" @click="prPick='dmvpn'"><div class="pn">DMVPN</div><div class="pd">mGRE · NHRP</div></div>
+      <div class="proto-cell" :class="{sel:prPick==='ipsec'}" @click="prPick='ipsec'"><div class="pn">IPsec</div><div class="pd">IKE · transform</div></div>
+      <div class="proto-cell" :class="{sel:prPick==='sdwan'}" @click="prPick='sdwan'"><div class="pn">SD-WAN</div><div class="pd">control · tunnels</div></div>
+    </div>
+    <div class="verdict" :class="prVerdict.cls">{{ prVerdict.text }}</div>
+    <table>
+      <tr><th>Lab</th><th>Core skill</th><th>Top trap</th></tr>
+      <tr><td>Multi-area OSPF</td><td>area 0 + areas, ABR, LSA3 summary, range</td><td>stub = no type 5; NSSA = type 7; all areas attach to area 0</td></tr>
+      <tr><td>Advanced BGP</td><td>RR (client/non-client), attrs, prefix/as-path/community filters</td><td>next-hop-self for iBGP; `send-community` must be set; weight→local pref→AS path→MED</td></tr>
+      <tr><td>MPLS</td><td>IGP+LDP labels, MP-BGP vpnv4, VRF/RD/RT</td><td>LDP = transport; MP-BGP = VPN label; 2 labels; `send-community`; `mpls ip` on interfaces</td></tr>
+      <tr><td>DMVPN</td><td>mGRE + NHRP + IPsec; phase 3 direct spoke-spoke</td><td>`tunnel destination` only on hub; NHRP resolution engine</td></tr>
+      <tr><td>IPsec</td><td>ISAKMP → transform → interesting ACL → crypto map</td><td>ACL must mirror both sides; IKEv1 2 phases vs IKEv2 1 exchange</td></tr>
+      <tr><td>SD-WAN</td><td>vManage/vSmart/vBond + vEdge/cEdge, BFD/SLA</td><td>control plane first; show sdwan control connections; DTLS 12346</td></tr>
+    </table>
+    <div class="callout violet"><b>Each protocol lab = the SAME verify discipline from Level 29: neighbor/adjacency first, then table, then path. DMVPN + IPsec = the WAN tunnel; MPLS + BGP = the provider core; OSPF = the IGP everywhere.</b></div>
+  </section>
+
+  <!-- 5. AUTOMATION & CAPSTONE -->
+  <section class="panel" v-show="sec==='auto'" id="auto">
+    <h2>🤖 Automation &amp; End-to-End Capstone</h2>
+    <h3>Automation labs</h3>
+    <p class="lead">Python + Ansible + APIs (RESTCONF/NETCONF) make config repeatable and idempotent.</p>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> enable APIs</div>
+      <div class="step"><span class="n">2</span> connect</div>
+      <div class="step"><span class="n">3</span> change config</div>
+      <div class="step"><span class="n">4</span> verify</div>
+      <div class="step"><span class="n">5</span> rollback</div>
+    </div>
+    <div class="card" style="margin-top:8px">
+      <h4>Automation essentials (memorize)</h4>
+      <table>
+        <tr><th>Method</th><th>Format</th><th>Detail</th></tr>
+        <tr><td>RESTCONF</td><td>JSON</td><td>HTTP + YANG; accept header `application/yang-data+json`</td></tr>
+        <tr><td>NETCONF</td><td>XML</td><td>XML RPC over SSH; ncclient</td></tr>
+        <tr><td>Ansible</td><td>modules</td><td>ios_config / netconf_config = idempotent</td></tr>
+        <tr><td>Enable first</td><td>IOS-XE</td><td>`restconf` + `netconf-yang`</td></tr>
+      </table>
+    </div>
+    <h3>End-to-End enterprise scenario</h3>
+    <p class="lead">Stitch campus + WAN + DC + security + automation into ONE topology; follow <b>one packet end-to-end</b> across the data path.</p>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> host → access</div>
+      <div class="step"><span class="n">2</span> access → dist</div>
+      <div class="step"><span class="n">3</span> to WAN</div>
+      <div class="step"><span class="n">4</span> tunnel/crypto</div>
+      <div class="step"><span class="n">5</span> remote site</div>
+      <div class="step"><span class="n">6</span> server</div>
+    </div>
+    <div class="callout red"><b>Automation: verify + rollback after EVERY change. End-to-end: verify each domain before crossing; simulate failures and re-verify; QoS/security/automation are integrated, not silos.</b></div>
+  </section>
+
+  <!-- 6. RECAP -->
+  <section class="panel" v-show="sec==='recap'" id="recap">
+    <h2>🗺️ The Full Path Recap</h2>
+    <p class="lead">This capstone closes the 30-level CCNP Enterprise path. The lab strategy ties every earlier level together:</p>
+    <div class="grid g2">
+      <div class="card"><h4>Foundations</h4><p class="muted" style="margin:0">L1-L4, addressing, VLAN/STP, routing</p></div>
+      <div class="card"><h4>Routing &amp; services</h4><p class="muted" style="margin:0">OSPF/EIGRP/BGP, redistribution, FHRP, NAT, QoS</p></div>
+      <div class="card"><h4>WAN &amp; security</h4><p class="muted" style="margin:0">MPLS, DMVPN/IPsec, SD-WAN, VPN, wireless</p></div>
+      <div class="card"><h4>Automation &amp; operations</h4><p class="muted" style="margin:0">SDN/YANG, virtualization/cloud, monitoring, HA, IOS-XE, troubleshooting</p></div>
+    </div>
+    <div class="callout green"><b>Practice in a real-image lab (CML/GNS3/EVE-NG), build each design from the ground up, drill the protocol labs, then automate and verify end-to-end. Hands-on + reproducibility = exam confidence.</b></div>
+  </section>
+
+  <!-- 7. COMMANDS -->
+  <section class="panel" v-show="sec==='cmds'" id="cmds">
+    <h2>⌨️ Commands</h2>
+    <div class="row-fn">
+      <button class="btn" v-for="c in commands" :key="c.key" :class="{primary:activeCmd===c.key}" @click="activeCmd=c.key">{{ c.label }}</button>
+    </div>
+    <pre class="cmd">{{ activeCommand.show }}</pre>
+  </section>
+
+  <!-- 8. TRAPS -->
+  <section class="panel" v-show="sec==='traps'" id="traps">
+    <h2>⚠️ Common Traps</h2>
+    <div v-for="t in traps" :key="t" class="trap-item"><span class="trap-ico">!</span><div>{{ t }}</div></div>
+  </section>
+
+  <!-- 9. QUIZ -->
+  <section class="panel" v-show="sec==='quiz'" id="quiz">
+    <h2>📝 Quiz ({{ quizQuestions.length }})</h2>
+    <div v-for="(q,qi) in quizQuestions" :key="qi" class="card" style="margin:12px 0">
+      <div style="font-weight:700;margin-bottom:8px">{{ qi+1 }}. {{ q.q }}</div>
+      <div v-for="(o,oi) in q.opts" :key="oi"
+           class="opt" :class="{sel:q.ans===oi}"
+           @click="q.ans=oi">
+        <span class="letter">{{ String.fromCharCode(65+oi) }}</span>{{ o.text }}
+      </div>
+    </div>
+    <div class="row-fn">
+      <button class="btn primary" @click="submitQuiz()" :disabled="!allQuizAnswered">Submit answers</button>
+      <button class="btn" @click="resetQuiz()">Reset</button>
+      <span class="muted" v-if="quizDone" style="font-weight:700">Score: {{ quizScore }} / {{ quizQuestions.length }}
+        ({{ Math.round(quizScore/quizQuestions.length*100) }}%)</span>
+    </div>
+    <div class="verdict" :class="quizDone ? (quizScore===quizQuestions.length?'ok':'info') : 'info'" v-if="quizDone">
+      {{ quizScore===quizQuestions.length ? '🎉 Perfect! All ' + quizQuestions.length + ' correct.' : 'Better luck next time — review the traps section.' }}
+    </div>
+  </section>
+
+  <!-- 10. CHECKLIST -->
+  <section class="panel" v-show="sec==='checklist'" id="checklist">
+    <h2>✅ Study Checklist</h2>
+    <p class="muted" style="margin-bottom:10px">{{ doneCount }} / {{ checklist.length }} complete</p>
+    <div v-for="(c,i) in checklist" :key="i" class="chk-item" :class="{done:c.done}" @click="toggleDone(i)">
+      <span class="chk-box">{{ c.done ? '✓' : '' }}</span>{{ c.t }}
+    </div>
+  </section>
+
+</div>
+
+<script src="../vue.global.prod.js"></script>
+<script>
+(() => {
+  const { createApp, ref, computed, reactive } = Vue;
+  const LS = {
+    theme: 'ccnp.lab.theme', done: 'ccnp.lab.done',
+    quiz: 'ccnp.lab.quiz'
+  };
+  function loadJSON(key, fb) {
+    try { const v = JSON.parse(localStorage.getItem(key)); return (v === null || v === undefined) ? fb : v; }
+    catch (e) { return fb; }
+  }
+  function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+  createApp({
+    setup() {
+      const theme = ref(loadJSON(LS.theme, 'dark'));
+      const sec = ref('intro');
+
+      /* ---------- SECTION NAV ---------- */
+      const sections = [
+        { id: 'intro', label: 'Overview', icon: '🧪' },
+        { id: 'plat', label: 'Platforms', icon: '🖥️' },
+        { id: 'design', label: 'Design Labs', icon: '🏗️' },
+        { id: 'proto', label: 'Protocol Labs', icon: '⚙️' },
+        { id: 'auto', label: 'Automation & E2E', icon: '🤖' },
+        { id: 'recap', label: 'Recap', icon: '🗺️' },
+        { id: 'cmds', label: 'Commands', icon: '⌨️' },
+        { id: 'traps', label: 'Traps', icon: '⚠️' },
+        { id: 'quiz', label: 'Quiz', icon: '📝' },
+        { id: 'checklist', label: 'Checklist', icon: '✅' }
+      ];
+
+      /* ---------- PLATFORM ---------- */
+      const platPick = ref('cml');
+      const platVerdict = computed(() => {
+        const m = {
+          pt: 'Packet Tracer — free, low fidelity, great for ENCOR basics + CLI practice. Lacks DMVPN/MPLS/SD-WAN depth. Save .pkt.',
+          cml: 'CML — official Cisco lab, REAL IOS-XE/NX-OS images, web UI + REST/NETCONF API, snapshots. Highest fidelity; requires license.',
+          gns3: 'GNS3 — free, real images + VMs + Docker. Dynamips = IOS, QEMU = IOS-XE. API + Ansible = automation practice.',
+          eve: 'EVE-NG — web-based, free tier, multi-vendor images, big topologies. Browser console + API. Pro = image import unlocked.'
+        };
+        return { cls: 'info', text: m[platPick.value] };
+      });
+
+      /* ---------- DESIGN ---------- */
+      const dsPick = ref('campus');
+      const dsVerdict = computed(() => {
+        const m = {
+          campus: 'Campus — three-tier access/distribution/core. VLAN → trunk → EtherChannel → SVI → routing → FHRP. Verify L1→L2→L3.',
+          branch: 'Branch — one router, dual WAN links, DMVPN/IPsec tunnel to HQ, SLA track failover. Verify tunnel → crypto → route.',
+          isp: 'ISP — IGP (OSPF) + iBGP/eBGP + MPLS LDP + MP-BGP L3VPN. eBGP=different AS; iBGP=next-hop-self. Route reflectors scale iBGP.',
+          dc: 'Data Center — NX-OS spine-leaf, vPC (active-active), VXLAN NVE/VNI overlay, OTV for remote DCs. Enable `feature` commands first.'
+        };
+        return { cls: 'info', text: m[dsPick.value] };
+      });
+
+      /* ---------- PROTOCOL ---------- */
+      const prPick = ref('ospf');
+      const prVerdict = computed(() => {
+        const m = {
+          ospf: 'Multi-area OSPF — area 0 backbone + areas via ABRs. LSA3 = inter-area summary; stub = no type 5; NSSA = type 7. `area range` summarizes.',
+          bgp: 'Advanced BGP — route reflectors (client/non-client) scale iBGP; next-hop-self; filters via prefix-list/as-path/community; weight→local pref→AS path→MED.',
+          mpls: 'MPLS — LDP carries transport labels, MP-BGP carries VPN labels (2 labels). `mpls ip` on interfaces; `send-community` for RTs. Verify LDP→FIB→VPNv4.',
+          dmvpn: 'DMVPN — mGRE + NHRP + IPsec. Spokes register to hub via NHRP; phase 3 = direct spoke-to-spoke. `tunnel destination` only on hub.',
+          ipsec: 'IPsec — ISAKMP policy → transform (esp-aes/esp-sha) → interesting-traffic ACL → crypto map → apply. IKEv1 = 2 phases; IKEv2 = 1 exchange.',
+          sdwan: 'SD-WAN — control plane (vManage/vSmart/vBond) up FIRST, onboard vEdge/cEdge, verify tunnels + BFD/SLA, then policy. show sdwan control connections.'
+        };
+        return { cls: 'info', text: m[prPick.value] };
+      });
+
+      /* ---------- COMMANDS ---------- */
+      const commands = [
+        {
+          key: 'campus', label: 'Campus',
+          show: "vlan 10\ninterface Gi0/1\n switchport mode trunk\n switchport trunk allowed vlan 10,20\n channel-group 1 mode active\ninterface Vlan10\n ip address 10.10.10.254 255.255.255.0\n standby 1 ip 10.10.10.1\nrouter ospf 1\n network 10.10.10.0 0.0.0.255 area 0\nshow spanning-tree\nshow etherchannel summary\nshow standby brief"
+        },
+        {
+          key: 'branch', label: 'Branch',
+          show: "interface Tunnel0\n ip nhrp network-id 1\n ip nhrp nhs 1.1.1.1\n tunnel source Gi0/1\n tunnel destination 1.1.1.1\n tunnel protection ipsec profile DMVPN\ntrack 1 ip sla 10 reachability\nip route 0.0.0.0 0.0.0.0 2.2.2.1 track 1\nshow ip nhrp brief\nshow crypto session\nshow track"
+        },
+        {
+          key: 'isp', label: 'ISP',
+          show: "router bgp 65001\n neighbor 10.0.0.2 remote-as 65002\n neighbor 10.0.0.1 remote-as 65000 next-hop-self\nmpls label protocol ldp\nrouter ospf 1\n mpls ldp autoconfig\nshow ip bgp summary\nshow mpls ldp bindings\nshow mpls forwarding"
+        },
+        {
+          key: 'dc', label: 'Data Center',
+          show: "feature vpc\nvpc domain 10\n peer-keepalive destination 10.0.0.2\ninterface port-channel 1\n vpc 1\nfeature vn-segment-vlan-based\ninterface nve1\n member vni 10010\nshow vpc\nshow nve peers\nshow ip vrf\ncopy run start"
+        },
+        {
+          key: 'ospf', label: 'Multi-Area OSPF',
+          show: "router ospf 1\n router-id 1.1.1.1\n network 10.0.0.0 0.0.0.255 area 0\n network 10.1.0.0 0.0.0.255 area 1\n area 1 range 10.1.0.0 255.255.0.0\nshow ip ospf neighbor\nshow ip ospf database summary\nshow ip route ospf"
+        },
+        {
+          key: 'bgp', label: 'Advanced BGP',
+          show: "router bgp 65000\n neighbor 10.0.0.1 remote-as 65000\n neighbor 10.0.0.1 route-reflector-client\n neighbor 10.0.0.1 next-hop-self\n neighbor 10.0.0.1 send-community\n neighbor 10.0.0.2 prefix-list FILTER in\n network 10.10.0.0 mask 255.255.255.0\nshow ip bgp summary\nshow ip bgp neighbors 10.0.0.1 received-routes"
+        },
+        {
+          key: 'mpls', label: 'MPLS',
+          show: "mpls label protocol ldp\ninterface Gi0/1\n mpls ip\nrouter ospf 1\n mpls ldp autoconfig\nvrf definition CUST\n rd 65000:100\n route-target both 65000:100\nrouter bgp 65000\n address-family vpnv4\n  neighbor 10.0.0.2 activate\n  neighbor 10.0.0.2 send-community both\nshow mpls ldp bindings\nshow bgp vpnv4 unicast"
+        },
+        {
+          key: 'dmvpn', label: 'DMVPN / IPsec',
+          show: "! DMVPN\ninterface Tunnel0\n ip nhrp network-id 1\n ip nhrp nhs 1.1.1.1\n tunnel mode gre multipoint\n tunnel destination 1.1.1.1\n tunnel protection ipsec profile DMVPN\nshow ip nhrp short\n! IPsec\ncrypto isakmp policy 10\n encr aes\n authentication pre-share\n group 14\ncrypto ipsec transform-set TS esp-aes esp-sha256\naccess-list 100 permit ip 10.0.0.0 0.0.0.255 10.1.0.0 0.0.0.255\ncrypto map CM 1 ipsec-isakmp\n set peer 1.1.1.1\n transform-set TS\n match address 100\ninterface Gi0/1\n crypto map CM\nshow crypto isakmp sa\nshow crypto ipsec sa"
+        },
+        {
+          key: 'sdwan', label: 'SD-WAN',
+          show: "! edge CLI\nsystem\n ip address 10.0.0.1\nsystem\n organization-name CORP\nvpn 0\n route 0.0.0.0/0 vpn 0 ipsec\nvpn 512\n ip route 0.0.0.0/0 vpn 0\nshow sdwan control connections\nshow sdwan tunnel\nshow sdwan interface\nshow sdwan policy\nshow sdwan bfd sessions"
+        },
+        {
+          key: 'auto', label: 'Automation',
+          show: "! IOS-XE\nconf t\n restconf\n netconf-yang\n ip http secure-server\nend\n! Python RESTCONF\nimport requests\nr = requests.get('/restconf/data/Cisco-IOS-XE-native:native/interface',\n  auth=(u,p), headers={'accept':'application/yang-data+json'})\n! Ansible\n- name: ensure config\n  cisco.ios.ios_config:\n    lines:\n      - hostname R1"
+        }
+      ];
+      const activeCmd = ref(commands[0].key);
+      const activeCommand = computed(() => commands.find(c => c.key === activeCmd.value));
+
+      /* ---------- TRAPS ---------- */
+      const traps = [
+        'Packet Tracer = FREE, LOW fidelity — fine for ENCOR basics but LACKS DMVPN/MPLS/QoS depth. Use CLI, not GUI.',
+        'CML = official Cisco lab with REAL IOS-XE/NX-OS images, snapshots, and REST/NETCONF API. Requires a license — the CCNP-grade tool.',
+        'GNS3: Dynamips emulates IOS; QEMU runs IOS-XE; Docker containers add hosts. Free but CPU/RAM heavy per image.',
+        'EVE-NG = web-based, free tier, MULTI-vendor images; Pro unlocks image import; built for LARGE topologies.',
+        'Campus lab: build VLAN → trunk → EtherChannel → SVI → routing → FHRP in a repeatable order; verify L1→L2→L3.',
+        'Branch lab: dual WAN needs `track` + route for failover; DMVPN/IPsec tunnel to HQ; verify tunnel → crypto → route.',
+        'ISP lab: eBGP = DIFFERENT AS; iBGP = same AS with next-hop-self. Route reflectors scale iBGP. MPLS = LDP labels + MP-BGP VPN labels.',
+        'Data Center: NX-OS `feature` commands must be ENABLED first; vPC = active-active (NOT standby); save with `copy run start`.',
+        'Multi-area OSPF: all areas attach to area 0 via ABRs; LSA3 = inter-area summary; stub = no type 5; NSSA = type 7.',
+        'Advanced BGP: route-reflector client/non-client rules; next-hop-self for iBGP; `send-community` must be set; best path weight→local pref→AS path→MED.',
+        'MPLS L3VPN: TWO labels — LDP transport label + BGP VPN label. MP-BGP needs `send-community` for RTs. `mpls ip` on interfaces.',
+        'DMVPN: `tunnel destination` only on the HUB (mGRE); NHRP = resolution+registration engine; phase 3 = direct spoke-to-spoke.',
+        'IPsec: interesting-traffic ACL defines & must mirror both tunnel ends; IKEv1 = 2 phases, IKEv2 = 1 exchange; esp-aes + esp-sha classic.',
+        'SD-WAN: control plane (vBond/vSmart/vManage) must be up FIRST; show sdwan control connections = first check; DTLS 12346; BFD drives failover.',
+        'Automation: enable `restconf` + `netconf-yang` first; RESTCONF = JSON (accept yang-data+json), NETCONF = XML; verify + rollback after every change.',
+        'End-to-end: follow ONE packet across domains; verify each domain before crossing; simulate failures and re-verify; QoS/security/automation are integrated, not silos.'
+      ];
+
+      /* ---------- QUIZ ---------- */
+      const quizRaw = [
+        { q: 'Which tool uses REAL Cisco IOS-XE/NX-OS images and is the CCNP-grade standard?', opts: [{ text: 'CML (Cisco Modeling Labs)' }, { text: 'Packet Tracer' }, { text: 'VPCS' }, { text: 'Simulation mode' }], correct: 0 },
+        { q: 'Packet Tracer is best described as:', opts: [{ text: 'free, low-fidelity, good for ENCOR basics' }, { text: 'a real-image CCNP emulator' }, { text: 'a licensed firewall' }, { text: 'a monitoring tool' }], correct: 0 },
+        { q: 'Which advanced feature does Packet Tracer NOT support?', opts: [{ text: 'DMVPN / MPLS / SD-WAN' }, { text: 'VLANs' }, { text: 'basic routing' }, { text: 'STP' }], correct: 0 },
+        { q: 'In GNS3, Dynamips is used to emulate:', opts: [{ text: 'IOS' }, { text: 'IOS-XE' }, { text: 'Docker' }, { text: 'NX-OS' }], correct: 0 },
+        { q: 'GNS3 runs IOS-XE images via:', opts: [{ text: 'QEMU' }, { text: 'Dynamips' }, { text: 'NSX' }, { text: 'VMkernel' }], correct: 0 },
+        { q: 'The EVE-NG Pro edition mainly unlocks:', opts: [{ text: 'image import' }, { text: 'the browser console' }, { text: 'the API' }, { text: 'multi-user' }], correct: 0 },
+        { q: 'The campus lab build order is:', opts: [{ text: 'VLAN → trunk → EtherChannel → SVI → routing → FHRP' }, { text: 'routing → FHRP → VLAN' }, { text: 'SVI → trunk → VLAN' }, { text: 'FHRP → EtherChannel → VLAN' }], correct: 0 },
+        { q: 'Branch dual-WAN failover requires:', opts: [{ text: '`track` (IP SLA) + a routed default' }, { text: 'a single static route only' }, { text: 'no extra config' }, { text: 'only a loopback' }], correct: 0 },
+        { q: 'In the ISP lab, iBGP neighbors need:', opts: [{ text: 'next-hop-self' }, { text: 'a different ASN' }, { text: 'MPLS disabled' }, { text: 'BGP synchronization enabled' }], correct: 0 },
+        { q: 'NX-OS Data Center: vPC gives:', opts: [{ text: 'active-active port channel across two switches' }, { text: 'active/standby failover' }, { text: 'a single-port bundle' }, { text: 'routing only' }], correct: 0 },
+        { q: 'Multi-area OSPF: all areas must be reachable through:', opts: [{ text: 'area 0 (backbone) via ABRs' }, { text: 'a stub area' }, { text: 'an NSSA directly' }, { text: 'type 7 only' }], correct: 0 },
+        { q: 'In OSPF, NSSA uses which LSA to carry external routes?', opts: [{ text: 'Type 7' }, { text: 'Type 3' }, { text: 'Type 1' }, { text: 'Type 5' }], correct: 0 },
+        { q: 'In MPLS L3VPN there are typically ___ labels (transport + VPN):', opts: [{ text: 'two' }, { text: 'one' }, { text: 'three' }, { text: 'zero' }], correct: 0 },
+        { q: 'MPLS MP-BGP must send which attribute to exchange route-targets?', opts: [{ text: 'community (+ send-community)' }, { text: 'local-pref' }, { text: 'weight' }, { text: 'origin code' }], correct: 0 },
+        { q: 'DMVPN spoke-to-spoke direct tunnels occur in:', opts: [{ text: 'phase 3' }, { text: 'phase 1' }, { text: 'phase 0' }, { text: 'phase 4 only' }], correct: 0 },
+        { q: 'In IPsec, the interesting-traffic ACL:', opts: [{ text: 'defines what the tunnel protects and must mirror both sides' }, { text: 'is optional' }, { text: 'sets the transform set' }, { text: 'allocates the pool' }], correct: 0 },
+        { q: 'SD-WAN lab: the FIRST thing to check is:', opts: [{ text: 'show sdwan control connections' }, { text: 'the firewall ACLs' }, { text: 'IKE phase 2' }, { text: 'the DHCP pool' }], correct: 0 },
+        { q: 'To automate config via RESTCONF the CLI must first:', opts: [{ text: 'enable `restconf` (and `netconf-yang`)' }, { text: 'disable SSH' }, { text: 'set a static route' }, { text: 'enable STP' }], correct: 0 }
+      ];
+      const quizQuestions = reactive(quizRaw.map(q => ({ ...q, ans: null })));
+      const quizDone = ref(false);
+      const quizScore = ref(loadJSON(LS.quiz, 0) || 0);
+      const allQuizAnswered = computed(() => quizQuestions.every(q => q.ans !== null));
+      function submitQuiz() {
+        if (!allQuizAnswered.value) return;
+        quizScore.value = quizQuestions.filter((q, i) => q.ans === q.correct).length;
+        quizDone.value = true;
+        save(LS.quiz, quizScore.value);
+      }
+      function resetQuiz() {
+        quizQuestions.forEach(q => q.ans = null);
+        quizDone.value = false;
+        quizScore.value = 0;
+        localStorage.removeItem(LS.quiz);
+      }
+
+      /* ---------- CHECKLIST ---------- */
+      const checklistRoot = loadJSON(LS.done, [
+        { t: 'Platforms: Packet Tracer (free/low-fidelity, ENCOR basics) vs CML/GNS3/EVE-NG (real images, CCNP-grade)', done: false },
+        { t: 'CML: real IOS-XE/NX-OS, snapshots, REST/NETCONF API; GNS3: Dynamips=IOS, QEMU=IOS-XE, Docker; EVE-NG: web, multi-vendor, free tier', done: false },
+        { t: 'Campus design: VLAN → trunk → EtherChannel → SVI → routing → FHRP (HSRP/EtherChannel = redundancy); verify L1→L2→L3', done: false },
+        { t: 'Branch design: dual WAN + DMVPN/IPsec + SLA track failover; verify tunnel → crypto → route', done: false },
+        { t: 'ISP design: IGP + iBGP/eBGP (next-hop-self) + MPLS LDP + MP-BGP L3VPN; route reflectors scale iBGP', done: false },
+        { t: 'Data Center: NX-OS feature commands, vPC active-active, VXLAN NVE/VNI, OTV remote DCs, copy run start', done: false },
+        { t: 'Multi-area OSPF: area 0 backbone + ABRs, LSA3 summaries, stub (no type 5) vs NSSA (type 7), area range', done: false },
+        { t: 'Advanced BGP: route reflectors (client/non-client), next-hop-self, send-community, prefix/as-path filters, bestpath order', done: false },
+        { t: 'MPLS: LDP transport label + BGP VPN label (2 labels), mpls ip on interfaces, MP-BGP send-community for RTs', done: false },
+        { t: 'DMVPN: mGRE + NHRP + IPsec; tunnel destination only on hub; phase 3 direct spoke-to-spoke. IPsec: interesting ACL mirrors, IKEv1 vs v2', done: false },
+        { t: 'SD-WAN: control plane first (vBond/vSmart/vManage), onboarding edge, show sdwan control connections, BFD/SLA failover, DTLS 12346', done: false },
+        { t: 'Automation: enable restconf + netconf-yang, RESTCONF JSON vs NETCONF XML, Ansible idempotent modules, verify + rollback after every change', done: false },
+        { t: 'End-to-end capstone: follow one packet across campus/WAN/DC, verify each domain, simulate failures, re-verify, integrate QoS/security/automation', done: false }
+      ]);
+      const checklist = reactive(checklistRoot);
+      const doneCount = computed(() => checklist.filter(c => c.done).length);
+      function saveChecklist() { save(LS.done, checklistRoot); }
+      function toggleDone(i) { checklistRoot[i].done = !checklistRoot[i].done; saveChecklist(); }
+
+      return {
+        theme, sec, sections,
+        platPick, platVerdict,
+        dsPick, dsVerdict,
+        prPick, prVerdict,
+        commands, activeCmd, activeCommand,
+        traps,
+        quizQuestions, quizDone, quizScore, allQuizAnswered, submitQuiz, resetQuiz,
+        checklist, doneCount, saveChecklist, toggleDone
+      };
+    }
+  }).mount('#app');
+})();
+</script>
+</body>
+</html>

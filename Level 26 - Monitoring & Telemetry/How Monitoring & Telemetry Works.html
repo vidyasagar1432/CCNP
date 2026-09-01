@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Monitoring &amp; Telemetry Works — Deep Dive</title>
+<style>
+  :root {
+    --bg: #0f172a; --panel: #111c34; --card: #1e293b; --card-2: #16233d;
+    --text: #f8fafc; --muted: #94a3b8;
+    --blue: #38bdf8; --blue-dim: #0c4a6e;
+    --green: #34d399; --green-dim: #064e3b;
+    --amber: #fbbf24; --amber-dim: #78350f;
+    --red: #f87171; --red-dim: #7f1d1d;
+    --violet: #a78bfa; --violet-dim: #4c1d95;
+    --cyan: #22d3ee; --cyan-dim: #164e63;
+    --border: #334155; --hover: #263449; --code-bg: #0b1220;
+  }
+  #app[data-theme="light"] {
+    --bg: #f1f5f9; --panel: #ffffff; --card: #ffffff; --card-2: #f8fafc;
+    --text: #0f172a; --muted: #64748b;
+    --blue: #0284c7; --blue-dim: #bae6fd;
+    --green: #059669; --green-dim: #d1fae5;
+    --amber: #d97706; --amber-dim: #fef3c7;
+    --red: #dc2626; --red-dim: #fee2e2;
+    --violet: #7c3aed; --violet-dim: #ede9fe;
+    --cyan: #0891b2; --cyan-dim: #cffafe;
+    --border: #cbd5e1; --hover: #e2e8f0; --code-bg: #0b1220;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; }
+  #app { max-width: 1040px; margin: 0 auto; padding: 20px 18px 60px; }
+
+  header { position: sticky; top: 0; z-index: 30; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .lv-badge { background: var(--blue-dim); color: var(--blue); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .exam-badge { background: var(--violet-dim); color: var(--violet); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .head-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: background 0.15s; }
+  .btn:hover { background: var(--hover); }
+  .btn.primary { background: var(--blue); color: #0f172a; border-color: var(--blue); }
+
+  nav { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 2px 16px; }
+  nav button.chip { border: 1px solid var(--border); background: var(--card); color: var(--muted); padding: 5px 11px; border-radius: 999px; cursor: pointer; font-size: 0.76rem; font-weight: 600; }
+  nav button.chip.active { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
+
+  section.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
+  section.panel h2 { font-size: 1.2rem; margin-bottom: 6px; }
+  section.panel h3 { font-size: 1rem; margin: 18px 0 10px; color: var(--blue); }
+  section.panel p { margin: 8px 0; }
+  .muted { color: var(--muted); }
+  .lead { color: var(--muted); font-size: 0.95rem; }
+
+  .grid { display: grid; gap: 12px; }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .g3 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .g4 { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .card h4 { font-size: 0.9rem; margin-bottom: 6px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85rem; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  tr:hover td { background: var(--hover); }
+
+  code, .mono { font-family: 'Fira Code', ui-monospace, monospace; }
+  .mono { font-size: 0.9rem; }
+  .chip-tag { display: inline-block; border-radius: 999px; padding: 1px 9px; font-size: 0.74rem; font-weight: 700; }
+  .b-blue { background: var(--blue-dim); color: var(--blue); }
+  .b-green { background: var(--green-dim); color: var(--green); }
+  .b-amber { background: var(--amber-dim); color: var(--amber); }
+  .b-red { background: var(--red-dim); color: var(--red); }
+  .b-violet { background: var(--violet-dim); color: var(--violet); }
+  .b-cyan { background: var(--cyan-dim); color: var(--cyan); }
+
+  .callout { border-left: 4px solid var(--amber); background: var(--card-2); border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 12px 0; font-size: 0.9rem; }
+  .callout.green { border-color: var(--green); }
+  .callout.red { border-color: var(--red); }
+  .callout.blue { border-color: var(--blue); }
+  .callout.violet { border-color: var(--violet); }
+
+  .row-fn { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 8px 0; }
+
+  .opt { display: flex; align-items: center; gap: 8px; padding: 6px 9px; margin: 3px 0; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; background: var(--card); font-size: 0.86rem; }
+  .opt.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .opt .letter { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex: 0 0 auto; }
+  .opt.sel .letter { background: var(--blue); color: #0f172a; }
+
+  #app pre, pre.cmd { background: var(--code-bg); color: #e2e8f0; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.82rem; line-height: 1.5; }
+
+  .trap-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  .trap-item:last-child { border-bottom: none; }
+  .trap-ico { color: var(--red); font-weight: 700; flex: 0 0 auto; }
+
+  .step-flow { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .step { border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 0.8rem; background: var(--card-2); }
+  .step .n { color: var(--blue); font-weight: 700; }
+
+  .verdict { border-radius: 8px; padding: 10px 14px; font-weight: 700; margin: 8px 0; }
+  .verdict.ok { background: var(--green-dim); color: var(--green); }
+  .verdict.bad { background: var(--red-dim); color: var(--red); }
+  .verdict.info { background: var(--blue-dim); color: var(--blue); }
+
+  .chk-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; margin: 5px 0; cursor: pointer; transition: opacity 0.15s; }
+  .chk-item.done { opacity: 0.55; text-decoration: line-through; }
+  .chk-box { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 5px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; }
+  .chk-item.done .chk-box { background: var(--green); border-color: var(--green); color: #0f172a; }
+
+  .proto-cell { border: 1px solid var(--border); border-radius: 10px; padding: 9px 10px; background: var(--card); cursor: pointer; text-align: center; }
+  .proto-cell.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .proto-cell .pn { font-weight: 700; }
+  .proto-cell .pd { font-size: 0.75rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<div id="app" :data-theme="theme">
+  <header>
+    <h1><span class="lv-badge">L26</span> How Monitoring &amp; Telemetry Works
+      <span class="exam-badge">ENCOR 350-401</span></h1>
+    <div class="head-actions">
+      <a class="btn" href="../Level 25 - Virtualization &amp; Cloud/How Virtualization &amp; Cloud Works.html">◀ Virt</a>
+      <a class="btn" href="../Level 27 - High Availability/How High Availability Works.html">HA ▶</a>
+      <a class="btn" href="../index.html">Flashcards</a>
+      <button class="btn" @click="theme = (theme==='dark'?'light':'dark')">{{ theme==='dark' ? '☀' : '🌙' }}</button>
+    </div>
+  </header>
+
+  <nav>
+    <button class="chip" v-for="s in sections" :key="s.id" :class="{active:sec===s.id}" @click="sec=s.id">{{ s.icon }} {{ s.label }}</button>
+  </nav>
+
+  <!-- 1. OVERVIEW -->
+  <section class="panel" v-show="sec==='intro'" id="intro">
+    <h2>📡 Monitoring &amp; Telemetry — the whole picture</h2>
+    <p class="lead">Two families: <b>device &amp; performance monitoring</b> (SNMP, IP SLA, Syslog, streaming telemetry) and <b>traffic monitoring</b> (NetFlow, SPAN/ERSPAN, Wireshark). The big theme: <b>pull (poll) vs push (stream)</b>.</p>
+
+    <h3>The big idea: push vs pull</h3>
+    <div class="grid g2">
+      <div class="card"><h4>Pull (poll)</h4><p class="muted" style="margin:0">manager asks · SNMP GET · polling overhead</p></div>
+      <div class="card"><h4>Push (stream)</h4><p class="muted" style="margin:0">device pushes · NetFlow · streaming telemetry · scalable</p></div>
+    </div>
+    <div class="callout red"><b>Streaming telemetry = push on change/interval (gRPC/gNMI over YANG) — the modern replacement for SNMP polling.</b></div>
+  </section>
+
+  <!-- 2. SNMP -->
+  <section class="panel" v-show="sec==='snmp'" id="snmp">
+    <h2>🖥️ SNMP</h2>
+    <p class="lead">Management protocol over <b>UDP 161 (poll) / 162 (traps)</b>. Data lives in the <b>MIB</b>, addressed by <b>OIDs</b>. Manager polls the agent.</p>
+
+    <h3>Operations</h3>
+    <div class="grid g4">
+      <div class="card"><h4>GET</h4><p class="muted" style="margin:0">read an OID</p></div>
+      <div class="card"><h4>GETNEXT</h4><p class="muted" style="margin:0">walk MIB</p></div>
+      <div class="card"><h4>SET</h4><p class="muted" style="margin:0">write a value</p></div>
+      <div class="card"><h4>TRAP/INFORM</h4><p class="muted" style="margin:0">push alert (A→M)</p></div>
+    </div>
+
+    <h3>Version picker (the core contrast)</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:snmpPick==='v2c'}" @click="snmpPick='v2c'"><div class="pn">v1/v2c</div><div class="pd">community string, clear-text — legacy</div></div>
+      <div class="proto-cell" :class="{sel:snmpPick==='v3'}" @click="snmpPick='v3'"><div class="pn">v3</div><div class="pd">auth (SHA/MD5) + privacy (AES/DES)</div></div>
+    </div>
+    <div class="verdict" :class="snmpVerdict.cls">{{ snmpVerdict.text }}</div>
+    <div class="callout blue"><b>MIB = device database; OID = dotted address (e.g. 1.3.6.1.2.1.1.1 = sysDescr). v2c = community (weak); v3 = secure.</b></div>
+    <pre class="cmd">snmp-server community public RO
+snmp-server community secret RW
+snmp-server host 192.0.2.10 version 3 authpriv NMS
+snmp-server group GRP v3 priv
+snmp-server user admin GRP v3 auth sha Pass1 priv aes 128 Pass2
+show snmp
+show snmp mib
+snmpget -v2c -c public host 1.3.6.1.2.1.1.1.0
+snmpwalk -v2c -c public host .1
+</pre>
+  </section>
+
+  <!-- 3. NETFLOW -->
+  <section class="panel" v-show="sec==='nflow'" id="nflow">
+    <h2>🌀 NetFlow &amp; Flexible NetFlow</h2>
+    <p class="lead">Exports <b>flow metadata</b> (conversations — not full packets) to a collector over <b>UDP 2055</b> (common). Flows are <b>bidirectional</b>, identified by the <b>7-tuple</b>.</p>
+
+    <h3>The 7-tuple</h3>
+    <div class="grid g4">
+      <div class="card"><h4>Src IP</h4><p class="muted" style="margin:0">source</p></div>
+      <div class="card"><h4>Dst IP</h4><p class="muted" style="margin:0">dest</p></div>
+      <div class="card"><h4>Src/Dst port</h4><p class="muted" style="margin:0">L4</p></div>
+      <div class="card"><h4>Proto + TOS + I/F</h4><p class="muted" style="margin:0">identify &amp; tag</p></div>
+    </div>
+
+    <h3>Version picker (the classic trap)</h3>
+    <div class="grid g3">
+      <div class="proto-cell" :class="{sel:nfPick==='v5'}" @click="nfPick='v5'"><div class="pn">v5</div><div class="pd">FIXED record format · most famous</div></div>
+      <div class="proto-cell" :class="{sel:nfPick==='v9'}" @click="nfPick='v9'"><div class="pn">v9</div><div class="pd">TEMPLATE-based · flexible</div></div>
+      <div class="proto-cell" :class="{sel:nfPick==='ipfix'}" @click="nfPick='ipfix'"><div class="pn">IPFIX</div><div class="pd">template-based standard</div></div>
+    </div>
+    <div class="verdict" :class="nfVerdict.cls">{{ nfVerdict.text }}</div>
+
+    <h3>Flexible NetFlow anatomy</h3>
+    <div class="grid g3">
+      <div class="card"><h4>record</h4><p class="muted" style="margin:0">match (keys) + collect (fields)</p></div>
+      <div class="card"><h4>exporter</h4><p class="muted" style="margin:0">collector dest, UDP 2055</p></div>
+      <div class="card"><h4>monitor</h4><p class="muted" style="margin:0">bind record + exporter + cache</p></div>
+    </div>
+    <div class="callout red"><b>record → exporter → monitor, then `ip flow monitor ... input` on an interface. match = key, collect = non-key data. FNF = custom records over v9/IPFIX.</b></div>
+    <pre class="cmd">flow record FR1
+ match ipv4 source address
+ match ipv4 destination address
+ match transport source-port
+ match transport destination-port
+ match ip protocol
+ collect counter bytes
+ collect counter packets
+flow exporter EXP1
+ destination 192.0.2.10
+ transport udp 2055
+flow monitor FM1
+ record FR1
+ exporter EXP1
+ cache timeout active 300
+interface GigabitEthernet0/1
+ ip flow monitor FM1 input
+</pre>
+  </section>
+
+  <!-- 4. SPAN/ERSPAN -->
+  <section class="panel" v-show="sec==='span'" id="span">
+    <h2>🪞 SPAN &amp; ERSPAN — port mirroring</h2>
+    <p class="lead"><b>SPAN</b> mirrors traffic from source ports to an analyzer <b>on the same switch</b> (one-way, local). <b>RSPAN</b> mirrors over a VLAN; <b>ERSPAN</b> encapsulates in <b>IP/GRE</b> across a routed network.</p>
+
+    <h3>Scope picker (memorize)</h3>
+    <div class="grid g3">
+      <div class="proto-cell" :class="{sel:spanPick==='span'}" @click="spanPick='span'"><div class="pn">SPAN</div><div class="pd">local · same switch</div></div>
+      <div class="proto-cell" :class="{sel:spanPick==='rspan'}" @click="spanPick='rspan'"><div class="pn">RSPAN</div><div class="pd">remote via L2 VLAN</div></div>
+      <div class="proto-cell" :class="{sel:spanPick==='erspan'}" @click="spanPick='erspan'"><div class="pn">ERSPAN</div><div class="pd">remote via IP/GRE</div></div>
+    </div>
+    <div class="verdict" :class="spanVerdict.cls">{{ spanVerdict.text }}</div>
+
+    <h3>SPAN session</h3>
+    <div class="callout blue"><b>Build a session = source + destination. Keywords rx/tx/both set the mirrored direction. SPAN does NOT route.</b></div>
+    <pre class="cmd">monitor session 1 source interface GigabitEthernet0/1 both
+monitor session 1 destination interface GigabitEthernet0/2
+show monitor session 1
+!
+! ERSPAN (routed mirror)
+monitor session 1 type erspan-source
+ monitor session 1 source interface GigabitEthernet0/1 both
+monitor session 1 destination
+ erspan id 100
+ erspan ip-address 192.0.2.10
+ erspan origin-ip 198.51.100.1
+show monitor session 1
+</pre>
+    <div class="callout red"><b>ERSPAN needs `type erspan-source/destination`, `erspan id` + `erspan ip-address`; GRE overhead (~+50 bytes) — watch MTU.</b></div>
+  </section>
+
+  <!-- 5. IP SLA -->
+  <section class="panel" v-show="sec==='ipsla'" id="ipsla">
+    <h2>🎯 IP SLA — synthetic probes</h2>
+    <p class="lead">Generates <b>synthetic probe traffic</b> between routers to measure <b>latency, jitter, loss, availability, MOS</b>. Results can <b>track</b> (react) for routing decisions.</p>
+
+    <h3>Probe types</h3>
+    <div class="grid g4">
+      <div class="card"><h4>ICMP echo</h4><p class="muted" style="margin:0">reachability</p></div>
+      <div class="card"><h4>UDP jitter</h4><p class="muted" style="margin:0">voice/MOS</p></div>
+      <div class="card"><h4>TCP connect</h4><p class="muted" style="margin:0">app checks</p></div>
+      <div class="card"><h4>HTTP</h4><p class="muted" style="margin:0">web availability</p></div>
+    </div>
+    <div class="callout red"><b>Config pattern: `ip sla` + type + `frequency` + `ip sla schedule`; then `track N ip sla ... reachability` ties results to routing/object tracking.</b></div>
+    <pre class="cmd">ip sla 10
+ icmp-echo 192.0.2.5
+ frequency 60
+ timeout 1000
+ip sla schedule 10 life forever start-time now
+track 1 ip sla 10 reachability
+show ip sla statistics
+show ip sla config
+show track 1
+</pre>
+  </section>
+
+  <!-- 6. SYSLOG -->
+  <section class="panel" v-show="sec==='syslog'" id="syslog">
+    <h2>📝 Syslog</h2>
+    <p class="lead">Sends device log messages to a central server (<b>UDP 514</b>). Each entry has a <b>facility</b> (source) and <b>severity (0–7)</b>.</p>
+
+    <h3>Severity levels (lower = more severe)</h3>
+    <div class="grid g4">
+      <div class="card"><h4>0 emergencies</h4><p class="muted" style="margin:0">system down</p></div>
+      <div class="card"><h4>3 errors</h4><p class="muted" style="margin:0">error events</p></div>
+      <div class="card"><h4>4 warnings</h4><p class="muted" style="margin:0">warning</p></div>
+      <div class="card"><h4>7 debugging</h4><p class="muted" style="margin:0">debug output</p></div>
+    </div>
+
+    <h3>Level picker</h3>
+    <div class="row-fn">
+      <button class="btn" v-for="l in sevLevels" :key="l" :class="{primary:sevPick===l}" @click="sevPick=l">{{ l }}</button>
+    </div>
+    <div class="verdict" :class="sevVerdict.cls">{{ sevVerdict.text }}</div>
+    <div class="callout red"><b>`logging trap` controls what goes to the server; `logging buffered` is the ON-BOX ring (separate); `logging console` is the console. Severity 0 = most severe.</b></div>
+    <pre class="cmd">logging host 192.0.2.10
+logging trap informational
+logging console errors
+logging buffered 8192
+logging source-interface Loopback0
+logging timestamp datetime
+show logging
+terminal monitor
+</pre>
+  </section>
+
+  <!-- 7. TELEMETRY -->
+  <section class="panel" v-show="sec==='tele'" id="tele">
+    <h2>📶 Streaming Telemetry (modern)</h2>
+    <p class="lead">The device <b>pushes</b> subscription data continuously to collectors — encoded as <b>protobuf/JSON</b>, transported over <b>gRPC/gNMI</b>, modeled by <b>YANG</b>.</p>
+
+    <h3>Push vs SNMP pull</h3>
+    <table>
+      <tr><th>Aspect</th><th>SNMP</th><th>Telemetry</th></tr>
+      <tr><td>Mode</td><td>pull (poll)</td><td>push (stream)</td></tr>
+      <tr><td>Richness</td><td>limited</td><td>full model</td></tr>
+      <tr><td>Latency</td><td>poll cycle</td><td>on change</td></tr>
+      <tr><td>Scale</td><td>poor</td><td>best</td></tr>
+    </table>
+
+    <h3>Subscription mode picker</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:telePick==='onchange'}" @click="telePick='onchange'"><div class="pn">On-change</div><div class="pd">push when value changes</div></div>
+      <div class="proto-cell" :class="{sel:telePick==='periodic'}" @click="telePick='periodic'"><div class="pn">Periodic</div><div class="pd">push at a fixed interval</div></div>
+    </div>
+    <div class="verdict" :class="teleVerdict.cls">{{ teleVerdict.text }}</div>
+    <div class="callout red"><b>Model-driven telemetry = subscribe to a YANG path and stream it. gNMI over gRPC is the modern pairing (vs NETCONF for config).</b></div>
+    <pre class="cmd">telemetry ietf subscription 10
+ encoding encode-kvgpb
+ filter xpath /interfaces/interface/statistics
+ stream yang-push
+ update-policy periodic 30000
+ receiver ip address 192.0.2.11 port 57500 protocol grpc-tcp
+show telemetry
+</pre>
+  </section>
+
+  <!-- 8. WIRESHARK -->
+  <section class="panel" v-show="sec==='wire'" id="wire">
+    <h2>🐛 Wireshark</h2>
+    <p class="lead">Packet analyzer: capture, decode, filter, and analyze traffic. Reads <b>pcap/pcapng</b>, uses <b>BPF capture filters</b> + rich <b>display filters</b>.</p>
+
+    <h3>Capture vs display filters (the trap)</h3>
+    <div class="grid g2">
+      <div class="card"><h4>Capture (BPF)</h4><p class="muted" style="margin:0">before capture · `tcp port 443`, `host 1.2.3.4` — limits what is stored</p></div>
+      <div class="card"><h4>Display</h4><p class="muted" style="margin:0">after capture · `http.request`, `tcp.stream eq 0` — refines the view</p></div>
+    </div>
+
+    <h3>Common display filters</h3>
+    <div class="grid g3">
+      <div class="card"><h4>ip.addr == X</h4><p class="muted" style="margin:0">host traffic</p></div>
+      <div class="card"><h4>tcp.stream eq 0</h4><p class="muted" style="margin:0">one session</p></div>
+      <div class="card"><h4>http.request</h4><p class="muted" style="margin:0">requests</p></div>
+    </div>
+    <div class="callout blue"><b>Follow TCP Stream = analyze a full conversation. Statistics → conversations / protocol hierarchy. On-box on IOS-XE: `monitor capture`.</b></div>
+    <pre class="cmd">monitor capture CAP interface Gi0/1 both
+monitor capture CAP buffer size 10240
+monitor capture CAP start
+show monitor capture CAP
+! tshark CLI
+tshark -i eth0 -f "tcp port 443"
+</pre>
+  </section>
+
+  <!-- 9. COMMANDS -->
+  <section class="panel" v-show="sec==='cmds'" id="cmds">
+    <h2>⌨️ Commands</h2>
+    <div class="row-fn">
+      <button class="btn" v-for="c in commands" :key="c.key" :class="{primary:activeCmd===c.key}" @click="activeCmd=c.key">{{ c.label }}</button>
+    </div>
+    <pre class="cmd">{{ activeCommand.show }}</pre>
+  </section>
+
+  <!-- 10. TRAPS -->
+  <section class="panel" v-show="sec==='traps'" id="traps">
+    <h2>⚠️ Common Traps</h2>
+    <div v-for="t in traps" :key="t" class="trap-item"><span class="trap-ico">!</span><div>{{ t }}</div></div>
+  </section>
+
+  <!-- 11. QUIZ -->
+  <section class="panel" v-show="sec==='quiz'" id="quiz">
+    <h2>📝 Quiz ({{ quizQuestions.length }})</h2>
+    <div v-for="(q,qi) in quizQuestions" :key="qi" class="card" style="margin:12px 0">
+      <div style="font-weight:700;margin-bottom:8px">{{ qi+1 }}. {{ q.q }}</div>
+      <div v-for="(o,oi) in q.opts" :key="oi"
+           class="opt" :class="{sel:q.ans===oi}"
+           @click="q.ans=oi">
+        <span class="letter">{{ String.fromCharCode(65+oi) }}</span>{{ o.text }}
+      </div>
+    </div>
+    <div class="row-fn">
+      <button class="btn primary" @click="submitQuiz()" :disabled="!allQuizAnswered">Submit answers</button>
+      <button class="btn" @click="resetQuiz()">Reset</button>
+      <span class="muted" v-if="quizDone" style="font-weight:700">Score: {{ quizScore }} / {{ quizQuestions.length }}
+        ({{ Math.round(quizScore/quizQuestions.length*100) }}%)</span>
+    </div>
+    <div class="verdict" :class="quizDone ? (quizScore===quizQuestions.length?'ok':'info') : 'info'" v-if="quizDone">
+      {{ quizScore===quizQuestions.length ? '🎉 Perfect! All ' + quizQuestions.length + ' correct.' : 'Better luck next time — review the traps section.' }}
+    </div>
+  </section>
+
+  <!-- 12. CHECKLIST -->
+  <section class="panel" v-show="sec==='checklist'" id="checklist">
+    <h2>✅ Study Checklist</h2>
+    <p class="muted" style="margin-bottom:10px">{{ doneCount }} / {{ checklist.length }} complete</p>
+    <div v-for="(c,i) in checklist" :key="i" class="chk-item" :class="{done:c.done}" @click="toggleDone(i)">
+      <span class="chk-box">{{ c.done ? '✓' : '' }}</span>{{ c.t }}
+    </div>
+  </section>
+
+</div>
+
+<script src="../vue.global.prod.js"></script>
+<script>
+(() => {
+  const { createApp, ref, computed, reactive } = Vue;
+  const LS = {
+    theme: 'ccnp.mon.theme', done: 'ccnp.mon.done',
+    quiz: 'ccnp.mon.quiz'
+  };
+  function loadJSON(key, fb) {
+    try { const v = JSON.parse(localStorage.getItem(key)); return (v === null || v === undefined) ? fb : v; }
+    catch (e) { return fb; }
+  }
+  function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+  createApp({
+    setup() {
+      const theme = ref(loadJSON(LS.theme, 'dark'));
+      const sec = ref('intro');
+
+      /* ---------- SECTION NAV ---------- */
+      const sections = [
+        { id: 'intro', label: 'Overview', icon: '📡' },
+        { id: 'snmp', label: 'SNMP', icon: '🖥️' },
+        { id: 'nflow', label: 'NetFlow', icon: '🌀' },
+        { id: 'span', label: 'SPAN/ERSPAN', icon: '🪞' },
+        { id: 'ipsla', label: 'IP SLA', icon: '🎯' },
+        { id: 'syslog', label: 'Syslog', icon: '📝' },
+        { id: 'tele', label: 'Telemetry', icon: '📶' },
+        { id: 'wire', label: 'Wireshark', icon: '🐛' },
+        { id: 'cmds', label: 'Commands', icon: '⌨️' },
+        { id: 'traps', label: 'Traps', icon: '⚠️' },
+        { id: 'quiz', label: 'Quiz', icon: '📝' },
+        { id: 'checklist', label: 'Checklist', icon: '✅' }
+      ];
+
+      /* ---------- SNMP ---------- */
+      const snmpPick = ref('v3');
+      const snmpVerdict = computed(() => {
+        if (snmpPick.value === 'v2c') return { cls: 'info', text: 'v1/v2c — community string in clear-text. Simple but WEAK security; legacy/lab use.' };
+        return { cls: 'info', text: 'v3 — strong security: authentication (SHA/MD5) + privacy (AES/DES). Production standard.' };
+      });
+
+      /* ---------- NETFLOW ---------- */
+      const nfPick = ref('v9');
+      const nfVerdict = computed(() => {
+        if (nfPick.value === 'v5') return { cls: 'info', text: 'v5 — FIXED record format. Famous but rigid; no templates.' };
+        if (nfPick.value === 'v9') return { cls: 'info', text: 'v9 — TEMPLATE-based (flexible/extensible). Enables Flexible NetFlow.' };
+        return { cls: 'info', text: 'IPFIX — the standards-based template protocol (extends v9).' };
+      });
+
+      /* ---------- SPAN ---------- */
+      const spanPick = ref('span');
+      const spanVerdict = computed(() => {
+        if (spanPick.value === 'span') return { cls: 'info', text: 'SPAN — local port mirroring on the same switch (one-way, no routing).' };
+        if (spanPick.value === 'rspan') return { cls: 'info', text: 'RSPAN — remote mirroring over a dedicated L2 VLAN.' };
+        return { cls: 'info', text: 'ERSPAN — remote mirroring over IP/GRE across a ROUTED network.' };
+      });
+
+      /* ---------- SYSLOG SEVERITY ---------- */
+      const sevLevels = ['0','1','2','3','4','5','6','7'];
+      const sevPick = ref('4');
+      const sevVerdict = computed(() => {
+        const m = {
+          '0': '0 = emergencies — system is down/unusable (most severe).',
+          '1': '1 = alerts — immediate action needed.',
+          '2': '2 = critical — critical conditions.',
+          '3': '3 = errors — error conditions.',
+          '4': '4 = warnings — warning conditions.',
+          '5': '5 = notification — normal but notable.',
+          '6': '6 = informational — normal info messages.',
+          '7': '7 = debugging — debug output (least severe).'
+        };
+        return { cls: 'info', text: m[sevPick.value] };
+      });
+
+      /* ---------- TELEMETRY ---------- */
+      const telePick = ref('periodic');
+      const teleVerdict = computed(() => {
+        if (telePick.value === 'onchange') return { cls: 'info', text: 'On-change — pushes data whenever the subscribed value changes (event-driven, low latency).' };
+        return { cls: 'info', text: 'Periodic — pushes data at a fixed interval (e.g. every 30s via update-policy).' };
+      });
+
+      /* ---------- COMMANDS ---------- */
+      const commands = [
+        {
+          key: 'snmp', label: 'SNMP',
+          show: "snmp-server community public RO\nsnmp-server community secret RW\nsnmp-server host 192.0.2.10 version 3 authpriv NMS\nsnmp-server group GRP v3 priv\nsnmp-server user admin GRP v3 auth sha Pass1 priv aes 128 Pass2\nshow snmp\nshow snmp mib\nsnmpget -v2c -c public host 1.3.6.1.2.1.1.1.0\nsnmpwalk -v2c -c public host .1"
+        },
+        {
+          key: 'flow', label: 'NetFlow/FNF',
+          show: "flow record FR1\n match ipv4 source address\n match ipv4 destination address\n match transport source-port\n match transport destination-port\n collect counter bytes\n collect counter packets\nflow exporter EXP1\n destination 192.0.2.10\n transport udp 2055\nflow monitor FM1\n record FR1\n exporter EXP1\ninterface GigabitEthernet0/1\n ip flow monitor FM1 input\nshow flow monitor FM1 cache"
+        },
+        {
+          key: 'span', label: 'SPAN/ERSPAN',
+          show: "monitor session 1 source interface GigabitEthernet0/1 both\nmonitor session 1 destination interface GigabitEthernet0/2\nshow monitor session 1\n!\nmonitor session 1 type erspan-source\n monitor session 1 source interface GigabitEthernet0/1 both\nmonitor session 1 destination\n erspan id 100\n erspan ip-address 192.0.2.10\n erspan origin-ip 198.51.100.1\nshow monitor session 1"
+        },
+        {
+          key: 'sla', label: 'IP SLA',
+          show: "ip sla 10\n icmp-echo 192.0.2.5\n frequency 60\n timeout 1000\nip sla schedule 10 life forever start-time now\ntrack 1 ip sla 10 reachability\nshow ip sla statistics\nshow ip sla config\nshow track 1"
+        },
+        {
+          key: 'syslog', label: 'Syslog',
+          show: "logging host 192.0.2.10\nlogging trap informational\nlogging console errors\nlogging buffered 8192\nlogging source-interface Loopback0\nlogging timestamp datetime\nshow logging\nterminal monitor"
+        },
+        {
+          key: 'tele', label: 'Telemetry',
+          show: "telemetry ietf subscription 10\n encoding encode-kvgpb\n filter xpath /interfaces/interface/statistics\n stream yang-push\n update-policy periodic 30000\n receiver ip address 192.0.2.11 port 57500 protocol grpc-tcp\nshow telemetry"
+        },
+        {
+          key: 'cap', label: 'Capture',
+          show: "monitor capture CAP interface Gi0/1 both\nmonitor capture CAP buffer size 10240\nmonitor capture CAP start\nshow monitor capture CAP\n! tshark\n tshark -i eth0 -f \"tcp port 443\""
+        }
+      ];
+      const activeCmd = ref(commands[0].key);
+      const activeCommand = computed(() => commands.find(c => c.key === activeCmd.value));
+
+      /* ---------- TRAPS ---------- */
+      const traps = [
+        'SNMP = UDP 161 poll / 162 traps; v2c = community (weak/clear), v3 = auth + encryption.',
+        'SNMP data lives in MIB, addressed by OIDs; GET reads, SET writes, TRAP/INFORM push alerts.',
+        'NetFlow = flow METADATA (not packets), bidirectional, 7-tuple; export usually UDP 2055.',
+        'NetFlow v5 = FIXED format; v9/IPFIX = TEMPLATE-based (flexible).',
+        'Flexible NetFlow = custom records: record (match/collect) → exporter → monitor → ip flow monitor.',
+        'SPAN = LOCAL mirroring on one switch (rx/tx/both), session = source + destination.',
+        'RSPAN = remote over a link-local VLAN; ERSPAN = remote over IP/GRE (routed), +~50 bytes MTU.',
+        'IP SLA = synthetic active probes (latency/jitter/loss/MOS); icmp-echo, udp-jitter, tcp-connect, http.',
+        'IP SLA config: ip sla + type + frequency + schedule; track links results to routing/object tracking.',
+        'Syslog = UDP 514; severity 0 (emergencies) = MOST severe ... 7 (debugging) = least.',
+        'logging trap = SERVER level; logging buffered = ON-BOX ring; logging console = console (all separate).',
+        'Telemetry = PUSH (stream); SNMP = poll. gNMI/gRPC over YANG; protobuf/JSON encoding.',
+        'Telemetry subscriptions: on-change (event-driven) vs periodic (fixed interval via update-policy).',
+        'Cisco model-driven telemetry (MDT): subscribe to a YANG path and stream it.',
+        'Wireshark: BPF = CAPTURE filter (pre-capture); display filters (post-capture) like http.request.',
+        'Wireshark: Follow TCP Stream for conversations; Statistics for protocol hierarchy; on-box = monitor capture.'
+      ];
+
+      /* ---------- QUIZ ---------- */
+      const quizRaw = [
+        { q: 'SNMP sends polls on port ___ and traps on port ___:', opts: [{ text: '161 / 162' }, { text: '162 / 161' }, { text: '514 / 2055' }, { text: '443 / 80' }], correct: 0 },
+        { q: 'Which SNMP version provides authentication and encryption?', opts: [{ text: 'v3' }, { text: 'v2c' }, { text: 'v1' }, { text: 'v0' }], correct: 0 },
+        { q: 'In SNMP, the MIB is:', opts: [{ text: 'the data tree on the device addressed via OIDs' }, { text: 'a routing protocol' }, { text: 'an encryption cipher' }, { text: 'the trap receiver' }], correct: 0 },
+        { q: 'Which SNMP operation WRITES a value?', opts: [{ text: 'SET' }, { text: 'GET' }, { text: 'GETNEXT' }, { text: 'TRAP' }], correct: 0 },
+        { q: 'NetFlow exports:', opts: [{ text: 'flow metadata (7-tuple conversation stats)' }, { text: 'full packet captures' }, { text: 'config snapshots' }, { text: 'syslog messages' }], correct: 0 },
+        { q: 'NetFlow v9 differs from v5 by being:', opts: [{ text: 'template-based (flexible)' }, { text: 'fixed-format' }, { text: 'unencrypted only' }, { text: 'a routing protocol' }], correct: 0 },
+        { q: 'NetFlow flows are:', opts: [{ text: 'bidirectional (forward + reverse)' }, { text: 'one-way only' }, { text: 'broadcast frames only' }, { text: 'unrelated to conversations' }], correct: 0 },
+        { q: 'Which statement about Flexible NetFlow is correct?', opts: [{ text: 'you define records with match (keys) and collect (fields)' }, { text: 'the fields are fixed and cannot change' }, { text: 'it only works with v5' }, { text: 'it does not use exporters' }], correct: 0 },
+        { q: 'SPAN mirrors traffic:', opts: [{ text: 'locally on the same switch (source + destination session)' }, { text: 'across a routed network automatically' }, { text: 'as encrypted tunnels by default' }, { text: 'only multicast' }], correct: 0 },
+        { q: 'ERSPAN encapsulates mirrored traffic in:', opts: [{ text: 'IP/GRE (routed remote mirroring)' }, { text: 'a local VLAN' }, { text: 'MPLS labels only' }, { text: 'plaintext Ethernet' }], correct: 0 },
+        { q: 'RSPAN differs from ERSPAN because it mirrors:', opts: [{ text: 'over a dedicated L2 VLAN (not routed)' }, { text: 'over IP/GRE' }, { text: 'only on the same switch' }, { text: 'using Syslog' }], correct: 0 },
+        { q: 'IP SLA is best described as:', opts: [{ text: 'synthetic probes measuring latency/jitter/loss/MOS' }, { text: 'passive traffic capture' }, { text: 'a syslog server' }, { text: 'an encryption method' }], correct: 0 },
+        { q: 'Which IP SLA operation measures voice quality (MOS)?', opts: [{ text: 'UDP jitter' }, { text: 'ICMP echo' }, { text: 'HTTP get' }, { text: 'DNS lookup' }], correct: 0 },
+        { q: 'In Syslog, severity 0 is:', opts: [{ text: 'emergencies (most severe)' }, { text: 'debugging (least severe)' }, { text: 'informational' }, { text: 'warnings' }], correct: 0 },
+        { q: 'The command that sets what goes to the syslog SERVER is:', opts: [{ text: 'logging trap' }, { text: 'logging console' }, { text: 'terminal monitor' }, { text: 'logging buffered' }], correct: 0 },
+        { q: 'Streaming telemetry is ___ while SNMP polling is ___:', opts: [{ text: 'push / pull' }, { text: 'pull / push' }, { text: 'pull / pull' }, { text: 'push / push' }], correct: 0 },
+        { q: 'The modern telemetry transport pair is:', opts: [{ text: 'gNMI over gRPC (YANG-modeled)' }, { text: 'TFTP over UDP' }, { text: 'SNMPv1 over 161' }, { text: 'EIGRP over 88' }], correct: 0 },
+        { q: 'In Wireshark, an example BPF CAPTURE filter is:', opts: [{ text: '"tcp port 443"' }, { text: '"http.request"' }, { text: '"tcp.stream eq 0"' }, { text: '"dns.qry.name"' }], correct: 0 }
+      ];
+      const quizQuestions = reactive(quizRaw.map(q => ({ ...q, ans: null })));
+      const quizDone = ref(false);
+      const quizScore = ref(loadJSON(LS.quiz, 0) || 0);
+      const allQuizAnswered = computed(() => quizQuestions.every(q => q.ans !== null));
+      function submitQuiz() {
+        if (!allQuizAnswered.value) return;
+        quizScore.value = quizQuestions.filter((q, i) => q.ans === q.correct).length;
+        quizDone.value = true;
+        save(LS.quiz, quizScore.value);
+      }
+      function resetQuiz() {
+        quizQuestions.forEach(q => q.ans = null);
+        quizDone.value = false;
+        quizScore.value = 0;
+        localStorage.removeItem(LS.quiz);
+      }
+
+      /* ---------- CHECKLIST ---------- */
+      const checklistRoot = loadJSON(LS.done, [
+        { t: 'SNMP = UDP 161 poll / 162 traps; MIB+OID; v2c community vs v3 auth+priv; GET/SET/TRAP/INFORM', done: false },
+        { t: 'NetFlow = flow metadata 7-tuple, bidirectional, UDP 2055; v5 fixed vs v9/IPFIX templates', done: false },
+        { t: 'Flexible NetFlow custom records (match/collect); record → exporter → monitor → interface', done: false },
+        { t: 'SPAN local, RSPAN L2 VLAN, ERSPAN IP/GRE routed; session = source + destination, rx/tx/both', done: false },
+        { t: 'IP SLA synthetic probes (latency/jitter/loss/MOS); ip sla + frequency + schedule; track', done: false },
+        { t: 'Syslog UDP 514; severity 0=most severe→7; trap/server vs buffered vs console; facility+severity', done: false },
+        { t: 'Telemetry = push (gRPC/gNMI over YANG, protobuf/JSON); on-change vs periodic subscription', done: false },
+        { t: 'Wireshark: BPF capture filter vs display filter; Follow TCP Stream; pcap/pcapng; monitor capture', done: false }
+      ]);
+      const checklist = reactive(checklistRoot);
+      const doneCount = computed(() => checklist.filter(c => c.done).length);
+      function saveChecklist() { save(LS.done, checklistRoot); }
+      function toggleDone(i) { checklistRoot[i].done = !checklistRoot[i].done; saveChecklist(); }
+
+      return {
+        theme, sec, sections,
+        snmpPick, snmpVerdict,
+        nfPick, nfVerdict,
+        spanPick, spanVerdict,
+        sevLevels, sevPick, sevVerdict,
+        telePick, teleVerdict,
+        commands, activeCmd, activeCommand,
+        traps,
+        quizQuestions, quizDone, quizScore, allQuizAnswered, submitQuiz, resetQuiz,
+        checklist, doneCount, saveChecklist, toggleDone
+      };
+    }
+  }).mount('#app');
+})();
+</script>
+</body>
+</html>

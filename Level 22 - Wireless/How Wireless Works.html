@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Wireless Works — Deep Dive</title>
+<style>
+  :root {
+    --bg: #0f172a; --panel: #111c34; --card: #1e293b; --card-2: #16233d;
+    --text: #f8fafc; --muted: #94a3b8;
+    --blue: #38bdf8; --blue-dim: #0c4a6e;
+    --green: #34d399; --green-dim: #064e3b;
+    --amber: #fbbf24; --amber-dim: #78350f;
+    --red: #f87171; --red-dim: #7f1d1d;
+    --violet: #a78bfa; --violet-dim: #4c1d95;
+    --cyan: #22d3ee; --cyan-dim: #164e63;
+    --border: #334155; --hover: #263449; --code-bg: #0b1220;
+  }
+  #app[data-theme="light"] {
+    --bg: #f1f5f9; --panel: #ffffff; --card: #ffffff; --card-2: #f8fafc;
+    --text: #0f172a; --muted: #64748b;
+    --blue: #0284c7; --blue-dim: #bae6fd;
+    --green: #059669; --green-dim: #d1fae5;
+    --amber: #d97706; --amber-dim: #fef3c7;
+    --red: #dc2626; --red-dim: #fee2e2;
+    --violet: #7c3aed; --violet-dim: #ede9fe;
+    --cyan: #0891b2; --cyan-dim: #cffafe;
+    --border: #cbd5e1; --hover: #e2e8f0; --code-bg: #0b1220;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; }
+  #app { max-width: 1040px; margin: 0 auto; padding: 20px 18px 60px; }
+
+  header { position: sticky; top: 0; z-index: 30; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .lv-badge { background: var(--blue-dim); color: var(--blue); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .exam-badge { background: var(--violet-dim); color: var(--violet); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .head-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: background 0.15s; }
+  .btn:hover { background: var(--hover); }
+  .btn.primary { background: var(--blue); color: #0f172a; border-color: var(--blue); }
+
+  nav { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 2px 16px; }
+  nav button.chip { border: 1px solid var(--border); background: var(--card); color: var(--muted); padding: 5px 11px; border-radius: 999px; cursor: pointer; font-size: 0.76rem; font-weight: 600; }
+  nav button.chip.active { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
+
+  section.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
+  section.panel h2 { font-size: 1.2rem; margin-bottom: 6px; }
+  section.panel h3 { font-size: 1rem; margin: 18px 0 10px; color: var(--blue); }
+  section.panel p { margin: 8px 0; }
+  .muted { color: var(--muted); }
+  .lead { color: var(--muted); font-size: 0.95rem; }
+
+  .grid { display: grid; gap: 12px; }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .g3 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .g4 { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .card h4 { font-size: 0.9rem; margin-bottom: 6px; }
+  .card .big { font-size: 1.3rem; font-weight: 700; font-family: 'Fira Code', ui-monospace, monospace; }
+
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85rem; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  tr:hover td { background: var(--hover); }
+
+  code, .mono { font-family: 'Fira Code', ui-monospace, monospace; }
+  .mono { font-size: 0.9rem; }
+  .chip-tag { display: inline-block; border-radius: 999px; padding: 1px 9px; font-size: 0.74rem; font-weight: 700; }
+  .b-blue { background: var(--blue-dim); color: var(--blue); }
+  .b-green { background: var(--green-dim); color: var(--green); }
+  .b-amber { background: var(--amber-dim); color: var(--amber); }
+  .b-red { background: var(--red-dim); color: var(--red); }
+  .b-violet { background: var(--violet-dim); color: var(--violet); }
+  .b-cyan { background: var(--cyan-dim); color: var(--cyan); }
+
+  .callout { border-left: 4px solid var(--amber); background: var(--card-2); border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 12px 0; font-size: 0.9rem; }
+  .callout.green { border-color: var(--green); }
+  .callout.red { border-color: var(--red); }
+  .callout.blue { border-color: var(--blue); }
+  .callout.violet { border-color: var(--violet); }
+
+  .row-fn { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 8px 0; }
+
+  .opt { display: flex; align-items: center; gap: 8px; padding: 6px 9px; margin: 3px 0; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; background: var(--card); font-size: 0.86rem; }
+  .opt.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .opt .letter { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex: 0 0 auto; }
+  .opt.sel .letter { background: var(--blue); color: #0f172a; }
+
+  #app pre, pre.cmd { background: var(--code-bg); color: #e2e8f0; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.82rem; line-height: 1.5; }
+
+  .trap-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  .trap-item:last-child { border-bottom: none; }
+  .trap-ico { color: var(--red); font-weight: 700; flex: 0 0 auto; }
+
+  .step-flow { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .step { border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 0.8rem; background: var(--card-2); }
+  .step .n { color: var(--blue); font-weight: 700; }
+
+  .verdict { border-radius: 8px; padding: 10px 14px; font-weight: 700; margin: 8px 0; }
+  .verdict.ok { background: var(--green-dim); color: var(--green); }
+  .verdict.bad { background: var(--red-dim); color: var(--red); }
+  .verdict.info { background: var(--blue-dim); color: var(--blue); }
+
+  .chk-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; margin: 5px 0; cursor: pointer; transition: opacity 0.15s; }
+  .chk-item.done { opacity: 0.55; text-decoration: line-through; }
+  .chk-box { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 5px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; }
+  .chk-item.done .chk-box { background: var(--green); border-color: var(--green); color: #0f172a; }
+
+  .proto-cell { border: 1px solid var(--border); border-radius: 10px; padding: 9px 10px; background: var(--card); cursor: pointer; text-align: center; }
+  .proto-cell.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .proto-cell .pn { font-weight: 700; }
+  .proto-cell .pd { font-size: 0.75rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<div id="app" :data-theme="theme">
+  <header>
+    <h1><span class="lv-badge">L22</span> How Wireless Works
+      <span class="exam-badge">ENCOR 350-401</span></h1>
+    <div class="head-actions">
+      <a class="btn" href="../Level 21 - QoS/How QoS Works.html">◀ QoS</a>
+      <a class="btn" href="../index.html">Flashcards</a>
+      <button class="btn" @click="theme = (theme==='dark'?'light':'dark')">{{ theme==='dark' ? '☀' : '🌙' }}</button>
+    </div>
+  </header>
+
+  <nav>
+    <button class="chip" v-for="s in sections" :key="s.id" :class="{active:sec===s.id}" @click="sec=s.id">{{ s.icon }} {{ s.label }}</button>
+  </nav>
+
+  <!-- 1. OVERVIEW -->
+  <section class="panel" v-show="sec==='intro'" id="intro">
+    <h2>📶 Wireless — the whole picture</h2>
+    <p class="lead">A WLAN is <b>802.11</b> (Wi-Fi) over RF. The enterprise model: <b>light APs + a WLC</b> talking <b>CAPWAP</b>, with <b>SSID/BSSID</b> identity, <b>channels/RF</b> planning, <b>mobility/roaming</b>, and <b>WPA2/WPA3</b> security.</p>
+
+    <h3>The four blocks (memorize)</h3>
+    <div class="grid g4">
+      <div class="card"><h4>Identity</h4><span class="chip-tag b-blue">SSID/BSSID</span><p class="muted" style="margin:0">name + MAC cell</p></div>
+      <div class="card"><h4>RF</h4><span class="chip-tag b-green">Channels</span><p class="muted" style="margin:0">2.4/5/6 GHz, RRM</p></div>
+      <div class="card"><h4>Control</h4><span class="chip-tag b-amber">WLC/CAPWAP</span><p class="muted" style="margin:0">centralized brain</p></div>
+      <div class="card"><h4>Mobility+Sec</h4><span class="chip-tag b-red">Roam + WPA</span><p class="muted" style="margin:0">seamless + secure</p></div>
+    </div>
+
+    <h3>Architecture planes</h3>
+    <div class="grid g3">
+      <div class="card"><h4>Control</h4><p class="muted" style="margin:0">WLC — CAPWAP control</p></div>
+      <div class="card"><h4>Data</h4><p class="muted" style="margin:0">AP → WLC (Local) or AP (FlexConnect)</p></div>
+      <div class="card"><h4>Management</h4><p class="muted" style="margin:0">WLC — RRM, config</p></div>
+    </div>
+
+    <h3>Deployment models</h3>
+    <table>
+      <tr><th>Model</th><th>Notes</th></tr>
+      <tr><td>Autonomous</td><td>AP-only (standalone)</td></tr>
+      <tr><td>Centralized</td><td>WLC + CAPWAP (classic enterprise)</td></tr>
+      <tr><td>Cloud</td><td>Meraki-style</td></tr>
+      <tr><td>Mesh</td><td>wireless backhaul</td></tr>
+    </table>
+    <div class="callout red"><b>The exam's big picture:</b> <b>WLAN = 802.11</b>; enterprise = <b>WLC + CAPWAP</b>; identity = <b>BSS(local)/ESS(global)/SSID(name)/BSSID(MAC)</b>; bands 2.4/5/6 GHz (5/6 = more channels).</div>
+  </section>
+
+  <!-- 2. WLAN FOUNDATIONS -->
+  <section class="panel" v-show="sec==='wlan'" id="wlan">
+    <h2>🏗️ WLAN Foundations</h2>
+    <p class="lead">Wired vs wireless, the components, the service sets, and where each plane lives.</p>
+
+    <h3>WLAN vs LAN</h3>
+    <table>
+      <tr><th>Aspect</th><th>Wired LAN</th><th>WLAN</th></tr>
+      <tr><td>Medium</td><td>cable</td><td>RF (shared, error-prone)</td></tr>
+      <tr><td>Access</td><td>plug</td><td>associate</td></tr>
+      <tr><td>Error</td><td>low</td><td>interference</td></tr>
+      <tr><td>Movement</td><td>static</td><td>roaming</td></tr>
+    </table>
+    <div class="callout blue"><b>RF is a shared, error-prone medium</b> — that shapes every design decision.</div>
+
+    <h3>Components</h3>
+    <div class="grid g4">
+      <div class="card"><h4>Client</h4><p class="muted" style="margin:0">station (STA)</p></div>
+      <div class="card"><h4>AP</h4><p class="muted" style="margin:0">access point</p></div>
+      <div class="card"><h4>WLC</h4><p class="muted" style="margin:0">controller</p></div>
+      <div class="card"><h4>Backend</h4><p class="muted" style="margin:0">wired + services</p></div>
+    </div>
+
+    <h3>Bands</h3>
+    <table>
+      <tr><th>Band</th><th>Notes</th></tr>
+      <tr><td>2.4 GHz</td><td>long range, crowded</td></tr>
+      <tr><td>5 GHz</td><td>more channels, faster</td></tr>
+      <tr><td>6 GHz</td><td>Wi-Fi 6E (new)</td></tr>
+    </table>
+    <div class="callout red"><b>More spectrum in 5/6 GHz → better performance.</b> 2.4 GHz is crowded with only 3 non-overlapping channels.</div>
+    <pre class="cmd">show wlan summary
+show ap summary
+show ap config general
+show wireless profile policy
+show ap join stats summary
+</pre>
+  </section>
+
+  <!-- 3. 802.11 -->
+  <section class="panel" v-show="sec==='80211'" id="80211">
+    <h2>📻 802.11 — Wi-Fi standard</h2>
+    <p class="lead">Defines the <b>MAC + PHY</b>, the <b>frame types</b>, the access method (<b>CSMA/CA</b>), and the amendment generations (a/b/g/n/ac/ax).</p>
+
+    <h3>Frame types</h3>
+    <div class="grid g3">
+      <div class="card"><h4>Management</h4><p class="muted" style="margin:0">beacon, probe, auth, assoc</p></div>
+      <div class="card"><h4>Control</h4><p class="muted" style="margin:0">RTS/CTS, ACK</p></div>
+      <div class="card"><h4>Data</h4><p class="muted" style="margin:0">payload</p></div>
+    </div>
+
+    <h3>CSMA/CA — why wireless can't detect collisions</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> Sense the channel</div>
+      <div class="step"><span class="n">2</span> Random backoff (DIFS/AIFS)</div>
+      <div class="step"><span class="n">3</span> Send if clear</div>
+      <div class="step"><span class="n">4</span> Receiver ACKs</div>
+    </div>
+    <div class="callout red"><b>Wireless can't detect collisions → CSMA/CA with ACKs</b> (no collision detection like wired CSMA/CD).</div>
+
+    <h3>Management frame flow</h3>
+    <table>
+      <tr><th>Frame</th><th>Direction</th><th>Step</th></tr>
+      <tr><td>Beacon</td><td>AP → STA</td><td>discover (every ~100 ms)</td></tr>
+      <tr><td>Probe req/resp</td><td>both</td><td>search</td></tr>
+      <tr><td>Auth</td><td>both</td><td>identity</td></tr>
+      <tr><td>Association</td><td>both</td><td>join BSS</td></tr>
+    </table>
+
+    <h3>Amendments (memorize the generations)</h3>
+    <table>
+      <tr><th>802.11</th><th>Band</th><th>Max</th><th>Key</th></tr>
+      <tr><td>b</td><td>2.4</td><td>11 Mbps</td><td>legacy</td></tr>
+      <tr><td>a</td><td>5</td><td>54 Mbps</td><td>legacy</td></tr>
+      <tr><td>g</td><td>2.4</td><td>54 Mbps</td><td>legacy</td></tr>
+      <tr><td>n (Wi-Fi 4)</td><td>2.4/5</td><td>600 Mbps</td><td><b>MIMO</b></td></tr>
+      <tr><td>ac (Wi-Fi 5)</td><td>5</td><td>~1.7 Gbps</td><td>wide channels</td></tr>
+      <tr><td>ax (Wi-Fi 6)</td><td>2.4/5/6</td><td>~9.6 Gbps</td><td><b>OFDMA</b></td></tr>
+    </table>
+    <div class="callout red"><b>n = MIMO; ac = 5 GHz fast; ax = OFDMA + 6 GHz.</b> RTS/CTS mitigates the <b>hidden node</b>.</div>
+    <pre class="cmd">show ap radio summary
+show ap dot11 5ghz summary
+show wireless client summary
+show ap config general
+show ap monitor
+</pre>
+  </section>
+
+  <!-- 4. SSID & BSSID -->
+  <section class="panel" v-show="sec==='ssid'" id="ssid">
+    <h2>🏷️ SSID &amp; BSSID</h2>
+    <p class="lead">Two distinct identities: the <b>SSID</b> is the human <b>name</b>; the <b>BSSID</b> is the AP radio's <b>MAC</b>.</p>
+
+    <h3>SSID vs BSSID (the core trap)</h3>
+    <table>
+      <tr><th>Term</th><th>Type</th><th>Meaning</th></tr>
+      <tr><td>SSID</td><td>ASCII name (≤32 chars)</td><td>network identity</td></tr>
+      <tr><td>BSSID</td><td>48-bit MAC</td><td>specific AP radio</td></tr>
+      <tr><td>BSS</td><td>one cell</td><td>1 AP radio + clients</td></tr>
+      <tr><td>ESS</td><td>many BSSes</td><td>one SSID across APs</td></tr>
+    </table>
+    <div class="callout blue"><b>One SSID can span many BSSIDs (one per AP radio/band).</b> Same SSID, different BSSIDs is normal in an ESS.</div>
+
+    <h3>The identity split</h3>
+    <div class="grid g4">
+      <div class="card"><h4>SSID</h4><p class="muted" style="margin:0">name clients see</p></div>
+      <div class="card"><h4>BSSID</h4><p class="muted" style="margin:0">AP radio MAC</p></div>
+      <div class="card"><h4>BSS</h4><p class="muted" style="margin:0">one AP cell</p></div>
+      <div class="card"><h4>ESS</h4><p class="muted" style="margin:0">all cells, one SSID</p></div>
+    </div>
+    <div class="callout red"><b>SSID broadcast ≠ secure</b> — hidden SSIDs are still probed by clients. BSSID = beacon source / frame destination.</div>
+
+    <h3>SSID → WLAN profile → VLAN/security/QoS</h3>
+    <table>
+      <tr><th>Layer</th><th>Definition</th></tr>
+      <tr><td>SSID</td><td>clients see the name</td></tr>
+      <tr><td>WLAN profile</td><td>security + policy</td></tr>
+      <tr><td>VLAN</td><td>where traffic lands</td></tr>
+      <tr><td>QoS/ACL</td><td>per-WLAN rules</td></tr>
+    </table>
+    <pre class="cmd">wlan Corp-Guest 2 Guest-Data
+ security wpa psk ascii GuestPass1
+ no security wpa akm dot1x
+ vlan Guest
+ no shutdown
+show wlan summary
+show wlan id 2
+show ap wlan summary
+</pre>
+  </section>
+
+  <!-- 5. CHANNELS -->
+  <section class="panel" v-show="sec==='channels'" id="channels">
+    <h2>📡 Channels &amp; RRM</h2>
+    <p class="lead">RF sub-bands APs transmit on. Non-overlapping channels share spectrum without colliding; <b>DFS</b> adds radar-aware channels; <b>RRM</b> auto-tunes channel + power.</p>
+
+    <h3>2.4 GHz channels</h3>
+    <div class="card"><p style="margin:0">Channels 1–13 (US 1–11), 20 MHz, spacing 5 MHz. <b>Only 1, 6, 11 are non-overlapping.</b></p></div>
+
+    <h3>Channel picker</h3>
+    <div class="grid g3">
+      <div class="proto-cell" :class="{sel:chanPick==='c2'}" @click="chanPick='c2'"><div class="pn">2.4 GHz</div><div class="pd">non-overlap 1/6/11</div></div>
+      <div class="proto-cell" :class="{sel:chanPick==='c5'}" @click="chanPick='c5'"><div class="pn">5 GHz</div><div class="pd">many channels, DFS 52–144</div></div>
+      <div class="proto-cell" :class="{sel:chanPick==='c6'}" @click="chanPick='c6'"><div class="pn">6 GHz</div><div class="pd">Wi-Fi 6E, wide channels</div></div>
+    </div>
+    <div class="verdict" :class="chanVerdict.cls">{{ chanVerdict.text }}</div>
+
+    <h3>Channel widths</h3>
+    <table>
+      <tr><th>Width</th><th>2.4</th><th>5</th></tr>
+      <tr><td>20 MHz</td><td>standard</td><td>standard</td></tr>
+      <tr><td>40 MHz</td><td>bond</td><td>bond</td></tr>
+      <tr><td>80/160 MHz</td><td>no</td><td>high speed</td></tr>
+    </table>
+    <div class="callout red"><b>Wider channel = more throughput but fewer available channels.</b> DFS channels (52–144) require radar checking before use.</div>
+
+    <h3>RRM &amp; TPC</h3>
+    <div class="grid g2">
+      <div class="card"><h4>RRM</h4><p class="muted" style="margin:0">WLC auto-assigns channels + monitors coverage/interference</p></div>
+      <div class="card"><h4>TPC</h4><p class="muted" style="margin:0">transmit power control — auto adjusts AP power</p></div>
+    </div>
+    <pre class="cmd">ap dot11 5ghz rrm channel global
+ap dot11 24ghz rrm channel global
+ap dot11 5ghz rrm tx-power global
+show ap radio summary
+show ap dot11 5ghz summary
+show ap monitor channel
+</pre>
+  </section>
+
+  <!-- 6. RF -->
+  <section class="panel" v-show="sec==='rf'" id="rf">
+    <h2>📶 RF Fundamentals</h2>
+    <p class="lead">Signal strength (<b>RSSI</b>), signal-to-noise (<b>SNR</b>), attenuation, interference, and antenna behavior decide whether Wi-Fi works.</p>
+
+    <h3>Key metrics</h3>
+    <table>
+      <tr><th>Metric</th><th>Meaning</th></tr>
+      <tr><td>RSSI</td><td>received signal (dBm) — strength</td></tr>
+      <tr><td>SNR</td><td>signal vs noise (dB) — cleanliness (≥~25 dB good)</td></tr>
+      <tr><td>EIRP</td><td>tx power + antenna − cable loss</td></tr>
+    </table>
+    <div class="callout blue"><b>RSSI = how strong; SNR = how clean.</b> Example: 20 dBm tx + 3 dBi antenna = 23 dBm EIRP.</div>
+
+    <h3>Signal behavior</h3>
+    <div class="grid g4">
+      <div class="card"><h4>Attenuation</h4><p class="muted" style="margin:0">distance/free-space loss</p></div>
+      <div class="card"><h4>Absorption</h4><p class="muted" style="margin:0">walls, people</p></div>
+      <div class="card"><h4>Reflection</h4><p class="muted" style="margin:0">multipath</p></div>
+      <div class="card"><h4>Interference</h4><p class="muted" style="margin:0">other radios</p></div>
+    </div>
+
+    <h3>Small vs large cells</h3>
+    <table>
+      <tr><th>Factor</th><th>Small cell</th><th>Large cell</th></tr>
+      <tr><td>Capacity</td><td><b>high</b> (more APs)</td><td>low</td></tr>
+      <tr><td>Interference</td><td>lower</td><td>higher</td></tr>
+      <tr><td>Coverage</td><td>less per AP</td><td>more per AP</td></tr>
+      <tr><td>Cost</td><td>higher</td><td>lower</td></tr>
+    </table>
+    <div class="callout red"><b>Smaller cells = more capacity</b> — the density answer for high client counts.</div>
+
+    <h3>Site surveys validate the design</h3>
+    <div class="grid g3">
+      <div class="card"><h4>Passive</h4><p class="muted" style="margin:0">measure existing RF</p></div>
+      <div class="card"><h4>Active</h4><p class="muted" style="margin:0">test throughput</p></div>
+      <div class="card"><h4>Predictive</h4><p class="muted" style="margin:0">software model</p></div>
+    </div>
+    <pre class="cmd">show ap radio summary
+show ap dot11 5ghz monitor
+show ap monitor cable
+show wireless client summary
+</pre>
+  </section>
+
+  <!-- 7. WLC -->
+  <section class="panel" v-show="sec==='wlc'" id="wlc">
+    <h2>🖥️ WLC — Wireless LAN Controller</h2>
+    <p class="lead">The <b>brain</b> of a centralized WLAN: configures APs, runs <b>RRM</b>, handles auth/roaming, and anchors control via <b>CAPWAP</b>. APs are "lite."</p>
+
+    <h3>What the WLC does</h3>
+    <div class="grid g3">
+      <div class="card"><h4>AP config</h4><p class="muted" style="margin:0">push profiles</p></div>
+      <div class="card"><h4>RRM</h4><p class="muted" style="margin:0">channels/power</p></div>
+      <div class="card"><h4>Auth</h4><p class="muted" style="margin:0">RADIUS/802.1X</p></div>
+      <div class="card"><h4>Roaming</h4><p class="muted" style="margin:0">client handoff</p></div>
+    </div>
+
+    <h3>Architecture split</h3>
+    <table>
+      <tr><th>Plane</th><th>Where</th></tr>
+      <tr><td>Control</td><td>WLC (CAPWAP control)</td></tr>
+      <tr><td>Management</td><td>WLC</td></tr>
+      <tr><td>Data</td><td>AP → WLC, or AP-local (FlexConnect)</td></tr>
+    </table>
+
+    <h3>Modes — the data-path question</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:wlcMode==='local'}" @click="wlcMode='local'"><div class="pn">Local</div><div class="pd">client data → WLC (centralized)</div></div>
+      <div class="proto-cell" :class="{sel:wlcMode==='flex'}" @click="wlcMode='flex'"><div class="pn">FlexConnect</div><div class="pd">data local to the AP (remote/branch)</div></div>
+    </div>
+    <div class="verdict" :class="wlcVerdict.cls">{{ wlcVerdict.text }}</div>
+    <div class="callout red"><b>Local = data through the WLC; FlexConnect = data at the AP.</b> For remote branches FlexConnect avoids backhauling traffic. Control/management stay on the WLC either way.</div>
+
+    <h3>AP join process</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> AP discovers WLC (DNS/L3)</div>
+      <div class="step"><span class="n">2</span> CAPWAP discovery</div>
+      <div class="step"><span class="n">3</span> DTLS (secure)</div>
+      <div class="step"><span class="n">4</span> config push</div>
+    </div>
+    <div class="callout green"><b>9800 series</b> = the modern <b>IOS-XE</b> controller platform.</div>
+    <pre class="cmd">show ap summary
+show ap join stats summary
+show wlan summary
+show wireless stats
+</pre>
+  </section>
+
+  <!-- 8. CAPWAP -->
+  <section class="panel" v-show="sec==='capwap'" id="capwap">
+    <h2>🔒 CAPWAP — AP ⇄ WLC tunnel</h2>
+    <p class="lead">The standard tunnel between AP and WLC, carrying <b>control</b> (and in Local mode) <b>data</b>. Two logical tunnels, two ports, DTLS-secured.</p>
+
+    <h3>The two tunnels (memorize the ports)</h3>
+    <table>
+      <tr><th>Tunnel</th><th>Port</th><th>Content</th></tr>
+      <tr><td>Control</td><td>UDP <b>5246</b></td><td>config, monitor</td></tr>
+      <tr><td>Data</td><td>UDP <b>5247</b></td><td>client traffic</td></tr>
+    </table>
+    <div class="callout red"><b>Control = UDP 5246; Data = UDP 5247.</b> Control is <b>DTLS-encrypted</b>; data can use DTLS too.</div>
+
+    <h3>Discovery → join → config</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> AP finds WLC (broadcast/multicast/DNS/hostname)</div>
+      <div class="step"><span class="n">2</span> discovery request/response</div>
+      <div class="step"><span class="n">3</span> join request/response</div>
+      <div class="step"><span class="n">4</span> config push (+ software)</div>
+    </div>
+
+    <h3>Mode data-path recap</h3>
+    <table>
+      <tr><th>Mode</th><th>Data over CAPWAP</th></tr>
+      <tr><td>Local</td><td><b>yes</b> (to WLC)</td></tr>
+      <tr><td>FlexConnect</td><td>no (AP switches locally)</td></tr>
+      <tr><td>Monitor</td><td>control only</td></tr>
+    </table>
+    <div class="callout amber"><b>Only Local mode sends client data to the WLC over CAPWAP</b> — making the WLC a potential chokepoint. CAPWAP replaced legacy <b>LWAPP</b>.</div>
+    <pre class="cmd">show ap join stats summary
+show ap capwap ip
+show ap summary
+show ap uptime
+debug capwap event
+</pre>
+  </section>
+
+  <!-- 9. MOBILITY -->
+  <section class="panel" v-show="sec==='mobility'" id="mobility">
+    <h2>🔄 Mobility</h2>
+    <p class="lead">Keeps a client's session alive while it moves between APs and <b>even between WLCs</b>. WLCs join a <b>mobility group</b> and share client state.</p>
+
+    <h3>Mobility group</h3>
+    <div class="card"><p style="margin:0">WLCs that <b>trust each other</b> and exchange client state (MAC/IP, security) — the foundation for seamless roaming.</p></div>
+
+    <h3>Roles during a roam</h3>
+    <div class="grid g3">
+      <div class="card"><h4>Anchor</h4><p class="muted" style="margin:0">first WLC — holds the session/subnet</p></div>
+      <div class="card"><h4>Foreign</h4><p class="muted" style="margin:0">new WLC — serves the client now</p></div>
+      <div class="card"><h4>Controller</h4><p class="muted" style="margin:0">group member — coordinates</p></div>
+    </div>
+    <div class="callout red"><b>Anchor = where the session lives; foreign = where the client is now.</b></div>
+
+    <h3>L2 vs L3 mobility</h3>
+    <table>
+      <tr><th>Type</th><th>Subnet</th><th>Forwarding</th></tr>
+      <tr><td>L2 mobility</td><td>same subnet</td><td>switch path</td></tr>
+      <tr><td>L3 mobility</td><td>different</td><td><b>anchor forwards</b></td></tr>
+    </table>
+    <div class="callout blue"><b>Mobility (WLC handoff) is the infrastructure that makes roaming (client AP handoff) seamless.</b></div>
+    <pre class="cmd">wireless mobility group name CORP
+wireless mobility member 192.0.2.10
+wireless mobility keepalive interval 30
+show wireless mobility summary
+show wireless mobility statistics
+show wireless mobility client
+</pre>
+  </section>
+
+  <!-- 10. ROAMING -->
+  <section class="panel" v-show="sec==='roam'" id="roam">
+    <h2>🚶 Roaming</h2>
+    <p class="lead">A client moves from one AP/BSS to another while keeping its session. Types by scope and seamlessness: <b>L2 vs L3</b>, <b>intra- vs inter-WLC</b>, and <b>802.11r</b> fast transition.</p>
+
+    <h3>Roaming types</h3>
+    <table>
+      <tr><th>Type</th><th>Scope</th></tr>
+      <tr><td>L2</td><td>same subnet (switch)</td></tr>
+      <tr><td>L3</td><td>different subnet (anchor)</td></tr>
+      <tr><td>Intra-WLC</td><td>same controller</td></tr>
+      <tr><td>Inter-WLC</td><td>across controllers (mobility)</td></tr>
+    </table>
+    <div class="callout red"><b>L3 roams need anchor forwarding.</b> A roam is really a <b>reassociation</b> at the new BSSID.</div>
+
+    <h3>Roaming helper amendments</h3>
+    <div class="grid g3">
+      <div class="proto-cell" :class="{sel:roamHelp==='r'}" @click="roamHelp='r'"><div class="pn">802.11r (FT)</div><div class="pd">pre-auth PMK — fast key handoff</div></div>
+      <div class="proto-cell" :class="{sel:roamHelp==='k'}" @click="roamHelp='k'"><div class="pn">802.11k</div><div class="pd">neighbor reports</div></div>
+      <div class="proto-cell" :class="{sel:roamHelp==='v'}" @click="roamHelp='v'"><div class="pn">802.11v</div><div class="pd">assist roaming / band steering</div></div>
+    </div>
+    <div class="verdict" :class="roamVerdict.cls">{{ roamVerdict.text }}</div>
+
+    <h3>Sticky clients</h3>
+    <div class="card"><p style="margin:0">A client hangs onto a weak AP because the RSSI threshold never drops it. Fix with <b>band steering + 802.11k/v/r</b>.</p></div>
+
+    <h3>Requirements for seamless roaming</h3>
+    <table>
+      <tr><th>Need</th><th>Mechanism</th></tr>
+      <tr><td>Same SSID</td><td>ESS</td></tr>
+      <tr><td>Same security</td><td>PMK / 802.1X</td></tr>
+      <tr><td>State sharing</td><td>mobility group</td></tr>
+      <tr><td>Fast keys</td><td>802.11r</td></tr>
+    </table>
+    <pre class="cmd">show wireless client summary
+show wireless client mac &lt;MAC&gt;
+show ap summary
+show wireless mobility client
+</pre>
+  </section>
+
+  <!-- 11. SECURITY -->
+  <section class="panel" v-show="sec==='security'" id="security">
+    <h2>🔐 WPA2 &amp; WPA3 Security</h2>
+    <p class="lead">Two generations. <b>WPA2</b> = AES-CCMP + PSK/802.1X. <b>WPA3</b> = <b>SAE</b> (kills offline dictionary attacks), forward secrecy, mandatory PMF.</p>
+
+    <h3>WPA2 vs WPA3 (the headline table)</h3>
+    <table>
+      <tr><th>Feature</th><th>WPA2</th><th>WPA3</th></tr>
+      <tr><td>Personal</td><td>PSK 4-way handshake</td><td><b>SAE</b></td></tr>
+      <tr><td>Dict attack</td><td>vulnerable</td><td><b>resistant</b></td></tr>
+      <tr><td>Forward secrecy</td><td>no</td><td><b>yes</b></td></tr>
+      <tr><td>PMF</td><td>optional</td><td><b>mandatory</b></td></tr>
+      <tr><td>Enterprise</td><td>802.1X</td><td>+ 192-bit</td></tr>
+    </table>
+    <div class="callout red"><b>Offline dictionary attack</b> is the headline WPA3 fix — SAE (Simultaneous Authentication of Equals) replaces the PSK model.</div>
+
+    <h3>WPA2 modes &amp; encryption</h3>
+    <div class="grid g2">
+      <div class="card"><h4>Personal</h4><p class="muted" style="margin:0">PSK (shared passphrase) — small networks</p></div>
+      <div class="card"><h4>Enterprise</h4><p class="muted" style="margin:0">802.1X/RADIUS — per-user</p></div>
+    </div>
+    <div class="card"><p style="margin:0"><b>AES-CCMP</b> is the WPA2 cipher (IEEE 802.11i); it replaced weak <b>TKIP/RC4</b> (WPA1).</p></div>
+
+    <h3>4-way handshake (WPA2) → PTK</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> AP sends ANonce</div>
+      <div class="step"><span class="n">2</span> client sends SNonce + MIC</div>
+      <div class="step"><span class="n">3</span> AP confirms + installs key</div>
+      <div class="step"><span class="n">4</span> client confirms</div>
+    </div>
+    <div class="callout blue"><b>Both sides derive the PTK from ANonce/SNonce + PMK.</b> In Enterprise, RADIUS hands the <b>MSK</b> which becomes the PMK.</div>
+
+    <h3>WPA3 highlights</h3>
+    <div class="grid g3">
+      <div class="card"><h4>SAE</h4><p class="muted" style="margin:0">personal · resists offline dict</p></div>
+      <div class="card"><h4>PMF mandatory</h4><p class="muted" style="margin:0">stops deauth/forgery</p></div>
+      <div class="card"><h4>192-bit</h4><p class="muted" style="margin:0">enterprise high-assurance</p></div>
+    </div>
+    <div class="callout amber"><b>Transition mode</b> lets legacy WPA2 devices join but is a <b>weaker mixed</b> baseline — prefer <b>WPA3-only</b> where possible.</div>
+    <pre class="cmd">! WPA2 enterprise
+wlan CorpData 1 Corp
+ security wpa akm dot1x
+ security dot1x server-auth
+ security wpa ccmp
+! WPA3 personal
+wlan Secure 3 SecureData
+ security wpa psk sae
+ security pmf
+ security wpa ccmp
+show wlan summary
+show wlan id 3
+show wireless client summary
+</pre>
+  </section>
+
+  <!-- 12. COMMANDS -->
+  <section class="panel" v-show="sec==='cmds'" id="cmds">
+    <h2>⌨️ CLI Commands</h2>
+    <div class="row-fn">
+      <button class="btn" v-for="c in commands" :key="c.key" :class="{primary:activeCmd===c.key}" @click="activeCmd=c.key">{{ c.label }}</button>
+    </div>
+    <pre class="cmd">{{ activeCommand.show }}</pre>
+  </section>
+
+  <!-- 13. TRAPS -->
+  <section class="panel" v-show="sec==='traps'" id="traps">
+    <h2>⚠️ Common Traps</h2>
+    <div v-for="t in traps" :key="t" class="trap-item"><span class="trap-ico">!</span><div>{{ t }}</div></div>
+  </section>
+
+  <!-- 14. QUIZ -->
+  <section class="panel" v-show="sec==='quiz'" id="quiz">
+    <h2>📝 Quiz ({{ quizQuestions.length }})</h2>
+    <div v-for="(q,qi) in quizQuestions" :key="qi" class="card" style="margin:12px 0">
+      <div style="font-weight:700;margin-bottom:8px">{{ qi+1 }}. {{ q.q }}</div>
+      <div v-for="(o,oi) in q.opts" :key="oi"
+           class="opt" :class="{sel:q.ans===oi}"
+           @click="q.ans=oi">
+        <span class="letter">{{ String.fromCharCode(65+oi) }}</span>{{ o.text }}
+      </div>
+    </div>
+    <div class="row-fn">
+      <button class="btn primary" @click="submitQuiz()" :disabled="!allQuizAnswered">Submit answers</button>
+      <button class="btn" @click="resetQuiz()">Reset</button>
+      <span class="muted" v-if="quizDone" style="font-weight:700">Score: {{ quizScore }} / {{ quizQuestions.length }}
+        ({{ Math.round(quizScore/quizQuestions.length*100) }}%)</span>
+    </div>
+    <div class="verdict" :class="quizDone ? (quizScore===quizQuestions.length?'ok':'info') : 'info'" v-if="quizDone">
+      {{ quizScore===quizQuestions.length ? '🎉 Perfect! All ' + quizQuestions.length + ' correct.' : 'Better luck next time — review the traps section.' }}
+    </div>
+  </section>
+
+  <!-- 15. CHECKLIST -->
+  <section class="panel" v-show="sec==='checklist'" id="checklist">
+    <h2>✅ Study Checklist</h2>
+    <p class="muted" style="margin-bottom:10px">{{ doneCount }} / {{ checklist.length }} complete</p>
+    <div v-for="(c,i) in checklist" :key="i" class="chk-item" :class="{done:c.done}" @click="toggleDone(i)">
+      <span class="chk-box">{{ c.done ? '✓' : '' }}</span>{{ c.t }}
+    </div>
+  </section>
+
+</div>
+
+<script src="../vue.global.prod.js"></script>
+<script>
+(() => {
+  const { createApp, ref, computed, reactive } = Vue;
+  const LS = {
+    theme: 'ccnp.wlan.theme', done: 'ccnp.wlan.done',
+    quiz: 'ccnp.wlan.quiz'
+  };
+  function loadJSON(key, fb) {
+    try { const v = JSON.parse(localStorage.getItem(key)); return (v === null || v === undefined) ? fb : v; }
+    catch (e) { return fb; }
+  }
+  function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+  createApp({
+    setup() {
+      const theme = ref(loadJSON(LS.theme, 'dark'));
+      const sec = ref('intro');
+
+      /* ---------- SECTION NAV ---------- */
+      const sections = [
+        { id: 'intro', label: 'Overview', icon: '📶' },
+        { id: 'wlan', label: 'WLAN Basics', icon: '🏗️' },
+        { id: '80211', label: '802.11', icon: '📻' },
+        { id: 'ssid', label: 'SSID/BSSID', icon: '🏷️' },
+        { id: 'channels', label: 'Channels', icon: '📡' },
+        { id: 'rf', label: 'RF', icon: '📶' },
+        { id: 'wlc', label: 'WLC', icon: '🖥️' },
+        { id: 'capwap', label: 'CAPWAP', icon: '🔒' },
+        { id: 'mobility', label: 'Mobility', icon: '🔄' },
+        { id: 'roam', label: 'Roaming', icon: '🚶' },
+        { id: 'security', label: 'Security', icon: '🔐' },
+        { id: 'cmds', label: 'Commands', icon: '⌨️' },
+        { id: 'traps', label: 'Traps', icon: '⚠️' },
+        { id: 'quiz', label: 'Quiz', icon: '📝' },
+        { id: 'checklist', label: 'Checklist', icon: '✅' }
+      ];
+
+      /* ---------- CHANNEL PICKER ---------- */
+      const chanPick = ref('c2');
+      const chanVerdict = computed(() => {
+        if (chanPick.value === 'c2') return { cls: 'info', text: '2.4 GHz — non-overlapping channels are 1, 6, 11 (US); crowded, longer range.' };
+        if (chanPick.value === 'c5') return { cls: 'info', text: '5 GHz — many channels (UNII 36–165); DFS 52–144 need radar checking; non-DFS 36/40/44/48/149.' };
+        return { cls: 'info', text: '6 GHz — Wi-Fi 6E; wide channels and lots of spectrum, newest band.' };
+      });
+
+      /* ---------- WLC MODE ---------- */
+      const wlcMode = ref('local');
+      const wlcVerdict = computed(() => {
+        if (wlcMode.value === 'local') return { cls: 'info', text: 'Local mode — client data is tunneled to the WLC over CAPWAP (centralized policy, WLC is a chokepoint).' };
+        return { cls: 'info', text: 'FlexConnect — client data is switched locally at the AP; ideal for remote/branch sites to avoid backhaul.' };
+      });
+
+      /* ---------- ROAMING HELPER ---------- */
+      const roamHelp = ref('r');
+      const roamVerdict = computed(() => {
+        if (roamHelp.value === 'r') return { cls: 'info', text: '802.11r (FT) — fast transition: pre-distributes the PMK so reassociation is ~ms for voice/real-time.' };
+        if (roamHelp.value === 'k') return { cls: 'info', text: '802.11k — neighbor reports help clients pick the best AP before roaming.' };
+        return { cls: 'info', text: '802.11v — assists roaming / band steering to keep clients on healthy APs (fixes stickiness).' };
+      });
+
+      /* ---------- COMMANDS ---------- */
+      const commands = [
+        {
+          key: 'wlan', label: 'WLAN/AP',
+          show: "wlan Corp-Guest 2 Guest-Data\n security wpa psk ascii GuestPass1\n vlan Guest\n no shutdown\n\nshow wlan summary\nshow wlan id 2\nshow ap summary\nshow ap config general\nshow wireless profile policy"
+        },
+        {
+          key: 'radio', label: 'Radio/Channels',
+          show: "ap dot11 5ghz rrm channel global\nap dot11 24ghz rrm channel global\nap dot11 5ghz rrm tx-power global\n\nshow ap radio summary\nshow ap dot11 5ghz summary\nshow ap dot11 24ghz summary\nshow ap monitor channel\nshow ap monitor cable"
+        },
+        {
+          key: 'capwap', label: 'CAPWAP',
+          show: "show ap join stats summary\nshow ap capwap ip\nshow ap summary\nshow ap uptime\nshow wireless ap config\ndebug capwap event"
+        },
+        {
+          key: 'mobility', label: 'Mobility',
+          show: "wireless mobility group name CORP\nwireless mobility member 192.0.2.10\nwireless mobility keepalive interval 30\n\nshow wireless mobility summary\nshow wireless mobility statistics\nshow wireless mobility client\nshow ap mobility summary"
+        },
+        {
+          key: 'roam', label: 'Roaming',
+          show: "show wireless client summary\nshow wireless client mac <MAC>\nshow ap summary\nshow wireless mobility client\ndebug dot11 event"
+        },
+        {
+          key: 'sec', label: 'Security',
+          show: "! WPA2 Enterprise\nwlan CorpData 1 Corp\n security wpa akm dot1x\n security dot1x server-auth\n no security wpa akm psk\n security wpa ccmp\n! WPA3 Personal\nwlan Secure 3 SecureData\n security wpa psk sae\n security pmf\n security wpa ccmp\n\nshow wlan summary\nshow wlan id 1\nshow wireless client summary\nshow dot11 associations"
+        }
+      ];
+      const activeCmd = ref(commands[0].key);
+      const activeCommand = computed(() => commands.find(c => c.key === activeCmd.value));
+
+      /* ---------- TRAPS ---------- */
+      const traps = [
+        'SSID = human name (≤32 chars); BSSID = AP radio MAC (48-bit) — two different identities.',
+        'BSS = one AP radio + clients (the basic cell); ESS = many BSSes under one SSID (roaming).',
+        'One SSID can span many BSSIDs — same SSID, different BSSIDs is normal in an ESS.',
+        'Hidden SSID ≠ secure — clients still probe for it; hiding is not a security measure.',
+        'Wireless can\'t detect collisions → CSMA/CA with ACKs (not CSMA/CD).',
+        'Amendments: n = MIMO, ac = 5 GHz fast, ax = OFDMA/6 GHz; beacons every ~100 ms.',
+        '2.4 GHz non-overlapping = 1, 6, 11; 5 GHz has many channels + DFS (52–144, radar check).',
+        'RTS/CTS mitigates the hidden-node problem; NAV is the wait timer.',
+        'RSSI = signal strength (dBm); SNR = cleanliness (dB, ≥~25 good); EIRP = tx + antenna − loss.',
+        'Smaller cells = more capacity (density answer); small cells have lower interference.',
+        'WLC = control + management plane; data may be local (FlexConnect) or through the WLC (Local).',
+        'CAPWAP control = UDP 5246 (DTLS); data = UDP 5247; AP discovers → joins → gets config.',
+        'Only Local mode sends client data over CAPWAP; FlexConnect switches locally for branches.',
+        'CAPWAP replaced legacy LWAPP; 9800 series is the modern IOS-XE WLC.',
+        'Mobility group = WLCs sharing client state; anchor = first WLC, foreign = current.',
+        'L3 mobility/roaming needs the anchor to forward traffic (cross-subnet).',
+        '802.11r = fast transition (pre-auth PMK, ~ms); 802.11k = neighbor reports; 802.11v = assist/band steering.',
+        'Sticky client fix = band steering + 802.11k/v/r.',
+        'WPA2 = AES-CCMP + PSK/802.1X; 4-way handshake derives PTK from ANonce/SNonce + PMK; TKIP is legacy.',
+        'WPA3 = SAE (kills offline dict), forward secrecy, mandatory PMF, optional 192-bit enterprise.',
+        'In Enterprise, RADIUS hands the MSK which becomes the PMK for the handshake.'
+      ];
+
+      /* ---------- QUIZ ---------- */
+      const quizRaw = [
+        { q: 'SSID is best described as:', opts: [{ text: 'the human-readable network name (≤32 chars)' }, { text: 'the AP radio MAC address' }, { text: 'one AP plus its clients' }, { text: 'a QoS class' }], correct: 0 },
+        { q: 'BSSID is:', opts: [{ text: 'the MAC address of an AP radio' }, { text: 'the network name' }, { text: 'a band-steering amendment' }, { text: 'an encryption standard' }], correct: 0 },
+        { q: 'A BSS is:', opts: [{ text: 'one AP radio + its clients' }, { text: 'many APs under one SSID' }, { text: 'a wireless LAN controller' }, { text: 'a management frame' }], correct: 0 },
+        { q: 'Wireless LANs avoid collisions using:', opts: [{ text: 'CSMA/CA with ACKs' }, { text: 'CSMA/CD' }, { text: 'token passing' }, { text: 'FDDI' }], correct: 0 },
+        { q: 'Which amendment introduced MIMO?', opts: [{ text: '802.11n' }, { text: '802.11a' }, { text: '802.11g' }, { text: '802.11ac' }], correct: 0 },
+        { q: 'Which amendment uses OFDMA and supports 6 GHz?', opts: [{ text: '802.11ax' }, { text: '802.11ac' }, { text: '802.11b' }, { text: '802.11n' }], correct: 0 },
+        { q: 'The non-overlapping 2.4 GHz channels are:', opts: [{ text: '1, 6, 11' }, { text: '1, 3, 5, 7' }, { text: '2, 4, 6, 8' }, { text: '36, 40, 44' }], correct: 0 },
+        { q: 'DFS channels require:', opts: [{ text: 'radar detection before use' }, { text: 'a license key' }, { text: '802.1X authentication' }, { text: 'MIMO only' }], correct: 0 },
+        { q: 'CAPWAP control traffic uses:', opts: [{ text: 'UDP 5246 (DTLS)' }, { text: 'UDP 5247 (data)' }, { text: 'TCP 443' }, { text: 'UDP 69' }], correct: 0 },
+        { q: 'CAPWAP data traffic uses:', opts: [{ text: 'UDP 5247' }, { text: 'UDP 5246' }, { text: 'TCP 5246' }, { text: 'UDP 161' }], correct: 0 },
+        { q: 'In FlexConnect mode, client data is:', opts: [{ text: 'switched locally at the AP' }, { text: 'always tunneled to the WLC' }, { text: 'dropped' }, { text: 'sent via IPsec to the core' }], correct: 0 },
+        { q: 'In mobility, the "anchor" WLC is:', opts: [{ text: 'the first WLC holding the session/subnet' }, { text: 'the WLC the client just joined' }, { text: 'the WLC running RRM' }, { text: 'any cloud controller' }], correct: 0 },
+        { q: 'L3 roaming/mobility needs:', opts: [{ text: 'the anchor to forward traffic' }, { text: 'no forwarding changes' }, { text: 'a mesh backhaul' }, { text: '802.11b' }], correct: 0 },
+        { q: '802.11r provides:', opts: [{ text: 'fast transition via pre-auth PMK' }, { text: 'neighbor reports' }, { text: 'band steering only' }, { text: 'management frame encryption' }], correct: 0 },
+        { q: 'WPA2\'s encryption cipher is:', opts: [{ text: 'AES-CCMP' }, { text: 'RC4/TKIP' }, { text: '3DES' }, { text: 'DES' }], correct: 0 },
+        { q: 'WPA3 Personal replaces the PSK 4-way handshake with:', opts: [{ text: 'SAE' }, { text: 'WEP' }, { text: 'EAP-TLS' }, { text: 'PEAP' }], correct: 0 },
+        { q: 'Which is a headline WPA3 security fix?', opts: [{ text: 'resists offline dictionary attacks' }, { text: 'adds a firewall' }, { text: 'increases speed' }, { text: 'removes encryption' }], correct: 0 },
+        { q: 'In WPA2 Enterprise, which server provides the MSK?', opts: [{ text: 'RADIUS' }, { text: 'DHCP' }, { text: 'DNS' }, { text: 'the AP' }], correct: 0 }
+      ];
+      const quizQuestions = reactive(quizRaw.map(q => ({ ...q, ans: null })));
+      const quizDone = ref(false);
+      const quizScore = ref(loadJSON(LS.quiz, 0) || 0);
+      const allQuizAnswered = computed(() => quizQuestions.every(q => q.ans !== null));
+      function submitQuiz() {
+        if (!allQuizAnswered.value) return;
+        quizScore.value = quizQuestions.filter((q, i) => q.ans === q.correct).length;
+        quizDone.value = true;
+        save(LS.quiz, quizScore.value);
+      }
+      function resetQuiz() {
+        quizQuestions.forEach(q => q.ans = null);
+        quizDone.value = false;
+        quizScore.value = 0;
+        localStorage.removeItem(LS.quiz);
+      }
+
+      /* ---------- CHECKLIST ---------- */
+      const checklistRoot = loadJSON(LS.done, [
+        { t: 'WLAN = 802.11; enterprise = APs + WLC + wired backend; control/data/management planes', done: false },
+        { t: 'Identity: SSID(name ≤32) vs BSSID(AP radio MAC); BSS=one cell; ESS=many BSSes one SSID', done: false },
+        { t: '802.11: CSMA/CA + ACK (no collision detect); frames mgmt(beacon/probe/auth/assoc)/ctrl/data', done: false },
+        { t: 'Amendments: b/g=legacy, a=5GHz, n=MIMO, ac=5GHz wide, ax=OFDMA/6GHz; beacons ~100ms', done: false },
+        { t: 'RTS/CTS fights hidden node; NAV = wait timer', done: false },
+        { t: 'Channels: 2.4 non-overlap 1/6/11; 5GHz many + DFS 52–144; wider channel = fewer channels', done: false },
+        { t: 'RRM auto-channels, TPC auto-power (run on the WLC)', done: false },
+        { t: 'RF: RSSI=strength(dBm), SNR=clean(dB), EIRP=tx+antenna−loss; small cells = more capacity', done: false },
+        { t: 'WLC = control + mgmt plane; Local(data→WLC) vs FlexConnect(data at AP, branches); 9800 IOS-XE', done: false },
+        { t: 'CAPWAP: control UDP 5246 (DTLS), data UDP 5247; discover → join → config; replaced LWAPP', done: false },
+        { t: 'Mobility group shares client state; anchor=first, foreign=current; L3 needs anchor forwarding', done: false },
+        { t: 'Roaming: L2/L3, intra/inter-WLC; 802.11r=FT fast keys, k=neighbor, v=assist/band steer', done: false },
+        { t: 'Sticky client fix = band steering + 802.11k/v/r', done: false },
+        { t: 'WPA2 = AES-CCMP + PSK/802.1X; 4-way handshake → PTK from ANonce/SNonce + PMK; MSK from RADIUS', done: false },
+        { t: 'WPA3 = SAE (kills offline dict), forward secrecy, mandatory PMF, optional 192-bit; transition mode', done: false }
+      ]);
+      const checklist = reactive(checklistRoot);
+      const doneCount = computed(() => checklist.filter(c => c.done).length);
+      function saveChecklist() { save(LS.done, checklistRoot); }
+      function toggleDone(i) { checklistRoot[i].done = !checklistRoot[i].done; saveChecklist(); }
+
+      return {
+        theme, sec, sections,
+        chanPick, chanVerdict,
+        wlcMode, wlcVerdict,
+        roamHelp, roamVerdict,
+        commands, activeCmd, activeCommand,
+        traps,
+        quizQuestions, quizDone, quizScore, allQuizAnswered, submitQuiz, resetQuiz,
+        checklist, doneCount, saveChecklist, toggleDone
+      };
+    }
+  }).mount('#app');
+})();
+</script>
+</body>
+</html>

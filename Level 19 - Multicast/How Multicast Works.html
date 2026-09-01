@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Multicast Works — Deep Dive</title>
+<style>
+  :root {
+    --bg: #0f172a; --panel: #111c34; --card: #1e293b; --card-2: #16233d;
+    --text: #f8fafc; --muted: #94a3b8;
+    --blue: #38bdf8; --blue-dim: #0c4a6e;
+    --green: #34d399; --green-dim: #064e3b;
+    --amber: #fbbf24; --amber-dim: #78350f;
+    --red: #f87171; --red-dim: #7f1d1d;
+    --violet: #a78bfa; --violet-dim: #4c1d95;
+    --cyan: #22d3ee; --cyan-dim: #164e63;
+    --border: #334155; --hover: #263449; --code-bg: #0b1220;
+  }
+  #app[data-theme="light"] {
+    --bg: #f1f5f9; --panel: #ffffff; --card: #ffffff; --card-2: #f8fafc;
+    --text: #0f172a; --muted: #64748b;
+    --blue: #0284c7; --blue-dim: #bae6fd;
+    --green: #059669; --green-dim: #d1fae5;
+    --amber: #d97706; --amber-dim: #fef3c7;
+    --red: #dc2626; --red-dim: #fee2e2;
+    --violet: #7c3aed; --violet-dim: #ede9fe;
+    --cyan: #0891b2; --cyan-dim: #cffafe;
+    --border: #cbd5e1; --hover: #e2e8f0; --code-bg: #0b1220;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; }
+  #app { max-width: 1040px; margin: 0 auto; padding: 20px 18px 60px; }
+
+  header { position: sticky; top: 0; z-index: 30; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .lv-badge { background: var(--blue-dim); color: var(--blue); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .exam-badge { background: var(--violet-dim); color: var(--violet); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .head-actions { display: flex; align-items: center; gap: 8px; }
+  .btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: background 0.15s; }
+  .btn:hover { background: var(--hover); }
+  .btn.primary { background: var(--blue); color: #0f172a; border-color: var(--blue); }
+
+  nav { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 2px 16px; }
+  nav button.chip { border: 1px solid var(--border); background: var(--card); color: var(--muted); padding: 5px 11px; border-radius: 999px; cursor: pointer; font-size: 0.76rem; font-weight: 600; }
+  nav button.chip.active { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
+
+  section.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
+  section.panel h2 { font-size: 1.2rem; margin-bottom: 6px; }
+  section.panel h3 { font-size: 1rem; margin: 18px 0 10px; color: var(--blue); }
+  section.panel p { margin: 8px 0; }
+  .muted { color: var(--muted); }
+  .lead { color: var(--muted); font-size: 0.95rem; }
+
+  .grid { display: grid; gap: 12px; }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .g3 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .g4 { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .card h4 { font-size: 0.9rem; margin-bottom: 6px; }
+  .card .big { font-size: 1.3rem; font-weight: 700; font-family: 'Fira Code', ui-monospace, monospace; }
+
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85rem; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  tr:hover td { background: var(--hover); }
+
+  code, .mono { font-family: 'Fira Code', ui-monospace, monospace; }
+  .mono { font-size: 0.9rem; }
+  .chip-tag { display: inline-block; border-radius: 999px; padding: 1px 9px; font-size: 0.74rem; font-weight: 700; }
+  .b-blue { background: var(--blue-dim); color: var(--blue); }
+  .b-green { background: var(--green-dim); color: var(--green); }
+  .b-amber { background: var(--amber-dim); color: var(--amber); }
+  .b-red { background: var(--red-dim); color: var(--red); }
+  .b-violet { background: var(--violet-dim); color: var(--violet); }
+  .b-cyan { background: var(--cyan-dim); color: var(--cyan); }
+
+  .callout { border-left: 4px solid var(--amber); background: var(--card-2); border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 12px 0; font-size: 0.9rem; }
+  .callout.green { border-color: var(--green); }
+  .callout.red { border-color: var(--red); }
+  .callout.blue { border-color: var(--blue); }
+  .callout.violet { border-color: var(--violet); }
+
+  .row-fn { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 8px 0; }
+  .row-fn input[type="number"], .row-fn input[type="text"] { background: var(--code-bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-family: 'Fira Code', monospace; font-size: 0.9rem; }
+
+  .opt { display: flex; align-items: center; gap: 8px; padding: 6px 9px; margin: 3px 0; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; background: var(--card); font-size: 0.86rem; }
+  .opt.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .opt .letter { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex: 0 0 auto; }
+  .opt.sel .letter { background: var(--blue); color: #0f172a; }
+
+  #app pre, pre.cmd { background: var(--code-bg); color: #e2e8f0; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.82rem; line-height: 1.5; }
+
+  .trap-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  .trap-item:last-child { border-bottom: none; }
+  .trap-ico { color: var(--red); font-weight: 700; flex: 0 0 auto; }
+
+  .step-flow { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .step { border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 0.8rem; background: var(--card-2); }
+  .step .n { color: var(--blue); font-weight: 700; }
+
+  .verdict { border-radius: 8px; padding: 10px 14px; font-weight: 700; margin: 8px 0; }
+  .verdict.ok { background: var(--green-dim); color: var(--green); }
+  .verdict.bad { background: var(--red-dim); color: var(--red); }
+  .verdict.info { background: var(--blue-dim); color: var(--blue); }
+
+  .chk-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; margin: 5px 0; cursor: pointer; transition: opacity 0.15s; }
+  .chk-item.done { opacity: 0.55; text-decoration: line-through; }
+  .chk-box { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 5px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; }
+  .chk-item.done .chk-box { background: var(--green); border-color: var(--green); color: #0f172a; }
+
+  .proto-cell { border: 1px solid var(--border); border-radius: 10px; padding: 9px 10px; background: var(--card); cursor: pointer; text-align: center; }
+  .proto-cell.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .proto-cell .pn { font-weight: 700; }
+  .proto-cell .pd { font-size: 0.75rem; color: var(--muted); }
+  .addr-chip { display:inline-block; border:1px solid var(--border); border-radius:8px; padding:2px 9px; font-family:'Fira Code',monospace; font-size:.8rem; margin:2px; background:var(--code-bg); }
+</style>
+</head>
+<body>
+<div id="app" :data-theme="theme">
+  <header>
+    <h1><span class="lv-badge">L19</span> How Multicast Works
+      <span class="exam-badge">ENCOR 350-401</span></h1>
+    <div class="head-actions">
+      <a class="btn" href="../Level 18 - VPN Technologies/How VPN Technologies Work.html">◀ VPN</a>
+      <a class="btn" href="../index.html">Flashcards</a>
+      <button class="btn" @click="theme = (theme==='dark'?'light':'dark')">{{ theme==='dark' ? '☀' : '🌙' }}</button>
+    </div>
+  </header>
+
+  <nav>
+    <button class="chip" v-for="s in sections" :key="s.id" :class="{active:sec===s.id}" @click="sec=s.id">{{ s.icon }} {{ s.label }}</button>
+  </nav>
+
+  <!-- 1. OVERVIEW -->
+  <section class="panel" v-show="sec==='intro'" id="intro">
+    <h2>📡 Multicast — the whole picture</h2>
+    <p class="lead">One-to-many delivery: <b>IGMP</b> = host→router membership, <b>PIM</b> = router-to-router tree building, <b>RPF</b> = the loop guard, <b>snooping</b> = the L2 pruning switch feature.</p>
+
+    <h3>The two layers</h3>
+    <div class="grid g2">
+      <div class="card"><h4>Host → Router (LAN)</h4><span class="chip-tag b-blue">IGMP</span><p class="muted" style="margin:0">v1/v2/v3 membership; v3 = source filtering (SSM)</p></div>
+      <div class="card"><h4>Router → Router (network)</h4><span class="chip-tag b-green">PIM</span><p class="muted" style="margin:0">dense (flood) or sparse (join via RP)</p></div>
+    </div>
+
+    <h3>Model choice</h3>
+    <div class="grid g2">
+      <div class="card"><h4>Dense (PIM-DM)</h4><span class="chip-tag b-amber">push / flood</span><p class="muted" style="margin:0">assumes members everywhere; prunes; <b>no RP</b></p></div>
+      <div class="card"><h4>Sparse (PIM-SM)</h4><span class="chip-tag b-green">pull / join</span><p class="muted" style="margin:0">production default; <b>RP required</b>; (*,G)→(S,G)</p></div>
+    </div>
+
+    <h3>Vocabulary to know cold</h3>
+    <table>
+      <tr><th>Term</th><th>Meaning</th></tr>
+      <tr><td class="mono">(S,G)</td><td>source-specific entry (shortest-path tree)</td></tr>
+      <tr><td class="mono">(*,G)</td><td>any-source entry (shared/shared tree via RP)</td></tr>
+      <tr><td>RPF</td><td>Reverse Path Forwarding — loop guard</td></tr>
+      <tr><td>RP</td><td>Rendezvous Point — hub of PIM-SM</td></tr>
+      <tr><td>DR</td><td>Designated Router — speaks for the LAN</td></tr>
+      <tr><td>FHR / LHR</td><td>First-Hop Router / Last-Hop Router</td></tr>
+    </table>
+    <div class="callout red"><b>One-line mental model:</b> hosts ask via <b>IGMP</b>, routers build trees with <b>PIM</b>, RPF keeps it loop-free, snooping stops L2 flooding.</div>
+  </section>
+
+  <!-- 2. IGMP -->
+  <section class="panel" v-show="sec==='igmp'" id="igmp">
+    <h2>👥 IGMP — group membership</h2>
+    <p class="lead"><b>Host → router</b> (LAN side). The router learns which groups hosts want; no members = router stops forwarding.</p>
+
+    <h3>Version selector</h3>
+    <div class="grid g3">
+      <div class="proto-cell v" :class="{sel:igmpVersion===1}" @click="igmpVersion=1"><div class="pn">v1</div><div class="pd">general query · slow 2-min leave · no SSM</div></div>
+      <div class="proto-cell" :class="{sel:igmpVersion===2}" @click="igmpVersion=2"><div class="pn">v2 (default)</div><div class="pd">fast leave · no SSM</div></div>
+      <div class="proto-cell" :class="{sel:igmpVersion===3}" @click="igmpVersion=3"><div class="pn">v3</div><div class="pd">source filtering · <b>SSM</b></div></div>
+    </div>
+    <div class="verdict" :class="igmpVerdict.cls">{{ igmpVerdict.text }}</div>
+
+    <h3>Membership workflow</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> query (general) → 224.0.0.1</div>
+      <div class="step"><span class="n">2</span> report → group addr (v2: 224.0.0.22)</div>
+      <div class="step"><span class="n">3</span> leave (v2) → 224.0.0.2</div>
+      <div class="step"><span class="n">4</span> group-specific query</div>
+    </div>
+
+    <h3>Roles on the segment</h3>
+    <div class="grid g3">
+      <div class="card"><h4>Querier</h4><p class="muted" style="margin:0">elected router (lowest IP) sends general queries</p></div>
+      <div class="card"><h4>Member</h4><p class="muted" style="margin:0">host sends reports</p></div>
+      <div class="card"><h4>Non-member</h4><p class="muted" style="margin:0">silent</p></div>
+    </div>
+    <pre class="cmd">ip multicast-routing
+ip pim sparse-mode        ! enables PIM + IGMP on the interface
+interface Gi0/1
+ ip igmp version 3        ! force v3 (SSM ready)
+ ip igmp join-group 239.1.1.1   ! router joins (test)
+show ip igmp groups
+show ip igmp interface
+show ip mroute
+</pre>
+    <div class="callout red"><b>Trap:</b> IGMP = <b>host→router</b> only. <b>v3 adds source filtering → enables SSM</b>. <b>ip pim sparse-mode</b> turns on IGMP. Fast leave = v2.</div>
+  </section>
+
+  <!-- 3. PIM DENSE -->
+  <section class="panel" v-show="sec==='dense'" id="dense">
+    <h2>🌊 PIM Dense (PIM-DM)</h2>
+    <p class="lead">Assumes <b>members everywhere</b> — floods then prunes (push model). Builds a source-based <b>(S,G) SPT</b> with <b>no RP</b>.</p>
+
+    <h3>Flood-and-prune cycle</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> source sends</div>
+      <div class="step"><span class="n">2</span> flood to all PIM neighbors</div>
+      <div class="step"><span class="n">3</span> leaf routers without members prune</div>
+      <div class="step"><span class="n">4</span> state timeout → re-flood (every 3 min)</div>
+    </div>
+    <div class="card"><p style="margin:0"><b>Graft</b> = fast restore of a pruned branch when a new member appears below it.</p></div>
+
+    <h3>State model</h3>
+    <div class="grid g3">
+      <div class="card"><h4>(S,G)</h4><p class="muted" style="margin:0">used — per-source tree</p></div>
+      <div class="card"><h4>(*,G)</h4><p class="muted" style="margin:0"><b>not used</b> in DM</p></div>
+      <div class="card"><h4>Prune state</h4><p class="muted" style="margin:0">branch cut — no receivers</p></div>
+    </div>
+
+    <h3>Dense vs Sparse</h3>
+    <table>
+      <tr><th>Aspect</th><th>Dense</th><th>Sparse</th></tr>
+      <tr><td>Assumption</td><td>members everywhere</td><td>members are sparse</td></tr>
+      <tr><td>Flow</td><td>push / flood</td><td>pull / join</td></tr>
+      <tr><td>State</td><td>(S,G) only</td><td>(*,G) + (S,G)</td></tr>
+      <tr><td>RP</td><td><b>not needed</b></td><td><b>required</b></td></tr>
+      <tr><td>Efficiency</td><td>low for sparse groups</td><td>high</td></tr>
+      <tr><td>Production default</td><td>no</td><td><b>yes</b></td></tr>
+    </table>
+    <pre class="cmd">ip multicast-routing
+interface Gi0/1
+ ip pim dense-mode
+show ip mroute
+show ip pim interface
+show ip pim neighbor
+</pre>
+    <div class="callout red"><b>Trap:</b> DM = <b>flood-and-prune</b>, <b>(S,G)</b> SPT, <b>no RP</b>, <b>graft</b> restores branches. Inefficient → <b>PIM-SM is production</b>.</div>
+  </section>
+
+  <!-- 4. PIM SPARSE -->
+  <section class="panel" v-show="sec==='sparse'" id="sparse">
+    <h2>🌱 PIM Sparse (PIM-SM) — production default</h2>
+    <p class="lead">Nobody gets traffic until they <b>explicitly join</b> (pull model) through a <b>Rendezvous Point (RP)</b>.</p>
+
+    <h3>Pull model walk-through</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> receiver → IGMP report</div>
+      <div class="step"><span class="n">2</span> DR joins (*,G) toward RP</div>
+      <div class="step"><span class="n">3</span> RP → shared tree built</div>
+      <div class="step"><span class="n">4</span> source registers to RP</div>
+      <div class="step"><span class="n">5</span> last-hop → SPT switchover</div>
+    </div>
+    <div class="callout green"><b>Key:</b> traffic flows <b>only to those who asked</b>.</div>
+
+    <h3>Two trees</h3>
+    <div class="grid g2">
+      <div class="card"><h4>Shared tree — (*,G)</h4><p class="muted" style="margin:0">via RP, initial path</p></div>
+      <div class="card"><h4>Shortest-path — (S,G)</h4><p class="muted" style="margin:0">source-direct, after switchover</p></div>
+    </div>
+
+    <h3>Register process</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> source → FHR (multicast)</div>
+      <div class="step"><span class="n">2</span> FHR → RP <b>register</b> (unicast, encapsulates)</div>
+      <div class="step"><span class="n">3</span> RP → FHR register-stop</div>
+      <div class="step"><span class="n">4</span> RP forwards down shared tree</div>
+    </div>
+    <div class="callout red"><b>Trap:</b> the <b>register message encapsulates</b> the multicast packet in <b>unicast</b> to the RP. With <b>spt-threshold 0</b> (the default) the LHR switches to the SPT <b>immediately</b>.</div>
+
+    <h3>SPT switchover trigger</h3>
+    <div class="row-fn">
+      <label class="muted" style="font-size:.85rem">Switch after:</label>
+      <button class="btn" :class="{primary:sptPick===0}" @click="sptPick=0">0 kbps (immediate)</button>
+      <button class="btn" :class="{primary:sptPick===1000}" @click="sptPick=1000">1,000 kbps</button>
+      <span class="mono muted" style="font-size:.8rem">ip pim spt-threshold {{ sptPick }}</span>
+    </div>
+    <div class="verdict" :class="sptVerdict.cls">{{ sptVerdict.text }}</div>
+    <pre class="cmd">ip multicast-routing
+ip pim rp-address 192.168.10.10
+ip pim spt-threshold 0        ! immediate SPT switchover
+interface Gi0/1
+ ip pim sparse-mode
+show ip mroute
+show ip pim rp mapping
+show ip pim neighbor
+</pre>
+  </section>
+
+  <!-- 5. RENDEZVOUS POINT -->
+  <section class="panel" v-show="sec==='rp'" id="rp">
+    <h2>📍 Rendezvous Point (RP)</h2>
+    <p class="lead">The hub of PIM-SM where receivers' <b>(*,G)</b> joins meet the source's register traffic. Every PIM-SM router must know the <b>group → RP mapping</b>.</p>
+
+    <h3>RP discovery method</h3>
+    <div class="grid g3">
+      <div class="proto-cell" :class="{sel:rpMethod==='static'}" @click="rpMethod='static'"><div class="pn">Static</div><div class="pd">ip pim rp-address · simple</div></div>
+      <div class="proto-cell" :class="{sel:rpMethod==='autorp'}" @click="rpMethod='autorp'"><div class="pn">Auto-RP</div><div class="pd">Cisco prop · 224.0.1.39/40</div></div>
+      <div class="proto-cell" :class="{sel:rpMethod==='bsr'}" @click="rpMethod='bsr'"><div class="pn">BSR</div><div class="pd">PIM draft standard</div></div>
+    </div>
+    <div class="verdict" :class="rpVerdict.cls">{{ rpVerdict.text }}</div>
+
+    <h3>RP redundancy</h3>
+    <div class="grid g2">
+      <div class="card"><h4>Anycast RP</h4><p class="muted" style="margin:0">shared loopback + <b>MSDP</b> → redundancy &amp; shared load</p></div>
+      <div class="card"><h4>Per-group RP</h4><p class="muted" style="margin:0">scale control by group range</p></div>
+    </div>
+    <div class="callout red"><b>Trap (memorize):</b> Auto-RP = Cisco group <b>224.0.1.39/40</b>. BSR = <b>PIM draft standard</b> (interoperable). <b>Anycast RP = shared loopback + MSDP</b>. No RP → no PIM-SM.</div>
+    <pre class="cmd">! static RP
+ip pim rp-address 192.168.10.10
+! Auto-RP candidate (on RP)
+ip pim send-rp-announce Loopback0 scope 32
+ip pim send-rp-discovery Loopback0 scope 32
+! BSR candidate
+ip pim bsr-candidate Loopback0 0
+ip pim rp-candidate Loopback0
+show ip pim rp mapping
+show ip pim rp hash
+</pre>
+  </section>
+
+  <!-- 6. MULTICAST ROUTING + RPF -->
+  <section class="panel" v-show="sec==='routing'" id="routing">
+    <h2>🛤️ Multicast Routing &amp; RPF</h2>
+    <p class="lead">Multicast forwards <b>away from the source</b> along a tree, governed by the <b>RPF check</b>: forward only if the packet arrived on the interface the <b>unicast RIB</b> would use toward the source.</p>
+
+    <h3>RPF check</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:rpfArrive==='right'}" @click="rpfArrive='right'"><div class="pn">On RPF interface</div><div class="pd">accept → forward toward tree</div></div>
+      <div class="proto-cell" :class="{sel:rpfArrive==='wrong'}" @click="rpfArrive='wrong'"><div class="pn">On wrong interface</div><div class="pd">RPF failure → <b>silent drop</b></div></div>
+    </div>
+    <div class="verdict" :class="rpfVerdict.cls">{{ rpfVerdict.text }}</div>
+
+    <h3>Unicast vs multicast decision</h3>
+    <table>
+      <tr><th>Aspect</th><th>Unicast</th><th>Multicast</th></tr>
+      <tr><td>Destination</td><td>host address</td><td>group address</td></tr>
+      <tr><td>Decision</td><td>toward destination</td><td><b>away from source</b></td></tr>
+      <tr><td>Routing basis</td><td>destination</td><td>RPF (source)</td></tr>
+      <tr><td>Protocol</td><td>unicast IGP</td><td>PIM + unicast RIB</td></tr>
+    </table>
+    <div class="callout blue"><b>PIM uses the <u>existing unicast RIB</u> for RPF</b> — no separate multicast topology. Asymmetric unicast breaks RPF.</div>
+
+    <h3>mroute entries</h3>
+    <div class="grid g3">
+      <div class="card"><h4>(*,G)</h4><p class="muted" style="margin:0">any source · shared tree</p></div>
+      <div class="card"><h4>(S,G)</h4><p class="muted" style="margin:0">source · group · SPT</p></div>
+      <div class="card"><h4>OIL</h4><p class="muted" style="margin:0">outgoing interface list</p></div>
+    </div>
+
+    <h3>Inter-domain tools</h3>
+    <div class="grid g4">
+      <div class="card"><h4>MBGP</h4><p class="muted" style="margin:0">multicast NLRI · <b>SAFI 2</b></p></div>
+      <div class="card"><h4>MSDP</h4><p class="muted" style="margin:0">RP peering / source discovery</p></div>
+      <div class="card"><h4>PIM</h4><p class="muted" style="margin:0">forwarding between domains</p></div>
+      <div class="card"><h4>SSM</h4><p class="muted" style="margin:0">simplifies inter-domain</p></div>
+    </div>
+    <pre class="cmd">show ip mroute
+show ip mroute count
+show ip rpf 10.1.1.1
+show ip pim interface
+debug ip mpacket
+</pre>
+    <div class="callout red"><b>Trap:</b> RPF = forward only from the source-facing (unicast-RIB) interface, else <b>silent drop</b>. <b>MBGP</b> = separate multicast NLRI (SAFI 2). <b>(*,G)</b> shared vs <b>(S,G)</b> SPT.</div>
+  </section>
+
+  <!-- 7. IGMP SNOOPING -->
+  <section class="panel" v-show="sec==='snoop'" id="snoop">
+    <h2>🔍 IGMP Snooping (the switch layer)</h2>
+    <p class="lead">A <b>Layer 2 (switch)</b> feature that inspects IGMP reports and forwards multicast <b>only out member ports</b> — instead of flooding the whole VLAN.</p>
+
+    <h3>Why it exists</h3>
+    <div class="card"><p style="margin:0">Without snooping, a switch floods group traffic like <b>broadcast</b>. Snooping builds a per-group port table: <b>member ports + the mrouter port</b>.</p></div>
+
+    <h3>How it works</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> host sends IGMP report</div>
+      <div class="step"><span class="n">2</span> switch snoops it</div>
+      <div class="step"><span class="n">3</span> records port as member</div>
+      <div class="step"><span class="n">4</span> forwards group traffic only to member ports</div>
+    </div>
+
+    <h3>Key terms</h3>
+    <div class="grid g2">
+      <div class="card"><h4>Mrouter port</h4><p class="muted" style="margin:0">facing the multicast router/querier</p></div>
+      <div class="card"><h4>Member port</h4><p class="muted" style="margin:0">facing a host that reported the group</p></div>
+    </div>
+
+    <h3>Snooping vs Proxying (the trap)</h3>
+    <table>
+      <tr><th>Feature</th><th>Snooping</th><th>Proxying</th></tr>
+      <tr><td>Level</td><td>switch inspects reports</td><td>switch acts as proxy</td></tr>
+      <tr><td>Queries</td><td><b>passes through</b></td><td>switch regenerates</td></tr>
+      <tr><td>State</td><td>L2 tables</td><td>L3-like state</td></tr>
+    </table>
+    <div class="callout red"><b>Trap:</b> snooping = switch/L2 and <b>on by default</b> on most Cisco switches. <b>Snooping passes queries through; proxying terminates and regenerates them</b> (different feature). Switch querier covers VLANs with no router.</div>
+    <pre class="cmd">ip igmp snooping                          ! global enable (default on)
+ip igmp snooping vlan 10
+ip igmp snooping querier                  ! switch acts as querier if no router
+show ip igmp snooping
+show ip igmp snooping groups
+show ip igmp snooping mrouter
+show mac address-table multicast
+</pre>
+  </section>
+
+  <!-- 8. SSM -->
+  <section class="panel" v-show="sec==='ssm'" id="ssm">
+    <h2>🅢 Source-Specific Multicast (SSM)</h2>
+    <p class="lead">Trees rooted directly at a <b>specific source (S,G)</b> — <b>no RP, no shared tree, no register process</b>. RFC 4607.</p>
+
+    <h3>SSM vs ASM</h3>
+    <table>
+      <tr><th>Aspect</th><th>ASM (PIM-SM)</th><th>SSM</th></tr>
+      <tr><td>Model</td><td>any source (*,G)</td><td>source-specific (S,G)</td></tr>
+      <tr><td>RP</td><td>required</td><td><b>none</b></td></tr>
+      <tr><td>Shared tree</td><td>yes, then SPT</td><td>never</td></tr>
+      <tr><td>Register</td><td>source → RP</td><td>none</td></tr>
+      <tr><td>Join</td><td>IGMPv2 (*,G)</td><td><b>IGMPv3 (S,G)</b></td></tr>
+      <tr><td>Address range</td><td>224/4</td><td><b>232.0.0.0/8</b></td></tr>
+      <tr><td>Inter-domain</td><td>complex (MSDP)</td><td>simple</td></tr>
+    </table>
+
+    <h3>How an SSM join works</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> Receiver → IGMPv3 (S,G) report → DR</div>
+      <div class="step"><span class="n">2</span> DR → PIM (S,G) join toward source</div>
+      <div class="step"><span class="n">3</span> Source → (S,G) SPT → receiver</div>
+    </div>
+    <div class="callout green"><b>Key:</b> the receiver names <b>both source and group</b> in a single <b>(S,G)</b> join → the network builds one <b>shortest-path tree</b> — no RPT phase, no RP.</div>
+
+    <h3>IGMP version requirement</h3>
+    <table>
+      <tr><th>Version</th><th>Supports SSM</th></tr>
+      <tr><td>IGMPv1/v2</td><td>no (only (*,G))</td></tr>
+      <tr><td>IGMPv3</td><td><b>yes (include/exclude source lists)</b></td></tr>
+    </table>
+    <pre class="cmd">ip multicast-routing
+ip pim ssm default                     ! SSM for 232/8 (RFC 4607)
+! optionally custom range
+ip pim ssm range SSM-POOL
+access-list 10 permit 232.0.0.0 0.255.255.255
+interface Gi0/1
+ ip pim sparse-mode
+ ip igmp version 3
+show ip mroute ssm
+show ip ssm
+</pre>
+    <div class="callout red"><b>Trap:</b> SSM = <b>232.0.0.0/8</b>, <b>IGMPv3 required</b>, enable with <b>ip pim ssm default</b>. No RP → <b>inter-domain multicast is simple (no MSDP)</b>.</div>
+  </section>
+
+  <!-- 9. BOUNDARIES + RPF -->
+  <section class="panel" v-show="sec==='bndrpf'" id="bndrpf">
+    <h2>🚧 Multicast Boundaries &amp; RPF</h2>
+    <p class="lead">Two distinct controls: <b>RPF</b> decides <i>whether</i> to forward toward the tree; <b>boundaries</b> decide <i>how far</i> multicast may travel.</p>
+
+    <h3>RPF — the loop guard</h3>
+    <div class="card"><p style="margin:0">Forward only if the packet arrived on the interface the <b>unicast RIB</b> points at for the source; otherwise <b>silently drop</b> (RPF failure). Uses the <b>existing unicast table</b> — multicast holds no separate topology.</p></div>
+
+    <h3>RPF vs asymmetric unicast</h3>
+    <div class="grid g2">
+      <div class="card"><h4>Equal unicast</h4><p class="muted" style="margin:0">RPF fine</p></div>
+      <div class="card"><h4>Asymmetric</h4><p class="muted" style="margin:0">RPF failure → fix with <b>MBGP</b>/static RPF/tunnels</p></div>
+    </div>
+
+    <h3>Boundary tools</h3>
+    <div class="grid g3">
+      <div class="card"><h4>TTL boundary</h4><p class="muted" style="margin:0"><span class="mono">ip multicast ttl-threshold 16</span></p></div>
+      <div class="card"><h4>Group boundary</h4><p class="muted" style="margin:0"><span class="mono">ip multicast boundary &lt;acl&gt;</span></p></div>
+      <div class="card"><h4>Admin scoping</h4><p class="muted" style="margin:0"><span class="mono">239.0.0.0/8</span> — never leaves the domain</p></div>
+    </div>
+
+    <h3>Boundary selector</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:bndTool==='ttl'}" @click="bndTool='ttl'"><div class="pn">TTL threshold</div><div class="pd">blocks low-TTL packets leaving the network</div></div>
+      <div class="proto-cell" :class="{sel:bndTool==='group'}" @click="bndTool='group'"><div class="pn">Group boundary ACL</div><div class="pd">blocks group ranges at the interface</div></div>
+    </div>
+    <div class="verdict" :class="bndVerdict.cls">{{ bndVerdict.text }}</div>
+    <pre class="cmd">interface GigabitEthernet0/1
+ ip multicast ttl-threshold 16        ! TTL scoping
+access-list 10 deny 232.0.0.0 0.255.255.255
+access-list 10 permit any
+interface GigabitEthernet0/2
+ ip multicast boundary 10             ! group filter
+show ip rpf 10.1.1.1
+show ip mroute
+debug ip mpacket
+</pre>
+    <div class="callout red"><b>Trap:</b> <b>RPF failure = silent drop</b>. <b>239/8</b> = administratively scoped. Boundaries = <b>TTL threshold</b> + <b>group boundary ACL</b>. Asymmetric unicast breaks RPF unless MBGP/static fixes it.</div>
+  </section>
+
+  <!-- 10. DR & ASSERT -->
+  <section class="panel" v-show="sec==='dr'" id="dr">
+    <h2>🏆 PIM DR &amp; Assert</h2>
+    <p class="lead">On a multi-access LAN with several PIM routers: the <b>DR</b> is elected to represent the hosts; <b>Assert</b> resolves <b>duplicate (S,G) forwarding</b>.</p>
+
+    <h3>DR vs Assert (memorize the difference)</h3>
+    <div class="grid g2">
+      <div class="card"><h4>DR = who speaks for hosts</h4><p class="muted" style="margin:0">sends IGMP/PIM joins · registers the source (FHR) · last-hop join</p></div>
+      <div class="card"><h4>Assert = who forwards the stream</h4><p class="muted" style="margin:0">picks one forwarder for a duplicated (S,G) on the LAN</p></div>
+    </div>
+
+    <h3>DR election</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> highest PIM neighbor priority wins (default 1)</div>
+      <div class="step"><span class="n">2</span> tie → <b>highest IP address</b> wins</div>
+      <div class="step"><span class="n">3</span> winner handles joins/IGMP/register</div>
+    </div>
+
+    <h3>Assert winner</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> lower route preference (admin distance) wins</div>
+      <div class="step"><span class="n">2</span> then lower metric to source</div>
+      <div class="step"><span class="n">3</span> tie → <b>highest IP wins</b></div>
+    </div>
+
+    <h3>Assert selector</h3>
+    <div class="grid g3">
+      <div class="proto-cell" :class="{sel:assertCase==='lower'}" @click="assertCase='lower'"><div class="pn">Lower metric</div><div class="pd">better path → wins</div></div>
+      <div class="proto-cell" :class="{sel:assertCase==='tie'}" @click="assertCase='tie'"><div class="pn">Equal metric</div><div class="pd">higher IP → wins</div></div>
+    </div>
+    <div class="verdict" :class="assertVerdict.cls">{{ assertVerdict.text }}</div>
+    <div class="callout red"><b>Trap:</b> DR = <b>priority then highest IP</b> (<span class="mono">ip pim dr-priority</span>). Assert winner = <b>lower metric to source, higher IP on tie</b>. <b>DR removes membership ambiguity; Assert removes forwarding duplication</b>.</div>
+    <pre class="cmd">interface GigabitEthernet0/1
+ ip pim sparse-mode
+ ip pim dr-priority 200        ! influence DR election
+show ip pim interface
+show ip pim neighbor
+show ip pim assert
+</pre>
+  </section>
+
+  <!-- 11. COMMANDS -->
+  <section class="panel" v-show="sec==='cmds'" id="cmds">
+    <h2>⌨️ CLI Commands</h2>
+    <div class="row-fn">
+      <button class="btn" v-for="c in commands" :key="c.key" :class="{primary:activeCmd===c.key}" @click="activeCmd=c.key">{{ c.label }}</button>
+    </div>
+    <pre class="cmd">{{ activeCommand.show }}</pre>
+  </section>
+
+  <!-- 12. TRAPS -->
+  <section class="panel" v-show="sec==='traps'" id="traps">
+    <h2>⚠️ Common Traps</h2>
+    <div v-for="t in traps" :key="t" class="trap-item"><span class="trap-ico">!</span><div>{{ t }}</div></div>
+  </section>
+
+  <!-- 13. QUIZ -->
+  <section class="panel" v-show="sec==='quiz'" id="quiz">
+    <h2>📝 Quiz ({{ quizQuestions.length }})</h2>
+    <div v-for="(q,qi) in quizQuestions" :key="qi" class="card" style="margin:12px 0">
+      <div style="font-weight:700;margin-bottom:8px">{{ qi+1 }}. {{ q.q }}</div>
+      <div v-for="(o,oi) in q.opts" :key="oi"
+           class="opt" :class="{sel:q.ans===oi}"
+           @click="q.ans=oi">
+        <span class="letter">{{ String.fromCharCode(65+oi) }}</span>{{ o.text }}
+      </div>
+    </div>
+    <div class="row-fn">
+      <button class="btn primary" @click="submitQuiz()" :disabled="!allQuizAnswered">Submit answers</button>
+      <button class="btn" @click="resetQuiz()">Reset</button>
+      <span class="muted" v-if="quizDone" style="font-weight:700">Score: {{ quizScore }} / {{ quizQuestions.length }}
+        ({{ Math.round(quizScore/quizQuestions.length*100) }}%)</span>
+    </div>
+    <div class="verdict" :class="quizDone ? (quizScore===quizQuestions.length?'ok':'info') : 'info'" v-if="quizDone">
+      {{ quizScore===quizQuestions.length ? '🎉 Perfect! All ' + quizQuestions.length + ' correct.' : 'Better luck next time — review the traps section.' }}
+    </div>
+  </section>
+
+  <!-- 14. CHECKLIST -->
+  <section class="panel" v-show="sec==='checklist'" id="checklist">
+    <h2>✅ Study Checklist</h2>
+    <p class="muted" style="margin-bottom:10px">{{ doneCount }} / {{ checklist.length }} complete</p>
+    <div v-for="(c,i) in checklist" :key="i" class="chk-item" :class="{done:c.done}" @click="toggleDone(i)">
+      <span class="chk-box">{{ c.done ? '✓' : '' }}</span>{{ c.t }}
+    </div>
+  </section>
+
+</div>
+
+<script src="../vue.global.prod.js"></script>
+<script>
+(() => {
+  const { createApp, ref, computed, reactive } = Vue;
+  const LS = {
+    theme: 'ccnp.mcast.theme', done: 'ccnp.mcast.done',
+    quiz: 'ccnp.mcast.quiz'
+  };
+  function loadJSON(key, fb) {
+    try { const v = JSON.parse(localStorage.getItem(key)); return (v === null || v === undefined) ? fb : v; }
+    catch (e) { return fb; }
+  }
+  function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+  createApp({
+    setup() {
+      const theme = ref(loadJSON(LS.theme, 'dark'));
+      const sec = ref('intro');
+
+      /* ---------- SECTION NAV ---------- */
+      const sections = [
+        { id: 'intro', label: 'Overview', icon: '📡' },
+        { id: 'igmp', label: 'IGMP', icon: '👥' },
+        { id: 'dense', label: 'PIM Dense', icon: '🌊' },
+        { id: 'sparse', label: 'PIM Sparse', icon: '🌱' },
+        { id: 'rp', label: 'Rendezvous Point', icon: '📍' },
+        { id: 'routing', label: 'Routing & RPF', icon: '🛤️' },
+        { id: 'snoop', label: 'IGMP Snooping', icon: '🔍' },
+        { id: 'ssm', label: 'SSM', icon: '🅢' },
+        { id: 'bndrpf', label: 'Boundaries & RPF', icon: '🚧' },
+        { id: 'dr', label: 'DR & Assert', icon: '🏆' },
+        { id: 'cmds', label: 'Commands', icon: '⌨️' },
+        { id: 'traps', label: 'Traps', icon: '⚠️' },
+        { id: 'quiz', label: 'Quiz', icon: '📝' },
+        { id: 'checklist', label: 'Checklist', icon: '✅' }
+      ];
+
+      /* ---------- IGMP VERSION ---------- */
+      const igmpVersion = ref(3);
+      const igmpVerdict = computed(() => {
+        if (igmpVersion.value === 1) return { cls: 'info', text: 'IGMPv1 — general query, slow 2-min leave, no SSM.' };
+        if (igmpVersion.value === 2) return { cls: 'info', text: 'IGMPv2 (default) — fast leave message; still no source filtering, so no SSM.' };
+        return { cls: 'info', text: 'IGMPv3 — include/exclude source lists → enables SSM (232/8 with (S,G) joins).' };
+      });
+
+      /* ---------- SPT THRESHOLD ---------- */
+      const sptPick = ref(0);
+      const sptVerdict = computed(() => {
+        if (sptPick.value === 0) return { cls: 'info', text: 'spt-threshold 0 — LHR switches to the (S,G) SPT immediately (default).' };
+        return { cls: 'info', text: 'spt-threshold ' + sptPick.value + ' — LHR stays on the (*,G) shared tree until the group exceeds ' + sptPick.value + ' kbps, then switches to the SPT.' };
+      });
+
+      /* ---------- RP METHOD ---------- */
+      const rpMethod = ref('static');
+      const rpVerdict = computed(() => {
+        if (rpMethod.value === 'static') return { cls: 'info', text: 'Static RP — ip pim rp-address; simple, manual per site. The exam favorite.' };
+        if (rpMethod.value === 'autorp') return { cls: 'info', text: 'Auto-RP — Cisco proprietary; uses groups 224.0.1.39 (announce) / 224.0.1.40 (discovery).' };
+        return { cls: 'info', text: 'BSR — PIM draft standard (interoperable); elected bootstrap router floods group→RP mappings.' };
+      });
+
+      /* ---------- RPF ARRIVE ---------- */
+      const rpfArrive = ref('right');
+      const rpfVerdict = computed(() => {
+        if (rpfArrive.value === 'right') return { cls: 'info', text: 'Accepted — the packet is on the RPF interface (the one the unicast RIB points toward the source), so it is forwarded toward the tree.' };
+        return { cls: 'info', text: 'RPF FAILURE — packet arrived on a non-source-facing interface → SILENTLY DROPPED (classic multicast troubleshooting symptom).' };
+      });
+
+      /* ---------- BOUNDARY TOOL ---------- */
+      const bndTool = ref('ttl');
+      const bndVerdict = computed(() => {
+        if (bndTool.value === 'ttl') return { cls: 'info', text: 'TTL boundary (ip multicast ttl-threshold 16) — packets with TTL below the threshold are not forwarded out the interface.' };
+        return { cls: 'info', text: 'Group boundary (ip multicast boundary &lt;acl&gt;) — blocks the ACL-matched multicast group ranges at the interface.' };
+      });
+
+      /* ---------- ASSERT CASE ---------- */
+      const assertCase = ref('lower');
+      const assertVerdict = computed(() => {
+        if (assertCase.value === 'lower') return { cls: 'info', text: 'Assert winner = the router with the LOWER metric to the source (better path) keeps forwarding; the loser prunes (S,G) on that interface.' };
+        return { cls: 'info', text: 'Equal metric = assert TIE → the router with the HIGHEST IP ADDRESS wins.' };
+      });
+
+      /* ---------- COMMANDS ---------- */
+      const commands = [
+        {
+          key: 'igmp', label: 'IGMP',
+          show: "! enable multicast + PIM (which turns on IGMP)\nip multicast-routing\nip pim sparse-mode\ninterface Gi0/1\n ip igmp version 3        ! SSM ready\n ip igmp join-group 239.1.1.1  ! router joins (test)\n ip igmp static-group 239.2.2.2 ! static membership\n\nshow ip igmp groups\nshow ip igmp interface\nshow ip mroute\nshow ip igmp snooping groups"
+        },
+        {
+          key: 'dense', label: 'PIM Dense',
+          show: "ip multicast-routing\ninterface Gi0/1\n ip pim dense-mode\n\nshow ip mroute\nshow ip pim interface\nshow ip pim neighbor\ndebug ip pim"
+        },
+        {
+          key: 'sparse', label: 'PIM Sparse + RP',
+          show: "ip multicast-routing\nip pim rp-address 192.168.10.10   ! static RP\nip pim spt-threshold 0             ! immediate SPT switchover\ninterface Gi0/1\n ip pim sparse-mode\n\nshow ip mroute\nshow ip pim rp mapping\nshow ip pim interface\nshow ip pim neighbor\ndebug ip pim"
+        },
+        {
+          key: 'rp', label: 'RP Discovery',
+          show: "! static\nip pim rp-address 192.168.10.10\n! Auto-RP candidate (on RP)\nip pim send-rp-announce Loopback0 scope 32\nip pim send-rp-discovery Loopback0 scope 32\n! BSR candidate\nip pim bsr-candidate Loopback0 0\nip pim rp-candidate Loopback0\n\nshow ip pim rp mapping\nshow ip pim rp hash\nshow ip pim neighbor\ndebug ip pim auto-rp"
+        },
+        {
+          key: 'mroute', label: 'Routing / RPF',
+          show: "show ip mroute\nshow ip mroute count\nshow ip rpf 10.1.1.1\nshow ip pim interface\nshow ip pim neighbor\ndebug ip mpacket\n\n! MBGP multicast address-family (SAFI 2 example)\nrouter bgp 65000\n address-family ipv4 multicast\n  neighbor 10.10.10.1 activate\n  network 192.168.1.0 mask 255.255.255.0"
+        },
+        {
+          key: 'snoop', label: 'Snooping',
+          show: "ip igmp snooping                    ! global enable (default on)\nip igmp snooping vlan 10\nip igmp snooping querier            ! switch acts as querier if no router\nip igmp snooping mrouter learn pim  ! learn mrouter from PIM\n\nshow ip igmp snooping\nshow ip igmp snooping groups\nshow ip igmp snooping mrouter\nshow mac address-table multicast"
+        },
+        {
+          key: 'ssm', label: 'SSM',
+          show: "ip multicast-routing\nip pim ssm default                  ! 232/8 (RFC 4607)\n! optional custom range\nip pim ssm range SSM-POOL\naccess-list 10 permit 232.0.0.0 0.255.255.255\ninterface Gi0/1\n ip pim sparse-mode\n ip igmp version 3\n\nshow ip mroute ssm\nshow ip ssm\nshow ip igmp groups\nshow ip pim interface"
+        },
+        {
+          key: 'bnd', label: 'Boundaries',
+          show: "interface GigabitEthernet0/1\n ip multicast ttl-threshold 16   ! TTL scoping\naccess-list 10 deny 232.0.0.0 0.255.255.255\naccess-list 10 permit any\ninterface GigabitEthernet0/2\n ip multicast boundary 10        ! group filter\n\nshow ip rpf 10.1.1.1\nshow ip mroute\nshow ip pim interface\ndebug ip mpacket"
+        },
+        {
+          key: 'dr', label: 'DR & Assert',
+          show: "interface GigabitEthernet0/1\n ip pim sparse-mode\n ip pim dr-priority 200   ! influence DR election\n\nshow ip pim interface\nshow ip pim neighbor\nshow ip pim assert\nshow ip mroute\ndebug ip pim"
+        }
+      ];
+      const activeCmd = ref(commands[0].key);
+      const activeCommand = computed(() => commands.find(c => c.key === activeCmd.value));
+
+      /* ---------- TRAPS ---------- */
+      const traps = [
+        'IGMP = host→router (LAN side only); IP multicast itself is router-to-router — don\'t mix them.',
+        'IGMPv3 adds source filtering → enables SSM. Fast leave = IGMPv2. Querier = lowest IP on the LAN.',
+        'ip pim sparse-mode turns on IGMP on the interface (and is the modern method).',
+        'PIM-DM = flood-and-prune, (S,G) ONLY, no RP, graft restores branches, inefficient → not production.',
+        'PIM-SM = production default; pull/join via an RP; shared (*,G) then (S,G) SPT.',
+        'The register message encapsulates the multicast packet in UNICAST to the RP.',
+        'spt-threshold 0 = immediate SPT switchover (the default).',
+        'RP mapping methods: static / Auto-RP (Cisco 224.0.1.39/40) / BSR (PIM draft standard).',
+        'Anycast RP = shared loopback + MSDP (redundancy). No RP = no PIM-SM.',
+        'RPF = forward only from the source-facing (unicast-RIB) interface, else SILENT DROP.',
+        'PIM uses the existing unicast RIB for RPF — asymmetric unicast breaks RPF unless MBGP/static fixes it.',
+        'MBGP = separate multicast NLRI, SAFI 2. MSDP = RP peering/source discovery.',
+        'IGMP snooping is L2/switch and passes queries through; proxying (L3) regenerates them. Snooping on by default.',
+        'Snooping forwards multicast out member ports + the mrouter port only.',
+        'SSM = 232.0.0.0/8 (RFC 4607), needs IGMPv3, enable with ip pim ssm default; no RP/shared tree/register.',
+        'Boundaries: TTL threshold + group boundary ACL; 239/8 = administratively scoped (never leaves the domain).',
+        'DR = priority then highest IP, acts for hosts (joins/IGMP/register). Assert = lower metric then higher IP, picks one forwarder.',
+        'DR = who speaks for hosts; Assert = who forwards the stream — separate concepts.'
+      ];
+
+      /* ---------- QUIZ ---------- */
+      const quizRaw = [
+        { q: 'Which protocol handles host-to-router multicast membership?', opts: [{ text: 'IGMP' }, { text: 'PIM' }, { text: 'OSPF' }, { text: 'NHRP' }], correct: 0 },
+        { q: 'Which IGMP version adds source filtering and enables SSM?', opts: [{ text: 'v3' }, { text: 'v2' }, { text: 'v1' }, { text: 'v4' }], correct: 0 },
+        { q: 'PIM-DM builds which type of tree and needs what?', opts: [{ text: '(S,G) SPT, no RP' }, { text: '(*,G) shared, uses RP' }, { text: '(S,G), always an RP' }, { text: 'MBGP SPT, RP required' }], correct: 0 },
+        { q: 'In PIM-DM, what quickly restores a pruned branch?', opts: [{ text: 'Graft' }, { text: 'Register' }, { text: 'Assert' }, { text: 'Join request' }], correct: 0 },
+        { q: 'PIM-SM is the production default because it uses a: ', opts: [{ text: 'pull/join model via an RP' }, { text: 'flood/push model' }, { text: 'static (S,G) map only' }, { text: 'broadcast over unicast' }], correct: 0 },
+        { q: 'In PIM-SM, the source\'s first packet reaches the RP via:', opts: [{ text: 'a register unicast (encapsulated)' }, { text: 'a graft message' }, { text: 'a TTL-threshold forward' }, { text: 'an assert message' }], correct: 0 },
+        { q: 'The RPF check forwards a packet only if it arrived on:', opts: [{ text: 'the interface the unicast RIB points toward the source' }, { text: 'the interface toward the destination' }, { text: 'any interface' }, { text: 'the lowest-MTU interface' }], correct: 0 },
+        { q: 'Playing tracer: a packet arrives on the WRONG interface relative to the source. Result?', opts: [{ text: 'silent drop (RPF failure)' }, { text: 'forwarded anyway' }, { text: 'blocked by the boundary ACL' }, { text: 'encapsulated to the RP' }], correct: 0 },
+        { q: 'Which tool carries a separate multicast NLRI (SAFI 2) for RPF?', opts: [{ text: 'MBGP' }, { text: 'MSDP' }, { text: 'NHRP' }, { text: 'Auto-RP' }], correct: 0 },
+        { q: 'IGMP snooping is a ______ feature that ______:', opts: [{ text: 'switch/L2; passes queries through' }, { text: 'router/L3; regenerates queries' }, { text: 'host; sends reports' }, { text: 'switch/L2; blocks all multicast' }], correct: 0 },
+        { q: 'Auto-RP uses which Cisco group addresses?', opts: [{ text: '224.0.1.39 / 224.0.1.40' }, { text: '232.0.0.0/8 only' }, { text: '239.0.0.0/8 only' }, { text: '224.0.0.1/224.0.0.2' }], correct: 0 },
+        { q: 'Anycast RP provides redundancy using:', opts: [{ text: 'a shared loopback + MSDP' }, { text: 'a single static RP' }, { text: 'BSR only' }, { text: 'IGMPv3 include lists' }], correct: 0 },
+        { q: 'SSM operates in which group range?', opts: [{ text: '232.0.0.0/8' }, { text: '239.0.0.0/8' }, { text: '224.0.0.0/24' }, { text: '224.0.1.39/40' }], correct: 0 },
+        { q: 'To use SSM, the receiver segment must run:', opts: [{ text: 'IGMPv3' }, { text: 'IGMPv2' }, { text: 'IGMPv1' }, { text: 'PIM-DM' }], correct: 0 },
+        { q: 'The 239.0.0.0/8 range is reserved for:', opts: [{ text: 'administratively scoped multicast' }, { text: 'SSM source-specific' }, { text: 'Auto-RP announcements' }, { text: 'loopback addressing' }], correct: 0 },
+        { q: 'PIM DR on a LAN is elected by:', opts: [{ text: 'highest priority, then highest IP' }, { text: 'lowest cost to the RP' }, { text: 'first to send a query' }, { text: 'lowest MAC address' }], correct: 0 },
+        { q: 'In a PIM Assert on equal metric, the winner is:', opts: [{ text: 'the highest IP address' }, { text: 'the lower IP address' }, { text: 'the DR' }, { text: 'the RPF silent dropper' }], correct: 0 },
+        { q: 'Which answer best states the DR vs Assert difference?', opts: [{ text: 'DR speaks for hosts; Assert picks one forwarder for a duplicated (S,G)' }, { text: 'DR encrypts; Assert authenticates' }, { text: 'DR is L3; Assert is L2' }, { text: 'DR is static; Assert is dynamic' }], correct: 0 }
+      ];
+      const quizQuestions = reactive(quizRaw.map(q => ({ ...q, ans: null })));
+      const quizDone = ref(false);
+      const quizScore = ref(loadJSON(LS.quiz, 0) || 0);
+      const allQuizAnswered = computed(() => quizQuestions.every(q => q.ans !== null));
+      function submitQuiz() {
+        if (!allQuizAnswered.value) return;
+        quizScore.value = quizQuestions.filter((q, i) => q.ans === q.correct).length;
+        quizDone.value = true;
+        save(LS.quiz, quizScore.value);
+      }
+      function resetQuiz() {
+        quizQuestions.forEach(q => q.ans = null);
+        quizDone.value = false;
+        quizScore.value = 0;
+        localStorage.removeItem(LS.quiz);
+      }
+
+      /* ---------- CHECKLIST ---------- */
+      const checklistRoot = loadJSON(LS.done, [
+        { t: 'Layers: IGMP host→router on LAN; PIM router→router for trees', done: false },
+        { t: 'IGMP: v1 basic, v2 (default) fast-leave, v3 source filter → SSM; querier = lowest IP', done: false },
+        { t: 'PIM-DM: flood-and-prune, (S,G) only, NO RP, graft restores branches', done: false },
+        { t: 'PIM-SM: production default, pull via RP, (*,G) shared then (S,G) SPT, spt-threshold 0 = immediate', done: false },
+        { t: 'Register process: FHR encapsulates multicast in unicast to RP; RP sends register-stop', done: false },
+        { t: 'RP mapping: static / Auto-RP (Cisco 224.0.1.39/40) / BSR (PIM standard); anycast RP = loopback + MSDP', done: false },
+        { t: 'RPF: forward only from source-facing (unicast-RIB) interface; else silent drop; PIM rides unicast RIB', done: false },
+        { t: 'mroute entries: (*,G) shared vs (S,G) SPT; OIL = outgoing interface list; show ip mroute', done: false },
+        { t: 'Inter-domain: MBGP (SAFI 2), MSDP, PIM, SSM; SSM = no RP/register for simple inter-domain', done: false },
+        { t: 'IGMP snooping: switch/L2, member + mrouter ports, passes queries through (not proxying), on by default, switch querier', done: false },
+        { t: 'SSM: 232/8 (RFC 4607), IGMPv3 required, ip pim ssm default, no RP/shared tree/register', done: false },
+        { t: 'Boundaries: TTL threshold + group boundary ACL; 239/8 admin scoped (never leaves domain)', done: false },
+        { t: 'DR: priority then highest IP, joins/IGMP/register; Assert: lower metric then higher IP picks one forwarder', done: false }
+      ]);
+      const checklist = reactive(checklistRoot);
+      const doneCount = computed(() => checklist.filter(c => c.done).length);
+      function saveChecklist() { save(LS.done, checklistRoot); }
+      function toggleDone(i) { checklistRoot[i].done = !checklistRoot[i].done; saveChecklist(); }
+
+      return {
+        theme, sec, sections,
+        igmpVersion, igmpVerdict,
+        sptPick, sptVerdict,
+        rpMethod, rpVerdict,
+        rpfArrive, rpfVerdict,
+        bndTool, bndVerdict,
+        assertCase, assertVerdict,
+        commands, activeCmd, activeCommand,
+        traps,
+        quizQuestions, quizDone, quizScore, allQuizAnswered, submitQuiz, resetQuiz,
+        checklist, doneCount, saveChecklist, toggleDone
+      };
+    }
+  }).mount('#app');
+})();
+</script>
+</body>
+</html>

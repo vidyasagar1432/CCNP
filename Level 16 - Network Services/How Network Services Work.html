@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Network Services Work — Deep Dive</title>
+<style>
+  :root {
+    --bg: #0f172a; --panel: #111c34; --card: #1e293b; --card-2: #16233d;
+    --text: #f8fafc; --muted: #94a3b8;
+    --blue: #38bdf8; --blue-dim: #0c4a6e;
+    --green: #34d399; --green-dim: #064e3b;
+    --amber: #fbbf24; --amber-dim: #78350f;
+    --red: #f87171; --red-dim: #7f1d1d;
+    --violet: #a78bfa; --violet-dim: #4c1d95;
+    --cyan: #22d3ee; --cyan-dim: #164e63;
+    --border: #334155; --hover: #263449; --code-bg: #0b1220;
+  }
+  #app[data-theme="light"] {
+    --bg: #f1f5f9; --panel: #ffffff; --card: #ffffff; --card-2: #f8fafc;
+    --text: #0f172a; --muted: #64748b;
+    --blue: #0284c7; --blue-dim: #bae6fd;
+    --green: #059669; --green-dim: #d1fae5;
+    --amber: #d97706; --amber-dim: #fef3c7;
+    --red: #dc2626; --red-dim: #fee2e2;
+    --violet: #7c3aed; --violet-dim: #ede9fe;
+    --cyan: #0891b2; --cyan-dim: #cffafe;
+    --border: #cbd5e1; --hover: #e2e8f0; --code-bg: #0b1220;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; }
+  #app { max-width: 1040px; margin: 0 auto; padding: 20px 18px 60px; }
+
+  header { position: sticky; top: 0; z-index: 30; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .lv-badge { background: var(--blue-dim); color: var(--blue); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .exam-badge { background: var(--violet-dim); color: var(--violet); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .head-actions { display: flex; align-items: center; gap: 8px; }
+  .btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: background 0.15s; }
+  .btn:hover { background: var(--hover); }
+  .btn.primary { background: var(--blue); color: #0f172a; border-color: var(--blue); }
+
+  nav { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 2px 16px; }
+  nav button.chip { border: 1px solid var(--border); background: var(--card); color: var(--muted); padding: 5px 11px; border-radius: 999px; cursor: pointer; font-size: 0.76rem; font-weight: 600; }
+  nav button.chip.active { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
+
+  section.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
+  section.panel h2 { font-size: 1.2rem; margin-bottom: 6px; }
+  section.panel h3 { font-size: 1rem; margin: 18px 0 10px; color: var(--blue); }
+  section.panel p { margin: 8px 0; }
+  .muted { color: var(--muted); }
+  .lead { color: var(--muted); font-size: 0.95rem; }
+
+  .grid { display: grid; gap: 12px; }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .g3 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .g4 { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+  .g5 { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .card h4 { font-size: 0.9rem; margin-bottom: 6px; }
+  .card .big { font-size: 1.3rem; font-weight: 700; font-family: 'Fira Code', ui-monospace, monospace; }
+
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85rem; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  tr:hover td { background: var(--hover); }
+
+  code, .mono { font-family: 'Fira Code', ui-monospace, monospace; }
+  .mono { font-size: 0.9rem; }
+  .chip-tag { display: inline-block; border-radius: 999px; padding: 1px 9px; font-size: 0.74rem; font-weight: 700; }
+  .b-blue { background: var(--blue-dim); color: var(--blue); }
+  .b-green { background: var(--green-dim); color: var(--green); }
+  .b-amber { background: var(--amber-dim); color: var(--amber); }
+  .b-red { background: var(--red-dim); color: var(--red); }
+  .b-violet { background: var(--violet-dim); color: var(--violet); }
+  .b-cyan { background: var(--cyan-dim); color: var(--cyan); }
+
+  .callout { border-left: 4px solid var(--amber); background: var(--card-2); border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 12px 0; font-size: 0.9rem; }
+  .callout.green { border-color: var(--green); }
+  .callout.red { border-color: var(--red); }
+  .callout.blue { border-color: var(--blue); }
+  .callout.violet { border-color: var(--violet); }
+
+  .row-fn { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 8px 0; }
+  .row-fn input[type="number"], .row-fn input[type="text"] { background: var(--code-bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-family: 'Fira Code', monospace; font-size: 0.9rem; }
+
+  .opt { display: flex; align-items: center; gap: 8px; padding: 6px 9px; margin: 3px 0; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; background: var(--card); font-size: 0.86rem; }
+  .opt.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .opt .letter { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex: 0 0 auto; }
+  .opt.sel .letter { background: var(--blue); color: #0f172a; }
+
+  #app pre, pre.cmd { background: var(--code-bg); color: #e2e8f0; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.82rem; line-height: 1.5; }
+
+  .trap-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  .trap-item:last-child { border-bottom: none; }
+  .trap-ico { color: var(--red); font-weight: 700; flex: 0 0 auto; }
+
+  .step-flow { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .step { border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 0.8rem; background: var(--card-2); }
+  .step .n { color: var(--blue); font-weight: 700; }
+  .step.cur { border-color: var(--blue); background: var(--blue-dim); }
+
+  .verdict { border-radius: 8px; padding: 10px 14px; font-weight: 700; margin: 8px 0; }
+  .verdict.ok { background: var(--green-dim); color: var(--green); }
+  .verdict.bad { background: var(--red-dim); color: var(--red); }
+  .verdict.info { background: var(--blue-dim); color: var(--blue); }
+
+  .chk-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; margin: 5px 0; cursor: pointer; transition: opacity 0.15s; }
+  .chk-item.done { opacity: 0.55; text-decoration: line-through; }
+  .chk-box { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 5px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; }
+  .chk-item.done .chk-box { background: var(--green); border-color: var(--green); color: #0f172a; }
+
+  .svc-pill { display: flex; flex-direction: column; gap: 2px; }
+  .proto-cell { border: 1px solid var(--border); border-radius: 10px; padding: 9px 10px; background: var(--card); cursor: pointer; text-align: center; }
+  .proto-cell.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .proto-cell .pn { font-weight: 700; }
+  .proto-cell .pd { font-size: 0.75rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<div id="app" :data-theme="theme">
+  <header>
+    <h1><span class="lv-badge">L16</span> How Network Services Work
+      <span class="exam-badge">ENCOR 350-401</span></h1>
+    <div class="head-actions">
+      <a class="btn" href="../Level 15 - NAT/How NAT Works.html">◀ NAT</a>
+      <a class="btn" href="../Level 17 - Security/How Security Works.html">Security ▶</a>
+      <a class="btn" href="../index.html">Flashcards</a>
+      <button class="btn" @click="theme = (theme==='dark'?'light':'dark')">{{ theme==='dark' ? '☀' : '🌙' }}</button>
+    </div>
+  </header>
+
+  <nav>
+    <button class="chip" v-for="s in sections" :key="s.id" :class="{active:sec===s.id}" @click="sec=s.id">{{ s.icon }} {{ s.label }}</button>
+  </nav>
+
+  <!-- 1. OVERVIEW -->
+  <section class="panel" v-show="sec==='intro'" id="intro">
+    <h2>🧩 Network Services — the whole picture</h2>
+    <p class="lead">Level 16 covers the common (and exam-heavy) network services a CCNP must know: <b>ports</b>, <b>protocols</b>, and how each <b>works and fails</b>.</p>
+
+    <h3>Master port reference (memorize)</h3>
+    <table>
+      <tr><th>Service</th><th>Transport</th><th>Port(s)</th><th>Role</th></tr>
+      <tr><td>DHCP</td><td>UDP</td><td class="mono">67 srv / 68 cli</td><td>address assignment</td></tr>
+      <tr><td>DNS</td><td>UDP + TCP</td><td class="mono">53</td><td>name resolution</td></tr>
+      <tr><td>NTP</td><td>UDP</td><td class="mono">123</td><td>time sync</td></tr>
+      <tr><td>SNMP</td><td>UDP</td><td class="mono">161 poll / 162 notify</td><td>device management</td></tr>
+      <tr><td>Syslog</td><td>UDP</td><td class="mono">514</td><td>remote logging</td></tr>
+      <tr><td>FTP</td><td>TCP</td><td class="mono">21 ctrl / 20 data</td><td>file transfer</td></tr>
+      <tr><td>TFTP</td><td>UDP</td><td class="mono">69</td><td>simple file xfer</td></tr>
+      <tr><td>HTTP / HTTPS</td><td>TCP</td><td class="mono">80 / 443</td><td>web</td></tr>
+      <tr><td>SSH / Telnet</td><td>TCP</td><td class="mono">22 / 23</td><td>remote CLI</td></tr>
+      <tr><td>SMTP</td><td>TCP</td><td class="mono">25 / 587 / 465</td><td>sending mail</td></tr>
+      <tr><td>POP3</td><td>TCP</td><td class="mono">110 / 995</td><td>download mail</td></tr>
+      <tr><td>IMAP</td><td>TCP</td><td class="mono">143 / 993</td><td>sync mail</td></tr>
+      <tr><td>LDAP</td><td>TCP</td><td class="mono">389 / 636</td><td>directory access</td></tr>
+      <tr><td>SIP</td><td>TCP/UDP</td><td class="mono">5060 / 5061</td><td>set-up calls</td></tr>
+      <tr><td>RTP / RTCP</td><td>UDP</td><td class="mono">even ≥16384 / +1</td><td>media / control</td></tr>
+    </table>
+    <div class="callout blue"><b>Quick families:</b> management = DHCP/DNS/NTP/SNMP/Syslog · file/web = FTP/TFTP/HTTP(S) · remote = SSH/Telnet · email = SMTP/POP/IMAP · directory = LDAP · voice = SIP/RTP.</div>
+  </section>
+
+  <!-- 2. DHCP -->
+  <section class="panel" v-show="sec==='dhcp'" id="dhcp">
+    <h2>🚗 DHCP — DORA + timers + snooping + relay</h2>
+    <p class="lead"><b>Dynamic Host Configuration Protocol</b> hands out IP config. Server = <b>UDP 67</b>, client = <b>UDP 68</b> (memory: 67=Server, 68=Client).</p>
+
+    <h3>DORA exchange explorer</h3>
+    <p class="muted">Step through the four-phase handshake.</p>
+    <div class="row-fn">
+      <button class="btn" v-for="(d,i) in dora" :key="d.n" :class="{primary:dhcpStep===i}" @click="dhcpStep=i">{{ d.n }}</button>
+    </div>
+    <div class="verdict" :class="doraVerdict.cls">{{ doraVerdict.text }}</div>
+    <p class="muted">Initial DISCOVER: Src <code>0.0.0.0</code>, Dst <code>255.255.255.255</code>, Src UDP 68 → Dst UDP 67.</p>
+
+    <h3>Lease timer calculator</h3>
+    <p class="muted"><b>T1 = 50%</b> of lease → renew with the original server. <b>T2 = 87.5%</b> → rebind with any server.</p>
+    <div class="grid g2">
+      <div class="card"><h4>Lease length (hours)</h4><div class="row-fn"><input type="number" v-model.number="leaseH" min="1"></div></div>
+    </div>
+    <div class="verdict" :class="leaseVerdict.cls">{{ leaseVerdict.text }}</div>
+
+    <h3>DHCP states</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> INIT</div>
+      <div class="step"><span class="n">2</span> SELECTING</div>
+      <div class="step"><span class="n">3</span> REQUESTING</div>
+      <div class="step"><span class="n">4</span> BOUND</div>
+      <div class="step"><span class="n">5</span> RENEWING (T1)</div>
+      <div class="step"><span class="n">6</span> REBINDING (T2)</div>
+      <div class="step"><span class="n">7</span> BOUND</div>
+    </div>
+
+    <h3>Key DHCP options</h3>
+    <table>
+      <tr><th>Option</th><th>Meaning</th></tr>
+      <tr><td class="mono">53</td><td>DHCP message type</td></tr>
+      <tr><td class="mono">54</td><td>server identifier</td></tr>
+      <tr><td class="mono">66</td><td>TFTP server name (boot)</td></tr>
+      <tr><td class="mono">67</td><td>bootfile name</td></tr>
+      <tr><td class="mono">82</td><td>Relay Agent Information (Circuit ID + Remote ID)</td></tr>
+      <tr><td class="mono">150</td><td>TFTP server address (Cisco IP phones)</td></tr>
+    </table>
+    <div class="callout red"><b>Trap:</b> option 82 ≠ DHCP snooping — separate features.</div>
+
+    <h3>DHCP Relay</h3>
+    <p class="muted">Put <code>ip helper-address</code> on the <b>client-facing</b> L3 interface (NOT server-facing). The relay sets the <b>giaddr</b> field so the server knows the client's subnet.</p>
+    <pre class="cmd">interface Vlan10
+ ip helper-address 10.0.0.5     &lt;-- client-facing
+</pre>
+    <div class="callout green"><b>Note:</b> <code>ip helper-address</code> is not DHCP-only — it also forwards DNS (53), TFTP (69), NetBIOS (137/138) UDP broadcasts. It does NOT create a route, and multiple helpers ≠ DHCP failover.</div>
+
+    <h3>DHCP Snooping</h3>
+    <p class="muted">A <b>Layer 2</b> security feature. Interfaces are <b>untrusted by default</b>; trust only toward the real DHCP server. OFFER/ACK/NAK are dropped on untrusted ports (blocks rogue servers); rate-limit mitigates starvation.</p>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> untrusted by default</div>
+      <div class="step"><span class="n">2</span> trust toward server</div>
+      <div class="step"><span class="n">3</span> build binding DB</div>
+      <div class="step"><span class="n">4</span> feed DAI + IP Source Guard</div>
+    </div>
+    <div class="callout blue"><b>Relationship:</b> DHCP Snooping → binding database (MAC+IP+VLAN+intf+lease) → <b>DAI</b> (validates ARP) and <b>IP Source Guard</b> (restricts source traffic).</div>
+  </section>
+
+  <!-- 3. DNS -->
+  <section class="panel" v-show="sec==='dns'" id="dns">
+    <h2>🔎 DNS — records + resolution</h2>
+    <p class="lead">Domain Name System resolves names to addresses. Primary port <b>UDP 53</b>; <b>TCP 53</b> for zone transfers and large responses.</p>
+
+    <h3>Record types (memorize)</h3>
+    <table>
+      <tr><th>Record</th><th>Purpose</th><th>Example</th></tr>
+      <tr><td class="mono">A</td><td>name → IPv4</td><td class="mono">www → 192.0.2.10</td></tr>
+      <tr><td class="mono">AAAA</td><td>name → IPv6</td><td class="mono">www → 2001:db8::10</td></tr>
+      <tr><td class="mono">CNAME</td><td>alias → canonical</td><td class="mono">www → web.example.com</td></tr>
+      <tr><td class="mono">MX</td><td>mail + preference (<b>lower = preferred</b>)</td><td class="mono">MX 10 mail1 / MX 20 mail2</td></tr>
+      <tr><td class="mono">PTR</td><td>reverse (IP → name)</td><td class="mono">in-addr.arpa / ip6.arpa</td></tr>
+      <tr><td class="mono">NS</td><td>authoritative nameserver</td><td class="mono">example.com → ns1</td></tr>
+      <tr><td class="mono">SOA</td><td>zone authority</td><td class="mono">serial, refresh, retry…</td></tr>
+      <tr><td class="mono">TXT / CAA</td><td>verification / CA auth</td><td class="mono">SPF, 0 issue "ca.com"</td></tr>
+    </table>
+
+    <h3>Resolution type selector</h3>
+    <div class="grid g2">
+      <div class="proto-cell" v-for="r in dnsModes" :key="r.key" :class="{sel:dnsMode===r.key}" @click="dnsMode=r.key">
+        <div class="pn">{{ r.name }}</div><div class="pd">{{ r.desc }}</div>
+      </div>
+    </div>
+    <div class="verdict" :class="dnsVerdict.cls">{{ dnsVerdict.text }}</div>
+
+    <h3>Caching &amp; TTL</h3>
+    <div class="card"><div class="big">TTL</div><p class="muted" style="margin:0">cache lifetime in seconds. Shorter TTL → faster change propagation but more queries. <b>NXDOMAIN</b> = name does not exist.</p></div>
+
+    <div class="callout red"><b>DNSSEC trap:</b> DNSSEC provides <u>authentication + integrity</u> (and authenticated denial of existence) but does <u>not encrypt</u> DNS traffic.</div>
+    <div class="callout blue"><b>Note:</b> <code>clear host *</code> clears only the <u>IOS hostname cache</u> — it does NOT flush external DNS caches. Lower MX preference is more preferred.</div>
+  </section>
+
+  <!-- 4. NTP -->
+  <section class="panel" v-show="sec==='ntp'" id="ntp">
+    <h2>🕐 NTP — time sync &amp; stratum</h2>
+    <p class="lead"><b>Network Time Protocol</b> synchronizes clocks over <b>UDP 123</b>. Key concept = <b>stratum</b> (distance from the reference clock).</p>
+
+    <h3>Stratum explorer</h3>
+    <div class="row-fn">
+      <button class="btn" v-for="(s,i) in strata" :key="s.n" :class="{primary:stratum===i}" @click="stratum=i">{{ s.n }}</button>
+    </div>
+    <div class="verdict" :class="stratumVerdict.cls">{{ stratumVerdict.text }}</div>
+
+    <h3>Operating modes</h3>
+    <table>
+      <tr><th>Command</th><th>Meaning</th></tr>
+      <tr><td class="mono">ntp server X</td><td>synchronize to an NTP server</td></tr>
+      <tr><td class="mono">ntp peer X</td><td>peer relationship (either can sync to the other)</td></tr>
+      <tr><td class="mono">ntp master N</td><td>serve from the local clock at stratum N (lab/fallback)</td></tr>
+      <tr><td class="mono">ntp source Loopback0</td><td>use Loopback0 as the NTP source IP</td></tr>
+    </table>
+
+    <div class="callout red"><b>Traps:</b> stratum <b>0</b> = reference clock, NOT a server. Stratum <b>16</b> = unsynchronized/unusable. A synchronized device is <u>one stratum higher</u> than its source. <code>ntp master</code> does NOT mean synced to a real external reference. NTP provides Syslog timestamps — it does not drive OSPF/BGP timers.</div>
+  </section>
+
+  <!-- 5. SNMP + SYSLOG -->
+  <section class="panel" v-show="sec==='snmp'" id="snmp">
+    <h2>📡 SNMP + Syslog — management &amp; logging</h2>
+    <p class="lead"><b>SNMP</b> polls and collects device data (<b>UDP 161</b> requests, <b>UDP 162</b> notifications). <b>Syslog</b> ships log messages (<b>UDP 514</b>).</p>
+
+    <h3>SNMP architecture</h3>
+    <div class="grid g2">
+      <div class="card"><h4>Manager (NMS)</h4><p style="font-size:.85rem">polls the agent, collects, displays. Sends GET/SET.</p></div>
+      <div class="card"><h4>Agent</h4><p style="font-size:.85rem">runs on the device, maintains the MIB, responds, sends traps/informs.</p></div>
+    </div>
+
+    <h3>Operations</h3>
+    <table>
+      <tr><th>Operation</th><th>Purpose</th></tr>
+      <tr><td>GET</td><td>read one object</td></tr>
+      <tr><td>GETNEXT</td><td>next object in MIB</td></tr>
+      <tr><td>GETBULK</td><td>efficiently get many objects (<b>SNMPv2+ only</b>)</td></tr>
+      <tr><td>SET</td><td>modify a writable object</td></tr>
+      <tr><td>TRAP</td><td>unsolicited, <b>no ack</b></td></tr>
+      <tr><td>INFORM</td><td>unsolicited, <b>requires ack</b></td></tr>
+    </table>
+
+    <h3>Version + security explorer</h3>
+    <div class="grid g4">
+      <div class="proto-cell" v-for="v in snmpVers" :key="v.key" :class="{sel:snmpVer===v.key}" @click="snmpVer=v.key">
+        <div class="pn">{{ v.name }}</div><div class="pd">{{ v.desc }}</div>
+      </div>
+    </div>
+    <div class="verdict" :class="snmpVerdict.cls">{{ snmpVerdict.text }}</div>
+
+    <h3>SNMPv3 security levels</h3>
+    <table>
+      <tr><th>Level</th><th>Auth</th><th>Privacy</th></tr>
+      <tr><td>noAuthNoPriv</td><td>no</td><td>no</td></tr>
+      <tr><td>authNoPriv</td><td>yes (MD5/SHA)</td><td>no</td></tr>
+      <tr><td>authPriv</td><td>yes</td><td><b>yes</b> (preferred)</td></tr>
+    </table>
+
+    <h3>Syslog severity threshold explorer</h3>
+    <p class="muted"><code>logging trap N</code> sends levels <b>0 through N</b> (that level + numerically lower/more severe).</p>
+    <div class="row-fn">
+      <button class="btn" v-for="(s,i) in sev" :key="s.n" :class="{primary:sevSel===s.n}" @click="sevSel=s.n">{{ s.n }}·{{ s.name }}</button>
+    </div>
+    <div class="verdict" :class="sevVerdict.cls">{{ sevVerdict.text }}</div>
+    <p class="muted">Format: <code>%FACILITY-SEVERITY-MNEMONIC: description</code> — e.g. <code>%LINEPROTO-5-UPDOWN: …</code></p>
+
+    <div class="callout red"><b>Traps:</b> INFORM still uses <b>UDP</b> (reliability ≠ TCP). GETBULK is NOT v1. Community strings are NOT encryption. SNMP and Syslog are separate mechanisms — Syslog does not feed SNMP traps. The local logging buffer is <b>volatile</b> (lost on reload).</div>
+  </section>
+
+  <!-- 6. FTP / TFTP -->
+  <section class="panel" v-show="sec==='ftptftp'" id="ftptftp">
+    <h2>📁 FTP vs TFTP — file transfer</h2>
+    <p class="lead">FTP is a full transport-connection file protocol; TFTP is a tiny UDP file pull/push used for device images.</p>
+
+    <h3>FTP mode explorer</h3>
+    <div class="grid g2">
+      <div class="proto-cell" v-for="m in ftpModes" :key="m.key" :class="{sel:ftpMode===m.key}" @click="ftpMode=m.key">
+        <div class="pn">{{ m.name }}</div><div class="pd">{{ m.desc }}</div>
+      </div>
+    </div>
+    <div class="verdict" :class="ftpVerdict.cls">{{ ftpVerdict.text }}</div>
+
+    <table>
+      <tr><th>Mode</th><th>Data initiated by</th><th>Server data source port</th></tr>
+      <tr><td>Active</td><td>Server → Client</td><td class="mono">TCP 20</td></tr>
+      <tr><td>Passive</td><td>Client → Server</td><td class="mono">dynamic / high port</td></tr>
+    </table>
+    <p class="muted">Memory: <b>Active = Server → Client for data · Passive = Client → Server for data</b>. Control is always <b>TCP 21</b>.</p>
+
+    <div class="callout red"><b>Security:</b> FTP sends credentials and data in <u>cleartext</u>. <b>FTPS</b> = FTP + TLS. <b>SFTP</b> = SSH-based (a different protocol, NOT "secure FTP").</div>
+
+    <h3>TFTP — lock-step over UDP</h3>
+    <table>
+      <tr><th>Message</th><th>Purpose</th></tr>
+      <tr><td>RRQ</td><td>read request (client reads)</td></tr>
+      <tr><td>WRQ</td><td>write request (client writes)</td></tr>
+      <tr><td>DATA</td><td>numbered data blocks</td></tr>
+      <tr><td>ACK</td><td>acknowledges each DATA</td></tr>
+    </table>
+    <p class="muted"><b>UDP 69</b> is only the initial request; the transfer itself uses dynamic UDP ports. Classic block = <b>512 bytes</b> (negotiable: blksize/tsize/windowsize). Final DATA smaller than block size = EOF; exact multiple → a <b>zero-length</b> DATA marks EOF.</p>
+    <div class="callout blue"><b>TFTP vs FTP:</b> connectionless, no auth, no encryption, no directory listing. Used for IOS image/config transfer; Option 150 → TFTP server for Cisco IP phones.</div>
+  </section>
+
+  <!-- 7. HTTP / HTTPS -->
+  <section class="panel" v-show="sec==='web'" id="web">
+    <h2>🌍 HTTP &amp; HTTPS — web</h2>
+    <p class="lead">HTTP = <b>TCP 80</b>, stateless request/response. HTTPS = <b>TCP 443</b>, HTTP carried over <b>TLS</b>.</p>
+
+    <h3>HTTP methods</h3>
+    <table>
+      <tr><th>Method</th><th>Purpose</th></tr>
+      <tr><td>GET</td><td>read (idempotent)</td></tr>
+      <tr><td>HEAD</td><td>headers only</td></tr>
+      <tr><td>POST</td><td>send data / create</td></tr>
+      <tr><td>PUT</td><td>update / replace</td></tr>
+      <tr><td>DELETE</td><td>remove</td></tr>
+    </table>
+
+    <h3>Status classes</h3>
+    <div class="grid g5">
+      <div class="card"><h4>1xx</h4><div class="big" style="font-size:1rem">Info</div><p class="muted" style="margin:0">100 Continue</p></div>
+      <div class="card"><h4>2xx</h4><div class="big" style="font-size:1rem;color:var(--green)">OK</div><p class="muted" style="margin:0">200 OK</p></div>
+      <div class="card"><h4>3xx</h4><div class="big" style="font-size:1rem">Redirect</div><p class="muted" style="margin:0">301/302</p></div>
+      <div class="card"><h4>4xx</h4><div class="big" style="font-size:1rem;color:var(--amber)">Client</div><p class="muted" style="margin:0">404 Not Found</p></div>
+      <div class="card"><h4>5xx</h4><div class="big" style="font-size:1rem;color:var(--red)">Server</div><p class="muted" style="margin:0">500/503</p></div>
+    </div>
+
+    <h3>HTTPS on Cisco</h3>
+    <pre class="cmd">crypto key generate rsa modulus 2048   &lt;-- RSA keypair REQUIRED
+ip http secure-server                   &lt;-- enable HTTPS
+ip http secure-port 443
+ip http authentication local
+</pre>
+    <div class="callout red"><b>Key trap:</b> without an RSA keypair, the secure (HTTPS) server <u>cannot start</u>. And <code>ip http server</code> = insecure HTTP; <code>ip http secure-server</code> = HTTPS. NTP fixes certificate-validity problems.</div>
+  </section>
+
+  <!-- 8. SSH / TELNET -->
+  <section class="panel" v-show="sec==='remote'" id="remote">
+    <h2>🔐 SSH &amp; Telnet — remote CLI</h2>
+    <p class="lead">SSH = <b>TCP 22</b>, encrypted remote management (v2 preferred). Telnet = <b>TCP 23</b>, <u>no encryption</u> — cleartext credentials + session.</p>
+
+    <h3>SSH connection stages</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> TCP handshake</div>
+      <div class="step"><span class="n">2</span> version exchange</div>
+      <div class="step"><span class="n">3</span> key exchange / negotiation</div>
+      <div class="step"><span class="n">4</span> server auth (host key)</div>
+      <div class="step"><span class="n">5</span> user auth</div>
+      <div class="step"><span class="n">6</span> encrypted session</div>
+    </div>
+
+    <h3>Cisco SSH config</h3>
+    <pre class="cmd">hostname R1
+ip domain-name ccnp.example
+username admin privilege 15 secret AdminPass123
+crypto key generate rsa modulus 2048   &lt;-- hostname + domain-name first
+ip ssh version 2
+ip ssh time-out 60
+ip ssh authentication-retries 3
+line vty 0 15
+ login local
+ transport input ssh                  &lt;-- allow SSH, block Telnet
+</pre>
+    <div class="callout red"><b>Traps:</b> hostname + <code>ip domain-name</code> are required before generating RSA keys. <code>transport input ssh</code> controls <u>incoming</u> VTY access. <b>SCP</b> = file copy over SSH (22); <b>SFTP</b> = SSH-based (platform dependent). ACLs restrict who connects but do NOT make Telnet secure.</div>
+  </section>
+
+  <!-- 9. EMAIL -->
+  <section class="panel" v-show="sec==='email'" id="email">
+    <h2>✉️ Email — SMTP (send) + POP3/IMAP (receive)</h2>
+    <p class="lead">SMTP <b>pushes</b> mail; clients <b>download/sync</b> via POP3 or IMAP.</p>
+
+    <h3>The three pieces</h3>
+    <div class="grid g3">
+      <div class="card"><h4>SMTP</h4><div class="big" style="font-size:1rem">25 / 587 / 465</div><p class="muted" style="margin:0">sending: relay 25, submission 587, TLS 465</p></div>
+      <div class="card"><h4>POP3</h4><div class="big" style="font-size:1rem">110 / 995</div><p class="muted" style="margin:0">download + typically delete — offline, single device</p></div>
+      <div class="card"><h4>IMAP</h4><div class="big" style="font-size:1rem">143 / 993</div><p class="muted" style="margin:0">keep on server, sync, folders — multi-device</p></div>
+    </div>
+
+    <h3>POP3 vs IMAP</h3>
+    <table>
+      <tr><th>Feature</th><th>POP3</th><th>IMAP</th></tr>
+      <tr><td>Storage</td><td>client-local (server emptied)</td><td>server-side</td></tr>
+      <tr><td>Multi-device</td><td>poor</td><td><b>strong</b></td></tr>
+      <tr><td>State</td><td>offline</td><td>online / synchronized</td></tr>
+      <tr><td>Folders</td><td>single INBOX</td><td>server folders</td></tr>
+      <tr><td>Ports</td><td class="mono">110 / 995</td><td class="mono">143 / 993</td></tr>
+    </table>
+    <div class="callout red"><b>Security:</b> an <b>open relay</b> is abused by spammers and must be blocked. Countermeasures: SPF, DKIM, DMARC, STARTTLS, SMTP AUTH over TLS. SMTP reply <b>4xx</b> = transient, <b>5xx</b> = permanent.</div>
+  </section>
+
+  <!-- 10. LDAP -->
+  <section class="panel" v-show="sec==='ldap'" id="ldap">
+    <h2>🗂️ LDAP — directory access</h2>
+    <p class="lead"><b>LDAP</b> is a <u>protocol</u> for accessing directory services; Active Directory is a <u>directory service</u> that supports LDAP — not interchangeable terms.</p>
+
+    <h3>Ports</h3>
+    <table>
+      <tr><th>Port</th><th>Use</th></tr>
+      <tr><td class="mono">389</td><td>LDAP (plain or StartTLS)</td></tr>
+      <tr><td class="mono">636</td><td>LDAPS (TLS from start)</td></tr>
+      <tr><td class="mono">3268</td><td>AD Global Catalog</td></tr>
+      <tr><td class="mono">3269</td><td>AD Global Catalog over TLS</td></tr>
+    </table>
+
+    <h3>DN builder</h3>
+    <p class="muted">Distinguished Name components: <code>dc</code> (domain), <code>ou</code> (org unit), <code>cn</code> (common name).</p>
+    <div class="grid g3">
+      <div class="card"><h4>cn</h4><div class="row-fn"><input type="text" v-model="ldapCn"></div></div>
+      <div class="card"><h4>ou</h4><div class="row-fn"><input type="text" v-model="ldapOu"></div></div>
+      <div class="card"><h4>dc</h4><div class="row-fn"><input type="text" v-model="ldapDc"></div></div>
+    </div>
+    <div class="verdict" :class="ldapVerdict.cls">{{ ldapVerdict.text }}</div>
+
+    <h3>Operations &amp; search filters</h3>
+    <div class="grid g2">
+      <div class="card"><h4>Operations</h4><ul style="margin-left:18px;font-size:.85rem"><li>BIND — establish/auth session</li><li>SEARCH — find entries</li><li>ADD / MODIFY / DELETE</li><li>MODIFY DN — rename/move</li><li>UNBIND — end session</li></ul></div>
+      <div class="card"><h4>Filter operators</h4><ul style="margin-left:18px;font-size:.85rem"><li class="mono">&amp; = AND</li><li class="mono">| = OR</li><li class="mono">! = NOT</li><li class="mono">(attr=value) equality</li><li class="mono">(attr=*) exists</li></ul></div>
+    </div>
+    <div class="callout red"><b>Traps:</b> TCP 389 is not always encrypted (use StartTLS or 636). 3268/3269 = AD GC, don't confuse with 389/636. LDAP ≠ RADIUS/TACACS+ — LDAP is an identity <u>backend</u>, not the network AAA protocol. BIND doesn't always mean password auth.</div>
+  </section>
+
+  <!-- 11. VOICE: SIP + RTP -->
+  <section class="panel" v-show="sec==='voice'" id="voice">
+    <h2>📞 SIP + RTP — voice &amp; media</h2>
+    <p class="lead"><b>SIP</b> is the <u>signaling</u> that sets up/tears down calls (<b>5060</b>, or <b>5061</b> for TLS). <b>RTP</b> carries the actual media. <b>RTCP</b> (RTP port + 1) reports quality.</p>
+
+    <h3>SIP methods</h3>
+    <table>
+      <tr><th>Method</th><th>Purpose</th></tr>
+      <tr><td>INVITE</td><td>establish session</td></tr>
+      <tr><td>ACK</td><td>confirm INVITE</td></tr>
+      <tr><td>BYE</td><td>end session</td></tr>
+      <tr><td>REGISTER</td><td>register with registrar</td></tr>
+      <tr><td>OPTIONS</td><td>capability query</td></tr>
+      <tr><td>CANCEL</td><td>abort pending setup</td></tr>
+    </table>
+
+    <h3>SIP call flow</h3>
+    <pre class="cmd">UAC --INVITE--&gt; UAS
+UAC &lt;--100/180-- UAS  (trying / ringing)
+UAC &lt;--200------ UAS  (OK with SDP)
+UAC --ACK------&gt; UAC
+^^^^^^^^ RTP media flows DIRECTLY between endpoints ^^^^^^^^
+UAC --BYE------&gt; UAS
+UAC &lt;--200------
+</pre>
+    <div class="callout red"><b>NAT trap:</b> NAT breaks <u>media (RTP)</u>, not signaling → symptom is <b>one-way audio</b>. A NAT ALG can incorrectly rewrite SDP.</div>
+
+    <h3>RTP explorer — even/odd ports</h3>
+    <div class="grid g2">
+      <div class="card"><h4>Media (RTP)</h4><div class="big" style="color:var(--cyan)">even UDP ≥ 16384</div><p class="muted" style="margin:0">voice/video payload, sequence #, timestamp</p></div>
+      <div class="card"><h4>Control (RTCP)</h4><div class="big" style="color:var(--violet)">RTP + 1 (odd)</div><p class="muted" style="margin:0">SR/RR/SDES — loss, jitter, delay (~5% bandwidth)</p></div>
+    </div>
+    <div class="callout blue"><b>Voice QoS targets:</b> one-way latency &lt; 150 ms · jitter &lt; 30 ms · loss &lt; 1%. DSCP: voice = <b>EF (46)</b>, video = <b>AF41 (34)</b>, signaling = <b>CS3</b>.</div>
+  </section>
+
+  <!-- 12. COMMANDS -->
+  <section class="panel" v-show="sec==='cmds'" id="cmds">
+    <h2>⌨️ CLI Commands</h2>
+    <div class="row-fn">
+      <button class="btn" v-for="c in commands" :key="c.key" :class="{primary:activeCmd===c.key}" @click="activeCmd=c.key">{{ c.label }}</button>
+    </div>
+    <pre class="cmd">{{ activeCommand.show }}</pre>
+  </section>
+
+  <!-- 13. TRAPS -->
+  <section class="panel" v-show="sec==='traps'" id="traps">
+    <h2>⚠️ Common Traps</h2>
+    <div v-for="t in traps" :key="t" class="trap-item"><span class="trap-ico">!</span><div>{{ t }}</div></div>
+  </section>
+
+  <!-- 14. QUIZ -->
+  <section class="panel" v-show="sec==='quiz'" id="quiz">
+    <h2>📝 Quiz ({{ quizQuestions.length }})</h2>
+    <div v-for="(q,qi) in quizQuestions" :key="qi" class="card" style="margin:12px 0">
+      <div style="font-weight:700;margin-bottom:8px">{{ qi+1 }}. {{ q.q }}</div>
+      <div v-for="(o,oi) in q.opts" :key="oi"
+           class="opt" :class="{sel:q.ans===oi}"
+           @click="q.ans=oi">
+        <span class="letter">{{ String.fromCharCode(65+oi) }}</span>{{ o.text }}
+      </div>
+    </div>
+    <div class="row-fn">
+      <button class="btn primary" @click="submitQuiz()" :disabled="!allQuizAnswered">Submit answers</button>
+      <button class="btn" @click="resetQuiz()">Reset</button>
+      <span class="muted" v-if="quizDone" style="font-weight:700">Score: {{ quizScore }} / {{ quizQuestions.length }}
+        ({{ Math.round(quizScore/quizQuestions.length*100) }}%)</span>
+    </div>
+    <div class="verdict" :class="quizDone ? (quizScore===quizQuestions.length?'ok':'info') : 'info'" v-if="quizDone">
+      {{ quizScore===quizQuestions.length ? '🎉 Perfect! All ' + quizQuestions.length + ' correct.' : 'Better luck next time — review the traps section.' }}
+    </div>
+  </section>
+
+  <!-- 15. CHECKLIST -->
+  <section class="panel" v-show="sec==='checklist'" id="checklist">
+    <h2>✅ Study Checklist</h2>
+    <p class="muted" style="margin-bottom:10px">{{ doneCount }} / {{ checklist.length }} complete</p>
+    <div v-for="(c,i) in checklist" :key="i" class="chk-item" :class="{done:c.done}" @click="toggleDone(i)">
+      <span class="chk-box">{{ c.done ? '✓' : '' }}</span>{{ c.t }}
+    </div>
+  </section>
+
+</div>
+
+<script src="../vue.global.prod.js"></script>
+<script>
+(() => {
+  const { createApp, ref, computed, reactive } = Vue;
+  const LS = {
+    theme: 'ccnp.svc.theme', done: 'ccnp.svc.done',
+    quiz: 'ccnp.svc.quiz'
+  };
+  function loadJSON(key, fb) {
+    try { const v = JSON.parse(localStorage.getItem(key)); return (v === null || v === undefined) ? fb : v; }
+    catch (e) { return fb; }
+  }
+  function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+  createApp({
+    setup() {
+      const theme = ref(loadJSON(LS.theme, 'dark'));
+      const sec = ref('intro');
+
+      /* ---------- SECTION NAV ---------- */
+      const sections = [
+        { id: 'intro', label: 'Overview', icon: '🧩' },
+        { id: 'dhcp', label: 'DHCP', icon: '🚗' },
+        { id: 'dns', label: 'DNS', icon: '🔎' },
+        { id: 'ntp', label: 'NTP', icon: '🕐' },
+        { id: 'snmp', label: 'SNMP+Syslog', icon: '📡' },
+        { id: 'ftptftp', label: 'FTP/TFTP', icon: '📁' },
+        { id: 'web', label: 'HTTP(S)', icon: '🌍' },
+        { id: 'remote', label: 'SSH/Telnet', icon: '🔐' },
+        { id: 'email', label: 'Email', icon: '✉️' },
+        { id: 'ldap', label: 'LDAP', icon: '🗂️' },
+        { id: 'voice', label: 'SIP/RTP', icon: '📞' },
+        { id: 'cmds', label: 'Commands', icon: '⌨️' },
+        { id: 'traps', label: 'Traps', icon: '⚠️' },
+        { id: 'quiz', label: 'Quiz', icon: '📝' },
+        { id: 'checklist', label: 'Checklist', icon: '✅' }
+      ];
+
+      /* ---------- DHCP DORA ---------- */
+      const dora = [
+        { n: 'DISCOVER', t: 'Client → broadcast: "is there a DHCP server?" (Src 0.0.0.0, Dst 255.255.255.255).' },
+        { n: 'OFFER', t: 'Server → client: offers an IP config lease.' },
+        { n: 'REQUEST', t: 'Client → server: "I accept the offer / I want to renew."' },
+        { n: 'ACK', t: 'Server → client: confirms the lease and configuration.' }
+      ];
+      const dhcpStep = ref(0);
+      const doraVerdict = computed(() => ({ cls: 'info', text: dora[dhcpStep.value].n + ' — ' + dora[dhcpStep.value].t }));
+
+      /* ---------- DHCP LEASE TIMER ---------- */
+      const leaseH = ref(24);
+      const leaseVerdict = computed(() => {
+        const h = Math.max(0, leaseH.value);
+        const t1 = h * 0.5;
+        const t2 = h * 0.875;
+        return { cls: 'info', text: 'Lease ' + h + ' h → T1 (50%) = ' + t1.toFixed(2) + ' h (renew with original server) · T2 (87.5%) = ' + t2.toFixed(2) + ' h (rebind with any server).' };
+      });
+
+      /* ---------- DNS ---------- */
+      const dnsModes = [
+        { key: 'recursive', name: 'Recursive', desc: 'resolver obtains the final answer for the client' },
+        { key: 'iterative', name: 'Iterative', desc: 'server returns the best answer/referral it has; client follows' }
+      ];
+      const dnsMode = ref('recursive');
+      const dnsVerdict = computed(() => {
+        const m = dnsModes.find(x => x.key === dnsMode.value);
+        return { cls: 'info', text: m.name + ' resolution: ' + m.desc };
+      });
+
+      /* ---------- NTP STRATUM ---------- */
+      const strata = [
+        { n: 'S0', t: 'Stratum 0 — a REFERENCE clock (atomic/GPS). NOT an ordinary NTP server.' },
+        { n: 'S1', t: 'Stratum 1 — device directly synchronized to a stratum-0 reference.' },
+        { n: 'S2', t: 'Stratum 2 — synchronized from a stratum-1 device.' },
+        { n: 'S3+', t: 'Stratum 3+ — synchronized from the level below; one stratum higher than its source.' },
+        { n: 'S16', t: 'Stratum 16 — UNSYNCHRONIZED / unusable.' }
+      ];
+      const stratum = ref(0);
+      const stratumVerdict = computed(() => ({ cls: 'info', text: strata[stratum.value].t }));
+
+      /* ---------- SNMP ---------- */
+      const snmpVers = [
+        { key: 'v1', name: 'SNMPv1', desc: 'community strings · no GETBULK · no INFORM' },
+        { key: 'v2c', name: 'SNMPv2c', desc: 'community strings · GETBULK ✓ · INFORM ✓' },
+        { key: 'v3', name: 'SNMPv3', desc: 'users/groups · strong auth (MD5/SHA) · encryption (DES/AES)' }
+      ];
+      const snmpVer = ref('v3');
+      const snmpVerdict = computed(() => {
+        const m = snmpVers.find(x => x.key === snmpVer.value);
+        const sel = snmpVer.value === 'v3' ? { cls: 'ok', text: 'SNMPv3 — secure: ' + m.desc + '. Prefer authPriv.' }
+          : (snmpVer.value === 'v2c' ? { cls: 'info', text: 'SNMPv2c — ' + m.desc + '. Weak community-string security.' }
+            : { cls: 'bad', text: 'SNMPv1 — legacy: ' + m.desc + '. Weak security, no GETBULK.' });
+        return sel;
+      });
+
+      /* ---------- SYSLOG SEVERITY ---------- */
+      const sev = [
+        { n: 0, name: 'Emergency' }, { n: 1, name: 'Alert' }, { n: 2, name: 'Critical' },
+        { n: 3, name: 'Error' }, { n: 4, name: 'Warning' }, { n: 5, name: 'Notice' },
+        { n: 6, name: 'Informational' }, { n: 7, name: 'Debugging' }
+      ];
+      const sevSel = ref(4);
+      const sevVerdict = computed(() => {
+        const n = sevSel.value;
+        const list = [];
+        for (let i = 0; i <= n; i++) list.push(sev[i].n + '·' + sev[i].name);
+        const excl = n === 7 ? 'nothing' : (sev[n + 1].n + '·' + sev[n + 1].name + ' and above');
+        return { cls: 'info', text: 'logging trap ' + n + ' → sends levels: ' + list.join(', ') + '. Excludes ' + excl + ' (less severe).' };
+      });
+
+      /* ---------- FTP MODE ---------- */
+      const ftpModes = [
+        { key: 'active', name: 'Active', desc: 'SERVER initiates data connection from TCP 20 (client behind NAT/firewall suffers)' },
+        { key: 'passive', name: 'Passive', desc: 'CLIENT initiates data connection to a dynamic/high port (better for client)' }
+      ];
+      const ftpMode = ref('passive');
+      const ftpVerdict = computed(() => {
+        const m = ftpModes.find(x => x.key === ftpMode.value);
+        return { cls: 'info', text: m.name + ' FTP — ' + m.desc };
+      });
+
+      /* ---------- LDAP DN ---------- */
+      const ldapCn = ref('Bob');
+      const ldapOu = ref('Users');
+      const ldapDc = ref('corp,example');
+      const ldapVerdict = computed(() => {
+        const dc = (ldapDc.value || '').split(',').map(s => s.trim()).filter(Boolean).join(',');
+        if (!ldapCn.value.trim()) return { cls: 'bad', text: 'cn cannot be empty.' };
+        return { cls: 'info', text: 'DN = cn=' + ldapCn.value.trim() + (ldapOu.value.trim() ? ',ou=' + ldapOu.value.trim() : '') + (dc ? ',dc=' + dc.replace(/,/g, ',dc=') : '') };
+      });
+
+      /* ---------- COMMANDS ---------- */
+      const commands = [
+        {
+          key: 'dhcp', label: 'DHCP',
+          show: "! IOS DHCP server\nip dhcp excluded-address 10.0.0.1 10.0.0.99\nip dhcp pool LAN\n network 10.0.0.0 255.255.255.0\n default-router 10.0.0.1\n dns-server 10.0.0.2\n domain-name example.local\n lease 1 0 0\n\n! relay on client-facing interface\ninterface Vlan10\n ip helper-address 10.0.0.5\n\nshow ip dhcp binding\nshow ip dhcp pool\nshow ip dhcp statistics"
+        },
+        {
+          key: 'snoop', label: 'DHCP Snooping',
+          show: "ip dhcp snooping\nip dhcp snooping vlan 10,20,30\n\ninterface GigabitEthernet0/1\n ip dhcp snooping trust          ! toward server/uplink\n\ninterface GigabitEthernet0/10\n ip dhcp snooping limit rate 10  ! client-facing, rate-limit\n\n! static binding for a non-DHCP client\nip dhcp snooping binding 0011.2233.4455 vlan 10 10.10.10.50 interface Gi0/10\n\n! persistence (critical when DAI/IP Source Guard depend on bindings)\nip dhcp snooping database flash:dhcp-snooping.db\n\nshow ip dhcp snooping\nshow ip dhcp snooping binding"
+        },
+        {
+          key: 'dns', label: 'DNS',
+          show: "ip domain lookup          ! enable DNS\nno ip domain lookup       ! disable (common in labs)\nip name-server 10.0.0.5 10.0.0.6\nip domain name ccnp.example\nip host R2 192.0.2.2      ! static host entry\n\nshow hosts                ! IOS hostname cache\nclear host *              ! clears IOS cache only (NOT external DNS)"
+        },
+        {
+          key: 'ntp', label: 'NTP',
+          show: "ntp server 10.0.0.5\nntp master 5              ! serve local clock at stratum 5 (lab/fallback)\nntp source Loopback0\n\n! authentication (key id + value + config must match both sides)\nntp authentication-key 1 md5 MySecretKey\nntp trusted-key 1\nntp authenticate\nntp server 10.0.0.5 key 1\n\nshow ntp status\nshow ntp associations      ! * system peer, + candidate, - other"
+        },
+        {
+          key: 'snmp', label: 'SNMP',
+          show: "! SNMPv2c community\nsnmp-server community cisco123 RO\nsnmp-server community netops RW\nsnmp-server host 10.0.0.5 version 2c cisco123\nsnmp-server location R1\nsnmp-server contact netadmin@corp\nsnmp-server enable traps\n\n! SNMPv3\nsnmp-server group ADMIN v3 priv\nsnmp-server user cisco-user ADMIN v3 auth sha SecretAuth priv aes 128 SecretPriv\nsnmp-server host 10.0.0.5 version 3 priv cisco-user\nsnmp-server view NMSVIEW iso included\n\nshow snmp\nshow snmp group\nshow snmp host"
+        },
+        {
+          key: 'syslog', label: 'Syslog',
+          show: "logging host 10.0.0.5           ! remote Syslog server\nlogging trap 4                  ! severity 0-4\nlogging source-interface Loopback0\nlogging buffered 4096           ! local RAM buffer\nlogging console\nlogging monitor\nterminal monitor               ! enable display in current VTY session\n\nservice timestamps log datetime msec\nservice timestamps debug datetime msec\n\nshow logging                   ! primary verification\nclear logging                  ! clears local buffer only"
+        },
+        {
+          key: 'http', label: 'HTTP(S)',
+          show: "! HTTPS\ncrypto key generate rsa modulus 2048   ! RSA keypair REQUIRED first\nip http secure-server\nip http secure-port 443\nip http secure-trustpoint <cert>\nip http authentication local\n\n! insecure HTTP\nip http server\nip http port 80\nip http access-class MGMT in\n\nshow ip http server status\nshow ip http server all"
+        },
+        {
+          key: 'ssh', label: 'SSH',
+          show: "hostname R1\nip domain-name ccnp.example\nusername admin privilege 15 secret AdminPass123\ncrypto key generate rsa modulus 2048   ! hostname + domain-name first\nip ssh version 2\nip ssh time-out 60\nip ssh authentication-retries 3\nline vty 0 15\n login local\n transport input ssh    ! allow SSH, block Telnet\n\nshow ip ssh\nshow ssh\nshow crypto key mypubkey rsa"
+        }
+      ];
+      const activeCmd = ref(commands[0].key);
+      const activeCommand = computed(() => commands.find(c => c.key === activeCmd.value));
+
+      /* ---------- TRAPS ---------- */
+      const traps = [
+        'DHCP: UDP 67 = server, 68 = client; ip dhcp excluded-address is in global config, not the pool.',
+        'DHCP: ip helper-address goes on the CLIENT-facing interface, and it forwards DNS/TFTP/NetBIOS too, not just DHCP.',
+        'DHCP lease timers: T1 = 50% (renew original), T2 = 87.5% (rebind any). Option 82 ≠ DHCP snooping.',
+        'DHCP snooping: interfaces are UNTRUSTED by default; OFFER/ACK/NAK dropped on untrusted ports (blocks rogue servers).',
+        'DHCP snooping feeds DAI + IP Source Guard via the binding database; static-IP clients need manual bindings.',
+        'DNS: UDP 53 normal, TCP 53 for zone transfers; DNSSEC authenticates but does NOT encrypt.',
+        'MX preference: LOWER number = more preferred server. clear host * clears only the IOS cache.',
+        'SNMP: 161 = polling, 162 = notifications; GETBULK and INFORM are SNMPv2+ only (not v1); INFORM is UDP but acknowledged.',
+        'SNMP community strings are NOT encryption; prefer SNMPv3 authPriv. MIB Cisco enterprise OID = 1.3.6.1.4.1.9.',
+        'Syslog: levels 0-7, 0 most severe; logging trap N sends 0..N; local buffer is volatile (lost on reload).',
+        'FTP: control TCP 21 always; active data = server→TCP 20, passive data = client→high port. SFTP ≠ FTPS.',
+        'TFTP: UDP 69 only for the request; classic 512-byte blocks; lock-step DATA/ACK; used for IOS images + Option 150 phones.',
+        'HTTPS: needs an RSA keypair first; ip http server = insecure, ip http secure-server = HTTPS.',
+        'SSH: TCP 22, v2 preferred; hostname + ip domain-name required before generating RSA keys; transport input ssh blocks Telnet.',
+        'Telnet: TCP 23, NO encryption; ACLs restrict who connects but do not secure the session.',
+        'Email: SMTP pushes (25 relay/587 submission/465 TLS); POP3 = 110/995 download+delete; IMAP = 143/993 server-sync.',
+        'LDAP: 389/636 = LDAP; 3268/3269 = AD Global Catalog; 389 not always encrypted; LDAP ≠ RADIUS/TACACS+ (it is an identity backend).',
+        'Voice: SIP = signaling (5060/5061), RTP = media (even UDP ≥16384), RTCP = +1 (odd). One-way audio = NAT/media path issue.',
+        'Voice QoS: latency < 150ms, jitter < 30ms, loss < 1%; DSCP voice = EF(46), video = AF41(34), signaling = CS3.'
+      ];
+
+      /* ---------- QUIZ ---------- */
+      const quizRaw = [
+        { q: 'Which port is the DHCP server?', opts: [{ text: 'UDP 67' }, { text: 'UDP 68' }, { text: 'UDP 53' }, { text: 'UDP 161' }], correct: 0 },
+        { q: 'DHCP lease renew (T1) happens at ___ of the lease.', opts: [{ text: '50%' }, { text: '87.5%' }, { text: '25%' }, { text: '100%' }], correct: 0 },
+        { q: 'DNS zone transfers use which transport?', opts: [{ text: 'TCP 53' }, { text: 'UDP 53 only' }, { text: 'TCP 25' }, { text: 'UDP 123' }], correct: 0 },
+        { q: 'Which DNS record is used for reverse (IP → name)?', opts: [{ text: 'PTR' }, { text: 'MX' }, { text: 'CNAME' }, { text: 'NS' }], correct: 0 },
+        { q: 'DNS64 does what?', opts: [{ text: 'synthesizes AAAA from A records for IPv6 clients' }, { text: 'encrypts DNS queries' }, { text: 'translates IPv6 packets to IPv4' }, { text: 'load-balances DNS servers' }], correct: 0 },
+        { q: 'A stratum 16 NTP device is:', opts: [{ text: 'unsynchronized / unusable' }, { text: 'a reference clock' }, { text: 'stratum 1' }, { text: 'a peer to everything' }], correct: 0 },
+        { q: 'SNMP GETBULK is available in which version(s)?', opts: [{ text: 'SNMPv2c and v3' }, { text: 'SNMPv1 only' }, { text: 'all versions' }, { text: 'v1 and v2c only' }], correct: 0 },
+        { q: 'Syslog logging trap 4 sends which levels?', opts: [{ text: '0 through 4' }, { text: '4 through 7' }, { text: 'just 4' }, { text: 'all levels' }], correct: 0 },
+        { q: 'In active FTP, who initiates the data connection and from where?', opts: [{ text: 'the server, from TCP 20' }, { text: 'the client, from a high port' }, { text: 'the server, from TCP 21' }, { text: 'the client, from TCP 20' }], correct: 0 },
+        { q: 'TFTP uses which port for the initial request?', opts: [{ text: 'UDP 69' }, { text: 'TCP 69' }, { text: 'UDP 21' }, { text: 'TCP 514' }], correct: 0 },
+        { q: 'What is required before ip http secure-server will start?', opts: [{ text: 'an RSA keypair' }, { text: 'a DNS server entry' }, { text: 'an SNMP community' }, { text: 'AAA configuration only' }], correct: 0 },
+        { q: 'Which command blocks Telnet but allows SSH on VTY lines?', opts: [{ text: 'transport input ssh' }, { text: 'access-class ssh in' }, { text: 'transport output ssh' }, { text: 'no telnet' }], correct: 0 },
+        { q: 'Which protocol keeps mail on the server for multi-device sync over port 143?', opts: [{ text: 'IMAP' }, { text: 'POP3' }, { text: 'SMTP' }, { text: 'LDAP' }], correct: 0 },
+        { q: 'Port 636 is used by:', opts: [{ text: 'LDAPS' }, { text: 'AD Global Catalog (plain)' }, { text: 'HTTPS' }, { text: 'IMAPS' }], correct: 0 },
+        { q: 'In VoIP, one-way audio most likely indicates a problem with:', opts: [{ text: 'RTP media path / NAT' }, { text: 'SIP signaling setup itself' }, { text: 'the registrar only' }, { text: 'DNS always' }], correct: 0 },
+        { q: 'Voice RTP DSCP marking is:', opts: [{ text: 'EF (46)' }, { text: 'AF41 (34)' }, { text: 'CS3' }, { text: '0 (best effort)' }], correct: 0 }
+      ];
+      const quizQuestions = reactive(quizRaw.map(q => ({ ...q, ans: null })));
+      const quizDone = ref(false);
+      const quizScore = ref(loadJSON(LS.quiz, 0) || 0);
+      const allQuizAnswered = computed(() => quizQuestions.every(q => q.ans !== null));
+      function submitQuiz() {
+        if (!allQuizAnswered.value) return;
+        quizScore.value = quizQuestions.filter((q, i) => q.ans === q.correct).length;
+        quizDone.value = true;
+        save(LS.quiz, quizScore.value);
+      }
+      function resetQuiz() {
+        quizQuestions.forEach(q => q.ans = null);
+        quizDone.value = false;
+        quizScore.value = 0;
+        localStorage.removeItem(LS.quiz);
+      }
+
+      /* ---------- CHECKLIST ---------- */
+      const checklistRoot = loadJSON(LS.done, [
+        { t: 'DHCP: UDP 67 server / 68 client; DORA = Discover/OFFER/Request/Ack; states INIT→BOUND→RENEW(T1)→REBIND(T2)', done: false },
+        { t: 'DHCP options: 53 type, 54 server, 66/67 TFTP boot, 82 relay info, 150 Cisco phones', done: false },
+        { t: 'DHCP Relay: ip helper-address on client-facing interface; sets giaddr; also forwards DNS/TFTP/NetBIOS', done: false },
+        { t: 'DHCP Snooping: untrusted by default; drops OFFER/ACK/NAK on untrusted ports; feeds DAI + IP Source Guard', done: false },
+        { t: 'DNS: UDP 53 (TCP for zone transfer); records A/AAAA/CNAME/MX(lower preferred)/PTR/NS/SOA/TXT/CAA', done: false },
+        { t: 'DNS: recursive vs iterative; TTL caching; NXDOMAIN; DNSSEC authenticates but does NOT encrypt', done: false },
+        { t: 'NTP: UDP 123; stratum 0=reference, 16=unsync, synced=one higher than source; ntp master = local clock', done: false },
+        { t: 'SNMP: 161 poll / 162 notify; GET/GETNEXT/GETBULK(v2+)/SET/TRAP(no ack)/INFORM(ack); v3 authPriv', done: false },
+        { t: 'Syslog: UDP 514; levels 0-7; logging trap N sends 0..N; buffer volatile; %FACILITY-SEVERITY-MNEMONIC', done: false },
+        { t: 'FTP: control TCP 21, active data=TCP 20 (server→client), passive data=high port (client→server); FTPS vs SFTP', done: false },
+        { t: 'TFTP: UDP 69 request, dynamic transfer ports, 512-byte blocks, lock-step; IOS images + Option 150', done: false },
+        { t: 'HTTP 80 / HTTPS 443; methods GET/HEAD/POST/PUT/DELETE; status 2xx/3xx/4xx/5xx; HTTPS needs RSA keypair', done: false },
+        { t: 'SSH 22 vs Telnet 23; SSH needs hostname+domain-name before RSA; transport input ssh blocks Telnet', done: false },
+        { t: 'Email: SMTP 25/587/465 push; POP3 110/995 download+delete; IMAP 143/993 server-sync folders', done: false },
+        { t: 'LDAP: 389/636 (LDAP vs LDAPS), 3268/3269 AD GC; DN components dc/ou/cn; LDAP ≠ RADIUS/TACACS+', done: false },
+        { t: 'Voice: SIP 5060/5061 signaling; RTP even≥16384 media; RTCP+1 control; one-way audio = media/NAT; EF(46) voice', done: false }
+      ]);
+      const checklist = reactive(checklistRoot);
+      const doneCount = computed(() => checklist.filter(c => c.done).length);
+      function saveChecklist() { save(LS.done, checklistRoot); }
+      function toggleDone(i) { checklistRoot[i].done = !checklistRoot[i].done; saveChecklist(); }
+
+      return {
+        theme, sec, sections,
+        dora, dhcpStep, doraVerdict,
+        leaseH, leaseVerdict,
+        dnsModes, dnsMode, dnsVerdict,
+        strata, stratum, stratumVerdict,
+        snmpVers, snmpVer, snmpVerdict,
+        sev, sevSel, sevVerdict,
+        ftpModes, ftpMode, ftpVerdict,
+        ldapCn, ldapOu, ldapDc, ldapVerdict,
+        commands, activeCmd, activeCommand,
+        traps,
+        quizQuestions, quizDone, quizScore, allQuizAnswered, submitQuiz, resetQuiz,
+        checklist, doneCount, saveChecklist, toggleDone
+      };
+    }
+  }).mount('#app');
+})();
+</script>
+</body>
+</html>

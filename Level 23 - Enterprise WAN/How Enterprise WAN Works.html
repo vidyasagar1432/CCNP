@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Enterprise WAN Works — Deep Dive</title>
+<style>
+  :root {
+    --bg: #0f172a; --panel: #111c34; --card: #1e293b; --card-2: #16233d;
+    --text: #f8fafc; --muted: #94a3b8;
+    --blue: #38bdf8; --blue-dim: #0c4a6e;
+    --green: #34d399; --green-dim: #064e3b;
+    --amber: #fbbf24; --amber-dim: #78350f;
+    --red: #f87171; --red-dim: #7f1d1d;
+    --violet: #a78bfa; --violet-dim: #4c1d95;
+    --cyan: #22d3ee; --cyan-dim: #164e63;
+    --border: #334155; --hover: #263449; --code-bg: #0b1220;
+  }
+  #app[data-theme="light"] {
+    --bg: #f1f5f9; --panel: #ffffff; --card: #ffffff; --card-2: #f8fafc;
+    --text: #0f172a; --muted: #64748b;
+    --blue: #0284c7; --blue-dim: #bae6fd;
+    --green: #059669; --green-dim: #d1fae5;
+    --amber: #d97706; --amber-dim: #fef3c7;
+    --red: #dc2626; --red-dim: #fee2e2;
+    --violet: #7c3aed; --violet-dim: #ede9fe;
+    --cyan: #0891b2; --cyan-dim: #cffafe;
+    --border: #cbd5e1; --hover: #e2e8f0; --code-bg: #0b1220;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; }
+  #app { max-width: 1040px; margin: 0 auto; padding: 20px 18px 60px; }
+
+  header { position: sticky; top: 0; z-index: 30; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .lv-badge { background: var(--blue-dim); color: var(--blue); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .exam-badge { background: var(--violet-dim); color: var(--violet); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .head-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: background 0.15s; }
+  .btn:hover { background: var(--hover); }
+  .btn.primary { background: var(--blue); color: #0f172a; border-color: var(--blue); }
+
+  nav { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 2px 16px; }
+  nav button.chip { border: 1px solid var(--border); background: var(--card); color: var(--muted); padding: 5px 11px; border-radius: 999px; cursor: pointer; font-size: 0.76rem; font-weight: 600; }
+  nav button.chip.active { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
+
+  section.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
+  section.panel h2 { font-size: 1.2rem; margin-bottom: 6px; }
+  section.panel h3 { font-size: 1rem; margin: 18px 0 10px; color: var(--blue); }
+  section.panel p { margin: 8px 0; }
+  .muted { color: var(--muted); }
+  .lead { color: var(--muted); font-size: 0.95rem; }
+
+  .grid { display: grid; gap: 12px; }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .g3 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .g4 { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .card h4 { font-size: 0.9rem; margin-bottom: 6px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85rem; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  tr:hover td { background: var(--hover); }
+
+  code, .mono { font-family: 'Fira Code', ui-monospace, monospace; }
+  .mono { font-size: 0.9rem; }
+  .chip-tag { display: inline-block; border-radius: 999px; padding: 1px 9px; font-size: 0.74rem; font-weight: 700; }
+  .b-blue { background: var(--blue-dim); color: var(--blue); }
+  .b-green { background: var(--green-dim); color: var(--green); }
+  .b-amber { background: var(--amber-dim); color: var(--amber); }
+  .b-red { background: var(--red-dim); color: var(--red); }
+  .b-violet { background: var(--violet-dim); color: var(--violet); }
+  .b-cyan { background: var(--cyan-dim); color: var(--cyan); }
+
+  .callout { border-left: 4px solid var(--amber); background: var(--card-2); border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 12px 0; font-size: 0.9rem; }
+  .callout.green { border-color: var(--green); }
+  .callout.red { border-color: var(--red); }
+  .callout.blue { border-color: var(--blue); }
+  .callout.violet { border-color: var(--violet); }
+
+  .row-fn { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 8px 0; }
+
+  .opt { display: flex; align-items: center; gap: 8px; padding: 6px 9px; margin: 3px 0; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; background: var(--card); font-size: 0.86rem; }
+  .opt.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .opt .letter { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex: 0 0 auto; }
+  .opt.sel .letter { background: var(--blue); color: #0f172a; }
+
+  #app pre, pre.cmd { background: var(--code-bg); color: #e2e8f0; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.82rem; line-height: 1.5; }
+
+  .trap-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  .trap-item:last-child { border-bottom: none; }
+  .trap-ico { color: var(--red); font-weight: 700; flex: 0 0 auto; }
+
+  .step-flow { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .step { border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 0.8rem; background: var(--card-2); }
+  .step .n { color: var(--blue); font-weight: 700; }
+
+  .verdict { border-radius: 8px; padding: 10px 14px; font-weight: 700; margin: 8px 0; }
+  .verdict.ok { background: var(--green-dim); color: var(--green); }
+  .verdict.bad { background: var(--red-dim); color: var(--red); }
+  .verdict.info { background: var(--blue-dim); color: var(--blue); }
+
+  .chk-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; margin: 5px 0; cursor: pointer; transition: opacity 0.15s; }
+  .chk-item.done { opacity: 0.55; text-decoration: line-through; }
+  .chk-box { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 5px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; }
+  .chk-item.done .chk-box { background: var(--green); border-color: var(--green); color: #0f172a; }
+
+  .proto-cell { border: 1px solid var(--border); border-radius: 10px; padding: 9px 10px; background: var(--card); cursor: pointer; text-align: center; }
+  .proto-cell.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .proto-cell .pn { font-weight: 700; }
+  .proto-cell .pd { font-size: 0.75rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<div id="app" :data-theme="theme">
+  <header>
+    <h1><span class="lv-badge">L23</span> How Enterprise WAN Works
+      <span class="exam-badge">ENCOR 350-401</span></h1>
+    <div class="head-actions">
+      <a class="btn" href="../Level 22 - Wireless/How Wireless Works.html">◀ Wireless</a>
+      <a class="btn" href="../Level 24 - SDN &amp; Automation/How SDN and Automation Works.html">SDN ▶</a>
+      <a class="btn" href="../index.html">Flashcards</a>
+      <button class="btn" @click="theme = (theme==='dark'?'light':'dark')">{{ theme==='dark' ? '☀' : '🌙' }}</button>
+    </div>
+  </header>
+
+  <nav>
+    <button class="chip" v-for="s in sections" :key="s.id" :class="{active:sec===s.id}" @click="sec=s.id">{{ s.icon }} {{ s.label }}</button>
+  </nav>
+
+  <!-- 1. OVERVIEW -->
+  <section class="panel" v-show="sec==='intro'" id="intro">
+    <h2>🌍 Enterprise WAN — the whole picture</h2>
+    <p class="lead">How enterprise sites connect across the WAN. The story splits into <b>traditional WAN</b> (PPP/PPPoE/Metro Ethernet/MPLS/broadband/LTE) and the modern <b>SD-WAN</b> overlay with its controller cluster.</p>
+
+    <h3>Traditional transports</h3>
+    <div class="grid g4">
+      <div class="card"><h4>PPP/PPPoE</h4><span class="chip-tag b-blue">leased/DSL</span><p class="muted" style="margin:0">auth + session</p></div>
+      <div class="card"><h4>Metro Ethernet</h4><span class="chip-tag b-green">L2/L3</span><p class="muted" style="margin:0">E-LINE/LAN/TREE</p></div>
+      <div class="card"><h4>MPLS WAN</h4><span class="chip-tag b-amber">L3VPN</span><p class="muted" style="margin:0">SP routes</p></div>
+      <div class="card"><h4>Broadband/LTE</h4><span class="chip-tag b-red">backup</span><p class="muted" style="margin:0">best-effort/DIA</p></div>
+    </div>
+
+    <h3>The SD-WAN downside of each controller (memorize)</h3>
+    <table>
+      <tr><th>Controller</th><th>Plane</th><th>Role</th></tr>
+      <tr><td>vBond</td><td>Orchestration</td><td>first contact · authenticates/onboards</td></tr>
+      <tr><td>vSmart</td><td>Control</td><td>OMP · routing · centralized policy</td></tr>
+      <tr><td>vManage</td><td>Management</td><td>GUI · templates · monitoring</td></tr>
+      <tr><td>WAN Edge</td><td>Data</td><td>vEdge/cEdge · tunnels · app-aware</td></tr>
+    </table>
+    <div class="callout red"><b>The one-line mnemonic:</b> <b>vBond opens the door (orchestrates), vSmart steers (controls), vManage runs the GUI (manages), edges carry data.</b></div>
+  </section>
+
+  <!-- 2. PPP -->
+  <section class="panel" v-show="sec==='ppp'" id="ppp">
+    <h2>🔗 PPP — Point-to-Point Protocol</h2>
+    <p class="lead">The classic point-to-point WAN protocol that succeeded HDLC with <b>authentication</b>, <b>multilink</b>, and <b>LCP/NCP negotiation</b>. PPPoE rides on it.</p>
+
+    <h3>PPP stack</h3>
+    <div class="grid g4">
+      <div class="card"><h4>LCP</h4><p class="muted" style="margin:0">link setup</p></div>
+      <div class="card"><h4>Auth</h4><p class="muted" style="margin:0">PAP / CHAP</p></div>
+      <div class="card"><h4>NCP</h4><p class="muted" style="margin:0">IPCP network</p></div>
+      <div class="card"><h4>Data</h4><p class="muted" style="margin:0">PPP framing</p></div>
+    </div>
+
+    <h3>LCP phases</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> Link established (LCP)</div>
+      <div class="step"><span class="n">2</span> Authentication (PAP/CHAP)</div>
+      <div class="step"><span class="n">3</span> NCP (IPCP)</div>
+      <div class="step"><span class="n">4</span> Data phase</div>
+    </div>
+    <div class="callout blue"><b>Link is up only if all phases pass.</b></div>
+
+    <h3>PAP vs CHAP (the core trap)</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:authPick==='pap'}" @click="authPick='pap'"><div class="pn">PAP</div><div class="pd">sends password in the CLEAR · one-way · weak</div></div>
+      <div class="proto-cell" :class="{sel:authPick==='chap'}" @click="authPick='chap'"><div class="pn">CHAP</div><div class="pd">challenge/response + hash · stronger · periodic</div></div>
+    </div>
+    <div class="verdict" :class="authVerdict.cls">{{ authVerdict.text }}</div>
+    <div class="callout red"><b>CHAP uses challenge/response and never sends the clear password; PAP transmits it in the clear (weak).</b></div>
+    <pre class="cmd">interface Serial0/0/0
+ encapsulation ppp
+ ppp authentication chap
+ ppp chap hostname R1
+ ppp chap password Secret
+show interface Serial0/0/0
+show ppp multilink
+debug ppp authentication
+debug ppp negotiation
+</pre>
+  </section>
+
+  <!-- 3. PPPoE -->
+  <section class="panel" v-show="sec==='pppoe'" id="pppoe">
+    <h2>🌐 PPPoE — PPP over Ethernet</h2>
+    <p class="lead">Carries <b>PPP sessions over Ethernet</b> — the standard for <b>DSL/broadband</b>. Discovery sets up the session, then LCP/CHAP/IPCP run as usual.</p>
+
+    <h3>Discovery (PADx) — the exam favorite</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">PADI</span> client broadcast (Initiation)</div>
+      <div class="step"><span class="n">PADO</span> server offer</div>
+      <div class="step"><span class="n">PADR</span> client requests</div>
+      <div class="step"><span class="n">PADS</span> session established</div>
+    </div>
+    <div class="callout red"><b>PADI → PADO → PADR → PADS</b> = session creation. The <b>access concentrator</b> issues the session ID.</div>
+
+    <h3>After discovery</h3>
+    <table>
+      <tr><th>Phase</th><th>Protocol</th></tr>
+      <tr><td>Link config</td><td>LCP</td></tr>
+      <tr><td>Auth</td><td>CHAP/PAP</td></tr>
+      <tr><td>IP addressing</td><td>IPCP</td></tr>
+      <tr><td>Data</td><td>PPP frames</td></tr>
+    </table>
+
+    <h3>The MTU trap</h3>
+    <div class="card"><p style="margin:0"><b>MTU 1492</b> on the link — the 8-byte PPPoE header reduces the payload from 1500.</p></div>
+    <pre class="cmd">interface Dialer1
+ ip address negotiated
+ encapsulation ppp
+ dialer pool 1
+ ppp authentication chap callin
+ ppp chap password Secret
+!
+interface GigabitEthernet0/0
+ pppoe enable
+ pppoe-client dial-pool-number 1
+show pppoe session
+show ip interface dialer
+show interface Dialer1
+debug pppoe events
+</pre>
+  </section>
+
+  <!-- 4. METRO ETHERNET -->
+  <section class="panel" v-show="sec==='metro'" id="metro">
+    <h2>🏙️ Metro Ethernet — Ethernet WAN</h2>
+    <p class="lead">Uses <b>Ethernet services</b> across a metro/SP network as the WAN — cheap, fast, familiar. Service types: <b>E-LINE, E-LAN, E-TREE</b>.</p>
+
+    <h3>EVC service types (the core map)</h3>
+    <div class="grid g3">
+      <div class="proto-cell" :class="{sel:evcPick==='line'}" @click="evcPick='line'"><div class="pn">E-LINE</div><div class="pd">point-to-point (site links)</div></div>
+      <div class="proto-cell" :class="{sel:evcPick==='lan'}" @click="evcPick='lan'"><div class="pn">E-LAN</div><div class="pd">multipoint any-to-any</div></div>
+      <div class="proto-cell" :class="{sel:evcPick==='tree'}" @click="evcPick='tree'"><div class="pn">E-TREE</div><div class="pd">hub-spoke root/leaf</div></div>
+    </div>
+    <div class="verdict" :class="evcVerdict.cls">{{ evcVerdict.text }}</div>
+
+    <h3>Delivery technologies</h3>
+    <table>
+      <tr><th>Technology</th><th>Type</th></tr>
+      <tr><td>EoMPLS</td><td>L2VPN pseudowire (P2P)</td></tr>
+      <tr><td>VPLS</td><td>multipoint L2VPN</td></tr>
+      <tr><td>EVPN</td><td>modern (BGP + VXLAN)</td></tr>
+      <tr><td>QinQ</td><td>VLAN stacking (S-tag + C-tag)</td></tr>
+    </table>
+    <div class="callout red"><b>E-LINE uses EoMPLS pseudowire; multipoint needs VPLS/EVPN. EVPN = BGP + VXLAN, scales beyond VPLS.</b></div>
+    <pre class="cmd">show l2vpn forwarding
+show l2vpn service
+show ethernet service
+show evpn evi
+show bridge-domain
+</pre>
+  </section>
+
+  <!-- 5. MPLS WAN -->
+  <section class="panel" v-show="sec==='mplswan'" id="mplswan">
+    <h2>🔷 MPLS WAN — provider L3VPN</h2>
+    <p class="lead">Connects sites over a provider's <b>L3VPN</b>. The SP provides <b>PE routers</b> (VRF + MP-BGP) carrying customer routes; the customer gets a <b>private, any-to-any VPN</b>.</p>
+
+    <h3>The L3VPN roles</h3>
+    <div class="grid g3">
+      <div class="card"><h4>CE</h4><p class="muted" style="margin:0">customer edge → PE</p></div>
+      <div class="card"><h4>PE</h4><p class="muted" style="margin:0">SP edge · VRF + MP-BGP</p></div>
+      <div class="card"><h4>P</h4><p class="muted" style="margin:0">SP core · labels</p></div>
+    </div>
+
+    <h3>CE–PE routing options</h3>
+    <div class="grid g4">
+      <div class="card"><h4>eBGP</h4><p class="muted" style="margin:0">most common</p></div>
+      <div class="card"><h4>OSPF</h4><p class="muted" style="margin:0">redistribution</p></div>
+      <div class="card"><h4>EIGRP</h4><p class="muted" style="margin:0">legacy</p></div>
+      <div class="card"><h4>Static</h4><p class="muted" style="margin:0">simplest</p></div>
+    </div>
+
+    <h3>MPLS WAN vs Metro Ethernet (the L2/L3 trap)</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:wanModel==='l3'}" @click="wanModel='l3'"><div class="pn">MPLS L3VPN</div><div class="pd">provider routes (L3)</div></div>
+      <div class="proto-cell" :class="{sel:wanModel==='l2'}" @click="wanModel='l2'"><div class="pn">Metro Ethernet</div><div class="pd">customer routes (L2)</div></div>
+    </div>
+    <div class="verdict" :class="wanVerdict.cls">{{ wanVerdict.text }}</div>
+    <pre class="cmd">show ip route vrf CUST1
+show bgp vpnv4 unicast vrf CUST1
+show mpls forwarding-table
+ping vrf CUST1 10.10.0.2
+show ip bgp vpnv4 all
+</pre>
+  </section>
+
+  <!-- 6. BROADBAND & LTE -->
+  <section class="panel" v-show="sec==='broadband'" id="broadband">
+    <h2>📶 Broadband &amp; LTE</h2>
+    <p class="lead">Cheap, everywhere, but <b>asymmetric, shared, best-effort</b> — the classic <b>secondary/DIA</b> link or SD-WAN transport, not an SLA-committed primary MPLS.</p>
+
+    <h3>Broadband types</h3>
+    <div class="grid g4">
+      <div class="card"><h4>DSL</h4><p class="muted" style="margin:0">phone lines · ADSL/VDSL</p></div>
+      <div class="card"><h4>Cable</h4><p class="muted" style="margin:0">coax · shared</p></div>
+      <div class="card"><h4>Fiber</h4><p class="muted" style="margin:0">GPON/EPON · high speed</p></div>
+      <div class="card"><h4>LTE</h4><p class="muted" style="margin:0">cellular · SIM + APN</p></div>
+    </div>
+    <div class="callout red"><b>Fiber = fastest/most symmetric; DSL/cable = asymmetric (down &gt; up); broadband = best-effort with no SLA.</b></div>
+
+    <h3>Broadband characteristics &amp; role</h3>
+    <table>
+      <tr><th>Characteristic</th><th>Value</th></tr>
+      <tr><td>Asymmetry</td><td>down > up</td></tr>
+      <tr><td>Sharing</td><td>neighborhood</td></tr>
+      <tr><td>Predictability</td><td>low</td></tr>
+      <tr><td>SLA</td><td>none</td></tr>
+      <tr><td>Role</td><td>backup / DIA / SD-WAN transport</td></tr>
+    </table>
+    <div class="callout blue"><b>Broadband playbook: PPPoE session + MTU 1492 + NAT + pair with MPLS for redundancy.</b></div>
+
+    <h3>LTE specifics</h3>
+    <table>
+      <tr><th>Item</th><th>Detail</th></tr>
+      <tr><td>Interface</td><td>Cellular0/0/0</td></tr>
+      <tr><td>Identity</td><td>SIM (subscriber)</td></tr>
+      <tr><td>Profile</td><td>APN</td></tr>
+      <tr><td>IP</td><td>ip address negotiated (carrier DHCP)</td></tr>
+      <tr><td>Role</td><td>primary (rural) / backup / SD-WAN</td></tr>
+    </table>
+    <div class="callout red"><b>LTE is metered + variable — treat as best-effort; SD-WAN makes it a seamless automatic fallback.</b></div>
+    <pre class="cmd">! Broadband / PPPoE
+interface Dialer1
+ ip address negotiated
+ pppoe-client dial-pool-number 1
+! LTE
+interface Cellular0/0/0
+ ip address negotiated
+ cellular profile 1
+ no shutdown
+dialer-list 1 protocol ip permit
+show pppoe session
+show cellular 0/0/0 hardware
+show cellular 0/0/0 radio
+show cellular 0/0/0 profile
+</pre>
+  </section>
+
+  <!-- 7. SD-WAN -->
+  <section class="panel" v-show="sec==='sdwan'" id="sdwan">
+    <h2>☁️ SD-WAN — overlay over any transport</h2>
+    <p class="lead">Cisco SD-WAN (Viptela) builds a <b>secure overlay</b> over any transport (MPLS, broadband, LTE) with <b>DTLS/IPsec</b> tunnels between edge routers. A controller cluster manages policies and routing centrally.</p>
+
+    <h3>Underlay vs overlay</h3>
+    <div class="grid g2">
+      <div class="card"><h4>Underlay</h4><p class="muted" style="margin:0">physical WAN: MPLS/broadband/LTE</p></div>
+      <div class="card"><h4>Overlay</h4><p class="muted" style="margin:0">secure tunnels, OMP control, centralized policy</p></div>
+    </div>
+    <div class="callout blue"><b>SD-WAN decouples services from the physical WAN</b> — any transport works.</div>
+
+    <h3>The four components (memorize)</h3>
+    <div class="grid g4">
+      <div class="card"><h4>vEdge/cEdge</h4><p class="muted" style="margin:0">WAN edge routers (data)</p></div>
+      <div class="card"><h4>vSmart</h4><p class="muted" style="margin:0">control + policy (OMP)</p></div>
+      <div class="card"><h4>vManage</h4><p class="muted" style="margin:0">management plane</p></div>
+      <div class="card"><h4>vBond</h4><p class="muted" style="margin:0">orchestration / onboarding</p></div>
+    </div>
+    <div class="callout red"><b>vBond authenticates/onboards; vSmart controls; vManage manages; edges carry traffic.</b></div>
+
+    <h3>OMP (Overlay Management Protocol)</h3>
+    <div class="card"><p style="margin:0">Control protocol running <b>edge ↔ vSmart</b>, carrying <b>routes, TLOCs, policies</b>. <b>OMP replaces BGP/IGP in the overlay.</b></p></div>
+
+    <h3>Key features</h3>
+    <div class="grid g3">
+      <div class="card"><h4>Transport-independent</h4><p class="muted" style="margin:0">any link</p></div>
+      <div class="card"><h4>App-aware routing</h4><p class="muted" style="margin:0">SLA-based path choice</p></div>
+      <div class="card"><h4>Centralized policy</h4><p class="muted" style="margin:0">pushed from vSmart</p></div>
+      <div class="card"><h4>Security</h4><p class="muted" style="margin:0">DTLS/IPsec tunnels</p></div>
+    </div>
+    <div class="callout green"><b>App-aware routing + SLA is the SD-WAN killer feature</b> — cheaper, more reliable, centrally managed.</div>
+    <pre class="cmd">show omp peers
+show omp routes
+show sdwan control connections
+show sdwan running-config
+show sdwan interface
+show omp tlocs
+</pre>
+  </section>
+
+  <!-- 8. CONTROLLERS -->
+  <section class="panel" v-show="sec==='controllers'" id="controllers">
+    <h2>🎛️ The SD-WAN Controllers</h2>
+    <p class="lead">Three controllers, three planes. Pick a controller to see its role — and remember <b>vBond opens the door, vSmart steers, vManage runs the GUI</b>.</p>
+
+    <h3>Controller plane selector</h3>
+    <div class="grid g3">
+      <div class="proto-cell" :class="{sel:ctrlPick==='vbond'}" @click="ctrlPick='vbond'"><div class="pn">vBond</div><div class="pd">Orchestration</div></div>
+      <div class="proto-cell" :class="{sel:ctrlPick==='vsmart'}" @click="ctrlPick='vsmart'"><div class="pn">vSmart</div><div class="pd">Control</div></div>
+      <div class="proto-cell" :class="{sel:ctrlPick==='vmanage'}" @click="ctrlPick='vmanage'"><div class="pn">vManage</div><div class="pd">Management</div></div>
+    </div>
+    <div class="verdict" :class="ctrlVerdict.cls">{{ ctrlVerdict.text }}</div>
+
+    <h3>The three planes (memorize)</h3>
+    <table>
+      <tr><th>Plane</th><th>Component</th><th>Job</th></tr>
+      <tr><td>Orchestration</td><td>vBond</td><td>first contact · authenticate/onboard · assign to vSmart/vManage</td></tr>
+      <tr><td>Control</td><td>vSmart</td><td>OMP · route/TLOC distribution · centralized policy · SLA</td></tr>
+      <tr><td>Management</td><td>vManage</td><td>dashboard · templates · onboarding · monitoring/analytics · API</td></tr>
+      <tr><td>Data</td><td>WAN Edge</td><td>tunnel termination · data plane</td></tr>
+    </table>
+
+    <h3>Onboarding flow (vBond first)</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> New edge contacts vBond</div>
+      <div class="step"><span class="n">2</span> vBond verifies identity (serial + certificate)</div>
+      <div class="step"><span class="n">3</span> assigns controllers (vSmart/vManage)</div>
+      <div class="step"><span class="n">4</span> edge builds secure sessions</div>
+    </div>
+    <div class="callout amber"><b>vBond must be publicly reachable (DTLS/TLS, port 12346 or 443) for onboarding.</b></div>
+    <pre class="cmd">show omp peers
+show omp routes
+show omp tlocs
+show sdwan vbond list
+show sdwan vmanage connections
+show sdwan control
+show sdwan device
+show sdwan policy
+</pre>
+  </section>
+
+  <!-- 9. WAN EDGE -->
+  <section class="panel" v-show="sec==='edge'" id="edge">
+    <h2>🛜 WAN Edge — vEdge vs cEdge</h2>
+    <p class="lead">The routers at each site — <b>vEdge</b> (Viptela OS) or <b>cEdge</b> (IOS-XE). They terminate tunnels, run OMP with vSmart, and enforce app-aware policy. This is where the <b>data plane</b> lives.</p>
+
+    <h3>vEdge vs cEdge (the trap)</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:edgePick==='vedge'}" @click="edgePick='vedge'"><div class="pn">vEdge</div><div class="pd">Viptela OS · native SD-WAN</div></div>
+      <div class="proto-cell" :class="{sel:edgePick==='cedge'}" @click="edgePick='cedge'"><div class="pn">cEdge</div><div class="pd">IOS-XE routers (Catalyst/ISR)</div></div>
+    </div>
+    <div class="verdict" :class="edgeVerdict.cls">{{ edgeVerdict.text }}</div>
+
+    <h3>Transport &amp; TLOC</h3>
+    <div class="grid g2">
+      <div class="card"><h4>TLOC</h4><p class="muted" style="margin:0">transport locator — identifies a path</p></div>
+      <div class="card"><h4>Color</h4><p class="muted" style="margin:0">label for the transport (MPLS/broadband/LTE)</p></div>
+    </div>
+    <div class="callout blue"><b>Each transport (TLOC + color) is a potential path; multiple per site for redundancy.</b></div>
+
+    <h3>The edge's four session types</h3>
+    <table>
+      <tr><th>Session</th><th>To</th></tr>
+      <tr><td>vBond</td><td>onboarding</td></tr>
+      <tr><td>vSmart</td><td>OMP (control)</td></tr>
+      <tr><td>vManage</td><td>management</td></tr>
+      <tr><td>Peers</td><td>edge-to-edge data tunnels</td></tr>
+    </table>
+    <div class="callout red"><b>Data is encrypted (DTLS/IPsec) and SLA-routed between edges. cEdge = IOS-XE running SD-WAN; vEdge = Viptela-native.</b></div>
+    <pre class="cmd">show sdwan control connections
+show sdwan control connections-history
+show omp peers
+show omp routes
+show sdwan interface
+show sdwan running-config
+</pre>
+  </section>
+
+  <!-- 10. COMMANDS -->
+  <section class="panel" v-show="sec==='cmds'" id="cmds">
+    <h2>⌨️ CLI Commands</h2>
+    <div class="row-fn">
+      <button class="btn" v-for="c in commands" :key="c.key" :class="{primary:activeCmd===c.key}" @click="activeCmd=c.key">{{ c.label }}</button>
+    </div>
+    <pre class="cmd">{{ activeCommand.show }}</pre>
+  </section>
+
+  <!-- 11. TRAPS -->
+  <section class="panel" v-show="sec==='traps'" id="traps">
+    <h2>⚠️ Common Traps</h2>
+    <div v-for="t in traps" :key="t" class="trap-item"><span class="trap-ico">!</span><div>{{ t }}</div></div>
+  </section>
+
+  <!-- 12. QUIZ -->
+  <section class="panel" v-show="sec==='quiz'" id="quiz">
+    <h2>📝 Quiz ({{ quizQuestions.length }})</h2>
+    <div v-for="(q,qi) in quizQuestions" :key="qi" class="card" style="margin:12px 0">
+      <div style="font-weight:700;margin-bottom:8px">{{ qi+1 }}. {{ q.q }}</div>
+      <div v-for="(o,oi) in q.opts" :key="oi"
+           class="opt" :class="{sel:q.ans===oi}"
+           @click="q.ans=oi">
+        <span class="letter">{{ String.fromCharCode(65+oi) }}</span>{{ o.text }}
+      </div>
+    </div>
+    <div class="row-fn">
+      <button class="btn primary" @click="submitQuiz()" :disabled="!allQuizAnswered">Submit answers</button>
+      <button class="btn" @click="resetQuiz()">Reset</button>
+      <span class="muted" v-if="quizDone" style="font-weight:700">Score: {{ quizScore }} / {{ quizQuestions.length }}
+        ({{ Math.round(quizScore/quizQuestions.length*100) }}%)</span>
+    </div>
+    <div class="verdict" :class="quizDone ? (quizScore===quizQuestions.length?'ok':'info') : 'info'" v-if="quizDone">
+      {{ quizScore===quizQuestions.length ? '🎉 Perfect! All ' + quizQuestions.length + ' correct.' : 'Better luck next time — review the traps section.' }}
+    </div>
+  </section>
+
+  <!-- 13. CHECKLIST -->
+  <section class="panel" v-show="sec==='checklist'" id="checklist">
+    <h2>✅ Study Checklist</h2>
+    <p class="muted" style="margin-bottom:10px">{{ doneCount }} / {{ checklist.length }} complete</p>
+    <div v-for="(c,i) in checklist" :key="i" class="chk-item" :class="{done:c.done}" @click="toggleDone(i)">
+      <span class="chk-box">{{ c.done ? '✓' : '' }}</span>{{ c.t }}
+    </div>
+  </section>
+
+</div>
+
+<script src="../vue.global.prod.js"></script>
+<script>
+(() => {
+  const { createApp, ref, computed, reactive } = Vue;
+  const LS = {
+    theme: 'ccnp.wan.theme', done: 'ccnp.wan.done',
+    quiz: 'ccnp.wan.quiz'
+  };
+  function loadJSON(key, fb) {
+    try { const v = JSON.parse(localStorage.getItem(key)); return (v === null || v === undefined) ? fb : v; }
+    catch (e) { return fb; }
+  }
+  function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+  createApp({
+    setup() {
+      const theme = ref(loadJSON(LS.theme, 'dark'));
+      const sec = ref('intro');
+
+      /* ---------- SECTION NAV ---------- */
+      const sections = [
+        { id: 'intro', label: 'Overview', icon: '🌍' },
+        { id: 'ppp', label: 'PPP', icon: '🔗' },
+        { id: 'pppoe', label: 'PPPoE', icon: '🌐' },
+        { id: 'metro', label: 'Metro Eth', icon: '🏙️' },
+        { id: 'mplswan', label: 'MPLS WAN', icon: '🔷' },
+        { id: 'broadband', label: 'Broadband/LTE', icon: '📶' },
+        { id: 'sdwan', label: 'SD-WAN', icon: '☁️' },
+        { id: 'controllers', label: 'Controllers', icon: '🎛️' },
+        { id: 'edge', label: 'WAN Edge', icon: '🛜' },
+        { id: 'cmds', label: 'Commands', icon: '⌨️' },
+        { id: 'traps', label: 'Traps', icon: '⚠️' },
+        { id: 'quiz', label: 'Quiz', icon: '📝' },
+        { id: 'checklist', label: 'Checklist', icon: '✅' }
+      ];
+
+      /* ---------- PAP vs CHAP ---------- */
+      const authPick = ref('chap');
+      const authVerdict = computed(() => {
+        if (authPick.value === 'pap') return { cls: 'bad', text: 'PAP — sends the password in the CLEAR (weak). One-way authentication.' };
+        return { cls: 'ok', text: 'CHAP — challenge/response with hashing, never sends the clear password. Stronger, runs periodically. Preferred.' };
+      });
+
+      /* ---------- EVC TYPE ---------- */
+      const evcPick = ref('line');
+      const evcVerdict = computed(() => {
+        if (evcPick.value === 'line') return { cls: 'info', text: 'E-LINE — point-to-point, used for site links (delivered by EoMPLS pseudowire).' };
+        if (evcPick.value === 'lan') return { cls: 'info', text: 'E-LAN — multipoint any-to-any (delivered by VPLS/EVPN).' };
+        return { cls: 'info', text: 'E-TREE — hub-spoke root/leaf model (restricts leaf-to-leaf traffic).' };
+      });
+
+      /* ---------- WAN MODEL ---------- */
+      const wanModel = ref('l3');
+      const wanVerdict = computed(() => {
+        if (wanModel.value === 'l3') return { cls: 'info', text: 'MPLS L3VPN — the PROVIDER does the routing between sites (L3).' };
+        return { cls: 'info', text: 'Metro Ethernet — the CUSTOMER keeps routing (L2); SP just transports.' };
+      });
+
+      /* ---------- CONTROLLER ---------- */
+      const ctrlPick = ref('vsmart');
+      const ctrlVerdict = computed(() => {
+        if (ctrlPick.value === 'vbond') return { cls: 'info', text: 'vBond = ORCHESTRATION plane: first contact, authenticates/onboards devices (serial + cert), assigns to vSmart/vManage. Must be publicly reachable (12346/443).' };
+        if (ctrlPick.value === 'vsmart') return { cls: 'info', text: 'vSmart = CONTROL plane: runs OMP with edges, distributes routes/TLOCs, holds centralized policy. No vSmart = no control/policy.' };
+        return { cls: 'info', text: 'vManage = MANAGEMENT plane: GUI/dashboard, templates, onboarding, monitoring/analytics, REST API. Run in a cluster for HA.' };
+      });
+
+      /* ---------- EDGE TYPE ---------- */
+      const edgePick = ref('cedge');
+      const edgeVerdict = computed(() => {
+        if (edgePick.value === 'vedge') return { cls: 'info', text: 'vEdge — Viptela-native OS, runs SD-WAN out of the box.' };
+        return { cls: 'info', text: 'cEdge — IOS-XE routers (Catalyst/ISR) running the SD-WAN feature set.' };
+      });
+
+      /* ---------- COMMANDS ---------- */
+      const commands = [
+        {
+          key: 'ppp', label: 'PPP/PPPoE',
+          show: "interface Serial0/0/0\n encapsulation ppp\n ppp authentication chap\n ppp chap hostname R1\n ppp chap password Secret\n\n! PPPoE\ninterface Dialer1\n ip address negotiated\n encapsulation ppp\n dialer pool 1\n pppoe-client dial-pool-number 1\n\nshow interface Serial0/0/0\nshow pppoe session\nshow ppp multilink\ndebug ppp negotiation\ndebug ppp authentication"
+        },
+        {
+          key: 'lte', label: 'Broadband/LTE',
+          show: "! Broadband / PPPoE\ninterface Dialer1\n ip address negotiated\n pppoe-client dial-pool-number 1\n\n! LTE\ninterface Cellular0/0/0\n ip address negotiated\n cellular profile 1\n no shutdown\n\ndialer-list 1 protocol ip permit\nshow pppoe session\nshow cellular 0/0/0 hardware\nshow cellular 0/0/0 radio\nshow cellular 0/0/0 profile"
+        },
+        {
+          key: 'metro', label: 'Metro Eth (L2)',
+          show: "show l2vpn forwarding\nshow l2vpn service\nshow ethernet service\nshow evpn evi\nshow bridge-domain\nshow mac address-table"
+        },
+        {
+          key: 'mpls', label: 'MPLS WAN',
+          show: "show ip route vrf CUST1\nshow bgp vpnv4 unicast vrf CUST1\nshow mpls forwarding-table\nping vrf CUST1 10.10.0.2\nshow ip bgp vpnv4 all"
+        },
+        {
+          key: 'sdwan', label: 'SD-WAN',
+          show: "show omp peers\nshow omp routes\nshow omp tlocs\nshow sdwan control connections\nshow sdwan interface\nshow sdwan running-config"
+        },
+        {
+          key: 'ctrl', label: 'Controllers',
+          show: "show sdwan vbond list\nshow sdwan vmanage connections\nshow sdwan control\nshow sdwan device\nshow sdwan policy\nshow sdwan running-config\nshow sdwan identity"
+        }
+      ];
+      const activeCmd = ref(commands[0].key);
+      const activeCommand = computed(() => commands.find(c => c.key === activeCmd.value));
+
+      /* ---------- TRAPS ---------- */
+      const traps = [
+        'PPP = LCP (link) + NCP (network) + auth; link is up only if all phases pass.',
+        'CHAP = challenge/response + hash (never sends clear password); PAP = clear text (weak).',
+        'PPPoE discovery = PADI → PADO → PADR → PADS; MTU 1492 (8-byte PPPoE header).',
+        'PPPoE rides PPP over Ethernet/DSL; session on a Dialer interface bound to a dial pool.',
+        'Metro Ethernet EVC: E-LINE = P2P, E-LAN = any-to-any, E-TREE = hub-spoke.',
+        'EoMPLS = P2P pseudowire; VPLS/EVPN = multipoint; EVPN = BGP + VXLAN (modern).',
+        'QinQ (802.1ad) = S-tag + C-tag stacking at the SP edge.',
+        'MPLS WAN = provider L3VPN (VRF + MP-BGP); provider routes between sites (L3).',
+        'Metro Ethernet (L2) keeps customer routing; MPLS L3VPN hands routing to the SP.',
+        'CE-PE options: eBGP (common) / OSPF / EIGRP / static; dual PE/CE = resilience via routing.',
+        'Broadband = DSL/cable/fiber, asymmetric, shared, best-effort, no SLA; PPPoE + MTU 1492.',
+        'Broadband/LTE typical role = backup / DIA / SD-WAN transport (not SLA primary).',
+        'LTE = Cellular interface + SIM + APN; ip address negotiated; metered + variable (best-effort).',
+        'SD-WAN = overlay over any transport; OMP replaces BGP/IGP in the overlay; app-aware routing by SLA.',
+        'SD-WAN controllers: vBond = orchestration (authenticates/onboards), vSmart = control (OMP + policy), vManage = management.',
+        'Mnemonic: vBond opens the door, vSmart steers, vManage runs the GUI.',
+        'WAN Edge = data plane; vEdge = Viptela OS, cEdge = IOS-XE; TLOC + color identify transports.',
+        'Edge sessions: vBond (onboard), vSmart (OMP), vManage (mgmt), peers (data tunnels, DTLS/IPsec).'
+      ];
+
+      /* ---------- QUIZ ---------- */
+      const quizRaw = [
+        { q: 'In PPP, which protocol sets up the link?', opts: [{ text: 'LCP' }, { text: 'NCP' }, { text: 'IPCP' }, { text: 'PPPoE' }], correct: 0 },
+        { q: 'CHAP differs from PAP because it:', opts: [{ text: 'uses challenge/response and never sends the clear password' }, { text: 'sends the password in clear text' }, { text: 'eliminates encryption' }, { text: 'only works on MPLS' }], correct: 0 },
+        { q: 'Which PPP auth method is weak because it transmits the password in the clear?', opts: [{ text: 'PAP' }, { text: 'CHAP' }, { text: 'MSCHAP' }, { text: 'EAP' }], correct: 0 },
+        { q: 'The correct PPPoE discovery sequence is:', opts: [{ text: 'PADI → PADO → PADR → PADS' }, { text: 'PADO → PADI → PADS → PADR' }, { text: 'PADS → PADR → PADDO → PADI' }, { text: 'PADI → PADR → PADO → PADS' }], correct: 0 },
+        { q: 'PPPoE links typically use which MTU?', opts: [{ text: '1492' }, { text: '1500' }, { text: '1400' }, { text: '1522' }], correct: 0 },
+        { q: 'E-LAN is which connectivity model?', opts: [{ text: 'multipoint any-to-any' }, { text: 'point-to-point' }, { text: 'hub-spoke' }, { text: 'ring' }], correct: 0 },
+        { q: 'E-TREE is which model?', opts: [{ text: 'hub-spoke root/leaf' }, { text: 'any-to-any' }, { text: 'point-to-point' }, { text: 'broadcast' }], correct: 0 },
+        { q: 'Which tech delivers multipoint Metro Ethernet?', opts: [{ text: 'VPLS/EVPN' }, { text: 'EoMPLS only' }, { text: 'PPP' }, { text: 'HDLC' }], correct: 0 },
+        { q: 'MPLS WAN (L3VPN) differs from Metro Ethernet because:', opts: [{ text: 'the provider does the routing (L3)' }, { text: 'the customer always routes' }, { text: 'it has no VRF' }, { text: 'it uses only Ethernet' }], correct: 0 },
+        { q: 'In an MPLS L3VPN, which device holds the VRF + MP-BGP?', opts: [{ text: 'PE' }, { text: 'CE' }, { text: 'P' }, { text: 'WLC' }], correct: 0 },
+        { q: 'Broadband internet is best characterized as:', opts: [{ text: 'asymmetric, shared, best-effort (no SLA)' }, { text: 'guaranteed symmetric SLA link' }, { text: 'always symmetric fiber' }, { text: 'connection-oriented' }], correct: 0 },
+        { q: 'LTE cellular interface identity uses:', opts: [{ text: 'SIM + APN profile' }, { text: 'a BGP neighbor' }, { text: 'a static MAC only' }, { text: 'a public certificate alone' }], correct: 0 },
+        { q: 'In SD-WAN, which protocol replaces BGP/IGP in the overlay?', opts: [{ text: 'OMP' }, { text: 'LDP' }, { text: 'RSVP' }, { text: 'PPPoE' }], correct: 0 },
+        { q: 'vSmart is which SD-WAN plane?', opts: [{ text: 'control (OMP + policy)' }, { text: 'management' }, { text: 'orchestration' }, { text: 'data' }], correct: 0 },
+        { q: 'vBond is which SD-WAN plane?', opts: [{ text: 'orchestration (authenticates/onboards)' }, { text: 'control' }, { text: 'management' }, { text: 'data' }], correct: 0 },
+        { q: 'vManage is which SD-WAN plane?', opts: [{ text: 'management (GUI/templates/monitoring)' }, { text: 'control' }, { text: 'orchestration' }, { text: 'data' }], correct: 0 },
+        { q: 'cEdge routers run which OS?', opts: [{ text: 'IOS-XE (Catalyst/ISR)' }, { text: 'Viptela OS only' }, { text: 'Nexus NX-OS' }, { text: 'IOS (classic)' }], correct: 0 },
+        { q: 'App-aware routing in SD-WAN picks paths based on:', opts: [{ text: 'SLA (latency/loss/jitter)' }, { text: 'MAC address' }, { text: 'DSL speed' }, { text: 'number of VLANs' }], correct: 0 }
+      ];
+      const quizQuestions = reactive(quizRaw.map(q => ({ ...q, ans: null })));
+      const quizDone = ref(false);
+      const quizScore = ref(loadJSON(LS.quiz, 0) || 0);
+      const allQuizAnswered = computed(() => quizQuestions.every(q => q.ans !== null));
+      function submitQuiz() {
+        if (!allQuizAnswered.value) return;
+        quizScore.value = quizQuestions.filter((q, i) => q.ans === q.correct).length;
+        quizDone.value = true;
+        save(LS.quiz, quizScore.value);
+      }
+      function resetQuiz() {
+        quizQuestions.forEach(q => q.ans = null);
+        quizDone.value = false;
+        quizScore.value = 0;
+        localStorage.removeItem(LS.quiz);
+      }
+
+      /* ---------- CHECKLIST ---------- */
+      const checklistRoot = loadJSON(LS.done, [
+        { t: 'WAN divides into traditional (PPP/PPPoE/Metro/MPLS/broadband/LTE) vs modern SD-WAN overlay', done: false },
+        { t: 'PPP = LCP + NCP + auth; CHAP challenge/response vs PAP clear text; MLPPP bonds links', done: false },
+        { t: 'PPPoE discovery PADI→PADO→PADR→PADS; Dialer interface + dial pool; MTU 1492', done: false },
+        { t: 'Metro Ethernet: E-LINE=P2P(EoMPLS), E-LAN=any-to-any(VPLS/EVPN), E-TREE=hub-spoke; QinQ tags', done: false },
+        { t: 'MPLS WAN = provider L3VPN (VRF+MP-BGP); CE-PE eBGP/static/OSPF/EIGRP; SP routes (L3)', done: false },
+        { t: 'Broadband = DSL/cable/fiber, asymmetric shared best-effort, no SLA; role = backup/DIA/SD-WAN', done: false },
+        { t: 'LTE = Cellular interface + SIM + APN; ip address negotiated; metered best-effort; SD-WAN fallback', done: false },
+        { t: 'SD-WAN = overlay over any transport; OMP replaces BGP/IGP; DTLS/IPsec; app-aware routing by SLA', done: false },
+        { t: 'Controllers: vBond=orchestration(onboard/auth), vSmart=control(OMP+policy), vManage=management(GUI)', done: false },
+        { t: 'Mnemonic: vBond opens the door, vSmart steers, vManage runs the GUI', done: false },
+        { t: 'WAN Edge = data plane; vEdge=Viptela OS vs cEdge=IOS-XE; TLOC+color identify transports', done: false },
+        { t: 'Edge sessions: vBond(onboard), vSmart(OMP), vManage(mgmt), peers(data tunnels DTLS/IPsec)', done: false }
+      ]);
+      const checklist = reactive(checklistRoot);
+      const doneCount = computed(() => checklist.filter(c => c.done).length);
+      function saveChecklist() { save(LS.done, checklistRoot); }
+      function toggleDone(i) { checklistRoot[i].done = !checklistRoot[i].done; saveChecklist(); }
+
+      return {
+        theme, sec, sections,
+        authPick, authVerdict,
+        evcPick, evcVerdict,
+        wanModel, wanVerdict,
+        ctrlPick, ctrlVerdict,
+        edgePick, edgeVerdict,
+        commands, activeCmd, activeCommand,
+        traps,
+        quizQuestions, quizDone, quizScore, allQuizAnswered, submitQuiz, resetQuiz,
+        checklist, doneCount, saveChecklist, toggleDone
+      };
+    }
+  }).mount('#app');
+})();
+</script>
+</body>
+</html>

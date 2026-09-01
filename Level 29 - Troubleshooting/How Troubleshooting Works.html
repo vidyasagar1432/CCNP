@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Troubleshooting Works — Deep Dive</title>
+<style>
+  :root {
+    --bg: #0f172a; --panel: #111c34; --card: #1e293b; --card-2: #16233d;
+    --text: #f8fafc; --muted: #94a3b8;
+    --blue: #38bdf8; --blue-dim: #0c4a6e;
+    --green: #34d399; --green-dim: #064e3b;
+    --amber: #fbbf24; --amber-dim: #78350f;
+    --red: #f87171; --red-dim: #7f1d1d;
+    --violet: #a78bfa; --violet-dim: #4c1d95;
+    --cyan: #22d3ee; --cyan-dim: #164e63;
+    --border: #334155; --hover: #263449; --code-bg: #0b1220;
+  }
+  #app[data-theme="light"] {
+    --bg: #f1f5f9; --panel: #ffffff; --card: #ffffff; --card-2: #f8fafc;
+    --text: #0f172a; --muted: #64748b;
+    --blue: #0284c7; --blue-dim: #e0f2fe;
+    --green: #059669; --green-dim: #d1fae5;
+    --amber: #d97706; --amber-dim: #fef3c7;
+    --red: #dc2626; --red-dim: #fee2e2;
+    --violet: #7c3aed; --violet-dim: #ede9fe;
+    --cyan: #0891b2; --cyan-dim: #cffafe;
+    --border: #cbd5e1; --hover: #e2e8f0; --code-bg: #0b1220;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; }
+  #app { max-width: 1040px; margin: 0 auto; padding: 20px 18px 60px; }
+
+  header { position: sticky; top: 0; z-index: 30; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .lv-badge { background: var(--blue-dim); color: var(--blue); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .exam-badge { background: var(--violet-dim); color: var(--violet); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .head-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: background 0.15s; }
+  .btn:hover { background: var(--hover); }
+  .btn.primary { background: var(--blue); color: #0f172a; border-color: var(--blue); }
+
+  nav { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 2px 16px; }
+  nav button.chip { border: 1px solid var(--border); background: var(--card); color: var(--muted); padding: 5px 11px; border-radius: 999px; cursor: pointer; font-size: 0.76rem; font-weight: 600; }
+  nav button.chip.active { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
+
+  section.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
+  section.panel h2 { font-size: 1.2rem; margin-bottom: 6px; }
+  section.panel h3 { font-size: 1rem; margin: 18px 0 10px; color: var(--blue); }
+  section.panel p { margin: 8px 0; }
+  .muted { color: var(--muted); }
+  .lead { color: var(--muted); font-size: 0.95rem; }
+
+  .grid { display: grid; gap: 12px; }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .g3 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .g4 { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .card h4 { font-size: 0.9rem; margin-bottom: 6px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85rem; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  tr:hover td { background: var(--hover); }
+
+  code, .mono { font-family: 'Fira Code', ui-monospace, monospace; }
+  .mono { font-size: 0.9rem; }
+  .chip-tag { display: inline-block; border-radius: 999px; padding: 1px 9px; font-size: 0.74rem; font-weight: 700; }
+  .b-blue { background: var(--blue-dim); color: var(--blue); }
+  .b-green { background: var(--green-dim); color: var(--green); }
+  .b-amber { background: var(--amber-dim); color: var(--amber); }
+  .b-red { background: var(--red-dim); color: var(--red); }
+  .b-violet { background: var(--violet-dim); color: var(--violet); }
+  .b-cyan { background: var(--cyan-dim); color: var(--cyan); }
+
+  .callout { border-left: 4px solid var(--amber); background: var(--card-2); border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 12px 0; font-size: 0.9rem; }
+  .callout.green { border-color: var(--green); }
+  .callout.red { border-color: var(--red); }
+  .callout.blue { border-color: var(--blue); }
+  .callout.violet { border-color: var(--violet); }
+
+  .row-fn { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 8px 0; }
+
+  .opt { display: flex; align-items: center; gap: 8px; padding: 6px 9px; margin: 3px 0; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; background: var(--card); font-size: 0.86rem; }
+  .opt.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .opt .letter { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex: 0 0 auto; }
+  .opt.sel .letter { background: var(--blue); color: #0f172a; }
+
+  #app pre, pre.cmd { background: var(--code-bg); color: #e2e8f0; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.82rem; line-height: 1.5; }
+
+  .trap-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  .trap-item:last-child { border-bottom: none; }
+  .trap-ico { color: var(--red); font-weight: 700; flex: 0 0 auto; }
+
+  .step-flow { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .step { border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 0.8rem; background: var(--card-2); }
+  .step .n { color: var(--blue); font-weight: 700; }
+
+  .verdict { border-radius: 8px; padding: 10px 14px; font-weight: 700; margin: 8px 0; }
+  .verdict.ok { background: var(--green-dim); color: var(--green); }
+  .verdict.bad { background: var(--red-dim); color: var(--red); }
+  .verdict.info { background: var(--blue-dim); color: var(--blue); }
+
+  .chk-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; margin: 5px 0; cursor: pointer; transition: opacity 0.15s; }
+  .chk-item.done { opacity: 0.55; text-decoration: line-through; }
+  .chk-box { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 5px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; }
+  .chk-item.done .chk-box { background: var(--green); border-color: var(--green); color: #0f172a; }
+
+  .proto-cell { border: 1px solid var(--border); border-radius: 10px; padding: 9px 10px; background: var(--card); cursor: pointer; text-align: center; }
+  .proto-cell.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .proto-cell .pn { font-weight: 700; }
+  .proto-cell .pd { font-size: 0.75rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<div id="app" :data-theme="theme">
+  <header>
+    <h1><span class="lv-badge">L29</span> How Troubleshooting Works
+      <span class="exam-badge">ENCOR 350-401</span></h1>
+    <div class="head-actions">
+      <a class="btn" href="../Level 28 - Cisco IOS and IOS XE/How Cisco IOS and IOS XE Works.html">◀ IOS/XE</a>
+      <a class="btn" href="../Level 30 - Labs/How Labs Work.html">Labs ▶</a>
+      <a class="btn" href="../index.html">Flashcards</a>
+      <button class="btn" @click="theme = (theme==='dark'?'light':'dark')">{{ theme==='dark' ? '☀' : '🌙' }}</button>
+    </div>
+  </header>
+
+  <nav>
+    <button class="chip" v-for="s in sections" :key="s.id" :class="{active:sec===s.id}" @click="sec=s.id">{{ s.icon }} {{ s.label }}</button>
+  </nav>
+
+  <!-- 1. OVERVIEW -->
+  <section class="panel" v-show="sec==='intro'" id="intro">
+    <h2>🩺 Troubleshooting — a systematic approach</h2>
+    <p class="lead">Troubleshoot <b>bottom-up</b> (L1 → L2 → L3 → services) and verify one layer before the next. Detect the <b>symptom</b>, isolate the <b>layer/technology</b>, check <b>both directions</b>, then fix and verify.</p>
+
+    <h3>The systematic method</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> Define symptom</div>
+      <div class="step"><span class="n">2</span> Pick layer/tech</div>
+      <div class="step"><span class="n">3</span> Verify up the chain</div>
+      <div class="step"><span class="n">4</span> Isolate the segment</div>
+      <div class="step"><span class="n">5</span> Fix + verify</div>
+    </div>
+    <div class="callout red"><b>Verify EVERY layer from L1 up. A layer-3 route exists ≠ the path works — check return path, ACLs, and NAT.</b></div>
+  </section>
+
+  <!-- 2. BY LAYER -->
+  <section class="panel" v-show="sec==='layer'" id="layer">
+    <h2>🧱 Troubleshooting by Layer (L1/L2/L3)</h2>
+    <p class="lead">Rule out the physical first, then data-link, then network. Match the symptom to its layer before touching config.</p>
+
+    <div class="grid g3">
+      <div class="proto-cell" :class="{sel:layerPick==='l1'}" @click="layerPick='l1'"><div class="pn">Layer 1</div><div class="pd">cable · optics · power</div></div>
+      <div class="proto-cell" :class="{sel:layerPick==='l2'}" @click="layerPick='l2'"><div class="pn">Layer 2</div><div class="pd">VLAN · trunk · MAC · STP</div></div>
+      <div class="proto-cell" :class="{sel:layerPick==='l3'}" @click="layerPick='l3'"><div class="pn">Layer 3</div><div class="pd">route · adjacency · path</div></div>
+    </div>
+    <div class="verdict" :class="layerVerdict.cls">{{ layerVerdict.text }}</div>
+    <table>
+      <tr><th>Layer</th><th>Key commands</th><th>Classic trap</th></tr>
+      <tr><td>L1</td><td>show interfaces status · transceiver · cable-diag</td><td>up/down = admin up, no link; duplex mismatch = errors, not no-link</td></tr>
+      <tr><td>L2</td><td>show mac address-table · show vlan · show interfaces trunk · show spanning-tree</td><td>MAC table = proof; trunk allowed + native match; STP blocking is normal</td></tr>
+      <tr><td>L3</td><td>show ip route · show ip interface brief · ping · traceroute · show ip cef</td><td>route exists ≠ reachable — check ACL/NAT/reverse path</td></tr>
+    </table>
+    <div class="callout blue"><b>Order: interface → adjacency → route → reachability. First word of an interface state = admin, second = protocol/link.</b></div>
+  </section>
+
+  <!-- 3. SWITCHING -->
+  <section class="panel" v-show="sec==='switch'" id="switch">
+    <h2>🔌 Switching: VLAN / STP / EtherChannel</h2>
+    <p class="lead">L2 faults split into <b>VLAN membership</b>, <b>spanning-tree</b>, and <b>link aggregation</b>. Pick the failing piece.</p>
+
+    <div class="grid g3">
+      <div class="proto-cell" :class="{sel:swPick==='vlan'}" @click="swPick='vlan'"><div class="pn">VLAN</div><div class="pd">exists · access · trunk</div></div>
+      <div class="proto-cell" :class="{sel:swPick==='stp'}" @click="swPick='stp'"><div class="pn">STP</div><div class="pd">root · roles · loops</div></div>
+      <div class="proto-cell" :class="{sel:swPick==='ch'}" @click="swPick='ch'"><div class="pn">EtherChannel</div><div class="pd">bundle · modes</div></div>
+    </div>
+    <div class="verdict" :class="swVerdict.cls">{{ swVerdict.text }}</div>
+    <div class="grid g2">
+      <div class="card">
+        <h4>VLAN checks</h4>
+        <ul>
+          <li>VLAN must <b>exist</b> first (`show vlan`)</li>
+          <li>Trunk <b>allowed list</b> gates crossing</li>
+          <li><b>Native VLAN</b> must match both ends</li>
+          <li>MAC table = ground truth of VLAN membership</li>
+          <li>Cross-VLAN DHCP → `ip helper-address`</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>STP checks</h4>
+        <ul>
+          <li><b>Blocking is normal</b>; loops are the failure</li>
+          <li>Root = lowest priority, then MAC</li>
+          <li>PortFast + BPDU Guard on access ports</li>
+          <li>Root Guard = wrong root; Loop Guard = silent failure</li>
+          <li>TC storm = flapping port flushes MACs</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h4>EtherChannel bundle matrix (memorize)</h4>
+      <table>
+        <tr><th>Side A</th><th>Side B</th><th>Result</th></tr>
+        <tr><td>active</td><td>active</td><td>LACP bundle ✔</td></tr>
+        <tr><td>active</td><td>passive</td><td>LACP bundle ✔</td></tr>
+        <tr><td>passive</td><td>passive</td><td>NO bundle ✘</td></tr>
+        <tr><td>desirable</td><td>desirable</td><td>PAgP bundle ✔</td></tr>
+        <tr><td>on</td><td>on</td><td>static (no negotiation) ✔</td></tr>
+      </table>
+    </div>
+    <div class="callout red"><b>`show etherchannel summary` shows P(in bundle)/I(standalone)/S(suspended)/D(down). passive+passive and auto+auto never bundle. Members must match speed, duplex, VLAN, mode.</b></div>
+  </section>
+
+  <!-- 4. ROUTING -->
+  <section class="panel" v-show="sec==='rout'" id="rout">
+    <h2>🛣️ Routing: OSPF / EIGRP / BGP</h2>
+    <p class="lead">Routing failures start with the <b>adjacency/neighbor table</b>, then the routing/LSDB, then the installed route and reachability.</p>
+
+    <div class="grid g3">
+      <div class="proto-cell" :class="{sel:rtPick==='ospf'}" @click="rtPick='ospf'"><div class="pn">OSPF</div><div class="pd">adj · MTU · area</div></div>
+      <div class="proto-cell" :class="{sel:rtPick==='eigrp'}" @click="rtPick='eigrp'"><div class="pn">EIGRP</div><div class="pd">K-values · SIA</div></div>
+      <div class="proto-cell" :class="{sel:rtPick==='bgp'}" @click="rtPick='bgp'"><div class="pn">BGP</div><div class="pd">session · NLRI · bestpath</div></div>
+    </div>
+    <div class="verdict" :class="rtVerdict.cls">{{ rtVerdict.text }}</div>
+    <table>
+      <tr><th>Protocol</th><th>First check</th><th>Top failure</th></tr>
+      <tr><td>OSPF</td><td>show ip ospf neighbor</td><td>MTU mismatch → stuck EXSTART/EXCHANGE; hello/area/auth match</td></tr>
+      <tr><td>EIGRP</td><td>show ip eigrp neighbors</td><td>K-values/AS mismatch; SIA = stuck in active (no reply)</td></tr>
+      <tr><td>BGP</td><td>show ip bgp summary</td><td>not Established = TCP; network not in table; RIB-failure (next-hop)</td></tr>
+    </table>
+    <div class="callout red"><b>OSPF MTU = stuck EXSTART. EIGRP SIA = stuck-in-active. BGP next-hop unreachable = RIB-failure (route present, not installed). Best path: weight → local pref → AS path → origin → MED → eBGP.</b></div>
+  </section>
+
+  <!-- 5. SERVICES -->
+  <section class="panel" v-show="sec==='svc'" id="svc">
+    <h2>🧩 Services: NAT / ACL / DHCP / DNS</h2>
+    <p class="lead">Layer-3+ services often drop or translate traffic silently. Verify the data plane, then the policy/service.</p>
+
+    <div class="grid g4">
+      <div class="proto-cell" :class="{sel:svcPick==='nat'}" @click="svcPick='nat'"><div class="pn">NAT</div><div class="pd">translations</div></div>
+      <div class="proto-cell" :class="{sel:svcPick==='acl'}" @click="svcPick='acl'"><div class="pn">ACL</div><div class="pd">order/mask</div></div>
+      <div class="proto-cell" :class="{sel:svcPick==='dhcp'}" @click="svcPick='dhcp'"><div class="pn">DHCP</div><div class="pd">DORA/helper</div></div>
+      <div class="proto-cell" :class="{sel:svcPick==='dns'}" @click="svcPick='dns'"><div class="pn">DNS</div><div class="pd">lookup/records</div></div>
+    </div>
+    <div class="verdict" :class="svcVerdict.cls">{{ svcVerdict.text }}</div>
+    <table>
+      <tr><th>Service</th><th>First check</th><th>Classic trap</th></tr>
+      <tr><td>NAT</td><td>show ip nat translations</td><td>wrong inside/outside = no translation; overload = PAT (many:1); stateful return path</td></tr>
+      <tr><td>ACL</td><td>show access-lists</td><td>first match wins; implicit deny at end; wildcard not subnet mask</td></tr>
+      <tr><td>DHCP</td><td>show ip dhcp binding</td><td>169.254 = APIPA (no server); `ip helper-address` for cross-VLAN; UDP 67/68</td></tr>
+      <tr><td>DNS</td><td>nslookup / dig</td><td>UDP 53; NXDOMAIN ≠ server down (check type/name); TTL = stale IP</td></tr>
+    </table>
+    <div class="callout blue"><b>NAT debug shows misses; ACL `show access-lists` shows hit counters; DHCP DORA = Discover→Offer→Request→Ack; DNS isolate with nslookup/dig, not ping.</b></div>
+  </section>
+
+  <!-- 6. ADVANCED -->
+  <section class="panel" v-show="sec==='adv'" id="adv">
+    <h2>🚀 Advanced: VPN / Wireless / QoS / SD-WAN</h2>
+
+    <div class="grid g4">
+      <div class="proto-cell" :class="{sel:adPick==='vpn'}" @click="adPick='vpn'"><div class="pn">VPN</div><div class="pd">IKE · IPSec</div></div>
+      <div class="proto-cell" :class="{sel:adPick==='wlan'}" @click="adPick='wlan'"><div class="pn">Wireless</div><div class="pd">RF · assoc · auth</div></div>
+      <div class="proto-cell" :class="{sel:adPick==='qos'}" @click="adPick='qos'"><div class="pn">QoS</div><div class="pd">mark · queue</div></div>
+      <div class="proto-cell" :class="{sel:adPick==='sdwan'}" @click="adPick='sdwan'"><div class="pn">SD-WAN</div><div class="pd">control · tunnels</div></div>
+    </div>
+    <div class="verdict" :class="adVerdict.cls">{{ adVerdict.text }}</div>
+    <table>
+      <tr><th>Tech</th><th>First check</th><th>Classic trap</th></tr>
+      <tr><td>VPN</td><td>show crypto isakmp sa / ipsec sa</td><td>Phase 1 = IKE SA; Phase 2 = IPSec SA gated by interesting-traffic ACL; tunnel up ≠ traffic protected</td></tr>
+      <tr><td>Wireless</td><td>show ap summary / client summary</td><td>RF → association → auth → IP order; associated ≠ authenticated</td></tr>
+      <tr><td>QoS</td><td>show policy-map interface</td><td>direction in/out + trust boundary; zero counters = never matched; queue drops = congestion</td></tr>
+      <tr><td>SD-WAN</td><td>show sdwan control connections</td><td>control plane (vSmart/vBond) up first; DTLS 12346; policy mismatch = silent drops; BFD/DTLS</td></tr>
+    </table>
+    <div class="callout red"><b>VPN: interesting traffic gates Phase 2; parameters must match both ends. QoS: `show policy-map interface` = applied reality. SD-WAN: control-plane first, then tunnels + policy.</b></div>
+  </section>
+
+  <!-- 7. PERFORMANCE -->
+  <section class="panel" v-show="sec==='perf'" id="perf">
+    <h2>📊 Performance Analysis</h2>
+    <p class="lead">Isolate <b>latency, throughput, jitter, and loss</b> and tie them to the network path with ping, traceroute, IP SLA, NetFlow, and packet analysis.</p>
+
+    <h3>Key metrics</h3>
+    <div class="grid g4">
+      <div class="card"><h4>Latency</h4><p class="muted" style="margin:0">RTT delay = ser + prop + process + queue</p></div>
+      <div class="card"><h4>Jitter</h4><p class="muted" style="margin:0">delay variation (≠ latency)</p></div>
+      <div class="card"><h4>Loss</h4><p class="muted" style="margin:0">dropped %</p></div>
+      <div class="card"><h4>Throughput</h4><p class="muted" style="margin:0">delivered bits/sec</p></div>
+    </div>
+    <table>
+      <tr><th>Pattern</th><th>Meaning</th></tr>
+      <tr><td>Constant high latency</td><td>serialization / distance</td></tr>
+      <tr><td>Spiking latency</td><td>queueing / congestion</td></tr>
+      <tr><td>Burst loss</td><td>congestion / drops</td></tr>
+      <tr><td>One-way high</td><td>asymmetric path</td></tr>
+      <tr><td>Triggered by TCP</td><td>window limiting throughput</td></tr>
+    </table>
+    <div class="callout blue"><b>Latency = 4 components. Jitter is VARIATION, not level. TCP window caps throughput independently of link bandwidth. IP SLA = active measurement. Baseline before isolating.</b></div>
+  </section>
+
+  <!-- 8. METHOD -->
+  <section class="panel" v-show="sec==='method'" id="method">
+    <h2>🧭 The systematic workflow</h2>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> Baseline</div>
+      <div class="step"><span class="n">2</span> Measure latency/loss</div>
+      <div class="step"><span class="n">3</span> Identify segment</div>
+      <div class="step"><span class="n">4</span> Capture</div>
+      <div class="step"><span class="n">5</span> Confirm fix</div>
+    </div>
+    <div class="callout red"><b>Work methodically: define the symptom → pick the layer → verify up the chain → isolate the segment (traceroute pinpoints the failing hop) → fix → re-verify. Always check the return path.</b></div>
+  </section>
+
+  <!-- 9. COMMANDS -->
+  <section class="panel" v-show="sec==='cmds'" id="cmds">
+    <h2>⌨️ Commands</h2>
+    <div class="row-fn">
+      <button class="btn" v-for="c in commands" :key="c.key" :class="{primary:activeCmd===c.key}" @click="activeCmd=c.key">{{ c.label }}</button>
+    </div>
+    <pre class="cmd">{{ activeCommand.show }}</pre>
+  </section>
+
+  <!-- 10. TRAPS -->
+  <section class="panel" v-show="sec==='traps'" id="traps">
+    <h2>⚠️ Common Traps</h2>
+    <div v-for="t in traps" :key="t" class="trap-item"><span class="trap-ico">!</span><div>{{ t }}</div></div>
+  </section>
+
+  <!-- 11. QUIZ -->
+  <section class="panel" v-show="sec==='quiz'" id="quiz">
+    <h2>📝 Quiz ({{ quizQuestions.length }})</h2>
+    <div v-for="(q,qi) in quizQuestions" :key="qi" class="card" style="margin:12px 0">
+      <div style="font-weight:700;margin-bottom:8px">{{ qi+1 }}. {{ q.q }}</div>
+      <div v-for="(o,oi) in q.opts" :key="oi"
+           class="opt" :class="{sel:q.ans===oi}"
+           @click="q.ans=oi">
+        <span class="letter">{{ String.fromCharCode(65+oi) }}</span>{{ o.text }}
+      </div>
+    </div>
+    <div class="row-fn">
+      <button class="btn primary" @click="submitQuiz()" :disabled="!allQuizAnswered">Submit answers</button>
+      <button class="btn" @click="resetQuiz()">Reset</button>
+      <span class="muted" v-if="quizDone" style="font-weight:700">Score: {{ quizScore }} / {{ quizQuestions.length }}
+        ({{ Math.round(quizScore/quizQuestions.length*100) }}%)</span>
+    </div>
+    <div class="verdict" :class="quizDone ? (quizScore===quizQuestions.length?'ok':'info') : 'info'" v-if="quizDone">
+      {{ quizScore===quizQuestions.length ? '🎉 Perfect! All ' + quizQuestions.length + ' correct.' : 'Better luck next time — review the traps section.' }}
+    </div>
+  </section>
+
+  <!-- 12. CHECKLIST -->
+  <section class="panel" v-show="sec==='checklist'" id="checklist">
+    <h2>✅ Study Checklist</h2>
+    <p class="muted" style="margin-bottom:10px">{{ doneCount }} / {{ checklist.length }} complete</p>
+    <div v-for="(c,i) in checklist" :key="i" class="chk-item" :class="{done:c.done}" @click="toggleDone(i)">
+      <span class="chk-box">{{ c.done ? '✓' : '' }}</span>{{ c.t }}
+    </div>
+  </section>
+
+</div>
+
+<script src="../vue.global.prod.js"></script>
+<script>
+(() => {
+  const { createApp, ref, computed, reactive } = Vue;
+  const LS = {
+    theme: 'ccnp.tshoot.theme', done: 'ccnp.tshoot.done',
+    quiz: 'ccnp.tshoot.quiz'
+  };
+  function loadJSON(key, fb) {
+    try { const v = JSON.parse(localStorage.getItem(key)); return (v === null || v === undefined) ? fb : v; }
+    catch (e) { return fb; }
+  }
+  function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+  createApp({
+    setup() {
+      const theme = ref(loadJSON(LS.theme, 'dark'));
+      const sec = ref('intro');
+
+      /* ---------- SECTION NAV ---------- */
+      const sections = [
+        { id: 'intro', label: 'Overview', icon: '🩺' },
+        { id: 'layer', label: 'By Layer', icon: '🧱' },
+        { id: 'switch', label: 'Switching', icon: '🔌' },
+        { id: 'rout', label: 'Routing', icon: '🛣️' },
+        { id: 'svc', label: 'Services', icon: '🧩' },
+        { id: 'adv', label: 'Advanced', icon: '🚀' },
+        { id: 'perf', label: 'Performance', icon: '📊' },
+        { id: 'method', label: 'Method', icon: '🧭' },
+        { id: 'cmds', label: 'Commands', icon: '⌨️' },
+        { id: 'traps', label: 'Traps', icon: '⚠️' },
+        { id: 'quiz', label: 'Quiz', icon: '📝' },
+        { id: 'checklist', label: 'Checklist', icon: '✅' }
+      ];
+
+      /* ---------- LAYER ---------- */
+      const layerPick = ref('l1');
+      const layerVerdict = computed(() => {
+        const m = {
+          l1: 'Layer 1 — physical. Check cable, optics, power. up/down = admin up, NO link. Duplex mismatch = errors, not no-link.',
+          l2: 'Layer 2 — data link. Check VLAN exists, port membership, MAC learning, trunk allowed/native, STP state. MAC table = proof.',
+          l3: 'Layer 3 — network. Check IP on interface, adjacency, route in table, path reaches. Route exists ≠ reachable (ACL/NAT/return).'
+        };
+        return { cls: 'info', text: m[layerPick.value] };
+      });
+
+      /* ---------- SWITCHING ---------- */
+      const swPick = ref('vlan');
+      const swVerdict = computed(() => {
+        const m = {
+          vlan: 'VLAN — verify it exists (show vlan), port is in it, trunk allowed list carries it, native VLAN matches. MAC table = ground truth.',
+          stp: 'STP — blocking is normal, loops are the failure. Root = lowest priority then MAC. PortFast+BPDU Guard on access; Root/Loop Guard protect.',
+          ch: 'EtherChannel — show etherchannel summary (P/I/S/U). passive+passive or auto+auto never bundle. Members must match speed/duplex/VLAN/mode.'
+        };
+        return { cls: 'info', text: m[swPick.value] };
+      });
+
+      /* ---------- ROUTING ---------- */
+      const rtPick = ref('ospf');
+      const rtVerdict = computed(() => {
+        const m = {
+          ospf: 'OSPF — show ip ospf neighbor first. MTU mismatch = stuck EXSTART/EXCHANGE. Hello/dead, area, auth, network type must match. FULL = healthy.',
+          eigrp: 'EIGRP — show ip eigrp neighbors first. K-values + AS must match. SIA = stuck in active (no reply). Stub = no queries on hub-spoke.',
+          bgp: 'BGP — show ip bgp summary. Established = up; Idle/Active = TCP/config. network must exist in table; RIB-failure = next-hop unreachable. iBGP full mesh.'
+        };
+        return { cls: 'info', text: m[rtPick.value] };
+      });
+
+      /* ---------- SERVICES ---------- */
+      const svcPick = ref('nat');
+      const svcVerdict = computed(() => {
+        const m = {
+          nat: 'NAT — show ip nat translations. Wrong inside/outside = no translation. Overload = PAT (many:1). Stateful return path must match the table.',
+          acl: 'ACL — show access-lists hit counters. First match wins; implicit deny at the end. Wildcard masks (inverse), not subnet masks.',
+          dhcp: 'DHCP — show ip dhcp binding. 169.254 = APIPA (no server). ip helper-address for cross-VLAN. DORA = Discover→Offer→Request→Ack, UDP 67/68.',
+          dns: 'DNS — nslookup/dig isolate DNS from ping. UDP 53. NXDOMAIN ≠ server down (check type/name). TTL = why stale IP persists.'
+        };
+        return { cls: 'info', text: m[svcPick.value] };
+      });
+
+      /* ---------- ADVANCED ---------- */
+      const adPick = ref('vpn');
+      const adVerdict = computed(() => {
+        const m = {
+          vpn: 'VPN — show crypto isakmp sa (Phase 1 IKE) / ipsec sa (Phase 2 data). Interesting-traffic ACL gates Phase 2. Tunnel up ≠ protected.',
+          wlan: 'Wireless — RF → association → auth → IP. show ap summary / client summary. Associated ≠ authenticated.',
+          qos: 'QoS — show policy-map interface = applied reality. Direction in/out + trust boundary. Zero counters = never matched; queue drops = congestion.',
+          sdwan: 'SD-WAN — show sdwan control connections first (vSmart/vBond). DTLS 12346. Policy mismatch = silent drops. BFD drives failover.'
+        };
+        return { cls: 'info', text: m[adPick.value] };
+      });
+
+      /* ---------- COMMANDS ---------- */
+      const commands = [
+        {
+          key: 'layer', label: 'Layer 1/2/3',
+          show: "show interfaces status\nshow interfaces GigabitEthernet0/1\nshow interface transceiver module\ntest cable-diagnostics tdr interface Gi0/1\nshow mac address-table\nshow vlan\nshow ip interface brief\nshow ip route\nping 10.0.0.1\ntraceroute 10.0.0.1\nshow ip cef 10.0.0.0/24"
+        },
+        {
+          key: 'switch', label: 'Switching',
+          show: "show vlan brief\nshow interfaces trunk\nshow interfaces Gi0/1 switchport\nshow mac address-table vlan 10\nshow spanning-tree\nshow spanning-tree vlan 10 root primary\nshow etherchannel summary\nshow etherchannel detail\nshow etherchannel load-balance"
+        },
+        {
+          key: 'ospf', label: 'OSPF',
+          show: "show ip ospf neighbor\nshow ip ospf interface Gi0/1\nshow ip ospf database\nshow ip route ospf\nshow ip ospf\ndebug ip ospf adj"
+        },
+        {
+          key: 'eigrp', label: 'EIGRP',
+          show: "show ip eigrp neighbors\nshow ip eigrp topology\nshow ip eigrp interfaces\nshow ip eigrp traffic\nshow ip route eigrp\ndebug eigrp packets"
+        },
+        {
+          key: 'bgp', label: 'BGP',
+          show: "show ip bgp summary\nshow ip bgp neighbors 10.0.0.1\nshow ip bgp\nshow ip bgp 10.0.0.0/24\nshow ip bgp rib-failure\nshow ip route bgp"
+        },
+        {
+          key: 'svc', label: 'NAT/ACL/DHCP/DNS',
+          show: "show ip nat translations\nshow ip nat statistics\ndebug ip nat detailed\nshow access-lists\nshow ip interface Gi0/1\nshow ip dhcp binding\nshow ip dhcp pool\nshow ip dhcp conflict\nnslookup server.corp.com\ndig server.corp.com\nshow hosts"
+        },
+        {
+          key: 'adv', label: 'VPN/Wireless/QoS/SD-WAN',
+          show: "show crypto isakmp sa\nshow crypto ipsec sa\nshow crypto map\nclear crypto sa\nshow ap summary\nshow wlan summary\nshow client summary\nshow policy-map interface Gi0/1\nshow mls qos\nshow sdwan control connections\nshow sdwan tunnel\nshow sdwan policy"
+        },
+        {
+          key: 'perf', label: 'Performance',
+          show: "ping 10.0.0.1 repeat 100\ntraceroute 10.0.0.1\nshow ip sla statistics\nshow flow monitor statistics\nshow interfaces counters errors\nshow processes cpu"
+        }
+      ];
+      const activeCmd = ref(commands[0].key);
+      const activeCommand = computed(() => commands.find(c => c.key === activeCmd.value));
+
+      /* ---------- TRAPS ---------- */
+      const traps = [
+        'Interface state: first word = admin, second = protocol/link. up/down = admin up but NO link.',
+        'Duplex mismatch = CRC errors, NOT no-link. Always rule out L1 before routing.',
+        'Layer 2: MAC table = switch proof. Trunk must carry the allowed VLAN; native VLAN must match both ends. STP blocking is normal; loops are the failure.',
+        'Layer 3: a route exists ≠ reachable — check ACL, NAT, and the return path. traceroute pinpoints the failing hop.',
+        'EtherChannel: passive+passive or auto+auto NEVER bundle. Members must match speed, duplex, VLAN, mode. show etherchannel summary = P/I/S/U.',
+        'OSPF: MTU mismatch = stuck EXSTART/EXCHANGE. Hello/dead, area, auth, network type must match. P2P has no DR/BDR.',
+        'EIGRP: K-values + AS must match. SIA = stuck-in-active (query timeout). Stub = no queries on hub-spoke.',
+        'BGP: Established = up; Idle/Active = TCP or config. network must EXIST in the table. RIB-failure = next-hop unreachable. iBGP full mesh. Best path: weight→local pref→AS path→MED.',
+        'NAT: wrong inside/outside = classic no-translation. Overload = PAT (many:1). NAT is stateful. debug ip nat reveals misses.',
+        'ACL: first match wins; implicit deny at the end. Masks are wildcards (inverse of subnet). show access-lists = hit counters.',
+        'DHCP: 169.254.x.x = APIPA = no server reached. ip helper-address enables cross-VLAN DHCP. UDP 67/68. DHCP snooping stops rogue servers.',
+        'DNS: UDP 53 for queries. nslookup/dig separate DNS from ping. NXDOMAIN ≠ server down — check name and record type.',
+        'VPN: Phase 1 = IKE SA; Phase 2 = IPSec SA gated by interesting-traffic ACL. Parameters must match both ends. Tunnel up ≠ protected traffic.',
+        'Wireless: order is RF → association → auth → IP. Client associated ≠ authenticated. show ap summary = AP health.',
+        'QoS: show policy-map interface = applied reality. Direction (service-policy in/out) + trust boundary matter. Zero counters = never matched; queue drops = congestion.',
+        'SD-WAN: control plane (vSmart/vBond) must be up FIRST. show sdwan control connections = first check. DTLS 12346. Policy mismatch = silent drops.',
+        'Performance: latency = 4 components (serialization/propagation/processing/queueing). Jitter = VARIATION, not level. TCP window caps throughput. IP SLA = active measurement.'
+      ];
+
+      /* ---------- QUIZ ---------- */
+      const quizRaw = [
+        { q: 'The interface state `up/down` means:', opts: [{ text: 'admin up, no physical link' }, { text: 'shutdown' }, { text: 'error-disabled' }, { text: 'fully operational' }], correct: 0 },
+        { q: 'A duplex mismatch typically causes:', opts: [{ text: 'CRC errors, not no-link' }, { text: 'complete loss of link' }, { text: 'a routing loop' }, { text: 'VLAN mismatch' }], correct: 0 },
+        { q: 'Which command proves the switch sees L2 hosts?', opts: [{ text: 'show mac address-table' }, { text: 'show vlan' }, { text: 'show ip route' }, { text: 'show spanning-tree' }], correct: 0 },
+        { q: 'In STP troubleshooting, a port in blocking state is:', opts: [{ text: 'normal backup, expected' }, { text: 'the critical failure' }, { text: 'an error-disabled port' }, { text: 'a duplex problem' }], correct: 0 },
+        { q: 'Two EtherChannel members both set to `passive` (LACP) will:', opts: [{ text: 'never bundle' }, { text: 'bundle immediately' }, { text: 'bundle as static' }, { text: 'drop all traffic' }], correct: 0 },
+        { q: '`show etherchannel summary` state `S` means a member is:', opts: [{ text: 'suspended' }, { text: 'in bundle' }, { text: 'standalone' }, { text: 'down' }], correct: 0 },
+        { q: 'An OSPF adjacency stuck in EXSTART/EXCHANGE usually means:', opts: [{ text: 'MTU mismatch' }, { text: 'a broadcast storm' }, { text: 'BGP not configured' }, { text: 'DHCP failure' }], correct: 0 },
+        { q: 'EIGRP SIA stands for:', opts: [{ text: 'stuck in active' }, { text: 'stuck in archive' }, { text: 'session in admin' }, { text: 'stub in area' }], correct: 0 },
+        { q: 'A BGP neighbor is healthy only when it reaches:', opts: [{ text: 'Established' }, { text: 'Idle' }, { text: 'Active' }, { text: 'Connect' }], correct: 0 },
+        { q: 'BGP RIB-failure means the route is:', opts: [{ text: 'learned but not installed (often next-hop unreachable)' }, { text: 'not learned at all' }, { text: 'summarized' }, { text: 'filtered by QoS' }], correct: 0 },
+        { q: 'NAT produces no translation. The classic cause is:', opts: [{ text: 'wrong inside/outside interface assignment' }, { text: 'DNS TTL too low' }, { text: 'STP blocking' }, { text: 'BGP not established' }], correct: 0 },
+        { q: 'ACL order rule: traffic is checked until:', opts: [{ text: 'the first match' }, { text: 'the implicit permit' }, { text: 'all entries deny' }, { text: 'the interface resets' }], correct: 0 },
+        { q: 'An ACL mask of 255.255.255.0 used in `access-list` is:', opts: [{ text: 'WRONG — ACLs use wildcard masks' }, { text: 'correct for a /24' }, { text: 'valid for destination only' }, { text: 'the only allowed form' }], correct: 0 },
+        { q: 'A client stuck at 169.254.x.x means:', opts: [{ text: 'no DHCP server reached (APIPA)' }, { text: 'DNS is down' }, { text: 'NAT failed' }, { text: 'QoS dropped it' }], correct: 0 },
+        { q: 'VPN Phase 2 (IPSec SA) is gated by:', opts: [{ text: 'the interesting-traffic ACL' }, { text: 'the IKE phase-1 proposal only' }, { text: 'the DNS server' }, { text: 'STP state' }], correct: 0 },
+        { q: 'In wireless troubleshooting the correct order is:', opts: [{ text: 'RF → association → auth → IP' }, { text: 'IP → auth → RF → association' }, { text: 'auth → RF → IP → association' }, { text: 'association → IP → RF → auth' }], correct: 0 },
+        { q: 'QoS `show policy-map interface` showing zero counters means:', opts: [{ text: 'the class never matched' }, { text: 'the policy is perfect' }, { text: 'the interface is down' }, { text: 'congestion is absent' }], correct: 0 },
+        { q: 'Jitter is best described as:', opts: [{ text: 'delay VARIATION' }, { text: 'the same as latency' }, { text: 'total dropped packets' }, { text: 'link bandwidth' }], correct: 0 }
+      ];
+      const quizQuestions = reactive(quizRaw.map(q => ({ ...q, ans: null })));
+      const quizDone = ref(false);
+      const quizScore = ref(loadJSON(LS.quiz, 0) || 0);
+      const allQuizAnswered = computed(() => quizQuestions.every(q => q.ans !== null));
+      function submitQuiz() {
+        if (!allQuizAnswered.value) return;
+        quizScore.value = quizQuestions.filter((q, i) => q.ans === q.correct).length;
+        quizDone.value = true;
+        save(LS.quiz, quizScore.value);
+      }
+      function resetQuiz() {
+        quizQuestions.forEach(q => q.ans = null);
+        quizDone.value = false;
+        quizScore.value = 0;
+        localStorage.removeItem(LS.quiz);
+      }
+
+      /* ---------- CHECKLIST ---------- */
+      const checklistRoot = loadJSON(LS.done, [
+        { t: 'Systematic method: define symptom → pick layer → verify up the chain → isolate → fix → re-verify; always check return path', done: false },
+        { t: 'Layer 1: interface states (up/up, up/down), cable/optics, duplex mismatch = errors not no-link; cable-diagnostics', done: false },
+        { t: 'Layer 2: MAC table proof, VLAN exists, trunk allowed + native match, STP blocking normal vs loops', done: false },
+        { t: 'Layer 3: interface → adjacency → route → reachability; route exists ≠ reachable (ACL/NAT/return); traceroute finds failing hop', done: false },
+        { t: 'VLAN/STP/EtherChannel: etherchannel summary P/I/S/U, passive+passive never bundles, STP root/protection features', done: false },
+        { t: 'OSPF: show ip ospf neighbor first; MTU = stuck EXSTART; EIGRP: K-values/AS, SIA; BGP: Established, rib-failure, bestpath order', done: false },
+        { t: 'NAT: inside/outside, overload=PAT, debug shows misses; ACL: first-match, implicit deny, wildcard masks, hit counters', done: false },
+        { t: 'DHCP: DORA, 169.254 APIPA, ip helper-address, UDP 67/68; DNS: nslookup/dig, UDP 53, record types, TTL', done: false },
+        { t: 'VPN: IKE SA vs IPSec SA, interesting traffic gates Phase 2; Wireless: RF→assoc→auth→IP, assoc≠auth', done: false },
+        { t: 'QoS: show policy-map interface, direction + trust, zero counters; SD-WAN: control plane first, DTLS 12346', done: false },
+        { t: 'Performance: latency 4 components, jitter = variation, TCP window caps throughput, IP SLA active measurement, baseline first', done: false }
+      ]);
+      const checklist = reactive(checklistRoot);
+      const doneCount = computed(() => checklist.filter(c => c.done).length);
+      function saveChecklist() { save(LS.done, checklistRoot); }
+      function toggleDone(i) { checklistRoot[i].done = !checklistRoot[i].done; saveChecklist(); }
+
+      return {
+        theme, sec, sections,
+        layerPick, layerVerdict,
+        swPick, swVerdict,
+        rtPick, rtVerdict,
+        svcPick, svcVerdict,
+        adPick, adVerdict,
+        commands, activeCmd, activeCommand,
+        traps,
+        quizQuestions, quizDone, quizScore, allQuizAnswered, submitQuiz, resetQuiz,
+        checklist, doneCount, saveChecklist, toggleDone
+      };
+    }
+  }).mount('#app');
+})();
+</script>
+</body>
+</html>

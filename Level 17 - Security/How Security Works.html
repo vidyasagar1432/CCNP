@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Security Works — Deep Dive</title>
+<style>
+  :root {
+    --bg: #0f172a; --panel: #111c34; --card: #1e293b; --card-2: #16233d;
+    --text: #f8fafc; --muted: #94a3b8;
+    --blue: #38bdf8; --blue-dim: #0c4a6e;
+    --green: #34d399; --green-dim: #064e3b;
+    --amber: #fbbf24; --amber-dim: #78350f;
+    --red: #f87171; --red-dim: #7f1d1d;
+    --violet: #a78bfa; --violet-dim: #4c1d95;
+    --cyan: #22d3ee; --cyan-dim: #164e63;
+    --border: #334155; --hover: #263449; --code-bg: #0b1220;
+  }
+  #app[data-theme="light"] {
+    --bg: #f1f5f9; --panel: #ffffff; --card: #ffffff; --card-2: #f8fafc;
+    --text: #0f172a; --muted: #64748b;
+    --blue: #0284c7; --blue-dim: #bae6fd;
+    --green: #059669; --green-dim: #d1fae5;
+    --amber: #d97706; --amber-dim: #fef3c7;
+    --red: #dc2626; --red-dim: #fee2e2;
+    --violet: #7c3aed; --violet-dim: #ede9fe;
+    --cyan: #0891b2; --cyan-dim: #cffafe;
+    --border: #cbd5e1; --hover: #e2e8f0; --code-bg: #0b1220;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; }
+  #app { max-width: 1040px; margin: 0 auto; padding: 20px 18px 60px; }
+
+  header { position: sticky; top: 0; z-index: 30; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .lv-badge { background: var(--blue-dim); color: var(--blue); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .exam-badge { background: var(--violet-dim); color: var(--violet); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .head-actions { display: flex; align-items: center; gap: 8px; }
+  .btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: background 0.15s; }
+  .btn:hover { background: var(--hover); }
+  .btn.primary { background: var(--blue); color: #0f172a; border-color: var(--blue); }
+
+  nav { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 2px 16px; }
+  nav button.chip { border: 1px solid var(--border); background: var(--card); color: var(--muted); padding: 5px 11px; border-radius: 999px; cursor: pointer; font-size: 0.76rem; font-weight: 600; }
+  nav button.chip.active { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
+
+  section.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
+  section.panel h2 { font-size: 1.2rem; margin-bottom: 6px; }
+  section.panel h3 { font-size: 1rem; margin: 18px 0 10px; color: var(--blue); }
+  section.panel p { margin: 8px 0; }
+  .muted { color: var(--muted); }
+  .lead { color: var(--muted); font-size: 0.95rem; }
+
+  .grid { display: grid; gap: 12px; }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .g3 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .g4 { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .card h4 { font-size: 0.9rem; margin-bottom: 6px; }
+  .card .big { font-size: 1.3rem; font-weight: 700; font-family: 'Fira Code', ui-monospace, monospace; }
+
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85rem; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  tr:hover td { background: var(--hover); }
+
+  code, .mono { font-family: 'Fira Code', ui-monospace, monospace; }
+  .mono { font-size: 0.9rem; }
+  .chip-tag { display: inline-block; border-radius: 999px; padding: 1px 9px; font-size: 0.74rem; font-weight: 700; }
+  .b-blue { background: var(--blue-dim); color: var(--blue); }
+  .b-green { background: var(--green-dim); color: var(--green); }
+  .b-amber { background: var(--amber-dim); color: var(--amber); }
+  .b-red { background: var(--red-dim); color: var(--red); }
+  .b-violet { background: var(--violet-dim); color: var(--violet); }
+  .b-cyan { background: var(--cyan-dim); color: var(--cyan); }
+
+  .callout { border-left: 4px solid var(--amber); background: var(--card-2); border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 12px 0; font-size: 0.9rem; }
+  .callout.green { border-color: var(--green); }
+  .callout.red { border-color: var(--red); }
+  .callout.blue { border-color: var(--blue); }
+  .callout.violet { border-color: var(--violet); }
+
+  .row-fn { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 8px 0; }
+  .row-fn input[type="number"], .row-fn input[type="text"] { background: var(--code-bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-family: 'Fira Code', monospace; font-size: 0.9rem; }
+
+  .opt { display: flex; align-items: center; gap: 8px; padding: 6px 9px; margin: 3px 0; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; background: var(--card); font-size: 0.86rem; }
+  .opt.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .opt .letter { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex: 0 0 auto; }
+  .opt.sel .letter { background: var(--blue); color: #0f172a; }
+
+  #app pre, pre.cmd { background: var(--code-bg); color: #e2e8f0; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.82rem; line-height: 1.5; }
+
+  .trap-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  .trap-item:last-child { border-bottom: none; }
+  .trap-ico { color: var(--red); font-weight: 700; flex: 0 0 auto; }
+
+  .step-flow { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .step { border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 0.8rem; background: var(--card-2); }
+  .step .n { color: var(--blue); font-weight: 700; }
+
+  .verdict { border-radius: 8px; padding: 10px 14px; font-weight: 700; margin: 8px 0; }
+  .verdict.ok { background: var(--green-dim); color: var(--green); }
+  .verdict.bad { background: var(--red-dim); color: var(--red); }
+  .verdict.info { background: var(--blue-dim); color: var(--blue); }
+
+  .chk-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; margin: 5px 0; cursor: pointer; transition: opacity 0.15s; }
+  .chk-item.done { opacity: 0.55; text-decoration: line-through; }
+  .chk-box { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 5px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; }
+  .chk-item.done .chk-box { background: var(--green); border-color: var(--green); color: #0f172a; }
+
+  .proto-cell { border: 1px solid var(--border); border-radius: 10px; padding: 9px 10px; background: var(--card); cursor: pointer; text-align: center; }
+  .proto-cell.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .proto-cell .pn { font-weight: 700; }
+  .proto-cell .pd { font-size: 0.75rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<div id="app" :data-theme="theme">
+  <header>
+    <h1><span class="lv-badge">L17</span> How Security Works
+      <span class="exam-badge">ENCOR 350-401</span></h1>
+    <div class="head-actions">
+      <a class="btn" href="../Level 16 - Network Services/How Network Services Work.html">◀ Network Services</a>
+      <a class="btn" href="../Level 18 - VPN Technologies/How VPN Technologies Work.html">VPN ▶</a>
+      <a class="btn" href="../index.html">Flashcards</a>
+      <button class="btn" @click="theme = (theme==='dark'?'light':'dark')">{{ theme==='dark' ? '☀' : '🌙' }}</button>
+    </div>
+  </header>
+
+  <nav>
+    <button class="chip" v-for="s in sections" :key="s.id" :class="{active:sec===s.id}" @click="sec=s.id">{{ s.icon }} {{ s.label }}</button>
+  </nav>
+
+  <!-- 1. OVERVIEW -->
+  <section class="panel" v-show="sec==='intro'" id="intro">
+    <h2>🛡️ Security — the whole picture</h2>
+    <p class="lead">Enterprise security spans <b>authentication/access control</b>, <b>Layer 2 security</b>, and <b>infrastructure protection</b> of the device itself.</p>
+
+    <h3>Three pillars</h3>
+    <div class="grid g3">
+      <div class="card"><h4>Access control</h4><span class="chip-tag b-blue">AAA</span><p class="muted" style="margin:0">AAA · TACACS+ · RADIUS · ACLs</p></div>
+      <div class="card"><h4>Layer 2 security</h4><span class="chip-tag b-green">Switch</span><p class="muted" style="margin:0">Port Security · DAI · IPSG · Storm Control</p></div>
+      <div class="card"><h4>Infrastructure</h4><span class="chip-tag b-amber">CPU</span><p class="muted" style="margin:0">CoPP · Hardening · Secure Mgmt · uRPF</p></div>
+    </div>
+
+    <h3>Layer 2 mechanism-dependency map (memorize)</h3>
+    <table>
+      <tr><th>Feature</th><th>Threat</th><th>Dependency</th></tr>
+      <tr><td>Port Security</td><td>unauthorized source MAC</td><td>none</td></tr>
+      <tr><td>DHCP Snooping</td><td>rogue DHCP + builds bindings</td><td>none</td></tr>
+      <tr><td>DAI</td><td>ARP spoofing</td><td><b>DHCP Snooping</b> or ARP ACL</td></tr>
+      <tr><td>IP Source Guard</td><td>source IP spoofing</td><td><b>DHCP Snooping</b> or static binding</td></tr>
+      <tr><td>Storm Control</td><td>traffic storms</td><td>none</td></tr>
+      <tr><td>BPDU Guard</td><td>rogue BPDUs on edge</td><td>none</td></tr>
+    </table>
+    <div class="callout blue"><b>Chain:</b> DHCP Snooping → binding DB → <b>DAI</b> (validates ARP) + <b>IPSG</b> (validates source IP). Port Security, Storm Control, BPDU Guard are independent.</div>
+  </section>
+
+  <!-- 2. AAA -->
+  <section class="panel" v-show="sec==='aaa'" id="aaa">
+    <h2>🔑 AAA — Authentication, Authorization, Accounting</h2>
+    <p class="lead">The three questions: <b>Authen</b> "Who are you?" · <b>Author</b> "What can you do?" · <b>Account</b> "What did you do?"</p>
+
+    <div class="grid g3">
+      <div class="card"><h4>Authentication</h4><div class="big" style="font-size:1rem;color:var(--blue)">who?</div><p class="muted" style="margin:0">verify username/password</p></div>
+      <div class="card"><h4>Authorization</h4><div class="big" style="font-size:1rem;color:var(--green)">can?</div><p class="muted" style="margin:0">permit privilege 15, per-command</p></div>
+      <div class="card"><h4>Accounting</h4><div class="big" style="font-size:1rem;color:var(--amber)">did?</div><p class="muted" style="margin:0">record login/session/commands</p></div>
+    </div>
+
+    <h3>Fallback behavior (critical)</h3>
+    <div class="row-fn">
+      <button class="btn" v-for="s in aaaScen" :key="s.key" :class="{primary:aaaPick===s.key}" @click="aaaPick=s.key">{{ s.label }}</button>
+    </div>
+    <div class="verdict" :class="aaaVerdict.cls">{{ aaaVerdict.text }}</div>
+
+    <h3>Method list keywords</h3>
+    <div class="grid g2">
+      <div class="card"><h4>Methods</h4>
+        <ul style="margin-left:18px;font-size:.85rem">
+          <li><b>local</b> — local user DB</li>
+          <li><b>none</b> — no auth</li>
+          <li><b>group tacacs+</b> — TACACS+ group</li>
+          <li><b>group radius</b> — RADIUS group</li>
+        </ul>
+      </div>
+      <div class="card"><h4>Accounting</h4>
+        <ul style="margin-left:18px;font-size:.85rem">
+          <li><b>start-stop</b> — start + stop records</li>
+          <li><b>stop-only</b> — stop only</li>
+          <li><b>none</b> — no accounting</li>
+          <li><b>commands N</b> — commands at privilege level N (not N commands)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout red"><b>Traps:</b> authentication success ≠ authorization success. Accounting does NOT grant or deny access. <code>commands 15</code> = privilege level 15, not 15 commands. Named lists must be explicitly applied; default lists apply automatically.</div>
+  </section>
+
+  <!-- 3. TACACS+ vs RADIUS -->
+  <section class="panel" v-show="sec==='tacacs'" id="tacacs">
+    <h2>⚖️ TACACS+ vs RADIUS</h2>
+    <p class="lead">The two network AAA protocols you must be able to compare cold.</p>
+
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:aaaProto==='tacacs'}" @click="aaaProto='tacacs'">
+        <div class="pn">TACACS+</div><div class="pd">Cisco · device administration</div>
+      </div>
+      <div class="proto-cell" :class="{sel:aaaProto==='radius'}" @click="aaaProto='radius'">
+        <div class="pn">RADIUS</div><div class="pd">IETF · network access (802.1X/Wi-Fi/VPN)</div>
+      </div>
+    </div>
+    <div class="verdict" :class="aaaProtoVerdict.cls">{{ aaaProtoVerdict.text }}</div>
+
+    <table>
+      <tr><th>Feature</th><th>TACACS+</th><th>RADIUS</th></tr>
+      <tr><td>Origin</td><td>Cisco</td><td>IETF open standard</td></tr>
+      <tr><td>Transport</td><td><b>TCP</b></td><td><b>UDP</b></td></tr>
+      <tr><td>Ports</td><td class="mono">TCP 49</td><td class="mono">UDP 1812 auth / 1813 acct</td></tr>
+      <tr><td>Encryption</td><td><b>packet body</b></td><td><b>password field only</b></td></tr>
+      <tr><td>AAA separation</td><td><b>Strong</b> (auth/authz/acct separate)</td><td>More coupled</td></tr>
+      <tr><td>Per-command authz</td><td><b>Granular</b></td><td>Not equivalent</td></tr>
+      <tr><td>Primary use</td><td>Device administration</td><td>Network access</td></tr>
+    </table>
+    <div class="callout red"><b>Trap:</b> ping to a TACACS+ server proves IP reachability, NOT that <b>TCP 49</b> works. Shared secret must match on both sides.</div>
+
+    <h3>RADIUS 802.1X roles</h3>
+    <div class="grid g3">
+      <div class="card"><h4>Supplicant</h4><p class="muted" style="margin:0">laptop / phone (endpoint)</p></div>
+      <div class="card"><h4>Authenticator / NAS</h4><p class="muted" style="margin:0">switch/AP/WLC = the RADIUS <b>client</b></p></div>
+      <div class="card"><h4>Authentication Server</h4><p class="muted" style="margin:0">RADIUS server</p></div>
+    </div>
+  </section>
+
+  <!-- 4. ACL -->
+  <section class="panel" v-show="sec==='acl'" id="acl">
+    <h2>📄 ACLs — access control lists</h2>
+    <p class="lead">Processing: <b>top-to-bottom, first match wins, implicit deny</b> at the end.</p>
+
+    <h3>Standard vs extended</h3>
+    <table>
+      <tr><th>Feature</th><th>Standard</th><th>Extended</th></tr>
+      <tr><td>Matches</td><td>source IPv4 only</td><td>src + dst + protocol + ports</td></tr>
+      <tr><td>Ranges</td><td class="mono">1-99, 1300-1999</td><td class="mono">100-199, 2000-2699</td></tr>
+      <tr><td>Placement</td><td>near <b>destination</b></td><td>near <b>source</b></td></tr>
+      <tr><td>Interface cmd</td><td class="mono">ip access-group</td><td class="mono">ip access-group</td></tr>
+      <tr><td>VTY cmd</td><td class="mono">access-class</td><td class="mono">access-class</td></tr>
+    </table>
+
+    <h3>Wildcard mask calculator</h3>
+    <p class="muted">Wildcard: <b>0 = must match, 1 = ignore</b>. It's the inverse of the subnet mask: <code>255 − subnet octet = wildcard octet</code>.</p>
+    <div class="grid g2">
+      <div class="card"><h4>Subnet mask (e.g. 255.255.255.0)</h4><div class="row-fn"><input type="text" v-model="aclMask"></div></div>
+    </div>
+    <div class="verdict" :class="aclVerdict.cls">{{ aclVerdict.text }}</div>
+
+    <h3>Port operators</h3>
+    <div class="grid g5" style="grid-template-columns:repeat(auto-fit,minmax(110px,1fr))">
+      <div class="card"><h4>eq</h4><p class="muted" style="margin:0">equal to</p></div>
+      <div class="card"><h4>neq</h4><p class="muted" style="margin:0">not equal</p></div>
+      <div class="card"><h4>gt</h4><p class="muted" style="margin:0">greater than</p></div>
+      <div class="card"><h4>lt</h4><p class="muted" style="margin:0">less than</p></div>
+      <div class="card"><h4>range</h4><p class="muted" style="margin:0">inclusive range</p></div>
+    </div>
+
+    <h3>IPv6 ACL differences</h3>
+    <table>
+      <tr><th>Feature</th><th>IPv4</th><th>IPv6</th></tr>
+      <tr><td>Wildcard mask</td><td>yes</td><td><b>no</b></td></tr>
+      <tr><td>Interface cmd</td><td class="mono">ip access-group</td><td class="mono">ipv6 traffic-filter</td></tr>
+      <tr><td>ICMP</td><td>ICMP</td><td><b>ICMPv6</b> (needed for ND)</td></tr>
+      <tr><td>Implicit deny</td><td>yes</td><td>yes</td></tr>
+    </table>
+    <div class="callout red"><b>Traps:</b> first match wins — a broad <code>permit</code> above a <code>deny</code> blocks nothing. ACLs are <u>stateless</u> (not firewalls) and do NOT create routes. <code>established</code> matches TCP ACK/RST only.</div>
+  </section>
+
+  <!-- 5. PORT SECURITY -->
+  <section class="panel" v-show="sec==='portsec'" id="portsec">
+    <h2>🔒 Port Security</h2>
+    <p class="lead">Layer 2 feature that admits only authorized <b>source MACs</b> on an access port. Default max = <b>1 secure MAC</b>, default violation mode = <b>shutdown</b>.</p>
+
+    <h3>Secure MAC types</h3>
+    <table>
+      <tr><th>Type</th><th>Learning</th><th>Survives reload?</th></tr>
+      <tr><td>Static</td><td>manual mac-address</td><td>yes</td></tr>
+      <tr><td>Dynamic</td><td>auto-learned</td><td><b>no</b></td></tr>
+      <tr><td>Sticky</td><td>auto-learned → added to config</td><td><b>yes, if saved</b></td></tr>
+    </table>
+
+    <h3>Violation mode selector</h3>
+    <div class="grid g3">
+      <div class="proto-cell" v-for="v in portModes" :key="v.key" :class="{sel:portMode===v.key}" @click="portMode=v.key">
+        <div class="pn">{{ v.name }}</div><div class="pd">{{ v.desc }}</div>
+      </div>
+    </div>
+    <div class="verdict" :class="portVerdict.cls">{{ portVerdict.text }}</div>
+    <p class="muted">Severity order: <b>shutdown → restrict → protect</b> (most → least disruptive).</p>
+
+    <pre class="cmd">interface Gi0/1
+ switchport mode access
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security mac-address sticky
+ switchport port-security violation shutdown
+ switchport port-security aging time 5
+</pre>
+    <div class="callout red"><b>Traps:</b> sticky MACs must be <u>saved</u> to survive reload; dynamic MACs do NOT survive. Port security limits <b>source MAC</b>, not IP, and is not a replacement for 802.1X.</div>
+  </section>
+
+  <!-- 6. DAI -->
+  <section class="panel" v-show="sec==='dai'" id="dai">
+    <h2>🕵️ Dynamic ARP Inspection (DAI)</h2>
+    <p class="lead">Layer 2 protection against <b>ARP spoofing/poisoning</b>. Enabled <b>per VLAN</b>; interfaces are <b>untrusted by default</b>. Validates ARP against <b>DHCP Snooping bindings</b> (or an ARP ACL for static devices).</p>
+
+    <h3>How it works</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> DHCP Snooping builds IP↔MAC bindings</div>
+      <div class="step"><span class="n">2</span> enable DAI per VLAN</div>
+      <div class="step"><span class="n">3</span> trust infrastructure ports</div>
+      <div class="step"><span class="n">4</span> endpoints stay untrusted</div>
+      <div class="step"><span class="n">5</span> DAI intercepts ARP, validates</div>
+    </div>
+
+    <h3>Validation options</h3>
+    <div class="grid g3">
+      <div class="card"><h4>src-mac</h4><p class="muted" style="margin:0">Ethernet src = ARP sender MAC</p></div>
+      <div class="card"><h4>dst-mac</h4><p class="muted" style="margin:0">destination MAC info</p></div>
+      <div class="card"><h4>ip</h4><p class="muted" style="margin:0">ARP IP fields consistency</p></div>
+    </div>
+    <div class="callout red"><b>Trap: DAI = ARP protection, NOT IP protection.</b> Static-IP devices need an ARP ACL (no DHCP binding). Trusted ports bypass inspection — only trust infrastructure.</div>
+  </section>
+
+  <!-- 7. IPSG -->
+  <section class="panel" v-show="sec==='ipsg'" id="ipsg">
+    <h2>🚫 IP Source Guard (IPSG)</h2>
+    <p class="lead">Layer 2 enforcement of source <b>IP</b> (or IP+MAC) on access ports, using DHCP Snooping bindings.</p>
+
+    <table>
+      <tr><th>Command</th><th>Filters</th></tr>
+      <tr><td class="mono">ip verify source</td><td>source <b>IP</b> only</td></tr>
+      <tr><td class="mono">ip verify source port-security</td><td>source <b>IP + MAC</b></td></tr>
+    </table>
+
+    <h3>Static binding for non-DHCP devices</h3>
+    <pre class="cmd">ip source binding aaaa.bbbb.5050 vlan 10 192.168.10.50 interface Gi0/3
+</pre>
+
+    <h3>The L2 security trio</h3>
+    <table>
+      <tr><th>Feature</th><th>Controls</th></tr>
+      <tr><td>Port Security</td><td>source <b>MAC</b> admission</td></tr>
+      <tr><td>IPSG</td><td>source <b>IP</b> (or IP+MAC) authorization</td></tr>
+      <tr><td>DAI</td><td><b>ARP</b> validation</td></tr>
+    </table>
+    <div class="callout red"><b>Trap:</b> the <code>port-security</code> keyword in <code>ip verify source port-security</code> is <u>part of the IPSG command</u>, NOT the same as enabling <code>switchport port-security</code>.</div>
+  </section>
+
+  <!-- 8. STORM CONTROL -->
+  <section class="panel" v-show="sec==='storm'" id="storm">
+    <h2>🌪️ Storm Control</h2>
+    <p class="lead">Limits L2 <b>broadcast, multicast, and unknown unicast</b> floods per interface (NOT known unicast).</p>
+
+    <h3>Threshold explorer</h3>
+    <div class="grid g2">
+      <div class="card"><h4>Rising threshold (%)</h4><div class="row-fn"><input type="number" v-model.number="stormRise" min="0" max="100"></div></div>
+      <div class="card"><h4>Falling threshold (%)</h4><div class="row-fn"><input type="number" v-model.number="stormFall" min="0" max="100"></div></div>
+    </div>
+    <div class="verdict" :class="stormVerdict.cls">{{ stormVerdict.text }}</div>
+    <p class="muted"><b>Rising</b> begins suppression; <b>falling</b> stops it (hysteresis prevents flapping around one threshold).</p>
+
+    <h3>Actions</h3>
+    <table>
+      <tr><th>Action</th><th>Behavior</th></tr>
+      <tr><td>Default</td><td>excess dropped, port stays up</td></tr>
+      <tr><td><span class="mono">action trap</span></td><td>SNMP notification, port stays up</td></tr>
+      <tr><td><span class="mono">action shutdown</span></td><td>port → err-disabled</td></tr>
+    </table>
+    <div class="callout red"><b>Trap:</b> Storm Control ≠ STP. <b>STP prevents loops;</b> Storm Control <b>limits floods</b>. Unknown unicast ≠ all unicast. Default behavior is suppression, not shutdown.</div>
+  </section>
+
+  <!-- 9. COPP -->
+  <section class="panel" v-show="sec==='copp'" id="copp">
+    <h2>🧠 CoPP — Control Plane Policing</h2>
+    <p class="lead">Protects the device <b>CPU / control plane</b> using QoS policing. Chain: ACL → class-map → policy-map → applied under <b><code>control-plane</code></b>.</p>
+
+    <h3>Network planes</h3>
+    <div class="grid g3">
+      <div class="card"><h4>Data plane</h4><p class="muted" style="margin:0">forwards transit traffic (CEF)</p></div>
+      <div class="card"><h4>Control plane</h4><p class="muted" style="margin:0">routing protocols, CPU processing</p></div>
+      <div class="card"><h4>Management plane</h4><p class="muted" style="margin:0">SSH, SNMP, HTTPS, Syslog</p></div>
+    </div>
+
+    <pre class="cmd">ip access-list extended COPP-MGMT
+ permit tcp any host 192.0.2.1 eq 22
+class-map match-any COPP-MGMT-CLASS
+ match access-group name COPP-MGMT
+policy-map COPP-POLICY
+ class COPP-MGMT-CLASS
+  police 512000 conform-action transmit exceed-action drop
+ class class-default
+  police 8000 conform-action transmit exceed-action drop
+control-plane
+ service-policy input COPP-POLICY
+</pre>
+    <div class="callout red"><b>Traps:</b> CoPP is <u>not</u> an interface ACL — it is applied under <code>control-plane</code>. Over-policing routing protocols → adjacency loss; forgetting to classify management traffic → management lockout. <code>show policy-map control-plane</code> is the key verification.</div>
+  </section>
+
+  <!-- 10. DEVICE HARDENING + SECURE MGMT -->
+  <section class="panel" v-show="sec==='harden'" id="harden">
+    <h2>🔧 Device Hardening &amp; Secure Management</h2>
+    <p class="lead">Make the device itself hard to compromise and manage it securely.</p>
+
+    <h3>Password type explorer</h3>
+    <div class="grid g5" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr))">
+      <div class="proto-cell" v-for="p in pwTypes" :key="p.n" :class="{sel:pwPick===p.n}" @click="pwPick=p.n">
+        <div class="pn">Type {{ p.n }}</div><div class="pd">{{ p.alg }}</div>
+      </div>
+    </div>
+    <div class="verdict" :class="pwVerdict.cls">{{ pwVerdict.text }}</div>
+    <div class="callout red"><b>Trap:</b> Type 7 is <u>reversible obfuscation</u>, NOT encryption. Type 8 = PBKDF2-SHA-256, Type 9 = scrypt. Use <code>enable secret</code>, not <code>enable password</code>.</div>
+
+    <h3>Management plane security</h3>
+    <table>
+      <tr><th>Function</th><th>Insecure</th><th>Secure</th></tr>
+      <tr><td>CLI</td><td>Telnet (23)</td><td><b>SSH (22)</b></td></tr>
+      <tr><td>Web</td><td>HTTP (80)</td><td><b>HTTPS (443)</b></td></tr>
+      <tr><td>Monitoring</td><td>SNMPv1/v2c</td><td><b>SNMPv3</b></td></tr>
+      <tr><td>File transfer</td><td>TFTP/FTP</td><td><b>SCP</b></td></tr>
+    </table>
+
+    <h3>Brute-force protection</h3>
+    <pre class="cmd">login block-for 120 attempts 3 within 60   ! 3 failures / 60s -> block 120s
+login on-failure log
+login on-success log
+</pre>
+    <div class="callout blue"><b>Isolation:</b> <b>Management VLAN</b> = logical separation; <b>Out-of-Band (OOB)</b> = separate physical network, stays available even when the production network fails.</div>
+  </section>
+
+  <!-- 11. INFRASTRUCTURE SECURITY -->
+  <section class="panel" v-show="sec==='infra'" id="infra">
+    <h2>🧱 Infrastructure Security &amp; uRPF</h2>
+    <p class="lead">Protect the network edge and routing infrastructure.</p>
+
+    <h3>uRPF explorer</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:urpfMode==='strict'}" @click="urpfMode='strict'">
+        <div class="pn">Strict (<span class="mono">rx</span>)</div><div class="pd">reverse path must use the incoming interface — breaks asymmetric routing</div>
+      </div>
+      <div class="proto-cell" :class="{sel:urpfMode==='loose'}" @click="urpfMode='loose'">
+        <div class="pn">Loose (<span class="mono">any</span>)</div><div class="pd">source must be reachable via any interface — works with asymmetric routing</div>
+      </div>
+    </div>
+    <div class="verdict" :class="urpfVerdict.cls">{{ urpfVerdict.text }}</div>
+    <div class="callout red"><b>Classic trap:</b> <b>strict uRPF + asymmetric routing = legitimate traffic dropped.</b></div>
+
+    <h3>Routing protocol security</h3>
+    <table>
+      <tr><th>Protocol</th><th>Mechanism</th></tr>
+      <tr><td>OSPF</td><td>authentication (message-digest)</td></tr>
+      <tr><td>EIGRP</td><td>key chain (MD5 or HMAC-SHA-256)</td></tr>
+      <tr><td>BGP</td><td><b>TCP MD5</b> + <b>TTL Security (GTSM)</b></td></tr>
+      <tr><td>IS-IS</td><td>authentication</td></tr>
+    </table>
+    <div class="callout blue"><b>BGP distinction:</b> <b>TCP MD5</b> authenticates the TCP session (not encryption); <b>TTL Security / GTSM</b> restricts acceptable hop distance (not authentication).</div>
+
+    <h3>IPv6 access-layer defenses</h3>
+    <div class="grid g3">
+      <div class="card"><h4>Rogue RA</h4><p class="muted" style="margin:0">RA Guard</p></div>
+      <div class="card"><h4>Rogue DHCPv6</h4><p class="muted" style="margin:0">DHCPv6 Guard</p></div>
+      <div class="card"><h4>v6 source spoofing</h4><p class="muted" style="margin:0">IPv6 ACL / source validation</p></div>
+    </div>
+  </section>
+
+  <!-- 12. COMMANDS -->
+  <section class="panel" v-show="sec==='cmds'" id="cmds">
+    <h2>⌨️ CLI Commands</h2>
+    <div class="row-fn">
+      <button class="btn" v-for="c in commands" :key="c.key" :class="{primary:activeCmd===c.key}" @click="activeCmd=c.key">{{ c.label }}</button>
+    </div>
+    <pre class="cmd">{{ activeCommand.show }}</pre>
+  </section>
+
+  <!-- 13. TRAPS -->
+  <section class="panel" v-show="sec==='traps'" id="traps">
+    <h2>⚠️ Common Traps</h2>
+    <div v-for="t in traps" :key="t" class="trap-item"><span class="trap-ico">!</span><div>{{ t }}</div></div>
+  </section>
+
+  <!-- 14. QUIZ -->
+  <section class="panel" v-show="sec==='quiz'" id="quiz">
+    <h2>📝 Quiz ({{ quizQuestions.length }})</h2>
+    <div v-for="(q,qi) in quizQuestions" :key="qi" class="card" style="margin:12px 0">
+      <div style="font-weight:700;margin-bottom:8px">{{ qi+1 }}. {{ q.q }}</div>
+      <div v-for="(o,oi) in q.opts" :key="oi"
+           class="opt" :class="{sel:q.ans===oi}"
+           @click="q.ans=oi">
+        <span class="letter">{{ String.fromCharCode(65+oi) }}</span>{{ o.text }}
+      </div>
+    </div>
+    <div class="row-fn">
+      <button class="btn primary" @click="submitQuiz()" :disabled="!allQuizAnswered">Submit answers</button>
+      <button class="btn" @click="resetQuiz()">Reset</button>
+      <span class="muted" v-if="quizDone" style="font-weight:700">Score: {{ quizScore }} / {{ quizQuestions.length }}
+        ({{ Math.round(quizScore/quizQuestions.length*100) }}%)</span>
+    </div>
+    <div class="verdict" :class="quizDone ? (quizScore===quizQuestions.length?'ok':'info') : 'info'" v-if="quizDone">
+      {{ quizScore===quizQuestions.length ? '🎉 Perfect! All ' + quizQuestions.length + ' correct.' : 'Better luck next time — review the traps section.' }}
+    </div>
+  </section>
+
+  <!-- 15. CHECKLIST -->
+  <section class="panel" v-show="sec==='checklist'" id="checklist">
+    <h2>✅ Study Checklist</h2>
+    <p class="muted" style="margin-bottom:10px">{{ doneCount }} / {{ checklist.length }} complete</p>
+    <div v-for="(c,i) in checklist" :key="i" class="chk-item" :class="{done:c.done}" @click="toggleDone(i)">
+      <span class="chk-box">{{ c.done ? '✓' : '' }}</span>{{ c.t }}
+    </div>
+  </section>
+
+</div>
+
+<script src="../vue.global.prod.js"></script>
+<script>
+(() => {
+  const { createApp, ref, computed, reactive } = Vue;
+  const LS = {
+    theme: 'ccnp.sec.theme', done: 'ccnp.sec.done',
+    quiz: 'ccnp.sec.quiz'
+  };
+  function loadJSON(key, fb) {
+    try { const v = JSON.parse(localStorage.getItem(key)); return (v === null || v === undefined) ? fb : v; }
+    catch (e) { return fb; }
+  }
+  function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+  createApp({
+    setup() {
+      const theme = ref(loadJSON(LS.theme, 'dark'));
+      const sec = ref('intro');
+
+      /* ---------- SECTION NAV ---------- */
+      const sections = [
+        { id: 'intro', label: 'Overview', icon: '🛡️' },
+        { id: 'aaa', label: 'AAA', icon: '🔑' },
+        { id: 'tacacs', label: 'TACACS+/RADIUS', icon: '⚖️' },
+        { id: 'acl', label: 'ACLs', icon: '📄' },
+        { id: 'portsec', label: 'Port Security', icon: '🔒' },
+        { id: 'dai', label: 'DAI', icon: '🕵️' },
+        { id: 'ipsg', label: 'IP Source Guard', icon: '🚫' },
+        { id: 'storm', label: 'Storm Control', icon: '🌪️' },
+        { id: 'copp', label: 'CoPP', icon: '🧠' },
+        { id: 'harden', label: 'Hardening', icon: '🔧' },
+        { id: 'infra', label: 'Infrastructure', icon: '🧱' },
+        { id: 'cmds', label: 'Commands', icon: '⌨️' },
+        { id: 'traps', label: 'Traps', icon: '⚠️' },
+        { id: 'quiz', label: 'Quiz', icon: '📝' },
+        { id: 'checklist', label: 'Checklist', icon: '✅' }
+      ];
+
+      /* ---------- AAA FALLBACK ---------- */
+      const aaaScen = [
+        { key: 'timeout', label: 'Server timeout/unavailable', r: 'May FALL BACK to the next method (e.g. local).' },
+        { key: 'reject', label: 'Server definitively rejects auth', r: 'Generally does NOT fall back to local — a central AAA explicit denial is not bypassed.' }
+      ];
+      const aaaPick = ref('timeout');
+      const aaaVerdict = computed(() => {
+        const s = aaaScen.find(x => x.key === aaaPick.value);
+        return { cls: s.key === 'reject' ? 'bad' : 'info', text: s.label + ' → ' + s.r };
+      });
+
+      /* ---------- TACACS+ / RADIUS ---------- */
+      const aaaProto = ref('tacacs');
+      const aaaProtoVerdict = computed(() => {
+        if (aaaProto.value === 'tacacs') return { cls: 'info', text: 'TACACS+ — Cisco, TCP 49, packet-body encryption, granular per-command authz; best for device administration.' };
+        return { cls: 'info', text: 'RADIUS — IETF, UDP 1812 auth / 1813 acct, password-field-only protection; best for network access (802.1X/Wi-Fi/VPN).' };
+      });
+
+      /* ---------- ACL WILDCARD ---------- */
+      const aclMask = ref('255.255.255.0');
+      const aclVerdict = computed(() => {
+        const p = (aclMask.value || '').split('.').map(Number);
+        if (p.length !== 4 || p.some(n => !Number.isInteger(n) || n < 0 || n > 255)) return { cls: 'bad', text: 'Invalid subnet mask: ' + aclMask.value };
+        const w = p.map(n => 255 - n);
+        return { cls: 'ok', text: 'Subnet ' + aclMask.value + ' → wildcard ' + w.join('.') + '  (0 = must match, 1 = ignore).' };
+      });
+
+      /* ---------- PORT SECURITY MODES ---------- */
+      const portModes = [
+        { key: 'shutdown', name: 'shutdown', desc: 'port → err-disabled (default; most disruptive)' },
+        { key: 'restrict', name: 'restrict', desc: 'drop violating frames + log/counters' },
+        { key: 'protect', name: 'protect', desc: 'drop violating frames, no notification (least disruptive)' }
+      ];
+      const portMode = ref('shutdown');
+      const portVerdict = computed(() => {
+        const m = portModes.find(x => x.key === portMode.value);
+        return { cls: 'info', text: 'Violation = ' + m.name + ': ' + m.desc };
+      });
+
+      /* ---------- STORM CONTROL ---------- */
+      const stormRise = ref(50);
+      const stormFall = ref(30);
+      const stormVerdict = computed(() => {
+        if (stormFall.value >= stormRise.value) return { cls: 'bad', text: 'Falling (' + stormFall.value + ') must be below rising (' + stormRise.value + ') for clean hysteresis.' };
+        return { cls: 'ok', text: 'Rising ' + stormRise.value + '% → begin suppression · Falling ' + stormFall.value + '% → stop suppression. Hysteresis avoids flapping.' };
+      });
+
+      /* ---------- PASSWORD TYPES ---------- */
+      const pwTypes = [
+        { n: 0, alg: 'clear text', risk: 'weak' },
+        { n: 5, alg: 'MD5', risk: 'legacy/weak' },
+        { n: 7, alg: 'reversible obfuscation', risk: 'weak — NOT encryption' },
+        { n: 8, alg: 'PBKDF2-SHA-256', risk: 'strong' },
+        { n: 9, alg: 'scrypt', risk: 'stronger' }
+      ];
+      const pwPick = ref(9);
+      const pwVerdict = computed(() => {
+        const p = pwTypes.find(x => x.n === pwPick.value);
+        const ok = (p.n === 8 || p.n === 9);
+        return { cls: ok ? 'ok' : (p.n === 0 ? 'bad' : 'info'), text: 'Type ' + p.n + ' = ' + p.alg + ' (' + p.risk + ').' };
+      });
+
+      /* ---------- uRPF ---------- */
+      const urpfMode = ref('loose');
+      const urpfVerdict = computed(() => {
+        if (urpfMode.value === 'strict') return { cls: 'info', text: 'Strict uRPF (rx): reverse path must use the INCOMING interface. Best for symmetric routing — breaks asymmetric routing.' };
+        return { cls: 'info', text: 'Loose uRPF (any): source must be reachable via ANY interface. Tolerates asymmetric routing.' };
+      });
+
+      /* ---------- COMMANDS ---------- */
+      const commands = [
+        {
+          key: 'aaa', label: 'AAA+TACACS+',
+          show: "aaa new-model\ntacacs server TAC1\n address ipv4 10.0.0.5\n key MyTacacsKey\naaa group server tacacs+ TACACS-GROUP\n server name TAC1\naaa authentication login VTY-AUTH group TACACS-GROUP local\naaa authorization exec VTY-EXEC group TACACS-GROUP local\naaa authorization commands 15 CMD-AUTH group TACACS-GROUP local\naaa accounting exec EXEC-ACCT start-stop group TACACS-GROUP\nline vty 0 15\n login authentication VTY-AUTH\n authorization exec VTY-EXEC\n authorization commands 15 CMD-AUTH\n transport input ssh\n\nshow running-config | section aaa\nshow aaa servers\ndebug tacacs / undebug all"
+        },
+        {
+          key: 'radius', label: 'RADIUS',
+          show: "aaa new-model\nradius server RAD1\n address ipv4 10.0.0.5 auth-port 1812 acct-port 1813\n key MyRadiusSecret\naaa group server radius RADIUS-GROUP\n server name RAD1\naaa authentication login default group RADIUS-GROUP local\nip radius source-interface Loopback0\n\nshow radius servers\ndebug radius / undebug all"
+        },
+        {
+          key: 'acl', label: 'ACL',
+          show: "! standard (source only) vs extended (src+dst+proto+port)\naccess-list 10 permit 192.168.10.0 0.0.0.255\nip access-list extended MGMT\n permit tcp any host 10.0.0.5 eq 22\n deny ip any any\n\ninterface GigabitEthernet0/1\n ip access-group MGMT in\n\nline vty 0 15\n access-class MGMT in       ! VTY access, not interface\n\nipv6 access-list V6\n permit ipv6 any any\ninterface Vlan10\n ipv6 traffic-filter V6 in   ! IPv6 has NO wildcard mask"
+        },
+        {
+          key: 'portsec', label: 'Port Security',
+          show: "interface Gi0/1\n switchport mode access\n switchport port-security\n switchport port-security maximum 2\n switchport port-security mac-address sticky\n switchport port-security violation shutdown\n switchport port-security aging time 5\n\nerrdisable recovery cause psecure-violation\nerrdisable recovery interval 60\n\nshow port-security\nshow port-security address"
+        },
+        {
+          key: 'daiipsg', label: 'DAI + IPSG',
+          show: "ip dhcp snooping\nip dhcp snooping vlan 10\n\n! DAI\nip arp inspection vlan 10\nip arp inspection validate src-mac dst-mac ip\ninterface Gi0/1\n ip arp inspection trust          ! toward infrastructure\ninterface Gi0/2\n ip arp inspection limit rate 15   ! rate-limit\n\n! ARP ACL for static-IP devices\narp access-list STATIC-ARP\n permit ip host 192.168.10.50 mac host aaaa.bbbb.5050\nip arp inspection filter STATIC-ARP vlan 10\n\n! IPSG\nip source binding aaaa.bbbb.5050 vlan 10 192.168.10.50 interface Gi0/3\ninterface Gi0/3\n ip verify source port-security\n\nshow ip arp inspection\nshow ip verify source\nshow ip dhcp snooping binding"
+        },
+        {
+          key: 'storm', label: 'Storm Control',
+          show: "interface Gi0/1\n storm-control broadcast level 50 30\n storm-control multicast level 50\n storm-control unicast level 50\n storm-control action shutdown\n\nshow storm-control\nshow storm-control broadcast"
+        },
+        {
+          key: 'copp', label: 'CoPP',
+          show: "ip access-list extended COPP-MGMT\n permit tcp any host 192.0.2.1 eq 22\nclass-map match-any COPP-MGMT-CLASS\n match access-group name COPP-MGMT\npolicy-map COPP-POLICY\n class COPP-MGMT-CLASS\n  police 512000 conform-action transmit exceed-action drop\n class class-default\n  police 8000 conform-action transmit exceed-action drop\ncontrol-plane\n service-policy input COPP-POLICY\n\nshow policy-map control-plane     ! key verification"
+        },
+        {
+          key: 'harden', label: 'Hardening',
+          show: "! passwords\naaa new-model\nenable secret StrongPass\naaa authentication login default local\nusername admin privilege 15 secret StrongPass\nservice password-encryption       ! Type 7 (reversible - not secure)\n\n! SSH\nhostname R1\nip domain-name example.local\ncrypto key generate rsa modulus 2048\nip ssh version 2\nline vty 0 15\n transport input ssh\n login local\n exec-timeout 5 0\n access-class MGMT in\n\n! brute-force\nlogin block-for 120 attempts 3 within 60\nlogin on-failure log\nlogin on-success log\n\n! disable unneeded\nno ip http server\nno service pad\nno ip source-route\n\nline aux 0\n transport input none\n no exec\n\n! secure mgmt\nip http access-class 99 in\nip http secure-server\nno ip http server"
+        }
+      ];
+      const activeCmd = ref(commands[0].key);
+      const activeCommand = computed(() => commands.find(c => c.key === activeCmd.value));
+
+      /* ---------- TRAPS ---------- */
+      const traps = [
+        'AAA: authentication success ≠ authorization success; accounting does not grant/deny access.',
+        'AAA: commands 15 = privilege level 15, not 15 commands; fallback is not "any failure → next method".',
+        'TACACS+: TCP 49, encrypts the packet BODY, granular per-command authz; RADIUS: UDP 1812/1813, password-field only.',
+        'RADIUS: the NAS/switch is the client (not the laptop); Access-Reject ≠ server unreachable.',
+        'ACL: first match wins + implicit deny; access-group = interface, access-class = VTY; stateless, not a firewall.',
+        'ACL wildcard: 0 = must match, 1 = ignore; inverse of subnet mask; IPv6 ACLs have NO wildcard masks.',
+        'Port Security: default max 1 MAC, default violation shutdown; sticky/dynamic MACs need saving to survive reload.',
+        'Port Security limits SOURCE MAC, not IP; not a replacement for 802.1X.',
+        'DAI = ARP protection (not IP); interfaces untrusted by default; static-IP devices need ARP ACLs.',
+        'IPSG: ip verify source port-security — the port-security keyword is part of IPSG, not the port-security feature.',
+        'DAI + IPSG depend on DHCP Snooping; Port Security, Storm Control, BPDU Guard do NOT.',
+        'Storm Control ≠ STP (STP prevents loops, Storm limits floods); default is suppression, not shutdown.',
+        'CoPP is applied under control-plane, not interfaces; over-policing routing → adjacency loss; lockout risk.',
+        'Password types: 7 = reversible obfuscation (not encryption); 8 = PBKDF2-SHA-256, 9 = scrypt.',
+        'Strict uRPF + asymmetric routing = legitimate drops; TTL Security (GTSM) is hop-distance, not authentication.',
+        'BGP TCP MD5 authenticates the session, it does NOT encrypt; management VLAN = logical, OOB = separate path.',
+        'Enabling HTTPS does not auto-disable HTTP; SNMPv3 authPriv = auth + encryption, community strings ≠ encryption.'
+      ];
+
+      /* ---------- QUIZ ---------- */
+      const quizRaw = [
+        { q: 'AAA\'s "authorization" answers which question?', opts: [{ text: 'What can you do?' }, { text: 'Who are you?' }, { text: 'What did you do?' }, { text: 'How many are online?' }], correct: 0 },
+        { q: 'TACACS+ uses which transport and port?', opts: [{ text: 'TCP 49' }, { text: 'UDP 49' }, { text: 'TCP 1812' }, { text: 'UDP 1813' }], correct: 0 },
+        { q: 'RADIUS authentication defaults to which port?', opts: [{ text: 'UDP 1812' }, { text: 'TCP 1812' }, { text: 'UDP 49' }, { text: 'TCP 1813' }], correct: 0 },
+        { q: 'Which AAA protocol encrypts the entire packet BODY and supports granular per-command authorization?', opts: [{ text: 'TACACS+' }, { text: 'RADIUS' }, { text: 'LDAP' }, { text: 'Kerberos' }], correct: 0 },
+        { q: 'In 802.1X, which device is the RADIUS client?', opts: [{ text: 'the switch/AP (authenticator/NAS)' }, { text: 'the user\'s laptop (supplicant)' }, { text: 'the RADIUS server' }, { text: 'the DNS server' }], correct: 0 },
+        { q: 'The wildcard for subnet mask 255.255.255.240 is:', opts: [{ text: '0.0.0.15' }, { text: '0.0.0.31' }, { text: '0.0.0.7' }, { text: '0.0.0.3' }], correct: 0 },
+        { q: 'An ACL\'s default final action is:', opts: [{ text: 'implicit deny' }, { text: 'implicit permit' }, { text: 'echo to next ACL' }, { text: 'drop and log' }], correct: 0 },
+        { q: 'Which command applies an ACL to a VTY line (not an interface)?', opts: [{ text: 'access-class' }, { text: 'ip access-group' }, { text: 'ipv6 traffic-filter' }, { text: 'ip access-list' }], correct: 0 },
+        { q: 'Port Security\'s DEFAULT violation mode is:', opts: [{ text: 'shutdown' }, { text: 'restrict' }, { text: 'protect' }, { text: 'notify' }], correct: 0 },
+        { q: 'Which port-security MAC type survives a reload ONLY if saved?', opts: [{ text: 'sticky' }, { text: 'dynamic' }, { text: 'static' }, { text: 'learned' }], correct: 0 },
+        { q: 'Dynamic ARP Inspection protects against:', opts: [{ text: 'ARP spoofing/poisoning' }, { text: 'source IP spoofing' }, { text: 'unauthorized MACs' }, { text: 'traffic storms' }], correct: 0 },
+        { q: 'DAI and IP Source Guard both depend on:', opts: [{ text: 'DHCP Snooping (or static bindings/ARP ACL)' }, { text: 'STP' }, { text: 'Port Security' }, { text: 'CoPP' }], correct: 0 },
+        { q: 'Which feature limits L2 broadcast/multicast/unknown-unicast floods?', opts: [{ text: 'Storm Control' }, { text: 'STP' }, { text: 'Port Security' }, { text: 'uRPF' }], correct: 0 },
+        { q: 'CoPP is applied under which config context?', opts: [{ text: 'control-plane (service-policy input)' }, { text: 'an interface' }, { text: 'the global ACL' }, { text: 'the VTY lines' }], correct: 0 },
+        { q: 'Which password type is reversible obfuscation and NOT secure encryption?', opts: [{ text: 'Type 7' }, { text: 'Type 8' }, { text: 'Type 9' }, { text: 'Type 0 (if secret)' }], correct: 0 },
+        { q: 'Strict uRPF breaks which scenario?', opts: [{ text: 'asymmetric routing' }, { text: 'symmetric routing' }, { text: 'loop-free L2' }, { text: 'DHCP DORA' }], correct: 0 },
+        { q: 'Port 3268/3269 are used by:', opts: [{ text: 'AD Global Catalog' }, { text: 'LDAP plain' }, { text: 'RADIUS' }, { text: 'TACACS+' }], correct: 0 }
+      ];
+      const quizQuestions = reactive(quizRaw.map(q => ({ ...q, ans: null })));
+      const quizDone = ref(false);
+      const quizScore = ref(loadJSON(LS.quiz, 0) || 0);
+      const allQuizAnswered = computed(() => quizQuestions.every(q => q.ans !== null));
+      function submitQuiz() {
+        if (!allQuizAnswered.value) return;
+        quizScore.value = quizQuestions.filter((q, i) => q.ans === q.correct).length;
+        quizDone.value = true;
+        save(LS.quiz, quizScore.value);
+      }
+      function resetQuiz() {
+        quizQuestions.forEach(q => q.ans = null);
+        quizDone.value = false;
+        quizScore.value = 0;
+        localStorage.removeItem(LS.quiz);
+      }
+
+      /* ---------- CHECKLIST ---------- */
+      const checklistRoot = loadJSON(LS.done, [
+        { t: 'AAA: Authentication (who), Authorization (can), Accounting (did); commands N = privilege level N', done: false },
+        { t: 'AAA fallback: timeout → may fall back; definitive reject → generally no fallback to local', done: false },
+        { t: 'TACACS+ (Cisco, TCP 49, body encrypt, per-command authz) vs RADIUS (IETF, UDP 1812/1813, password only)', done: false },
+        { t: 'RADIUS 802.1X: supplicant / authenticator-NAS(client) / authentication server', done: false },
+        { t: 'ACL: first match wins, implicit deny; standard 1-99/1300-1999, extended 100-199/2000-2699; access-group vs access-class', done: false },
+        { t: 'Wildcard: 0=match, 1=ignore; inverse of subnet mask; host/any; IPv6 ACL has NO wildcard', done: false },
+        { t: 'Port Security: max 1 default, shutdown default; static/dynamic/sticky MAC survival; warns source MAC not IP', done: false },
+        { t: 'DAI: ARP protection per VLAN, untrusted by default, validates against DHCP Snooping/ARP ACL', done: false },
+        { t: 'IPSG: ip verify source (IP) / port-security (IP+MAC); ip source binding for static devices', done: false },
+        { t: 'Storm Control: broadcast/multicast/unknown-unicast; rising/falling hysteresis; default suppress, trap/shutdown actions; ≠ STP', done: false },
+        { t: 'CoPP: ACL→class-map→policy-map→control-plane; protects CPU; not an interface ACL; lockout + adjacency risks', done: false },
+        { t: 'Password types: 0 clear, 5 MD5, 7 reversible (not encryption), 8 PBKDF2-SHA-256, 9 scrypt', done: false },
+        { t: 'Secure mgmt: SSH>Telnet, HTTPS>HTTP, SNMPv3>v1/v2c, SCP>TFTP; Management VLAN vs OOB', done: false },
+        { t: 'uRPF strict (rx, breaks asymmetric) vs loose (any); BGP TCP MD5=auth not encrypt; TTL Security=hop distance', done: false },
+        { t: 'L2 chain: DHCP Snooping → DAI + IPSG; Port Security/Storm/BPDU Guard independent; IPv6 needs RA Guard/DHCPv6 Guard', done: false }
+      ]);
+      const checklist = reactive(checklistRoot);
+      const doneCount = computed(() => checklist.filter(c => c.done).length);
+      function saveChecklist() { save(LS.done, checklistRoot); }
+      function toggleDone(i) { checklistRoot[i].done = !checklistRoot[i].done; saveChecklist(); }
+
+      return {
+        theme, sec, sections,
+        aaaScen, aaaPick, aaaVerdict,
+        aaaProto, aaaProtoVerdict,
+        aclMask, aclVerdict,
+        portModes, portMode, portVerdict,
+        stormRise, stormFall, stormVerdict,
+        pwTypes, pwPick, pwVerdict,
+        urpfMode, urpfVerdict,
+        commands, activeCmd, activeCommand,
+        traps,
+        quizQuestions, quizDone, quizScore, allQuizAnswered, submitQuiz, resetQuiz,
+        checklist, doneCount, saveChecklist, toggleDone
+      };
+    }
+  }).mount('#app');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How SDN &amp; Automation Works — Deep Dive</title>
+<style>
+  :root {
+    --bg: #0f172a; --panel: #111c34; --card: #1e293b; --card-2: #16233d;
+    --text: #f8fafc; --muted: #94a3b8;
+    --blue: #38bdf8; --blue-dim: #0c4a6e;
+    --green: #34d399; --green-dim: #064e3b;
+    --amber: #fbbf24; --amber-dim: #78350f;
+    --red: #f87171; --red-dim: #7f1d1d;
+    --violet: #a78bfa; --violet-dim: #4c1d95;
+    --cyan: #22d3ee; --cyan-dim: #164e63;
+    --border: #334155; --hover: #263449; --code-bg: #0b1220;
+  }
+  #app[data-theme="light"] {
+    --bg: #f1f5f9; --panel: #ffffff; --card: #ffffff; --card-2: #f8fafc;
+    --text: #0f172a; --muted: #64748b;
+    --blue: #0284c7; --blue-dim: #bae6fd;
+    --green: #059669; --green-dim: #d1fae5;
+    --amber: #d97706; --amber-dim: #fef3c7;
+    --red: #dc2626; --red-dim: #fee2e2;
+    --violet: #7c3aed; --violet-dim: #ede9fe;
+    --cyan: #0891b2; --cyan-dim: #cffafe;
+    --border: #cbd5e1; --hover: #e2e8f0; --code-bg: #0b1220;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; }
+  #app { max-width: 1040px; margin: 0 auto; padding: 20px 18px 60px; }
+
+  header { position: sticky; top: 0; z-index: 30; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .lv-badge { background: var(--blue-dim); color: var(--blue); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .exam-badge { background: var(--violet-dim); color: var(--violet); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .head-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: background 0.15s; }
+  .btn:hover { background: var(--hover); }
+  .btn.primary { background: var(--blue); color: #0f172a; border-color: var(--blue); }
+
+  nav { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 2px 16px; }
+  nav button.chip { border: 1px solid var(--border); background: var(--card); color: var(--muted); padding: 5px 11px; border-radius: 999px; cursor: pointer; font-size: 0.76rem; font-weight: 600; }
+  nav button.chip.active { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
+
+  section.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
+  section.panel h2 { font-size: 1.2rem; margin-bottom: 6px; }
+  section.panel h3 { font-size: 1rem; margin: 18px 0 10px; color: var(--blue); }
+  section.panel p { margin: 8px 0; }
+  .muted { color: var(--muted); }
+  .lead { color: var(--muted); font-size: 0.95rem; }
+
+  .grid { display: grid; gap: 12px; }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .g3 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .g4 { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .card h4 { font-size: 0.9rem; margin-bottom: 6px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85rem; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  tr:hover td { background: var(--hover); }
+
+  code, .mono { font-family: 'Fira Code', ui-monospace, monospace; }
+  .mono { font-size: 0.9rem; }
+  .chip-tag { display: inline-block; border-radius: 999px; padding: 1px 9px; font-size: 0.74rem; font-weight: 700; }
+  .b-blue { background: var(--blue-dim); color: var(--blue); }
+  .b-green { background: var(--green-dim); color: var(--green); }
+  .b-amber { background: var(--amber-dim); color: var(--amber); }
+  .b-red { background: var(--red-dim); color: var(--red); }
+  .b-violet { background: var(--violet-dim); color: var(--violet); }
+  .b-cyan { background: var(--cyan-dim); color: var(--cyan); }
+
+  .callout { border-left: 4px solid var(--amber); background: var(--card-2); border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 12px 0; font-size: 0.9rem; }
+  .callout.green { border-color: var(--green); }
+  .callout.red { border-color: var(--red); }
+  .callout.blue { border-color: var(--blue); }
+  .callout.violet { border-color: var(--violet); }
+
+  .row-fn { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 8px 0; }
+
+  .opt { display: flex; align-items: center; gap: 8px; padding: 6px 9px; margin: 3px 0; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; background: var(--card); font-size: 0.86rem; }
+  .opt.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .opt .letter { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex: 0 0 auto; }
+  .opt.sel .letter { background: var(--blue); color: #0f172a; }
+
+  #app pre, pre.cmd { background: var(--code-bg); color: #e2e8f0; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.82rem; line-height: 1.5; }
+
+  .trap-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  .trap-item:last-child { border-bottom: none; }
+  .trap-ico { color: var(--red); font-weight: 700; flex: 0 0 auto; }
+
+  .step-flow { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .step { border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 0.8rem; background: var(--card-2); }
+  .step .n { color: var(--blue); font-weight: 700; }
+
+  .verdict { border-radius: 8px; padding: 10px 14px; font-weight: 700; margin: 8px 0; }
+  .verdict.ok { background: var(--green-dim); color: var(--green); }
+  .verdict.bad { background: var(--red-dim); color: var(--red); }
+  .verdict.info { background: var(--blue-dim); color: var(--blue); }
+
+  .chk-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; margin: 5px 0; cursor: pointer; transition: opacity 0.15s; }
+  .chk-item.done { opacity: 0.55; text-decoration: line-through; }
+  .chk-box { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 5px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; }
+  .chk-item.done .chk-box { background: var(--green); border-color: var(--green); color: #0f172a; }
+
+  .proto-cell { border: 1px solid var(--border); border-radius: 10px; padding: 9px 10px; background: var(--card); cursor: pointer; text-align: center; }
+  .proto-cell.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .proto-cell .pn { font-weight: 700; }
+  .proto-cell .pd { font-size: 0.75rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<div id="app" :data-theme="theme">
+  <header>
+    <h1><span class="lv-badge">L24</span> How SDN &amp; Automation Works
+      <span class="exam-badge">ENCOR 350-401</span></h1>
+    <div class="head-actions">
+      <a class="btn" href="../Level 23 - Enterprise WAN/How Enterprise WAN Works.html">◀ WAN</a>
+      <a class="btn" href="../Level 25 - Virtualization &amp; Cloud/How Virtualization &amp; Cloud Works.html">Virt ▶</a>
+      <a class="btn" href="../index.html">Flashcards</a>
+      <button class="btn" @click="theme = (theme==='dark'?'light':'dark')">{{ theme==='dark' ? '☀' : '🌙' }}</button>
+    </div>
+  </header>
+
+  <nav>
+    <button class="chip" v-for="s in sections" :key="s.id" :class="{active:sec===s.id}" @click="sec=s.id">{{ s.icon }} {{ s.label }}</button>
+  </nav>
+
+  <!-- 1. OVERVIEW -->
+  <section class="panel" v-show="sec==='intro'" id="intro">
+    <h2>⚙️ SDN &amp; Automation — the whole picture</h2>
+    <p class="lead">Two big ideas: <b>SDN</b> (separate control from data, centralize the brain) and <b>automation</b> (program the network via APIs/data models/tools). The stack: <b>DNA Center + SD-Access (LISP/VXLAN)</b> for the fabric, <b>REST/RESTCONF/NETCONF over YANG</b> to talk to devices, and <b>Python/Ansible/Terraform/Git</b> to drive it all.</p>
+
+    <h3>The three blocks (memorize)</h3>
+    <div class="grid g3">
+      <div class="card"><h4>Fabric</h4><span class="chip-tag b-blue">SD-Access</span><p class="muted" style="margin:0">LISP control + VXLAN data + ISE policy</p></div>
+      <div class="card"><h4>APIs</h4><span class="chip-tag b-green">YANG-based</span><p class="muted" style="margin:0">RESTCONF (HTTP/JSON) · NETCONF (SSH/XML)</p></div>
+      <div class="card"><h4>Tools</h4><span class="chip-tag b-amber">IaC</span><p class="muted" style="margin:0">Python · Ansible · Terraform · Git</p></div>
+    </div>
+
+    <h3>SDN planes (north vs south — the core map)</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">App</span> business apps</div>
+      <div class="step"><span class="n">NB</span> northbound API (app ↔ controller)</div>
+      <div class="step"><span class="n">Ctrl</span> controller (centralized logic)</div>
+      <div class="step"><span class="n">SB</span> southbound API (controller ↔ device)</div>
+      <div class="step"><span class="n">HW</span> infrastructure</div>
+    </div>
+    <div class="callout red"><b>Northbound = up to apps; southbound = down to devices.</b> Modern southbound = NETCONF/RESTCONF over YANG.</div>
+  </section>
+
+  <!-- 2. SDN -->
+  <section class="panel" v-show="sec==='sdn'" id="sdn">
+    <h2>🧠 SDN Fundamentals</h2>
+    <p class="lead">Separation of <b>control plane</b> from the <b>data plane</b>, centralizing the brain in a controller. Network services become <b>programmable and centrally managed</b>.</p>
+
+    <h3>Where each plane lives</h3>
+    <table>
+      <tr><th>Plane</th><th>SDN location</th></tr>
+      <tr><td>Control</td><td>controller (central)</td></tr>
+      <tr><td>Data</td><td>switches/routers</td></tr>
+      <tr><td>Management</td><td>orchestration</td></tr>
+      <tr><td>Service</td><td>apps/APIs</td></tr>
+    </table>
+    <div class="callout blue"><b>Centralized control = one brain for the whole network.</b></div>
+
+    <h3>Southbound protocol picker</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:sbPick==='netconf'}" @click="sbPick='netconf'"><div class="pn">NETCONF</div><div class="pd">YANG + XML · SSH · RPC</div></div>
+      <div class="proto-cell" :class="{sel:sbPick==='restconf'}" @click="sbPick='restconf'"><div class="pn">RESTCONF</div><div class="pd">YANG + REST · HTTP · JSON</div></div>
+      <div class="proto-cell" :class="{sel:sbPick==='openflow'}" @click="sbPick='openflow'"><div class="pn">OpenFlow</div><div class="pd">flow-table · legacy SDN</div></div>
+      <div class="proto-cell" :class="{sel:sbPick==='cli'}" @click="sbPick='cli'"><div class="pn">CLI/SNMP</div><div class="pd">legacy out-of-band</div></div>
+    </div>
+    <div class="verdict" :class="sbVerdict.cls">{{ sbVerdict.text }}</div>
+
+    <h3>Benefits &amp; trade-offs</h3>
+    <div class="grid g2">
+      <div class="card"><h4>Benefits</h4><p class="muted" style="margin:0">agility · automation · consistency · visibility · policy-driven security</p></div>
+      <div class="card"><h4>Trade-offs</h4><p class="muted" style="margin:0">controller SPOF (needs HA) · protocol support · new skills · hybrid migration</p></div>
+    </div>
+    <pre class="cmd">netconf-yang
+restconf
+show platform software yang
+show netconf-yang sessions
+show running-config
+</pre>
+  </section>
+
+  <!-- 3. DNA CENTER -->
+  <section class="panel" v-show="sec==='dna'" id="dna">
+    <h2>🎛️ Cisco DNA Center</h2>
+    <p class="lead">Cisco's <b>SDN controller + management platform</b> for campus networks: intent-based networking, automation (design/provision/assurance), and the <b>control logic for SD-Access</b>.</p>
+
+    <h3>What DNA Center does</h3>
+    <div class="grid g3">
+      <div class="card"><h4>Design</h4><p class="muted" style="margin:0">sites, templates</p></div>
+      <div class="card"><h4>Provision</h4><p class="muted" style="margin:0">device config</p></div>
+      <div class="card"><h4>Assurance</h4><p class="muted" style="margin:0">telemetry/health</p></div>
+      <div class="card"><h4>Automation</h4><p class="muted" style="margin:0">intent-based</p></div>
+      <div class="card"><h4>SD-Access</h4><p class="muted" style="margin:0">fabric control</p></div>
+    </div>
+    <div class="callout blue"><b>DNA Center = the brain + dashboard of the campus.</b></div>
+
+    <h3>Intent-based networking flow</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> Intent (what you want)</div>
+      <div class="step"><span class="n">2</span> Translate (policies → config)</div>
+      <div class="step"><span class="n">3</span> Activate (push to devices)</div>
+      <div class="step"><span class="n">4</span> Assure (verify intent)</div>
+    </div>
+    <div class="callout red"><b>Intent = desired state; DNA Center makes it real and verifies it via assurance telemetry.</b></div>
+
+    <h3>SD-Access tie-in &amp; HA</h3>
+    <div class="grid g2">
+      <div class="card"><h4>Fabric stack</h4><p class="muted" style="margin:0">Control = LISP · Data = VXLAN · Policy = ISE · Orchestrate = DNA Center</p></div>
+      <div class="card"><h4>HA</h4><p class="muted" style="margin:0">run as a cluster (primary/secondary, DB replication)</p></div>
+    </div>
+    <pre class="cmd">! DNA Center is managed via GUI + REST API (not CLI)
+! REST API entry:
+curl -k -X GET "https://dna.center/api/v1/network-device" -H "X-Auth-Token: $TOKEN"
+show telemetry
+show platform software
+</pre>
+  </section>
+
+  <!-- 4. SD-ACCESS -->
+  <section class="panel" v-show="sec==='sda'" id="sda">
+    <h2>🏷️ SD-Access — the campus fabric</h2>
+    <p class="lead">Cisco's <b>intent-based campus fabric</b>: a <b>VXLAN</b> overlay (data plane) with a <b>LISP</b> control plane and <b>ISE</b> policy, orchestrated by <b>DNA Center</b>.</p>
+
+    <h3>The three planes (the core map)</h3>
+    <div class="grid g3">
+      <div class="proto-cell" :class="{sel:sdaPick==='control'}" @click="sdaPick='control'"><div class="pn">Control</div><div class="pd">LISP (EID↔RLOC mapping)</div></div>
+      <div class="proto-cell" :class="{sel:sdaPick==='data'}" @click="sdaPick='data'"><div class="pn">Data</div><div class="pd">VXLAN (VNI tunnels)</div></div>
+      <div class="proto-cell" :class="{sel:sdaPick==='policy'}" @click="sdaPick='policy'"><div class="pn">Policy</div><div class="pd">ISE + SGT (security groups)</div></div>
+    </div>
+    <div class="verdict" :class="sdaVerdict.cls">{{ sdaVerdict.text }}</div>
+
+    <h3>Fabric roles</h3>
+    <div class="grid g4">
+      <div class="card"><h4>Fabric edge</h4><p class="muted" style="margin:0">access switch (entry)</p></div>
+      <div class="card"><h4>Border</h4><p class="muted" style="margin:0">to outside/legacy (exit)</p></div>
+      <div class="card"><h4>Control plane</h4><p class="muted" style="margin:0">LISP map server</p></div>
+      <div class="card"><h4>Fabric WLC</h4><p class="muted" style="margin:0">wireless</p></div>
+    </div>
+
+    <h3>Macro vs micro segmentation (the trap)</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:segPick==='macro'}" @click="segPick='macro'"><div class="pn">Macro</div><div class="pd">VN (VRF) · separate networks · VXLAN</div></div>
+      <div class="proto-cell" :class="{sel:segPick==='micro'}" @click="segPick='micro'"><div class="pn">Micro</div><div class="pd">SG (trust) · security groups · ISE/SGT</div></div>
+    </div>
+    <div class="verdict" :class="segVerdict.cls">{{ segVerdict.text }}</div>
+    <div class="callout red"><b>Hosts keep their IPs while roaming; policy follows the security group, not the VLAN.</b></div>
+    <pre class="cmd">show lisp session
+show lisp map-cache
+show vxlan vni
+show vlan vn-segment
+show ip device tracking
+show authentication sessions
+</pre>
+  </section>
+
+  <!-- 5. VXLAN -->
+  <section class="panel" v-show="sec==='vxlan'" id="vxlan">
+    <h2>🔀 VXLAN — data-plane overlay</h2>
+    <p class="lead">Encapsulates L2 frames in <b>UDP (4789)</b> over the underlay, scaling VLANs to <b>16 million VNIs</b> and stretching L2 domains across L3. The <b>data plane of SD-Access</b>.</p>
+
+    <h3>Why VXLAN (escapes the VLAN limit)</h3>
+    <div class="grid g2">
+      <div class="card"><h4>Problem</h4><p class="muted" style="margin:0">4094 VLANs (12-bit) · L2 can't stretch L3 · multi-tenant</p></div>
+      <div class="card"><h4>Answer</h4><p class="muted" style="margin:0">16M VNIs (24-bit) · MAC-in-UDP overlay · VNI = tenant</p></div>
+    </div>
+
+    <h3>VLAN vs VXLAN (the trap)</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:vvPick==='vlan'}" @click="vvPick='vlan'"><div class="pn">VLAN</div><div class="pd">12-bit · 4094 · L2-domain · switch transport</div></div>
+      <div class="proto-cell" :class="{sel:vvPick==='vxlan'}" @click="vvPick='vxlan'"><div class="pn">VXLAN</div><div class="pd">24-bit VNI · 16M · overlay L3 · UDP/IP transport</div></div>
+    </div>
+    <div class="verdict" :class="vvVerdict.cls">{{ vvVerdict.text }}</div>
+
+    <h3>Encapsulation &amp; endpoints</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">Outer</span> IP/UDP (port 4789)</div>
+      <div class="step"><span class="n">VXLAN</span> VNI (24-bit)</div>
+      <div class="step"><span class="n">Inner</span> original L2 frame</div>
+      <div class="step"><span class="n">Result</span> MAC-in-UDP</div>
+    </div>
+    <div class="callout blue"><b>VTEPs (tunnel endpoints) encapsulate at ingress and decapsulate at egress.</b></div>
+
+    <h3>BUM handling</h3>
+    <div class="grid g3">
+      <div class="card"><h4>Multicast</h4><p class="muted" style="margin:0">underlay mcast</p></div>
+      <div class="card"><h4>Head-end replication</h4><p class="muted" style="margin:0">unicast copies</p></div>
+      <div class="card"><h4>EVPN</h4><p class="muted" style="margin:0">BGP-based</p></div>
+    </div>
+    <pre class="cmd">show vxlan vni
+show nve peers
+show interface nve1
+show l2vpn evpn
+show vlan vn-segment
+</pre>
+  </section>
+
+  <!-- 6. LISP -->
+  <section class="panel" v-show="sec==='lisp'" id="lisp">
+    <h2>🗺️ LISP — control-plane overlay</h2>
+    <p class="lead">Separates <b>identity (EID)</b> from <b>location (RLOC)</b>: hosts keep stable IDs while mapping to current locations via a <b>map server/control plane</b>. The <b>control plane of SD-Access</b>.</p>
+
+    <h3>EID vs RLOC (the core split)</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:lispPick==='eid'}" @click="lispPick='eid'"><div class="pn">EID</div><div class="pd">endpoint identity (host IP) — travels</div></div>
+      <div class="proto-cell" :class="{sel:lispPick==='rloc'}" @click="lispPick='rloc'"><div class="pn">RLOC</div><div class="pd">routing locator (site IP) — current location</div></div>
+    </div>
+    <div class="verdict" :class="lispVerdict.cls">{{ lispVerdict.text }}</div>
+
+    <h3>LISP roles</h3>
+    <div class="grid g4">
+      <div class="card"><h4>ITR</h4><p class="muted" style="margin:0">ingress tunnel router (edge)</p></div>
+      <div class="card"><h4>ETR</h4><p class="muted" style="margin:0">egress tunnel router (edge)</p></div>
+      <div class="card"><h4>MR/MS</h4><p class="muted" style="margin:0">map resolver/server (control)</p></div>
+      <div class="card"><h4>PxTR</h4><p class="muted" style="margin:0">proxy to non-LISP</p></div>
+    </div>
+
+    <h3>Mapping flow</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1</span> ITR needs a destination</div>
+      <div class="step"><span class="n">2</span> map-request to MR/MS</div>
+      <div class="step"><span class="n">3</span> MS returns EID → RLOC</div>
+      <div class="step"><span class="n">4</span> ITR encapsulates to ETR</div>
+    </div>
+    <div class="callout red"><b>Control plane = map lookup; data plane = encapsulation. LISP maps EIDs so hosts roam with the same IP.</b></div>
+    <pre class="cmd">show lisp session
+show lisp map-cache
+show lisp eid-table
+show lisp ipv4 database
+debug lisp
+</pre>
+  </section>
+
+  <!-- 7. REST API -->
+  <section class="panel" v-show="sec==='api'" id="api">
+    <h2>🔌 REST API</h2>
+    <p class="lead">An <b>HTTP-based</b> API style: resources have URLs and actions are HTTP verbs; data rides as <b>JSON</b>. Controllers (DNA Center, vManage) expose REST — making the network scriptable.</p>
+
+    <h3>HTTP verb selector (memorize)</h3>
+    <div class="grid g4">
+      <div class="proto-cell" :class="{sel:verbPick==='get'}" @click="verbPick='get'"><div class="pn">GET</div><div class="pd">read</div></div>
+      <div class="proto-cell" :class="{sel:verbPick==='post'}" @click="verbPick='post'"><div class="pn">POST</div><div class="pd">create</div></div>
+      <div class="proto-cell" :class="{sel:verbPick==='put'}" @click="verbPick='put'"><div class="pn">PUT</div><div class="pd">replace</div></div>
+      <div class="proto-cell" :class="{sel:verbPick==='patch'}" @click="verbPick='patch'"><div class="pn">PATCH</div><div class="pd">modify</div></div>
+      <div class="proto-cell" :class="{sel:verbPick==='del'}" @click="verbPick='del'"><div class="pn">DELETE</div><div class="pd">remove</div></div>
+    </div>
+    <div class="verdict" :class="verbVerdict.cls">{{ verbVerdict.text }}</div>
+
+    <h3>Status codes</h3>
+    <table>
+      <tr><th>Code</th><th>Meaning</th></tr>
+      <tr><td>200</td><td>OK</td></tr>
+      <tr><td>201</td><td>created</td></tr>
+      <tr><td>401</td><td>unauthorized</td></tr>
+      <tr><td>404</td><td>not found</td></tr>
+      <tr><td>500</td><td>server error</td></tr>
+    </table>
+    <div class="callout red"><b>2xx = success · 4xx = client · 5xx = server.</b> REST is <b>stateless</b> (each request independent); token/bearer auth is standard.</div>
+    <pre class="cmd">curl -X GET "https://10.0.0.5/dna/intent/api/v1/network-device" \
+  -H "X-Auth-Token: $TOKEN" -k
+curl -X POST -d '{"key":"value"}' -H "Content-Type: application/json" https://host/api
+</pre>
+  </section>
+
+  <!-- 8. RESTCONF / NETCONF / YANG -->
+  <section class="panel" v-show="sec==='nc'" id="nc">
+    <h2>📦 RESTCONF · NETCONF · YANG</h2>
+    <p class="lead">The <b>model-driven</b> way to configure devices. <b>YANG</b> is the shared data model; <b>RESTCONF</b> and <b>NETCONF</b> are two protocols that operate on it.</p>
+
+    <h3>Protocol picker (the core contrast)</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:yangPick==='restconf'}" @click="yangPick='restconf'"><div class="pn">RESTCONF</div><div class="pd">RFC 8040 · HTTP(S) · JSON/XML · stateless</div></div>
+      <div class="proto-cell" :class="{sel:yangPick==='netconf'}" @click="yangPick='netconf'"><div class="pn">NETCONF</div><div class="pd">RFC 6241 · SSH · XML RPC · candidate</div></div>
+    </div>
+    <div class="verdict" :class="yangVerdict.cls">{{ yangVerdict.text }}</div>
+
+    <h3>RESTCONF vs NETCONF (memorize)</h3>
+    <table>
+      <tr><th>Aspect</th><th>RESTCONF</th><th>NETCONF</th></tr>
+      <tr><td>Transport</td><td>HTTP(S)</td><td>SSH</td></tr>
+      <tr><td>Encoding</td><td>JSON/XML</td><td>XML</td></tr>
+      <tr><td>Style</td><td>HTTP verbs</td><td>RPCs (&lt;get&gt;/&lt;edit-config&gt;)</td></tr>
+      <tr><td>State</td><td>stateless</td><td>stateful</td></tr>
+      <tr><td>Candidate</td><td>limited</td><td><b>yes — stage &amp; commit</b></td></tr>
+    </table>
+    <div class="callout red"><b>RESTCONF = HTTP + JSON (simpler); NETCONF = SSH + XML/RPC (richer, transactional).</b> Pick RESTCONF for simplicity, NETCONF for power.</div>
+
+    <h3>YANG data model (shared schema)</h3>
+    <div class="grid g4">
+      <div class="card"><h4>module</h4><p class="muted" style="margin:0">namespace</p></div>
+      <div class="card"><h4>container</h4><p class="muted" style="margin:0">group of nodes</p></div>
+      <div class="card"><h4>list</h4><p class="muted" style="margin:0">repeated entries</p></div>
+      <div class="card"><h4>leaf</h4><p class="muted" style="margin:0">single value</p></div>
+    </div>
+    <div class="callout blue"><b>Standard models: <b>ietf-interfaces</b>, <b>ietf-ip</b>, <b>Cisco-IOS-XE-native</b>.</b> Typed leaves = automatic validation.</div>
+    <pre class="cmd">! enable RESTCONF
+conf t
+ restconf
+!
+! enable NETCONF
+netconf-yang
+netconf ssh
+!
+show netconf-yang sessions
+show netconf-yang datastore
+show netconf-yang schemas
+! RESTCONF PATCH example
+curl -k -u admin:pass -X PATCH \
+  https://192.0.2.1/restconf/data/Cisco-IOS-XE-native:native/interface/GigabitEthernet=1 \
+  -d '{"description":"uplink"}' -H "Content-Type: application/yang-data+json"
+</pre>
+  </section>
+
+  <!-- 9. DATA FORMATS -->
+  <section class="panel" v-show="sec==='data'" id="data">
+    <h2>📄 Data Formats — JSON · XML · YAML</h2>
+    <p class="lead">The payloads that carry config and state. <b>JSON</b> (modern API default), <b>XML</b> (NETCONF/legacy), <b>YAML</b> (Ansible/readable).</p>
+
+    <h3>Format picker</h3>
+    <div class="grid g3">
+      <div class="proto-cell" :class="{sel:fmtPick==='json'}" @click="fmtPick='json'"><div class="pn">JSON</div><div class="pd">compact · { } [ ] · REST</div></div>
+      <div class="proto-cell" :class="{sel:fmtPick==='xml'}" @click="fmtPick='xml'"><div class="pn">XML</div><div class="pd">tags · well-formed · NETCONF</div></div>
+      <div class="proto-cell" :class="{sel:fmtPick==='yaml'}" @click="fmtPick='yaml'"><div class="pn">YAML</div><div class="pd">indent · spaces · Ansible</div></div>
+    </div>
+    <div class="verdict" :class="fmtVerdict.cls">{{ fmtVerdict.text }}</div>
+
+    <h3>Examples &amp; key rules</h3>
+    <table>
+      <tr><th>Format</th><th>Structure</th><th>Rules / gotchas</th></tr>
+      <tr><td>JSON</td><td>{ } object, [ ] array, "key": value</td><td>double-quoted keys · no trailing commas</td></tr>
+      <tr><td>XML</td><td>&lt;tag&gt;value&lt;/tag&gt;, attr="v"</td><td>well-formed · one root · case-sensitive · escape &amp; &lt; &gt;</td></tr>
+      <tr><td>YAML</td><td>key: value, - item (indent)</td><td>spaces NOT tabs · same indent level · quote special chars</td></tr>
+    </table>
+    <div class="callout red"><b>JSON keys double-quoted &amp; no trailing commas (parse fails otherwise). YAML tabs/mixed indent = parse error. JSON = light/modern, XML = verbose/strict, YAML = human-readable.</b></div>
+    <pre class="cmd">! JSON (Python)
+import json
+data = json.loads(payload)   # str -> dict
+! XML (Python)
+import xml.etree.ElementTree as ET
+root = ET.fromstring(payload)
+! YAML (Python)
+import yaml
+data = yaml.safe_load(text)  # YAML -> dict/list
+</pre>
+  </section>
+
+  <!-- 10. AUTOMATION TOOLS -->
+  <section class="panel" v-show="sec==='tools'" id="tools">
+    <h2>🛠️ Automation Tools — Python · Ansible · Terraform · Git</h2>
+    <p class="lead">The tools that script, manage, and version the network.</p>
+
+    <h3>Tool picker (model comparison)</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:toolPick==='python'}" @click="toolPick='python'"><div class="pn">Python</div><div class="pd">language · requests/json/netmiko/ncclient</div></div>
+      <div class="proto-cell" :class="{sel:toolPick==='ansible'}" @click="toolPick='ansible'"><div class="pn">Ansible</div><div class="pd">agentless push · YAML playbooks · imperative</div></div>
+      <div class="proto-cell" :class="{sel:toolPick==='terraform'}" @click="toolPick='terraform'"><div class="pn">Terraform</div><div class="pd">declarative IaC · state · plan/apply</div></div>
+      <div class="proto-cell" :class="{sel:toolPick==='git'}" @click="toolPick='git'"><div class="pn">Git</div><div class="pd">version control · working→staged→committed</div></div>
+    </div>
+    <div class="verdict" :class="toolVerdict.cls">{{ toolVerdict.text }}</div>
+
+    <h3>Terraform vs Ansible (the trap)</h3>
+    <table>
+      <tr><th>Aspect</th><th>Terraform</th><th>Ansible</th></tr>
+      <tr><td>Model</td><td>declarative (HCL)</td><td>imperative (YAML playbooks)</td></tr>
+      <tr><td>State</td><td><b>yes — tracks it</b></td><td>no state</td></tr>
+      <tr><td>Workflow</td><td>init → plan → apply → destroy</td><td>run playbook</td></tr>
+      <tr><td>Use</td><td>provision infra</td><td>config/manage</td></tr>
+    </table>
+    <div class="callout red"><b>Terraform = declarative + state (plan previews changes); Ansible = agentless push over SSH (playbooks with ios_config/ios_command, idempotent).</b></div>
+    <pre class="cmd">! Ansible
+ansible-playbook playbook.yaml
+ansible-inventory --list
+ansible routers -m ios_command -a "commands='show version'"
+! Terraform
+terraform init
+terraform plan
+terraform apply
+terraform destroy
+! Git
+git init
+git add configs/
+git commit -m "add router configs"
+git log
+git diff
+! Python
+import requests, json
+r = requests.get("https://host/api", headers={"X-Auth-Token": token}, verify=False)
+data = r.json()
+</pre>
+  </section>
+
+  <!-- 11. COMMANDS -->
+  <section class="panel" v-show="sec==='cmds'" id="cmds">
+    <h2>⌨️ CLI &amp; Tool Commands</h2>
+    <div class="row-fn">
+      <button class="btn" v-for="c in commands" :key="c.key" :class="{primary:activeCmd===c.key}" @click="activeCmd=c.key">{{ c.label }}</button>
+    </div>
+    <pre class="cmd">{{ activeCommand.show }}</pre>
+  </section>
+
+  <!-- 12. TRAPS -->
+  <section class="panel" v-show="sec==='traps'" id="traps">
+    <h2>⚠️ Common Traps</h2>
+    <div v-for="t in traps" :key="t" class="trap-item"><span class="trap-ico">!</span><div>{{ t }}</div></div>
+  </section>
+
+  <!-- 13. QUIZ -->
+  <section class="panel" v-show="sec==='quiz'" id="quiz">
+    <h2>📝 Quiz ({{ quizQuestions.length }})</h2>
+    <div v-for="(q,qi) in quizQuestions" :key="qi" class="card" style="margin:12px 0">
+      <div style="font-weight:700;margin-bottom:8px">{{ qi+1 }}. {{ q.q }}</div>
+      <div v-for="(o,oi) in q.opts" :key="oi"
+           class="opt" :class="{sel:q.ans===oi}"
+           @click="q.ans=oi">
+        <span class="letter">{{ String.fromCharCode(65+oi) }}</span>{{ o.text }}
+      </div>
+    </div>
+    <div class="row-fn">
+      <button class="btn primary" @click="submitQuiz()" :disabled="!allQuizAnswered">Submit answers</button>
+      <button class="btn" @click="resetQuiz()">Reset</button>
+      <span class="muted" v-if="quizDone" style="font-weight:700">Score: {{ quizScore }} / {{ quizQuestions.length }}
+        ({{ Math.round(quizScore/quizQuestions.length*100) }}%)</span>
+    </div>
+    <div class="verdict" :class="quizDone ? (quizScore===quizQuestions.length?'ok':'info') : 'info'" v-if="quizDone">
+      {{ quizScore===quizQuestions.length ? '🎉 Perfect! All ' + quizQuestions.length + ' correct.' : 'Better luck next time — review the traps section.' }}
+    </div>
+  </section>
+
+  <!-- 14. CHECKLIST -->
+  <section class="panel" v-show="sec==='checklist'" id="checklist">
+    <h2>✅ Study Checklist</h2>
+    <p class="muted" style="margin-bottom:10px">{{ doneCount }} / {{ checklist.length }} complete</p>
+    <div v-for="(c,i) in checklist" :key="i" class="chk-item" :class="{done:c.done}" @click="toggleDone(i)">
+      <span class="chk-box">{{ c.done ? '✓' : '' }}</span>{{ c.t }}
+    </div>
+  </section>
+
+</div>
+
+<script src="../vue.global.prod.js"></script>
+<script>
+(() => {
+  const { createApp, ref, computed, reactive } = Vue;
+  const LS = {
+    theme: 'ccnp.sdn.theme', done: 'ccnp.sdn.done',
+    quiz: 'ccnp.sdn.quiz'
+  };
+  function loadJSON(key, fb) {
+    try { const v = JSON.parse(localStorage.getItem(key)); return (v === null || v === undefined) ? fb : v; }
+    catch (e) { return fb; }
+  }
+  function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+  createApp({
+    setup() {
+      const theme = ref(loadJSON(LS.theme, 'dark'));
+      const sec = ref('intro');
+
+      /* ---------- SECTION NAV ---------- */
+      const sections = [
+        { id: 'intro', label: 'Overview', icon: '⚙️' },
+        { id: 'sdn', label: 'SDN', icon: '🧠' },
+        { id: 'dna', label: 'DNA Center', icon: '🎛️' },
+        { id: 'sda', label: 'SD-Access', icon: '🏷️' },
+        { id: 'vxlan', label: 'VXLAN', icon: '🔀' },
+        { id: 'lisp', label: 'LISP', icon: '🗺️' },
+        { id: 'api', label: 'REST API', icon: '🔌' },
+        { id: 'nc', label: 'NETCONF/RESTCONF', icon: '📦' },
+        { id: 'data', label: 'Formats', icon: '📄' },
+        { id: 'tools', label: 'Tools', icon: '🛠️' },
+        { id: 'cmds', label: 'Commands', icon: '⌨️' },
+        { id: 'traps', label: 'Traps', icon: '⚠️' },
+        { id: 'quiz', label: 'Quiz', icon: '📝' },
+        { id: 'checklist', label: 'Checklist', icon: '✅' }
+      ];
+
+      /* ---------- SDN SOUTHBOUND ---------- */
+      const sbPick = ref('netconf');
+      const sbVerdict = computed(() => {
+        if (sbPick.value === 'netconf') return { cls: 'info', text: 'NETCONF — YANG + XML over SSH with RPCs (edit-config/commit).' };
+        if (sbPick.value === 'restconf') return { cls: 'info', text: 'RESTCONF — YANG + REST verbs over HTTP(S) with JSON/XML.' };
+        if (sbPick.value === 'openflow') return { cls: 'info', text: 'OpenFlow — flow-table programming, the classic (legacy) SDN southbound.' };
+        return { cls: 'info', text: 'CLI/SNMP — the legacy out-of-band way (not model-driven).' };
+      });
+
+      /* ---------- SD-ACCESS PLANE ---------- */
+      const sdaPick = ref('data');
+      const sdaVerdict = computed(() => {
+        if (sdaPick.value === 'control') return { cls: 'info', text: 'Control plane = LISP — maps EID (identity) to RLOC so hosts roam with the same IP.' };
+        if (sdaPick.value === 'data') return { cls: 'info', text: 'Data plane = VXLAN — VNI tunnels (MAC-in-UDP, port 4789) carry traffic.' };
+        return { cls: 'info', text: 'Policy plane = ISE + SGT — security groups control access (micro-segmentation).' };
+      });
+
+      /* ---------- MACRO/MICRO ---------- */
+      const segPick = ref('macro');
+      const segVerdict = computed(() => {
+        if (segPick.value === 'macro') return { cls: 'info', text: 'Macro — Virtual Networks (VRF) via VXLAN: separate networks, separate routing.' };
+        return { cls: 'info', text: 'Micro — Security Groups (SGT) via ISE: fine-grained trust inside a VN.' };
+      });
+
+      /* ---------- VLAN vs VXLAN ---------- */
+      const vvPick = ref('vxlan');
+      const vvVerdict = computed(() => {
+        if (vvPick.value === 'vlan') return { cls: 'info', text: 'VLAN — 12-bit ID, 4094 count, L2-domain, switched locally.' };
+        return { cls: 'info', text: 'VXLAN — 24-bit VNI, ~16M count, overlay across L3, UDP/IP (4789) transport.' };
+      });
+
+      /* ---------- LISP EID/RLOC ---------- */
+      const lispPick = ref('eid');
+      const lispVerdict = computed(() => {
+        if (lispPick.value === 'eid') return { cls: 'info', text: 'EID — endpoint identity (host IP). It travels with the host (mobility).' };
+        return { cls: 'info', text: 'RLOC — routing locator (site IP). The current network location of the EID.' };
+      });
+
+      /* ---------- REST VERB ---------- */
+      const verbPick = ref('get');
+      const verbVerdict = computed(() => {
+        const m = { get: 'GET = READ — retrieve a resource.', post: 'POST = CREATE — create a new resource.', put: 'PUT = REPLACE — replace a resource entirely.', patch: 'PATCH = MODIFY — partial update.', del: 'DELETE = REMOVE — delete a resource.' };
+        return { cls: 'info', text: m[verbPick.value] };
+      });
+
+      /* ---------- RESTCONF/NETCONF ---------- */
+      const yangPick = ref('restconf');
+      const yangVerdict = computed(() => {
+        if (yangPick.value === 'restconf') return { cls: 'info', text: 'RESTCONF — RFC 8040: YANG over HTTP(S), JSON/XML, stateless, uses HTTP verbs. Simpler.' };
+        return { cls: 'info', text: 'NETCONF — RFC 6241: YANG over SSH with XML RPCs, candidate/transaction support. Richer.' };
+      });
+
+      /* ---------- FORMAT ---------- */
+      const fmtPick = ref('json');
+      const fmtVerdict = computed(() => {
+        if (fmtPick.value === 'json') return { cls: 'info', text: 'JSON — { } object, [ ] array, "key": value; keys double-quoted, no trailing commas; REST/RESTCONF default.' };
+        if (fmtPick.value === 'xml') return { cls: 'info', text: 'XML — &lt;tag&gt;value&lt;/tag&gt; with attributes; well-formed, single root; used by NETCONF.' };
+        return { cls: 'info', text: 'YAML — indentation-based (spaces not tabs); key: value + - item; used by Ansible; human-readable.' };
+      });
+
+      /* ---------- TOOL ---------- */
+      const toolPick = ref('ansible');
+      const toolVerdict = computed(() => {
+        if (toolPick.value === 'python') return { cls: 'info', text: 'Python — general language; requests (REST), json, netmiko (SSH), ncclient (NETCONF).' };
+        if (toolPick.value === 'ansible') return { cls: 'info', text: 'Ansible — agentless PUSH over SSH, YAML playbooks, ios_config/ios_command modules, idempotent.' };
+        if (toolPick.value === 'terraform') return { cls: 'info', text: 'Terraform — declarative IaC (HCL) with state; workflow init → plan → apply → destroy.' };
+        return { cls: 'info', text: 'Git — distributed VCS; files flow working → staged → committed; add/commit/push; branch + PR.' };
+      });
+
+      /* ---------- COMMANDS ---------- */
+      const commands = [
+        {
+          key: 'yang', label: 'Enable NETCONF/RESTCONF',
+          show: "! RESTCONF\nconf t\n restconf\n!\n! NETCONF\nnetconf-yang\nnetconf ssh\n!\nshow netconf-yang sessions\nshow netconf-yang datastore\nshow netconf-yang schemas\nshow platform software yang\nshow running-config"
+        },
+        {
+          key: 'restconf', label: 'RESTCONF',
+          show: "curl -k -u admin:pass -X PATCH \\\n  https://192.0.2.1/restconf/data/Cisco-IOS-XE-native:native/interface/GigabitEthernet=1 \\\n  -d '{\"description\":\"uplink\"}' \\\n  -H \"Content-Type: application/yang-data+json\"\n\ncurl -k -u admin:pass -X GET \\\n  https://192.0.2.1/restconf/data/Cisco-IOS-XE-native:native/interfaces"
+        },
+        {
+          key: 'sda', label: 'SD-Access/LISP/VXLAN',
+          show: "show lisp session\nshow lisp map-cache\nshow lisp eid-table\nshow lisp ipv4 database\nshow vxlan vni\nshow nve peers\nshow interface nve1\nshow vlan vn-segment\nshow l2vpn evpn\nshow ip device tracking\nshow authentication sessions"
+        },
+        {
+          key: 'dna', label: 'DNA Center REST',
+          show: "# DNA Center is GUI + REST API managed\ncurl -k -X POST \"https://dna.center/dna/system/api/v1/auth/token\" \\\n  -u username:password\ncurl -k -X GET \"https://dna.center/dna/intent/api/v1/network-device\" \\\n  -H \"X-Auth-Token: $TOKEN\"\nshow telemetry\nshow platform software"
+        },
+        {
+          key: 'tools', label: 'Automation Tools',
+          show: "! Ansible\nansible-playbook playbook.yaml\nansible-inventory --list\nansible routers -m ios_command -a \"commands='show version'\"\n\n! Terraform\nterraform init\nterraform plan\nterraform apply\ntransform destroy\n\n! Git\ngit init\ngit add configs/\ngit commit -m \"add router configs\"\ngit log\ngit diff"
+        }
+      ];
+      const activeCmd = ref(commands[0].key);
+      const activeCommand = computed(() => commands.find(c => c.key === activeCmd.value));
+
+      /* ---------- TRAPS ---------- */
+      const traps = [
+        'SDN separates control from data; northbound = apps, southbound = devices.',
+        'Modern southbound = NETCONF/RESTCONF over YANG; OpenFlow/CLI/SNMP are older.',
+        'DNA Center = intent-based: intent → translate → activate → assure (via telemetry).',
+        'SD-Access planes: LISP = control, VXLAN = data, ISE+SGT = policy, DNA Center = orchestrate.',
+        'SD-Access fabric roles: edge (entry), border (exit), control plane (map server), fabric WLC.',
+        'Macro segmentation = VN/VRF (VXLAN); micro = SGT (ISE).',
+        'Hosts keep their IP while roaming; policy follows the security group, not the VLAN.',
+        'VXLAN = MAC-in-UDP, port 4789, 24-bit VNI (~16M); VTEPs encap/decap at edges.',
+        'BUM in VXLAN via multicast, head-end replication, or EVPN.',
+        'LISP = EID (identity) vs RLOC (location); ITR/ETR edges, MR/MS control, PxTR legacy interop.',
+        'REST verbs: GET=read, POST=create, PUT=replace, PATCH=modify, DELETE=remove.',
+        'HTTP status: 2xx success, 4xx client, 5xx server; REST is stateless; token/bearer auth.',
+        'RESTCONF = HTTP+JSON (RFC 8040, stateless); NETCONF = SSH+XML RPC (RFC 6241, candidate/transaction).',
+        'NETCONF ops: <get>, <get-config>, <edit-config>, <copy-config>, <commit>; candidate = stage then commit.',
+        'YANG = data model (module/container/list/leaf); shared by NETCONF and RESTCONF.',
+        'JSON keys double-quoted, no trailing commas; XML well-formed one root; YAML spaces not tabs (Ansible).',
+        'Ansible = agentless push, YAML playbooks, ios_config/ios_command, idempotent.',
+        'Terraform = declarative IaC + state, plan/apply; vs Ansible imperative/push.',
+        'Git files flow working → staged → committed; add stages, commit saves, push syncs, branch+PR collaborates.'
+      ];
+
+      /* ---------- QUIZ ---------- */
+      const quizRaw = [
+        { q: 'In SDN, the northbound interface connects to:', opts: [{ text: 'applications' }, { text: 'network devices' }, { text: 'the physical cabling' }, { text: 'the power supply' }], correct: 0 },
+        { q: 'VXLAN encapsulates frames in which transport &amp; port?', opts: [{ text: 'UDP 4789' }, { text: 'TCP 443' }, { text: 'UDP 5246' }, { text: 'TCP 22' }], correct: 0 },
+        { q: 'A VXLAN VNI is how many bits (≈ how many IDs)?', opts: [{ text: '24-bit, ~16 million' }, { text: '12-bit, 4094' }, { text: '32-bit, 4 billion' }, { text: '8-bit, 256' }], correct: 0 },
+        { q: 'SD-Access control plane is provided by:', opts: [{ text: 'LISP' }, { text: 'VXLAN' }, { text: 'ISE' }, { text: 'OSPF' }], correct: 0 },
+        { q: 'SD-Access data plane is provided by:', opts: [{ text: 'VXLAN' }, { text: 'LISP' }, { text: 'MP-BGP' }, { text: 'EIGRP' }], correct: 0 },
+        { q: 'Macro segmentation in SD-Access uses:', opts: [{ text: 'VNs / VRFs (via VXLAN)' }, { text: 'SGT security groups (ISE)' }, { text: 'ACLs only' }, { text: 'QoS classes' }], correct: 0 },
+        { q: 'Micro segmentation in SD-Access uses:', opts: [{ text: 'SGT security groups (ISE)' }, { text: 'VRFs' }, { text: 'VXLAN VNIs' }, { text: 'VLANs' }], correct: 0 },
+        { q: 'In LISP, the EID is:', opts: [{ text: 'endpoint identity (host IP)' }, { text: 'routing locator (site IP)' }, { text: 'the VNI' }, { text: 'the UDP port' }], correct: 0 },
+        { q: 'Which HTTP verb CREATES a resource?', opts: [{ text: 'POST' }, { text: 'GET' }, { text: 'DELETE' }, { text: 'PATCH' }], correct: 0 },
+        { q: 'Which HTTP verb READS a resource?', opts: [{ text: 'GET' }, { text: 'PUT' }, { text: 'POST' }, { text: 'DELETE' }], correct: 0 },
+        { q: 'RESTCONF differs from NETCONF because it uses:', opts: [{ text: 'HTTP(S) with JSON/XML' }, { text: 'SSH with XML RPCs' }, { text: 'SNMP traps' }, { text: 'Telnet' }], correct: 0 },
+        { q: 'NETCONF runs over which transport with XML RPCs?', opts: [{ text: 'SSH' }, { text: 'HTTP' }, { text: 'UDP' }, { text: 'TFTP' }], correct: 0 },
+        { q: 'YANG is best described as:', opts: [{ text: 'a data modeling language (tree of containers/lists/leafs)' }, { text: 'a routing protocol' }, { text: 'an encryption cipher' }, { text: 'a switching protocol' }], correct: 0 },
+        { q: 'JSON keys must be:', opts: [{ text: 'double-quoted with no trailing commas' }, { text: 'single-quoted' }, { text: 'indented with tabs' }, { text: 'uppercase' }], correct: 0 },
+        { q: 'YAML structure is defined by:', opts: [{ text: 'indentation (spaces, not tabs)' }, { text: 'curly braces' }, { text: 'angle brackets' }, { text: 'forward slashes' }], correct: 0 },
+        { q: 'Ansible is best described as:', opts: [{ text: 'agentless, push-based with YAML playbooks (IOS config modules)' }, { text: 'declarative IaC with state and plan/apply' }, { text: 'a database' }, { text: 'a version control system' }], correct: 0 },
+        { q: 'Terraform differs from Ansible by being:', opts: [{ text: 'declarative with state and a plan/apply workflow' }, { text: 'agentless push only' }, { text: 'limited to SSH commands' }, { text: 'unable to manage clouds' }], correct: 0 },
+        { q: 'In Git, the sequence of file states is:', opts: [{ text: 'working → staged → committed' }, { text: 'committed → staged → working' }, { text: 'staged → working → committed' }, { text: 'pushed → pulled → merged' }], correct: 0 }
+      ];
+      const quizQuestions = reactive(quizRaw.map(q => ({ ...q, ans: null })));
+      const quizDone = ref(false);
+      const quizScore = ref(loadJSON(LS.quiz, 0) || 0);
+      const allQuizAnswered = computed(() => quizQuestions.every(q => q.ans !== null));
+      function submitQuiz() {
+        if (!allQuizAnswered.value) return;
+        quizScore.value = quizQuestions.filter((q, i) => q.ans === q.correct).length;
+        quizDone.value = true;
+        save(LS.quiz, quizScore.value);
+      }
+      function resetQuiz() {
+        quizQuestions.forEach(q => q.ans = null);
+        quizDone.value = false;
+        quizScore.value = 0;
+        localStorage.removeItem(LS.quiz);
+      }
+
+      /* ---------- CHECKLIST ---------- */
+      const checklistRoot = loadJSON(LS.done, [
+        { t: 'SDN = separate control/data plane; northbound=apps, southbound=devices (NETCONF/RESTCONF/YANG)', done: false },
+        { t: 'DNA Center = intent-based (intent→translate→activate→assure), cluster for HA, REST API', done: false },
+        { t: 'SD-Access = LISP(control) + VXLAN(data) + ISE+SGT(policy) + DNA Center; roles edge/border/control', done: false },
+        { t: 'Macro seg = VN/VRF (VXLAN); micro seg = SGT (ISE); hosts keep IP while roaming', done: false },
+        { t: 'VXLAN = MAC-in-UDP port 4789, 24-bit VNI (~16M), VTEP encap/decap, BUM via mcast/HER/EVPN', done: false },
+        { t: 'LISP = EID(identity vs RLOC(location); ITR/ETR edges, MR/MS control, PxTR legacy', done: false },
+        { t: 'REST verbs GET/POST/PUT/PATCH/DELETE; status 2xx/4xx/5xx; stateless; token auth', done: false },
+        { t: 'RESTCONF = HTTP+JSON (RFC 8040, stateless); NETCONF = SSH+XML RPC (RFC 6241, candidate)', done: false },
+        { t: 'YANG = data model (module/container/list/leaf); ietf-interfaces, ietf-ip, Cisco-IOS-XE-native', done: false },
+        { t: 'Formats: JSON(keys quoted, no trailing commas), XML(well-formed one root, NETCONF), YAML(spaces)', done: false },
+        { t: 'Ansible = agentless push, YAML playbooks, ios_config/ios_command, idempotent', done: false },
+        { t: 'Terraform = declarative IaC + state, plan/apply; vs Ansible imperative/push', done: false },
+        { t: 'Git files working→staged→committed; add/commit/push; branch+PR collaboration', done: false }
+      ]);
+      const checklist = reactive(checklistRoot);
+      const doneCount = computed(() => checklist.filter(c => c.done).length);
+      function saveChecklist() { save(LS.done, checklistRoot); }
+      function toggleDone(i) { checklistRoot[i].done = !checklistRoot[i].done; saveChecklist(); }
+
+      return {
+        theme, sec, sections,
+        sbPick, sbVerdict,
+        sdaPick, sdaVerdict,
+        segPick, segVerdict,
+        vvPick, vvVerdict,
+        lispPick, lispVerdict,
+        verbPick, verbVerdict,
+        yangPick, yangVerdict,
+        fmtPick, fmtVerdict,
+        toolPick, toolVerdict,
+        commands, activeCmd, activeCommand,
+        traps,
+        quizQuestions, quizDone, quizScore, allQuizAnswered, submitQuiz, resetQuiz,
+        checklist, doneCount, saveChecklist, toggleDone
+      };
+    }
+  }).mount('#app');
+})();
+</script>
+</body>
+</html>

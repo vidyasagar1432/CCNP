@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How STP Works — Deep Dive</title>
+<style>
+  :root {
+    --bg: #0f172a; --panel: #111c34; --card: #1e293b; --card-2: #16233d;
+    --text: #f8fafc; --muted: #94a3b8;
+    --blue: #38bdf8; --blue-dim: #0c4a6e;
+    --green: #34d399; --green-dim: #064e3b;
+    --amber: #fbbf24; --amber-dim: #78350f;
+    --red: #f87171; --red-dim: #7f1d1d;
+    --violet: #a78bfa; --violet-dim: #4c1d95;
+    --cyan: #22d3ee; --cyan-dim: #164e63;
+    --border: #334155; --hover: #263449; --code-bg: #0b1220;
+  }
+  #app[data-theme="light"] {
+    --bg: #f1f5f9; --panel: #ffffff; --card: #ffffff; --card-2: #f8fafc;
+    --text: #0f172a; --muted: #64748b;
+    --blue: #0284c7; --blue-dim: #bae6fd;
+    --green: #059669; --green-dim: #d1fae5;
+    --amber: #d97706; --amber-dim: #fef3c7;
+    --red: #dc2626; --red-dim: #fee2e2;
+    --violet: #7c3aed; --violet-dim: #ede9fe;
+    --cyan: #0891b2; --cyan-dim: #cffafe;
+    --border: #cbd5e1; --hover: #e2e8f0; --code-bg: #0b1220;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; }
+  #app { max-width: 1040px; margin: 0 auto; padding: 20px 18px 60px; }
+
+  header { position: sticky; top: 0; z-index: 30; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .lv-badge { background: var(--blue-dim); color: var(--blue); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .exam-badge { background: var(--violet-dim); color: var(--violet); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .head-actions { display: flex; align-items: center; gap: 8px; }
+  .btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: background 0.15s; }
+  .btn:hover { background: var(--hover); }
+  .btn.primary { background: var(--blue); color: #0f172a; border-color: var(--blue); }
+
+  nav { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 2px 16px; }
+  nav button.chip { border: 1px solid var(--border); background: var(--card); color: var(--muted); padding: 5px 11px; border-radius: 999px; cursor: pointer; font-size: 0.76rem; font-weight: 600; }
+  nav button.chip.active { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
+
+  section.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
+  section.panel h2 { font-size: 1.2rem; margin-bottom: 6px; }
+  section.panel h3 { font-size: 1rem; margin: 18px 0 10px; color: var(--blue); }
+  section.panel p { margin: 8px 0; }
+  .muted { color: var(--muted); }
+  .lead { color: var(--muted); font-size: 0.95rem; }
+
+  .grid { display: grid; gap: 12px; }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .g3 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .card h4 { font-size: 0.9rem; margin-bottom: 6px; }
+  .card .big { font-size: 1.3rem; font-weight: 700; font-family: 'Fira Code', ui-monospace, monospace; }
+
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85rem; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  tr:hover td { background: var(--hover); }
+
+  code, .mono { font-family: 'Fira Code', ui-monospace, monospace; }
+  .mono { font-size: 0.9rem; }
+  .chip { display: inline-block; border-radius: 999px; padding: 1px 9px; font-size: 0.74rem; font-weight: 700; }
+  .b-blue { background: var(--blue-dim); color: var(--blue); }
+  .b-green { background: var(--green-dim); color: var(--green); }
+  .b-amber { background: var(--amber-dim); color: var(--amber); }
+  .b-red { background: var(--red-dim); color: var(--red); }
+  .b-violet { background: var(--violet-dim); color: var(--violet); }
+  .b-cyan { background: var(--cyan-dim); color: var(--cyan); }
+
+  .callout { border-left: 4px solid var(--amber); background: var(--card-2); border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 12px 0; font-size: 0.9rem; }
+  .callout.green { border-color: var(--green); }
+  .callout.red { border-color: var(--red); }
+  .callout.blue { border-color: var(--blue); }
+
+  .bar { height: 12px; background: var(--card-2); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; display: flex; margin: 4px 0 8px; }
+  .bar > div { height: 100%; }
+  .seg-blue { background: var(--blue); }
+  .seg-green { background: var(--green); }
+  .seg-violet { background: var(--violet); }
+  .seg-amber { background: var(--amber); }
+  .seg-red { background: var(--red); }
+
+  .mlink { display: flex; align-items: center; gap: 4px; }
+  .mlink .arrow { color: var(--muted); }
+  .row-fn { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 8px 0; }
+  .row-fn input[type="text"] { background: var(--code-bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-family: 'Fira Code', monospace; font-size: 0.9rem; width: 100%; }
+
+  .opt { display: flex; align-items: center; gap: 8px; padding: 6px 9px; margin: 3px 0; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; background: var(--card); font-size: 0.86rem; }
+  .opt.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .opt .letter { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex: 0 0 auto; }
+  .opt.sel .letter { background: var(--blue); color: #0f172a; }
+
+  #app pre, pre.cmd { background: var(--code-bg); color: #e2e8f0; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.82rem; line-height: 1.5; }
+
+  .trap-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  .trap-item:last-child { border-bottom: none; }
+  .trap-ico { color: var(--red); font-weight: 700; flex: 0 0 auto; }
+
+  .step-flow { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .step { border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 0.8rem; background: var(--card-2); }
+  .step .n { color: var(--blue); font-weight: 700; }
+
+  .verdict { border-radius: 8px; padding: 10px 14px; font-weight: 700; margin: 8px 0; }
+  .verdict.ok { background: var(--green-dim); color: var(--green); }
+  .verdict.bad { background: var(--red-dim); color: var(--red); }
+  .verdict.info { background: var(--blue-dim); color: var(--blue); }
+
+  .chk-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; margin: 5px 0; cursor: pointer; transition: opacity 0.15s; }
+  .chk-item.done { opacity: 0.55; text-decoration: line-through; }
+  .chk-box { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 5px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; }
+  .chk-item.done .chk-box { background: var(--green); border-color: var(--green); color: #0f172a; }
+
+  /* STP-specific */
+  .topo { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 8px 0; font-family: 'Fira Code', monospace; font-size: 0.8rem; }
+  .switch { border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; background: var(--card); text-align: center; min-width: 118px; }
+  .switch.root { border-color: var(--blue); background: var(--blue-dim); }
+  .switch .sname { font-weight: 700; }
+  .switch .srole { font-size: 0.72rem; color: var(--muted); }
+  .link-line { color: var(--muted); }
+
+  .role-cell { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; background: var(--card); cursor: pointer; }
+  .role-cell.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .role-cell .rname { font-family: 'Fira Code', monospace; font-weight: 700; }
+  .role-cell .rdesc { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+
+  .state-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin: 8px 0; }
+  .state-cell { border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; background: var(--card); text-align: center; }
+  .state-cell.fwd { border-color: var(--green); background: var(--green-dim); }
+  .state-cell.blk { border-color: var(--red); background: var(--red-dim); }
+  .state-cell.learn { border-color: var(--amber); background: var(--amber-dim); }
+  .state-cell .stname { font-family: 'Fira Code', monospace; font-weight: 700; }
+  .state-cell .stflag { font-size: 0.7rem; color: var(--muted); }
+
+  .mode-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin: 8px 0; }
+  .mode-cell { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; background: var(--card); cursor: pointer; }
+  .mode-cell.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .mode-cell .mname { font-family: 'Fira Code', monospace; font-weight: 700; }
+  .mode-cell .mdesc { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+
+  .prot-card { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; background: var(--card); margin: 8px 0; }
+  .prot-card h4 { font-size: 0.95rem; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .prot-card .pstat { font-size: 0.8rem; }
+
+  .metric-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0; }
+  .metric { font-family: 'Fira Code', monospace; font-size: 0.8rem; border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; background: var(--card-2); display: inline-flex; gap: 6px; align-items: center; }
+  .metric .mv { color: var(--green); font-weight: 700; }
+</style>
+</head>
+<body>
+<div id="app" :data-theme="theme">
+  <header>
+    <h1><span class="lv-badge">L08</span> How STP Works
+      <span class="exam-badge">ENCOR 350-401</span></h1>
+    <div class="head-actions">
+      <a class="btn" href="../Level 07 - VLAN Technologies/How VLANs Work.html">◀ VLANs</a>
+      <a class="btn" href="../index.html">Flashcards</a>
+      <button class="btn" @click="theme = (theme==='dark'?'light':'dark')">{{ theme==='dark' ? '☀' : '🌙' }}</button>
+    </div>
+  </header>
+
+  <nav>
+    <button class="chip" v-for="s in sections" :key="s.id" :class="{active:sec===s.id}" @click="sec=s.id">{{ s.icon }} {{ s.label }}</button>
+  </nav>
+
+  <!-- 1. STP -->
+  <section class="panel" v-show="sec==='stp'" id="stp">
+    <h2>🕸️ STP — Layer 2 loop prevention</h2>
+    <p class="lead"><b>STP (IEEE 802.1D)</b> builds a <b>loop-free logical topology</b> over physically redundant Layer 2. It elects a Root Bridge, selects Root Ports and Designated Ports, and puts unnecessary paths into a non-forwarding state. Preventing loops prevents catastrophic failures.</p>
+
+    <div class="grid g3">
+      <div class="card"><h4>Standard</h4><div class="big">802.1D</div><div class="muted">classic / slow convergence</div></div>
+      <div class="card"><h4>Purpose</h4><div class="big">loop control</div><div class="muted">not a link-redundancy protocol</div></div>
+      <div class="card"><h4>Replacement</h4><div class="big mono">802.1w</div><div class="muted">RSTP — rapid</div></div>
+    </div>
+
+    <h3>Why L2 loops are catastrophic</h3>
+    <table>
+      <tr><th>Problem</th><th>What happens</th></tr>
+      <tr><td><b>Broadcast storm</b></td><td>Broadcast / flooded frames circulate repeatedly</td></tr>
+      <tr><td><b>MAC-table flapping</b></td><td>Switch learns the same source MAC from different ports</td></tr>
+      <tr><td><b>Duplicate frames</b></td><td>Same frame reaches the destination via multiple paths</td></tr>
+      <tr><td><b>CPU / link saturation</b></td><td>Continuous flooding consumes bandwidth and switch CPU</td></tr>
+    </table>
+    <div class="callout red"><b>Trap:</b> Ethernet frames have <u>no Layer-2 TTL/hop limit</u>. So a loop lets frames circulate endlessly — no decrementing hop count to stop them.</div>
+
+    <h3>STP decision process</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1.</span> Elect the Root Bridge (lowest Bridge ID)</div>
+      <div class="step"><span class="n">2.</span> Select a Root Port on each non-root switch</div>
+      <div class="step"><span class="n">3.</span> Select a Designated Port on each segment</div>
+      <div class="step"><span class="n">4.</span> Block redundant (non-designated) paths</div>
+    </div>
+    <div class="callout blue"><b>Mental model:</b> physical redundancy exists → STP computes which links may forward → some forward, some do not. That partial forwarding = a loop-free tree. STP does <u>not</u> remove the physical redundancy.</div>
+
+    <h3>Path-cost explorer</h3>
+    <p class="muted">Which of two paths would STP prefer toward the Root?</p>
+    <div class="row-fn">
+      <input type="text" v-model="costInput" placeholder="Path A cost, e.g. 4">
+    </div>
+    <div class="verdict" :class="costVerdict.cls">{{ costVerdict.text }}</div>
+    <p class="muted" style="margin-top:4px">Short-method reference costs — lower cost wins.</p>
+    <table>
+      <tr><th>Link speed</th><th class="mono">Short cost</th><th class="mono">Long cost</th></tr>
+      <tr><td>10 Mbps</td><td class="mono">100</td><td class="mono">2,000,000</td></tr>
+      <tr><td>100 Mbps</td><td class="mono">19</td><td class="mono">200,000</td></tr>
+      <tr><td>1 Gbps</td><td class="mono">4</td><td class="mono">20,000</td></tr>
+      <tr><td>10 Gbps</td><td class="mono">2</td><td class="mono">2,000</td></tr>
+      <tr><td>100 Gbps</td><td class="mono">1</td><td class="mono">200</td></tr>
+    </table>
+    <div class="callout amber"><b>CCNP tip:</b> Cisco supports a configurable <code>short</code> or <code>long</code> path-cost method. Don't assume every <code>show spanning-tree</code> uses the short-cost values.</div>
+
+    <h3>Classic timers</h3>
+    <table>
+      <tr><th>Timer</th><th class="mono">Default</th><th>Purpose</th></tr>
+      <tr><td>Hello</td><td class="mono">2 s</td><td>Interval between Configuration BPDUs</td></tr>
+      <tr><td>Max Age</td><td class="mono">20 s</td><td>Max time STP info is considered valid</td></tr>
+      <tr><td>Forward Delay</td><td class="mono">15 s</td><td>Time in Listening and Learning (each)</td></tr>
+    </table>
+    <div class="callout red"><b>Trap:</b> Classic STP does <u>not</u> always take exactly 50 s. ~50 s (20 + 15 + 15) is a commonly cited <u>worst-case</u> timer sequence, not a fixed universal convergence time.</div>
+  </section>
+
+  <!-- 2. ROOT BRIDGE -->
+  <section class="panel" v-show="sec==='root'" id="root">
+    <h2>👑 Root Bridge election</h2>
+    <p class="lead">The Root Bridge is the reference point of a spanning-tree instance. Every non-root switch computes its <b>best path toward the root</b>, and STP uses that to assign port roles. There is <b>one root per spanning-tree instance</b>.</p>
+
+    <h3>Election rule</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1.</span> Lowest Bridge Priority</div>
+      <div class="step"><span class="n">2.</span> If tied → lowest Extended System ID / VLAN ID</div>
+      <div class="step"><span class="n">3.</span> If still tied → lowest MAC address</div>
+    </div>
+    <div class="callout blue"><b>Simplified:</b> <u>lowest priority wins; if tied, lowest MAC wins.</u></div>
+
+    <h3>Root election explorer</h3>
+    <p class="muted">Set priorities and pick which two switches compete. Lower priority wins; ties break by lower MAC.</p>
+    <div class="grid g2">
+      <div class="card">
+        <h4>SW1</h4>
+        <div class="mono">Priority</div>
+        <div class="row-fn">
+          <button class="btn" v-for="p in rootPriorities" :key="'s1'+p" :class="{primary:rootP1===p}" @click="rootP1=p">{{ p }}</button>
+        </div>
+        <div class="mono" style="margin-top:6px">MAC: 0000.0000.0001</div>
+      </div>
+      <div class="card">
+        <h4>SW2</h4>
+        <div class="mono">Priority</div>
+        <div class="row-fn">
+          <button class="btn" v-for="p in rootPriorities" :key="'s2'+p" :class="{primary:rootP2===p}" @click="rootP2=p">{{ p }}</button>
+        </div>
+        <div class="mono" style="margin-top:6px">MAC: 0000.0000.0002</div>
+      </div>
+    </div>
+    <div class="verdict" :class="rootVerdict.cls">{{ rootVerdict.text }}</div>
+    <p class="muted" style="margin-top:4px">Priority granularity is <b>4096</b> (0, 4096, 8192, … 61440). Default is <b>32768</b>.</p>
+
+    <h3>Effective priority &amp; System ID Extension</h3>
+    <div class="row-fn">
+      <input type="text" v-model="effPrio" placeholder="configured priority, e.g. 4096">
+      <input type="text" v-model="effVlan" placeholder="VLAN, e.g. 10">
+    </div>
+    <div class="verdict" :class="effVerdict.cls">{{ effVerdict.text }}</div>
+    <div class="callout green"><b>Key:</b> Cisco uses a <b>12-bit System ID Extension</b> — the VLAN ID rides <u>inside</u> the Bridge ID. Effective priority = configured priority + VLAN ID (e.g. 4096 + 10 = 4106 for VLAN 10).</div>
+
+    <h3>Root characteristics</h3>
+    <table>
+      <tr><th>Attribute</th><th>Root Bridge</th><th>Non-root switch</th></tr>
+      <tr><td>Root Port</td><td><b>None</b></td><td>Normally one</td></tr>
+      <tr><td>Root Path Cost</td><td class="mono">0</td><td>Cost toward root</td></tr>
+      <tr><td>Participating ports</td><td>Normally Designated</td><td>RP / DP / Alternate as applicable</td></tr>
+      <tr><td>Root per instance</td><td class="mono">PVST+ → per VLAN</td><td class="mono">MST → per MSTI</td></tr>
+    </table>
+    <div class="callout red"><b>Trap:</b> The root bridge has <u>no Root Port</u> — it is already the root, so it needs no path to itself. Its active participating ports are normally Designated Ports.</div>
+    <div class="callout red"><b>Trap:</b> <code>root primary</code> and <code>root secondary</code> are <u>configuration macros</u> that adjust priority — not separate STP roles and not guaranteed fixed values. Common results: primary → 24576, secondary → 28672.</div>
+  </section>
+
+  <!-- 3. PORT ROLES -->
+  <section class="panel" v-show="sec==='roles'" id="roles">
+    <h2>🎭 Port Roles — responsibility, not state</h2>
+    <p class="lead">A port <b>role</b> describes what a port <b>does</b> in the topology (its responsibility). A port <b>state</b> describes its current <b>behavior</b>. <b>Role ≠ State.</b></p>
+
+    <h3>Roles at a glance</h3>
+    <div class="grid g2">
+      <div class="role-cell"><div class="rname">Root Port (RP)</div><div class="rdesc">Best path from a non-root switch toward the Root. Normally Forwarding. (One per non-root switch per instance.)</div></div>
+      <div class="role-cell"><div class="rname">Designated Port (DP)</div><div class="rdesc">Best port on a segment toward the Root. Normally Forwarding. One per segment.</div></div>
+      <div class="role-cell"><div class="rname">Alternate Port</div><div class="rdesc">RSTP: backup path to the root (via another switch). Discarding until needed.</div></div>
+      <div class="role-cell"><div class="rname">Backup Port</div><div class="rdesc">RSTP: backup for another DP on the <b>same segment</b>. Discarding.</div></div>
+    </div>
+    <div class="callout blue"><b>Root</b>: no Root Port — its active ports are normally Designated Ports.</div>
+
+    <h3>Role explorer</h3>
+    <p class="muted">Select a role to see its description and typical state.</p>
+    <div class="grid g2">
+      <div class="role-cell" v-for="r in roleList" :key="r.key" :class="{sel:roleSel===r.key}" @click="roleSel=r.key" style="cursor:pointer">
+        <div class="rname">{{ r.name }}</div><div class="rdesc">{{ r.short }}</div>
+      </div>
+    </div>
+    <div class="verdict" :class="roleVerdict.cls">{{ roleVerdict.text }}</div>
+
+    <h3>Role vs state — don't confuse them</h3>
+    <table>
+      <tr><th>Term</th><th>Category</th><th>Example</th></tr>
+      <tr><td>Root Port</td><td>ROLE</td><td class="mono">forwarding</td></tr>
+      <tr><td>Designated Port</td><td>ROLE</td><td class="mono">forwarding</td></tr>
+      <tr><td>Alternate / Backup</td><td>ROLE</td><td class="mono">discarding</td></tr>
+      <tr><td>Blocking / Forwarding</td><td>STATE</td><td>current behavior</td></tr>
+    </table>
+    <div class="callout red"><b>Trap:</b> "Blocking" and "Forwarding" are <u>states</u>; Root/Designated/Alternate/Backup are <u>roles</u>. A Root Port is a role that is normally in the Forwarding state.</div>
+
+    <h3>Sample topology</h3>
+    <div class="topo">
+      <div class="switch root"><div class="sname">SW1</div><div class="srole">ROOT · Designated</div></div>
+      <span class="link-line">━</span>
+      <div class="switch"><div class="sname">SW2</div><div class="srole">Root Port → Forwarding</div></div>
+      <span class="link-line">━</span>
+      <div class="switch"><div class="sname">SW3</div><div class="srole">Alternate → Discarding</div></div>
+    </div>
+  </section>
+
+  <!-- 4. PORT STATES -->
+  <section class="panel" v-show="sec==='states'" id="states">
+    <h2>🚦 Port States — blocking → forwarding</h2>
+    <p class="lead">States describe a port's current forwarding/learning behavior. Classic 802.1D has 5 states; RSTP collapses these into 3.</p>
+
+    <h3>Classic 802.1D states</h3>
+    <table>
+      <tr><th>State</th><th>Forwards data</th><th>Learns MAC</th><th>Purpose</th></tr>
+      <tr><td>Blocking</td><td>No</td><td>No</td><td>Prevents loops while receiving STP info</td></tr>
+      <tr><td>Listening</td><td>No</td><td>No</td><td>Participates in STP calculation</td></tr>
+      <tr><td>Learning</td><td>No</td><td>Yes</td><td>Builds MAC-address table</td></tr>
+      <tr><td>Forwarding</td><td>Yes</td><td>Yes</td><td>Normal data forwarding</td></tr>
+      <tr><td>Disabled</td><td>No</td><td>No</td><td>Administratively down / not participating</td></tr>
+    </table>
+
+    <h3>RSTP states</h3>
+    <div class="state-grid">
+      <div class="state-cell blk"><div class="stname">Discarding</div><div class="stflag">no data · no learning</div></div>
+      <div class="state-cell learn"><div class="stname">Learning</div><div class="stflag">no data · learns MAC</div></div>
+      <div class="state-cell fwd"><div class="stname">Forwarding</div><div class="stflag">data + learning</div></div>
+    </div>
+    <div class="callout blue"><b>Key:</b> RSTP merges Blocking + Listening into a single <b>Discarding</b> state, so 802.1D's 5 states become 3.</div>
+
+    <h3>Blocking still participates</h3>
+    <div class="callout green"><b>Important:</b> A blocking/non-designated port can still <u>receive BPDUs</u> and continue monitoring STP information so it can react if the topology changes. Blocking is not "off."</div>
+    <div class="callout red"><b>Trap:</b> Blocking does <u>not</u> forward user traffic, but it remains STP-aware and can transition to another state.</div>
+
+    <h3>Port state selection</h3>
+    <div class="row-fn">
+      <button class="btn" v-for="s in stateList" :key="s.key" :class="{primary:stateSel===s.key}" @click="stateSel=s.key">{{ s.name }}</button>
+    </div>
+    <div class="verdict" :class="stateVerdict.cls">{{ stateVerdict.text }}</div>
+  </section>
+
+  <!-- 5. BPDU -->
+  <section class="panel" v-show="sec==='bpdu'" id="bpdu">
+    <h2>📨 BPDU — STP's control message</h2>
+    <p class="lead"><b>BPDU (Bridge Protocol Data Unit)</b> is the control-plane message switches exchange to build and maintain the spanning tree.</p>
+
+    <h3>What a Configuration BPDU carries</h3>
+    <div class="grid g2">
+      <div class="card"><h4>Root Bridge ID</h4><div class="muted">who the root is</div></div>
+      <div class="card"><h4>Root Path Cost</h4><div class="muted">cost toward the root</div></div>
+      <div class="card"><h4>Sender Bridge ID</h4><div class="muted">who sent it</div></div>
+      <div class="card"><h4>Sender Port ID</h4><div class="muted">which local port</div></div>
+      <div class="card"><h4>Timers</h4><div class="muted">hello / max age / forward delay</div></div>
+      <div class="card"><h4>TC / TCA flags</h4><div class="muted">topology-change signaling</div></div>
+    </div>
+    <div class="callout blue"><b>Hidden note:</b> RSTP BPDUs (802.1w) also carry <u>port role</u> and <u>proposal/agreement</u> (P/A) information — that's how RSTP converges so fast.</div>
+
+    <h3>How BPDUs move</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1.</span> Root emits Configuration BPDUs from its Designated Ports</div>
+      <div class="step"><span class="n">2.</span> Each non-root switch receives the best root info</div>
+      <div class="step"><span class="n">3.</span> It selects its Root Port</div>
+      <div class="step"><span class="n">4.</span> It transmits <b>updated</b> BPDUs from its Designated Ports</div>
+    </div>
+    <div class="callout red"><b>Trap:</b> Do <u>not</u> think of STP as "root sends one BPDU, every switch blindly relays it unchanged." Each bridge evaluates received info, selects its own roles, and sends its <u>own</u> BPDUs from its Designated Ports.</div>
+
+    <h3>BPDU comparison order</h3>
+    <p class="muted">When comparing received STP information, evaluate fields in this order:</p>
+    <div class="step-flow">
+      <div class="step"><span class="n">1.</span> Lowest Root Bridge ID</div>
+      <div class="step"><span class="n">2.</span> Lowest Root Path Cost</div>
+      <div class="step"><span class="n">3.</span> Lowest Sender Bridge ID</div>
+      <div class="step"><span class="n">4.</span> Lowest Sender Port ID</div>
+    </div>
+
+    <h3>TCN vs TC</h3>
+    <table>
+      <tr><th>Term</th><th>Meaning</th></tr>
+      <tr><td><b>TCN</b></td><td>Topology Change <u>Notification</u> — the mechanism used to notify the root of a topology change</td></tr>
+      <tr><td><b>TC</b></td><td>Topology Change <u>indication</u> — a flag in Configuration BPDUs after a change</td></tr>
+    </table>
+    <div class="callout red"><b>Trap:</b> TCN ≠ TC. The <u>TC indication</u> (set by the root) causes temporary faster MAC aging — normally using Forward Delay (15 s) — so stale MAC entries are removed faster after a change.</div>
+  </section>
+
+  <!-- 6. RSTP -->
+  <section class="panel" v-show="sec==='rstp'" id="rstp">
+    <h2>⚡ RSTP (802.1w) — rapid convergence</h2>
+    <p class="lead">RSTP (IEEE 802.1w) is the rapid evolution of STP. It converges in seconds instead of ~50 s because it stops relying on slow timers.</p>
+
+    <h3>Why RSTP is faster</h3>
+    <div class="step-flow">
+      <div class="step"><span class="n">1.</span> Explicit port roles (Root / Designated / Alternate / Backup)</div>
+      <div class="step"><span class="n">2.</span> Rapid transitions instead of timer-driven Listening/Learning</div>
+      <div class="step"><span class="n">3.</span> <b>Proposal/Agreement</b> sync handshake</div>
+      <div class="step"><span class="n">4.</span> Assumes point-to-point links for rapid behavior</div>
+      <div class="step"><span class="n">5.</span> Edge ports transition immediately</div>
+    </div>
+    <div class="callout blue"><b>Proposal/Agreement:</b> a Designated Port proposes; downstream switches agree; ports converge almost immediately rather than waiting out Forward Delay on every hop.</div>
+
+    <h3>Classic STP vs RSTP</h3>
+    <table>
+      <tr><th>Feature</th><th>Classic STP</th><th>RSTP</th></tr>
+      <tr><td>Standard</td><td class="mono">802.1D</td><td class="mono">802.1w</td></tr>
+      <tr><td>Convergence</td><td>Slow (timers, ~50 s worst case)</td><td>Rapid (P/A + roles)</td></tr>
+      <tr><td>States</td><td>Blocking, Listening, Learning, Forwarding</td><td>Discarding, Learning, Forwarding</td></tr>
+      <tr><td>Roles</td><td>Root, Designated, Non-designated</td><td>Root, Designated, Alternate, Backup</td></tr>
+      <tr><td>Transition</td><td>Timer-driven</td><td>Proposal/Agreement + edge ports</td></tr>
+    </table>
+
+    <h3>RSTP port role explorer</h3>
+    <div class="mode-grid">
+      <div class="role-cell" v-for="r in rstpRoles" :key="r.key" :class="{sel:rstpRoleSel===r.key}" @click="rstpRoleSel=r.key" style="cursor:pointer">
+        <div class="rname">{{ r.name }}</div><div class="rdesc">{{ r.desc }}</div>
+      </div>
+    </div>
+    <div class="verdict" :class="rstpRoleVerdict.cls">{{ rstpRoleVerdict.text }}</div>
+    <div class="callout green"><b>Note:</b> PortFast ports in RSTP are <u>edge ports</u> — they assume an end host, so they transition to Forwarding immediately and skip the handshake.</div>
+  </section>
+
+  <!-- 7. PVST+ -->
+  <section class="panel" v-show="sec==='pvst'" id="pvst">
+    <h2>🌿 PVST+ — one 802.1D instance per VLAN</h2>
+    <p class="lead">PVST+ (Per-VLAN Spanning Tree) runs a <b>separate spanning-tree instance per VLAN</b>. Each VLAN gets its own root, its own Root/Designated/Blocking ports, and its own L2 forwarding behavior.</p>
+    <p class="muted">Modern Cisco defaults to <b>Rapid PVST+</b> (RSTP per VLAN), not classic PVST+.</p>
+
+    <h3>The big benefit: per-VLAN load balancing</h3>
+    <div class="callout blue"><b>Key idea:</b> Because each VLAN has its own topology, the <u>same physical interface</u> can forward VLAN 10 while blocking VLAN 20 — enabling Layer-2 load balancing across parallel links.</div>
+
+    <h3>Per-VLAN load-balancing explorer</h3>
+    <div class="topo">
+      <div class="switch"><div class="sname">SW1</div><div class="srole">ROOT V10</div></div>
+      <span class="link-line">━</span>
+      <div class="switch"><div class="sname">SW3</div><div class="srole">RP(V10) / DP(V20)</div></div>
+      <span class="link-line">━</span>
+      <div class="switch"><div class="sname">SW2</div><div class="srole">ROOT V20</div></div>
+    </div>
+    <p class="muted">VLAN 10's traffic prefers the top path (SW1→SW3), while VLAN 20's prefers the bottom (SW2→SW3). One redundant link can serve both.</p>
+    <div class="mode-grid">
+      <div class="mode-cell" v-for="v in pvstVlans" :key="v.key" :class="{sel:pvstSel===v.key}" @click="pvstSel=v.key">
+        <div class="mname">{{ v.name }}</div><div class="mdesc">{{ v.desc }}</div>
+      </div>
+    </div>
+    <div class="verdict" :class="pvstVerdict.cls">{{ pvstVerdict.text }}</div>
+  </section>
+
+  <!-- 8. RAPID PVST+ -->
+  <section class="panel" v-show="sec==='rapid'" id="rapid">
+    <h2>🚀 Rapid PVST+ — RSTP per VLAN</h2>
+    <p class="lead">Rapid PVST+ combines <b>RSTP mechanics</b> with <b>per-VLAN instances</b>. It gives you the fast convergence of 802.1w <em>and</em> the per-VLAN load balancing of PVST+.</p>
+
+    <h3>Configuration</h3>
+    <pre class="cmd">spanning-tree mode rapid-pvst
+
+! per-VLAN root placement
+spanning-tree vlan 10 root primary
+spanning-tree vlan 20 root secondary
+
+spanning-tree vlan 10 priority 4096
+
+show spanning-tree vlan 10
+show spanning-tree summary</pre>
+
+    <h3>Per-VLAN root assignment</h3>
+    <p class="muted">Each VLAN runs its own instance → each VLAN can have its own root:</p>
+    <div class="grid g2">
+      <div class="card"><h4>VLAN 10</h4><div class="big mono">Root = SW1</div><div class="muted">one L2 path preferred</div></div>
+      <div class="card"><h4>VLAN 20</h4><div class="big mono">Root = SW2</div><div class="muted">different L2 path preferred</div></div>
+    </div>
+    <div class="callout green"><b>Exam rule:</b> Rapid PVST+ = <u>RSTP mechanics + one instance per VLAN + root per VLAN</u>. This is the default STP mode on modern Cisco switches.</div>
+    <div class="callout red"><b>Note:</b> As the number of VLANs grows, per-VLAN instances consume more CPU/BPDU overhead — that's one reason large designs may prefer MST.</div>
+  </section>
+
+  <!-- 9. MST -->
+  <section class="panel" v-show="sec==='mst'" id="mst">
+    <h2>🗺️ MST (802.1s) — map many VLANs to few instances</h2>
+    <p class="lead">MST (Multiple Spanning Tree) groups many VLANs into a smaller set of <b>MST instances (MSTIs)</b>, reducing the number of spanning-tree instances the switch must run.</p>
+
+    <h3>How MST groups VLANs</h3>
+    <div class="callout blue"><b>Root per MSTI, not per VLAN:</b> In MST the root is elected <u>per MST instance</u>. All VLANs mapped to the same MSTI share that instance's topology.</div>
+    <div class="grid g2">
+      <div class="card"><h4>MSTI 1</h4><div class="mono">VLANs 10–20</div><div class="muted">Root = SW1</div></div>
+      <div class="card"><h4>MSTI 2</h4><div class="mono">VLANs 30–40</div><div class="muted">Root = SW2</div></div>
+    </div>
+    <p class="muted">VLAN 10, 11, 12 … 20 all map to MSTI 1 and share one topology. VLANs 30–40 share MSTI 2's topology.</p>
+
+    <h3>MST region</h3>
+    <p class="muted">Switches belong to the <b>same MST region</b> only when all of these match:</p>
+    <div class="step-flow">
+      <div class="step"><span class="n">1.</span> Same region <b>name</b></div>
+      <div class="step"><span class="n">2.</span> Same <b>revision</b> number</div>
+      <div class="step"><span class="n">3.</span> Same <b>VLAN-to-instance mapping</b></div>
+    </div>
+    <div class="callout red"><b>Trap:</b> If <u>any</u> of those three differs, the switches are in <u>different MST regions</u> — even if only the mapping is off. Regions can still connect, but they run instances separately across the region boundary.</div>
+
+    <h3>MST region matching explorer</h3>
+    <div class="mode-grid">
+      <div class="mode-cell" v-for="m in mstParams" :key="m.key" :class="{sel:mstSel===m.key}" @click="mstSel=m.key">
+        <div class="mname">{{ m.name }}</div><div class="mdesc">{{ m.desc }}</div>
+      </div>
+    </div>
+    <div class="verdict" :class="mstVerdict.cls">{{ mstVerdict.text }}</div>
+  </section>
+
+  <!-- 10. PROTECTIONS -->
+  <section class="panel" v-show="sec==='prot'" id="prot">
+    <h2>🛡️ STP protections — PortFast &amp; Guards</h2>
+    <p class="lead">These features harden STP edges and guard against misbehaving or malicious switches. They are not panaceas — each protects one specific failure mode.</p>
+
+    <h3>PortFast</h3>
+    <div class="prot-card">
+      <h4>⚡ PortFast <span class="chip b-blue">edge port</span></h4>
+      <p class="pstat">An edge-port feature: the port transitions to <b>Forwarding immediately</b> (skips Listening/Learning), because it expects an end host, not another switch. It does <u>not</u> disable STP.</p>
+      <div class="mono" style="margin-top:6px">interface GigabitEthernet0/1<br>spanning-tree portfast</div>
+      <div class="callout red" style="margin-top:8px"><b>Trap:</b> PortFast + another switch on the link = a loop can form. That's why it's normally paired with <b>BPDU Guard</b>. In RSTP, a PortFast port is an <b>edge port</b>.</div>
+    </div>
+
+    <h3>BPDU Guard</h3>
+    <div class="prot-card">
+      <h4>🚧 BPDU Guard <span class="chip b-red">err-disable</span></h4>
+      <p class="pstat">Protects edge / PortFast ports. If a BPDU arrives, the interface is placed into <b>err-disabled</b> state — because a real switch showed up where a host was expected.</p>
+      <div class="mono" style="margin-top:6px">interface GigabitEthernet0/1<br>spanning-tree bpduguard enable</div>
+    </div>
+
+    <h3>Root Guard</h3>
+    <div class="prot-card">
+      <h4>👑 Root Guard <span class="chip b-amber">root-inconsistent</span></h4>
+      <p class="pstat">Protects the <b>intended root placement</b>. If a superior BPDU (a would-be better root) arrives on the port, it goes <b>root-inconsistent</b> — it stops forwarding instead of letting the downstream switch hijack the root election.</p>
+      <div class="mono" style="margin-top:6px">interface GigabitEthernet0/24<br>spanning-tree guard root</div>
+    </div>
+
+    <h3>Loop Guard</h3>
+    <div class="prot-card">
+      <h4>🔁 Loop Guard <span class="chip b-violet">loop-inconsistent</span></h4>
+      <p class="pstat">Protects non-designated ports against <b>unexpected BPDU loss</b>. If BPDUs stop arriving (e.g. a unidirectional link), a non-designated port would otherwise start forwarding → potential loop. Loop Guard puts it into <b>loop-inconsistent</b> (discarding) until valid BPDUs resume.</p>
+      <div class="mono" style="margin-top:6px">interface GigabitEthernet0/2<br>spanning-tree guard loop</div>
+    </div>
+
+    <h3>Which guard for which problem?</h3>
+    <table>
+      <tr><th>Feature</th><th>Signals</th><th>Result</th></tr>
+      <tr><td>PortFast</td><td>—</td><td>Immediate Forwarding (edge)</td></tr>
+      <tr><td>BPDU Guard</td><td>BPDU received on edge port</td><td>err-disabled</td></tr>
+      <tr><td>Root Guard</td><td>Superior BPDU (new root threat)</td><td>root-inconsistent (stops forwarding)</td></tr>
+      <tr><td>Loop Guard</td><td>BPDUs stop arriving on non-designated port</td><td>loop-inconsistent (discarding)</td></tr>
+    </table>
+    <div class="callout amber"><b>Distinction:</b> BPDU Guard reacts to a BPDU being <u>present</u>; Loop Guard reacts to BPDUs being <u>absent</u> (and protects against the symptom, not the physical link failure itself).</div>
+  </section>
+
+  <!-- 11. ETHERCHANNEL -->
+  <section class="panel" v-show="sec==='ec'" id="ec">
+    <h2>🔗 EtherChannel — bundle links into one logical link</h2>
+    <p class="lead">EtherChannel bundles multiple physical links into a single logical link. STP sees the bundle as <b>one logical link</b>, which removes the loop the individual physical links would create.</p>
+
+    <h3>Negotiation protocols</h3>
+    <table>
+      <tr><th>Method</th><th>Standard</th><th>Modes</th><th>Rule</th></tr>
+      <tr><td><b>LACP</b></td><td class="mono">802.3ad / 802.1AX</td><td class="mono">active / passive</td><td>Need ≥1 active side</td></tr>
+      <tr><td><b>PAgP</b></td><td>Cisco proprietary (legacy)</td><td class="mono">desirable / auto</td><td>Need ≥1 desirable side</td></tr>
+      <tr><td><b>Static (ON)</b></td><td>—</td><td class="mono">mode on</td><td>No negotiation; both ends consistent</td></tr>
+    </table>
+    <div class="callout red"><b>Trap:</b> <code>passive + passive</code> (LACP) and <code>auto + auto</code> (PAgP) both <u>fail</u> — neither side actively initiates. At least one side must be active/desirable.</div>
+
+    <h3>LACP negotiation explorer</h3>
+    <p class="muted">Pick modes for SW-A and SW-B — do they form a bundle?</p>
+    <div class="grid g2">
+      <div class="card">
+        <h4>SW-A</h4>
+        <div class="row-fn">
+          <button class="btn" v-for="m in lacpModes" :key="'a'+m" :class="{primary:lacpA===m}" @click="lacpA=m">{{ m }}</button>
+        </div>
+      </div>
+      <div class="card">
+        <h4>SW-B</h4>
+        <div class="row-fn">
+          <button class="btn" v-for="m in lacpModes" :key="'b'+m" :class="{primary:lacpB===m}" @click="lacpB=m">{{ m }}</button>
+        </div>
+      </div>
+    </div>
+    <div class="verdict" :class="lacpVerdict.cls">{{ lacpVerdict.text }}</div>
+
+    <h3>PAgP negotiation explorer</h3>
+    <div class="grid g2">
+      <div class="card">
+        <h4>SW-A</h4>
+        <div class="row-fn">
+          <button class="btn" v-for="m in pagpModes" :key="'a'+m" :class="{primary:pagpA===m}" @click="pagpA=m">{{ m }}</button>
+        </div>
+      </div>
+      <div class="card">
+        <h4>SW-B</h4>
+        <div class="row-fn">
+          <button class="btn" v-for="m in pagpModes" :key="'b'+m" :class="{primary:pagpB===m}" @click="pagpB=m">{{ m }}</button>
+        </div>
+      </div>
+    </div>
+    <div class="verdict" :class="pagpVerdict.cls">{{ pagpVerdict.text }}</div>
+    <div class="callout green"><b>Preference:</b> Use <b>LACP</b> (open standard). PAgP is legacy and Cisco-only.</div>
+  </section>
+
+  <!-- 12. COMMANDS -->
+  <section class="panel" v-show="sec==='cmds'" id="cmds">
+    <h2>⌨️ CLI Commands</h2>
+    <div class="row-fn">
+      <button class="btn" v-for="c in commands" :key="c.key" :class="{primary:activeCmd===c.key}" @click="activeCmd=c.key">{{ c.label }}</button>
+    </div>
+    <pre class="cmd">{{ activeCommand.show }}</pre>
+    <div class="callout green" style="margin-top:6px"><b>Core verify trio:</b> <code>show spanning-tree</code>, <code>show spanning-tree vlan &lt;id&gt;</code>, and <code>show spanning-tree root</code> cover almost every STP issue.</div>
+  </section>
+
+  <!-- 13. TRAPS -->
+  <section class="panel" v-show="sec==='traps'" id="traps">
+    <h2>⚠️ Common Traps</h2>
+    <div v-for="t in traps" :key="t" class="trap-item"><span class="trap-ico">!</span><div>{{ t }}</div></div>
+  </section>
+
+  <!-- 14. QUIZ -->
+  <section class="panel" v-show="sec==='quiz'" id="quiz">
+    <h2>📝 Quiz ({{ quizQuestions.length }})</h2>
+    <div v-for="(q,qi) in quizQuestions" :key="qi" class="card" style="margin:12px 0">
+      <div style="font-weight:700;margin-bottom:8px">{{ qi+1 }}. {{ q.q }}</div>
+      <div v-for="(o,oi) in q.opts" :key="oi"
+           class="opt" :class="{sel:q.ans===oi}"
+           @click="q.ans=oi">
+        <span class="letter">{{ String.fromCharCode(65+oi) }}</span>{{ o.text }}
+      </div>
+    </div>
+    <div class="row-fn">
+      <button class="btn primary" @click="submitQuiz()" :disabled="!allQuizAnswered">Submit answers</button>
+      <button class="btn" @click="resetQuiz()">Reset</button>
+      <span class="muted" v-if="quizDone" style="font-weight:700">Score: {{ quizScore }} / {{ quizQuestions.length }}
+        ({{ Math.round(quizScore/quizQuestions.length*100) }}%)</span>
+    </div>
+    <div class="verdict" :class="quizDone ? (quizScore===quizQuestions.length?'ok':'info') : 'info'" v-if="quizDone">
+      {{ quizScore===quizQuestions.length ? '🎉 Perfect! All ' + quizQuestions.length + ' correct.' : 'Better luck next time — review the traps section.' }}
+    </div>
+  </section>
+
+  <!-- 15. CHECKLIST -->
+  <section class="panel" v-show="sec==='checklist'" id="checklist">
+    <h2>✅ Study Checklist</h2>
+    <p class="muted" style="margin-bottom:10px">{{ doneCount }} / {{ checklist.length }} complete</p>
+    <div v-for="(c,i) in checklist" :key="i" class="chk-item" :class="{done:c.done}" @click="toggleDone(i)">
+      <span class="chk-box">{{ c.done ? '✓' : '' }}</span>{{ c.t }}
+    </div>
+  </section>
+
+</div>
+
+<script src="../vue.global.prod.js"></script>
+<script>
+(() => {
+  const { createApp, ref, computed, reactive } = Vue;
+  const LS = {
+    theme: 'ccnp.stp.theme', done: 'ccnp.stp.done',
+    quiz: 'ccnp.stp.quiz'
+  };
+  function loadJSON(key, fb) {
+    try { const v = JSON.parse(localStorage.getItem(key)); return (v === null || v === undefined) ? fb : v; }
+    catch (e) { return fb; }
+  }
+  function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+  function shuffle(a) {
+    const x = a.slice();
+    for (let i = x.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [x[i], x[j]] = [x[j], x[i]];
+    }
+    return x;
+  }
+
+  createApp({
+    setup() {
+      const theme = ref(loadJSON(LS.theme, 'dark'));
+      const sec = ref('stp');
+
+      /* ---------- SECTION NAV ---------- */
+      const sections = [
+        { id: 'stp', label: 'STP', icon: '🕸️' },
+        { id: 'root', label: 'Root Bridge', icon: '👑' },
+        { id: 'roles', label: 'Port Roles', icon: '🎭' },
+        { id: 'states', label: 'Port States', icon: '🚦' },
+        { id: 'bpdu', label: 'BPDU', icon: '📨' },
+        { id: 'rstp', label: 'RSTP', icon: '⚡' },
+        { id: 'pvst', label: 'PVST+', icon: '🌿' },
+        { id: 'rapid', label: 'Rapid PVST+', icon: '🚀' },
+        { id: 'mst', label: 'MST', icon: '🗺️' },
+        { id: 'prot', label: 'Protections', icon: '🛡️' },
+        { id: 'ec', label: 'EtherChannel', icon: '🔗' },
+        { id: 'cmds', label: 'Commands', icon: '⌨️' },
+        { id: 'traps', label: 'Traps', icon: '⚠️' },
+        { id: 'quiz', label: 'Quiz', icon: '📝' },
+        { id: 'checklist', label: 'Checklist', icon: '✅' }
+      ];
+
+      /* ---------- PATH COST EXPLORER ---------- */
+      const costInput = ref('4');
+      const costVerdict = computed(() => {
+        const v = parseFloat(costInput.value);
+        if (isNaN(v) || costInput.value.trim() === '') return { cls: 'info', text: 'Enter a root path cost.' };
+        if (v < 0) return { cls: 'bad', text: 'Cost cannot be negative.' };
+        if (v === 0) return { cls: 'info', text: '0 = the cost of the Root Bridge itself. Non-root switches have a cost > 0 toward the root.' };
+        if (v <= 19) return { cls: 'ok', text: 'Cost ' + v + ' — low cost = preferred (closer to root). The lower the Root Path Cost, the better.' };
+        return { cls: 'info', text: 'Cost ' + v + ' — a higher cost is less preferred. Lower total Root Path Cost wins the path selection.' };
+      });
+
+      /* ---------- ROOT ELECTION EXPLORER ---------- */
+      const rootPriorities = [32768, 24576, 4096];
+      const rootP1 = ref(32768);
+      const rootP2 = ref(32768);
+      const rootVerdict = computed(() => {
+        if (rootP1.value === rootP2.value) {
+          return { cls: 'ok', text: 'Priorities tied (' + rootP1.value + '). Tie broken by lowest MAC → SW1 (0000.0000.0001) wins: SW1 = Root Bridge.' };
+        }
+        if (rootP1.value < rootP2.value) {
+          return { cls: 'ok', text: 'SW1 priority ' + rootP1.value + ' &lt; SW2 ' + rootP2.value + ' → SW1 = Root Bridge.' };
+        }
+        return { cls: 'ok', text: 'SW2 priority ' + rootP2.value + ' &lt; SW1 ' + rootP1.value + ' → SW2 = Root Bridge.' };
+      });
+
+      /* ---------- EFFECTIVE PRIORITY EXPLORER ---------- */
+      const effPrio = ref('4096');
+      const effVlan = ref('10');
+      const effVerdict = computed(() => {
+        const p = parseInt(effPrio.value, 10);
+        const v = parseInt(effVlan.value, 10);
+        if (isNaN(p) || isNaN(v)) return { cls: 'info', text: 'Enter a configured priority (multiple of 4096) and a VLAN ID.' };
+        if (p % 4096 !== 0) return { cls: 'info', text: 'Configurable priority is normally set in increments of 4096. Use e.g. 0, 4096, 8192, 32768.' };
+        const eff = p + v;
+        return { cls: 'ok', text: 'Effective priority = ' + p + ' + ' + v + ' (VLAN) = ' + eff + ' (System ID Extension embeds the VLAN ID).' };
+      });
+
+      /* ---------- ROLE EXPLORER ---------- */
+      const roleList = [
+        { key: 'root', name: 'Root Port (RP)', short: 'Best path to the root · Forwarding' },
+        { key: 'des', name: 'Designated Port (DP)', short: 'Best port on a segment · Forwarding' },
+        { key: 'alt', name: 'Alternate Port', short: 'Backup path to root · Discarding' },
+        { key: 'bak', name: 'Backup Port', short: 'Backup DP on same segment · Discarding' }
+      ];
+      const roleSel = ref('root');
+      const roleVerdict = computed(() => {
+        switch (roleSel.value) {
+          case 'root': return { cls: 'ok', text: 'Root Port: the best path from a non-root switch toward the Root Bridge. Normally Forwarding. One per non-root switch.' };
+          case 'des': return { cls: 'ok', text: 'Designated Port: the best port on a segment toward the Root. Normally Forwarding. One per segment.' };
+          case 'alt': return { cls: 'info', text: 'Alternate Port: an RSTP backup path to the root, reached via another switch. Discarding unless the Root Port path fails.' };
+          case 'bak': return { cls: 'info', text: 'Backup Port: an RSTP backup for another Designated Port on the same segment. Discarding.' };
+        }
+      });
+
+      /* ---------- STATE EXPLORER ---------- */
+      const stateList = [
+        { key: 'blocking', name: 'Blocking' },
+        { key: 'listening', name: 'Listening' },
+        { key: 'learning', name: 'Learning' },
+        { key: 'forwarding', name: 'Forwarding' },
+        { key: 'discarding', name: 'Discarding' }
+      ];
+      const stateSel = ref('blocking');
+      const stateVerdict = computed(() => {
+        switch (stateSel.value) {
+          case 'blocking': return { cls: 'red', text: 'Blocking: no data, no MAC learning — but still receives BPDUs and monitors STP info (classic 802.1D).' };
+          case 'listening': return { cls: 'amber', text: 'Listening: no data, no learning — participates in STP calculation (classic 802.1D).' };
+          case 'learning': return { cls: 'amber', text: 'Learning: no data forwarding, but builds the MAC table (classic).' };
+          case 'forwarding': return { cls: 'ok', text: 'Forwarding: normal data forwarding + MAC learning. The desired end state for active ports.' };
+          case 'discarding': return { cls: 'ok', text: 'Discarding: RSTP state merging Blocking + Listening. No data, no learning.' };
+        }
+      });
+
+      /* ---------- RSTP ROLE EXPLORER ---------- */
+      const rstpRoles = [
+        { key: 'root', name: 'Root', desc: 'Best path to root · Forwarding' },
+        { key: 'des', name: 'Designated', desc: 'Best port on segment · Forwarding' },
+        { key: 'alt', name: 'Alternate', desc: 'Backup to root · Discarding' },
+        { key: 'bak', name: 'Backup', desc: 'Backup DP same segment · Discarding' }
+      ];
+      const rstpRoleSel = ref('root');
+      const rstpRoleVerdict = computed(() => {
+        const m = {
+          root: ['ok', 'Root Port: best path from a non-root switch toward the root. Normally Forwarding.'],
+          des: ['ok', 'Designated Port: best port on a L2 segment toward the root. Normally Forwarding.'],
+          alt: ['info', 'Alternate Port: RSTP-only role — a backup path to the root via another switch; Discarding until needed.'],
+          bak: ['info', 'Backup Port: RSTP-only — a backup for a Designated Port on the same segment; Discarding.']
+        };
+        const r = m[rstpRoleSel.value];
+        return { cls: r[0], text: r[1] };
+      });
+
+      /* ---------- PVST+ EXPLORER ---------- */
+      const pvstVlans = [
+        { key: 'v10', name: 'VLAN 10', desc: 'Root = SW1 · traffic prefers top path' },
+        { key: 'v20', name: 'VLAN 20', desc: 'Root = SW2 · traffic prefers bottom path' },
+        { key: 'v30', name: 'VLAN 30', desc: 'Root = SW1 · top path preferred' }
+      ];
+      const pvstSel = ref('v10');
+      const pvstVerdict = computed(() => {
+        const m = {
+          v10: ['ok', 'VLAN 10 instance: root is SW1. VLAN-10 traffic prefers the path via SW1 (top).'],
+          v20: ['ok', 'VLAN 20 instance: root is SW2. VLAN-20 traffic prefers the path via SW2 (bottom).'],
+          v30: ['ok', 'VLAN 30 instance: root is SW1. VLAN-30 traffic prefers the top path.']
+        };
+        const r = m[pvstSel.value];
+        return { cls: r[0], text: r[1] };
+      });
+
+      /* ---------- MST EXPLORER ---------- */
+      const mstParams = [
+        { key: 'name', name: 'Region name', desc: 'Must match across all switches in the region' },
+        { key: 'rev', name: 'Revision number', desc: 'Must match (e.g. 1)' },
+        { key: 'map', name: 'VLAN→MSTI mapping', desc: 'Must match — e.g. 10-20 → instance 1' }
+      ];
+      const mstSel = ref('name');
+      const mstVerdict = computed(() => {
+        const m = {
+          name: ['bad', 'Different region name → different MST regions. All three parameters must match for a common region.'],
+          rev: ['bad', 'Different revision → different MST regions. Name AND revision AND mapping must all match.'],
+          map: ['bad', 'Different VLAN→instance mapping → different MST regions. A single mismatched mapping splits the region.']
+        };
+        const r = m[mstSel.value];
+        return { cls: r[0], text: r[1] };
+      });
+
+      /* ---------- LACP EXPLORER ---------- */
+      const lacpModes = ['active', 'passive'];
+      const lacpA = ref('active');
+      const lacpB = ref('passive');
+      const lacpVerdict = computed(() => {
+        if (lacpA.value === 'active' || lacpB.value === 'active') {
+          return { cls: 'ok', text: 'Bundle forms (LACP). At least one side is active → negotiation succeeds.' };
+        }
+        return { cls: 'bad', text: 'passive + passive = NO bundle. Neither side actively initiates LACP.' };
+      });
+
+      /* ---------- PAGP EXPLORER ---------- */
+      const pagpModes = ['desirable', 'auto'];
+      const pagpA = ref('desirable');
+      const pagpB = ref('auto');
+      const pagpVerdict = computed(() => {
+        if (pagpA.value === 'desirable' || pagpB.value === 'desirable') {
+          return { cls: 'ok', text: 'Bundle forms (PAgP). At least one side is desirable → negotiation succeeds.' };
+        }
+        return { cls: 'bad', text: 'auto + auto = NO bundle. Neither side actively initiates PAgP.' };
+      });
+
+      /* ---------- COMMANDS ---------- */
+      const commands = [
+        {
+          key: 'stp', label: 'STP Mode',
+          show: "! view current mode\nshow spanning-tree summary\n\n! classic 802.1D per-VLAN (legacy)\nspanning-tree mode pvst\n\n! rapid per-VLAN (modern default)\nspanning-tree mode rapid-pvst\n\n! MST\nspanning-tree mode mst"
+        },
+        {
+          key: 'root', label: 'Root Placement',
+          show: "spanning-tree vlan 10 priority 4096\n\n! convenience macros (priority adjusters)\nspanning-tree vlan 10 root primary\nspanning-tree vlan 20 root secondary\n\nshow spanning-tree root\nshow spanning-tree vlan 10"
+        },
+        {
+          key: 'cost', label: 'Port Cost',
+          show: "! influence root-port selection on a link\ninterface GigabitEthernet0/1\n spanning-tree vlan 10 cost 19\n spanning-tree vlan 10 port-priority 64"
+        },
+        {
+          key: 'portfast', label: 'PortFast',
+          show: "interface GigabitEthernet0/1\n spanning-tree portfast\n spanning-tree bpduguard enable\n\n! or globally for access ports\nspanning-tree portfast default\nspanning-tree portfast bpduguard default"
+        },
+        {
+          key: 'guard', label: 'Guards',
+          show: "! Root Guard - protect intended root placement\ninterface GigabitEthernet0/24\n spanning-tree guard root\n\n! Loop Guard - non-designated, unexpected BPDU loss\ninterface GigabitEthernet0/2\n spanning-tree guard loop"
+        },
+        {
+          key: 'ec', label: 'EtherChannel',
+          show: "interface Port-channel1\n switchport mode trunk\n!\ninterface GigabitEthernet0/1\n channel-group 1 mode active   ! LACP\n interface GigabitEthernet0/2\n channel-group 1 mode active\n!\ninterface GigabitEthernet0/3\n channel-group 2 mode desirable  ! PAgP\n\nshow etherchannel summary\nshow spanning-tree interface Port-channel1"
+        },
+        {
+          key: 'verify', label: 'Verify',
+          show: "show spanning-tree\nshow spanning-tree vlan 10\nshow spanning-tree root\nshow spanning-tree summary\nshow spanning-tree interface GigabitEthernet0/1 detail\nshow running-config | section spanning-tree"
+        }
+      ];
+      const activeCmd = ref(commands[0].key);
+      const activeCommand = computed(() => commands.find(c => c.key === activeCmd.value));
+
+      /* ---------- TRAPS ---------- */
+      const traps = [
+        'Lowest Bridge ID wins (lowest priority, then lowest MAC) — NOT highest.',
+        'MAC is only compared when priority ties, and the LOWEST MAC wins.',
+        'The root bridge has NO Root Port — it is already the root.',
+        'Root per instance: PVST+/Rapid PVST+ = per VLAN; MST = per MST instance.',
+        'Role ≠ state. Root/Designated/Alternate/Backup are roles; Blocking/Forwarding are states.',
+        'Blocking ports still receive BPDUs and monitor STP info — they are not "off".',
+        'Classic STP does NOT always take exactly 50 s — ~50 s is a worst-case timer sequence.',
+        'root primary / root secondary are configuration macros, not fixed priorities or STP roles.',
+        'STP is loop prevention, not link redundancy — redundant links may be non-forwarding.',
+        'TCN ≠ TC. TCN = notification; TC = topology-change indication causing fast MAC aging.',
+        'Non-root switches do NOT blindly relay the root\'s BPDU — they send their own with best root info.',
+        'Bridge Priority (root election) ≠ Port Priority (port tie-breaking).',
+        'Priority increments are 4096 (0, 4096, 8192 … 61440); default is 32768.',
+        'PortFast does NOT disable STP — it makes a port an edge port that forwards immediately.',
+        'BPDU Guard reacts to a BPDU (presents) → err-disabled; Loop Guard reacts to BPDU loss (absence) → loop-inconsistent.',
+        'LACP passive+passive and PAgP auto+auto both fail — one side must actively initiate.',
+        'MST region match needs name + revision + VLAN→instance mapping all equal — any difference splits the region.'
+      ];
+
+      /* ---------- QUIZ ---------- */
+      const quizRaw = [
+        { q: 'Which standard is classic STP?', opts: [{ text: '802.1w' }, { text: '802.1D' }, { text: '802.1s' }, { text: '802.3ad' }], correct: 1 },
+        { q: 'Which switch becomes the Root Bridge?', opts: [{ text: 'Highest Bridge ID' }, { text: 'Lowest Bridge ID' }, { text: 'Lowest root path cost' }, { text: 'Highest MAC' }], correct: 1 },
+        { q: 'The root bridge normally has which type of port?', opts: [{ text: 'One Root Port' }, { text: 'No Root Port; participating ports are Designated' }, { text: 'Only Alternate ports' }, { text: 'Only Blocking ports' }], correct: 1 },
+        { q: 'When Bridge prioreties tie, what breaks the tie?', opts: [{ text: 'Highest MAC wins' }, { text: 'Lowest MAC wins' }, { text: 'Faster link wins' }, { text: 'Configured priority' }], correct: 1 },
+        { q: 'What is the default STP bridge priority?', opts: [{ text: '4096' }, { text: '32768' }, { text: '28672' }, { text: '61440' }], correct: 1 },
+        { q: 'Which is a ROLE, not a state?', opts: [{ text: 'Blocking' }, { text: 'Designated Port' }, { text: 'Listening' }, { text: 'Forwarding' }], correct: 1 },
+        { q: 'In RSTP, Blocking and Listening merge into which state?', opts: [{ text: 'Forwarding' }, { text: 'Discarding' }, { text: 'Learning' }, { text: 'Disabled' }], correct: 1 },
+        { q: 'What does a Root Port provide?', opts: [{ text: 'Backup path to the root' }, { text: 'Best path from a non-root switch toward the root' }, { text: 'The root\'s own connection' }, { text: 'A blocking path' }], correct: 1 },
+        { q: 'Which protocol runs one classic 802.1D instance per VLAN?', opts: [{ text: 'RSTP' }, { text: 'PVST+' }, { text: 'MST' }, { text: 'LACP' }], correct: 1 },
+        { q: 'Which RSTP role is a backup path to the root via another switch?', opts: [{ text: 'Backup Port' }, { text: 'Alternate Port' }, { text: 'Root Port' }, { text: 'Designated Port' }], correct: 1 },
+        { q: 'Which LACP combination fails to form a bundle?', opts: [{ text: 'active + passive' }, { text: 'active + active' }, { text: 'passive + passive' }, { text: 'active + on' }], correct: 2 },
+        { q: 'What protects a non-designated port against unexpected BPDU loss?', opts: [{ text: 'BPDU Guard' }, { text: 'Root Guard' }, { text: 'Loop Guard' }, { text: 'PortFast' }], correct: 2 }
+      ];
+      const quizQuestions = reactive(quizRaw.map(q => ({ ...q, ans: null })));
+      const quizDone = ref(false);
+      const quizScore = ref(loadJSON(LS.quiz, 0) || 0);
+      const allQuizAnswered = computed(() => quizQuestions.every(q => q.ans !== null));
+      function submitQuiz() {
+        if (!allQuizAnswered.value) return;
+        quizScore.value = quizQuestions.filter((q, i) => q.ans === q.correct).length;
+        quizDone.value = true;
+        save(LS.quiz, quizScore.value);
+      }
+      function resetQuiz() {
+        quizQuestions.forEach(q => q.ans = null);
+        quizDone.value = false;
+        quizScore.value = 0;
+        localStorage.removeItem(LS.quiz);
+      }
+
+      /* ---------- CHECKLIST ---------- */
+      const checklistRoot = loadJSON(LS.done, [
+        { t: 'Explain why L2 loops are catastrophic (broadcast storm, MAC flapping, duplicate frames)', done: false },
+        { t: 'Walk the STP process: elect root → root port → designated port → block redundancy', done: false },
+        { t: 'Recall Bridge ID: priority (4096 granularity) + System ID Extension (VLAN) + MAC', done: false },
+        { t: 'State root election: lowest priority, then lowest MAC; root has no Root Port', done: false },
+        { t: 'Distinguish role vs state; name classic roles and states', done: false },
+        { t: 'List classic path costs (10M=100, 100M=19, 1G=4, 10G=2) and short vs long methods', done: false },
+        { t: 'Describe the Configuration BPDU fields and the 4-field comparison order', done: false },
+        { t: 'Contrast TCN vs TC and the temporary fast MAC aging during a topology change', done: false },
+        { t: 'Explain RSTP speed: explicit roles, proposal/agreement, edge ports, Discarding state', done: false },
+        { t: 'Explain PVST+/Rapid PVST+ as per-VLAN instances enabling L2 load balancing', done: false },
+        { t: 'Explain MST: map VLANs to MSTIs, root per MSTI, region = name+revision+mapping', done: false },
+        { t: 'Describe PortFast, BPDU Guard, Root Guard, Loop Guard and their failure modes', done: false },
+        { t: 'Explain EtherChannel: LACP (active/passive), PAgP (desirable/auto), static ON', done: false },
+        { t: 'Know STP verify commands: show spanning-tree, vlan, root, summary, interface detail', done: false }
+      ]);
+      const checklist = reactive(checklistRoot);
+      const doneCount = computed(() => checklist.filter(c => c.done).length);
+      function saveChecklist() { save(LS.done, checklistRoot); }
+      function toggleDone(i) { checklistRoot[i].done = !checklistRoot[i].done; saveChecklist(); }
+
+      return {
+        theme, sec, sections,
+        costInput, costVerdict,
+        rootPriorities, rootP1, rootP2, rootVerdict,
+        effPrio, effVlan, effVerdict,
+        roleList, roleSel, roleVerdict,
+        stateList, stateSel, stateVerdict,
+        rstpRoles, rstpRoleSel, rstpRoleVerdict,
+        pvstVlans, pvstSel, pvstVerdict,
+        mstParams, mstSel, mstVerdict,
+        lacpModes, lacpA, lacpB, lacpVerdict,
+        pagpModes, pagpA, pagpB, pagpVerdict,
+        commands, activeCmd, activeCommand,
+        traps,
+        quizQuestions, quizDone, quizScore, allQuizAnswered, submitQuiz, resetQuiz,
+        checklist, doneCount, saveChecklist, toggleDone
+      };
+    }
+  }).mount('#app');
+})();
+</script>
+</body>
+</html>

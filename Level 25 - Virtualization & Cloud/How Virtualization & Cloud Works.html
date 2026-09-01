@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Virtualization &amp; Cloud Works — Deep Dive</title>
+<style>
+  :root {
+    --bg: #0f172a; --panel: #111c34; --card: #1e293b; --card-2: #16233d;
+    --text: #f8fafc; --muted: #94a3b8;
+    --blue: #38bdf8; --blue-dim: #0c4a6e;
+    --green: #34d399; --green-dim: #064e3b;
+    --amber: #fbbf24; --amber-dim: #78350f;
+    --red: #f87171; --red-dim: #7f1d1d;
+    --violet: #a78bfa; --violet-dim: #4c1d95;
+    --cyan: #22d3ee; --cyan-dim: #164e63;
+    --border: #334155; --hover: #263449; --code-bg: #0b1220;
+  }
+  #app[data-theme="light"] {
+    --bg: #f1f5f9; --panel: #ffffff; --card: #ffffff; --card-2: #f8fafc;
+    --text: #0f172a; --muted: #64748b;
+    --blue: #0284c7; --blue-dim: #bae6fd;
+    --green: #059669; --green-dim: #d1fae5;
+    --amber: #d97706; --amber-dim: #fef3c7;
+    --red: #dc2626; --red-dim: #fee2e2;
+    --violet: #7c3aed; --violet-dim: #ede9fe;
+    --cyan: #0891b2; --cyan-dim: #cffafe;
+    --border: #cbd5e1; --hover: #e2e8f0; --code-bg: #0b1220;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; }
+  #app { max-width: 1040px; margin: 0 auto; padding: 20px 18px 60px; }
+
+  header { position: sticky; top: 0; z-index: 30; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .lv-badge { background: var(--blue-dim); color: var(--blue); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .exam-badge { background: var(--violet-dim); color: var(--violet); border-radius: 999px; padding: 2px 10px; font-size: 0.7rem; font-weight: 700; }
+  .head-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: background 0.15s; }
+  .btn:hover { background: var(--hover); }
+  .btn.primary { background: var(--blue); color: #0f172a; border-color: var(--blue); }
+
+  nav { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 2px 16px; }
+  nav button.chip { border: 1px solid var(--border); background: var(--card); color: var(--muted); padding: 5px 11px; border-radius: 999px; cursor: pointer; font-size: 0.76rem; font-weight: 600; }
+  nav button.chip.active { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
+
+  section.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
+  section.panel h2 { font-size: 1.2rem; margin-bottom: 6px; }
+  section.panel h3 { font-size: 1rem; margin: 18px 0 10px; color: var(--blue); }
+  section.panel p { margin: 8px 0; }
+  .muted { color: var(--muted); }
+  .lead { color: var(--muted); font-size: 0.95rem; }
+
+  .grid { display: grid; gap: 12px; }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .g3 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .g4 { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .card h4 { font-size: 0.9rem; margin-bottom: 6px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85rem; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  tr:hover td { background: var(--hover); }
+
+  code, .mono { font-family: 'Fira Code', ui-monospace, monospace; }
+  .mono { font-size: 0.9rem; }
+  .chip-tag { display: inline-block; border-radius: 999px; padding: 1px 9px; font-size: 0.74rem; font-weight: 700; }
+  .b-blue { background: var(--blue-dim); color: var(--blue); }
+  .b-green { background: var(--green-dim); color: var(--green); }
+  .b-amber { background: var(--amber-dim); color: var(--amber); }
+  .b-red { background: var(--red-dim); color: var(--red); }
+  .b-violet { background: var(--violet-dim); color: var(--violet); }
+  .b-cyan { background: var(--cyan-dim); color: var(--cyan); }
+
+  .callout { border-left: 4px solid var(--amber); background: var(--card-2); border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 12px 0; font-size: 0.9rem; }
+  .callout.green { border-color: var(--green); }
+  .callout.red { border-color: var(--red); }
+  .callout.blue { border-color: var(--blue); }
+  .callout.violet { border-color: var(--violet); }
+
+  .row-fn { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 8px 0; }
+
+  .opt { display: flex; align-items: center; gap: 8px; padding: 6px 9px; margin: 3px 0; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; background: var(--card); font-size: 0.86rem; }
+  .opt.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .opt .letter { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex: 0 0 auto; }
+  .opt.sel .letter { background: var(--blue); color: #0f172a; }
+
+  #app pre, pre.cmd { background: var(--code-bg); color: #e2e8f0; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.82rem; line-height: 1.5; }
+
+  .trap-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  .trap-item:last-child { border-bottom: none; }
+  .trap-ico { color: var(--red); font-weight: 700; flex: 0 0 auto; }
+
+  .step-flow { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .step { border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 0.8rem; background: var(--card-2); }
+  .step .n { color: var(--blue); font-weight: 700; }
+
+  .verdict { border-radius: 8px; padding: 10px 14px; font-weight: 700; margin: 8px 0; }
+  .verdict.ok { background: var(--green-dim); color: var(--green); }
+  .verdict.bad { background: var(--red-dim); color: var(--red); }
+  .verdict.info { background: var(--blue-dim); color: var(--blue); }
+
+  .chk-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; margin: 5px 0; cursor: pointer; transition: opacity 0.15s; }
+  .chk-item.done { opacity: 0.55; text-decoration: line-through; }
+  .chk-box { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 5px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; }
+  .chk-item.done .chk-box { background: var(--green); border-color: var(--green); color: #0f172a; }
+
+  .proto-cell { border: 1px solid var(--border); border-radius: 10px; padding: 9px 10px; background: var(--card); cursor: pointer; text-align: center; }
+  .proto-cell.sel { border-color: var(--blue); background: var(--blue-dim); }
+  .proto-cell .pn { font-weight: 700; }
+  .proto-cell .pd { font-size: 0.75rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<div id="app" :data-theme="theme">
+  <header>
+    <h1><span class="lv-badge">L25</span> How Virtualization &amp; Cloud Works
+      <span class="exam-badge">ENCOR 350-401</span></h1>
+    <div class="head-actions">
+      <a class="btn" href="../Level 24 - SDN &amp; Automation/How SDN and Automation Works.html">◀ SDN</a>
+      <a class="btn" href="../Level 26 - Monitoring &amp; Telemetry/How Monitoring &amp; Telemetry Works.html">Telemetry ▶</a>
+      <a class="btn" href="../index.html">Flashcards</a>
+      <button class="btn" @click="theme = (theme==='dark'?'light':'dark')">{{ theme==='dark' ? '☀' : '🌙' }}</button>
+    </div>
+  </header>
+
+  <nav>
+    <button class="chip" v-for="s in sections" :key="s.id" :class="{active:sec===s.id}" @click="sec=s.id">{{ s.icon }} {{ s.label }}</button>
+  </nav>
+
+  <!-- 1. OVERVIEW -->
+  <section class="panel" v-show="sec==='intro'" id="intro">
+    <h2>☁️ Virtualization &amp; Cloud — the whole picture</h2>
+    <p class="lead">Three layers: <b>server virtualization</b> (VMs &amp; hypervisors, containers &amp; orchestration), <b>network virtualization</b> (VRF — the routing-table slice, cloud VPCs), and <b>cloud models &amp; services</b> (public/private/hybrid × IaaS/PaaS/SaaS).</p>
+
+    <h3>The three blocks</h3>
+    <div class="grid g3">
+      <div class="card"><h4>Server</h4><span class="chip-tag b-blue">VM / containers</span><p class="muted" style="margin:0">hypervisor, Docker, K8s</p></div>
+      <div class="card"><h4>Network</h4><span class="chip-tag b-green">VRF</span><p class="muted" style="margin:0">isolated RIB/FIB — VRF-lite, VPC</p></div>
+      <div class="card"><h4>Cloud</h4><span class="chip-tag b-amber">models</span><p class="muted" style="margin:0">public/private/hybrid · IaaS/PaaS/SaaS</p></div>
+    </div>
+    <div class="callout red"><b>VM = own kernel; container = shared kernel.</b> This single contrast drives most of the exam questions here.</div>
+  </section>
+
+  <!-- 2. SERVER VIRTUALIZATION -->
+  <section class="panel" v-show="sec==='server'" id="server">
+    <h2>🖥️ Server Virtualization — VM &amp; Hypervisor</h2>
+    <p class="lead">A <b>VM</b> = full guest OS on <b>virtualized hardware</b> (vCPU/vRAM/vNIC/vDisk) atop a <b>hypervisor</b>. The hypervisor schedules and isolates workloads.</p>
+
+    <h3>VM anatomy</h3>
+    <div class="grid g4">
+      <div class="card"><h4>vCPU</h4><p class="muted" style="margin:0">virtual cores</p></div>
+      <div class="card"><h4>vRAM</h4><p class="muted" style="margin:0">allocated memory</p></div>
+      <div class="card"><h4>vNIC</h4><p class="muted" style="margin:0">virtual NIC</p></div>
+      <div class="card"><h4>vDisk</h4><p class="muted" style="margin:0">virtual disk</p></div>
+    </div>
+    <div class="callout blue"><b>Virtual appliances = routers/firewalls running as VMs: CSR1000v, vWLC, ASAv, vManage/vSmart.</b></div>
+
+    <h3>Hypervisor type picker (the core contrast)</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:hvPick==='t1'}" @click="hvPick='t1'"><div class="pn">Type 1 — bare-metal</div><div class="pd">runs on hardware · ESXi, Hyper-V, KVM</div></div>
+      <div class="proto-cell" :class="{sel:hvPick==='t2'}" @click="hvPick='t2'"><div class="pn">Type 2 — hosted</div><div class="pd">runs on an OS · VirtualBox, Workstation</div></div>
+    </div>
+    <div class="verdict" :class="hvVerdict.cls">{{ hvVerdict.text }}</div>
+
+    <h3>VM vs container (memorize)</h3>
+    <table>
+      <tr><th>Aspect</th><th>VM</th><th>Container</th></tr>
+      <tr><td>Kernel</td><td>own</td><td>shared</td></tr>
+      <tr><td>Boot</td><td>minutes</td><td>seconds</td></tr>
+      <tr><td>Overhead</td><td>high</td><td>low</td></tr>
+      <tr><td>Isolation</td><td>strong</td><td>lighter</td></tr>
+      <tr><td>Density</td><td>low</td><td>high</td></tr>
+    </table>
+    <div class="callout red"><b>VMs trade density for isolation; containers trade isolation for density + speed.</b></div>
+  </section>
+
+  <!-- 3. CONTAINERS -->
+  <section class="panel" v-show="sec==='cont'" id="cont">
+    <h2>🐳 Containers — Docker &amp; Kubernetes</h2>
+    <p class="lead">Containers package an app + dependencies, <b>isolated via namespaces, limited via cgroups</b>, sharing the host kernel. <b>Docker</b> = the runtime; <b>Kubernetes</b> = the orchestrator.</p>
+
+    <h3>Container basics</h3>
+    <div class="grid g3">
+      <div class="card"><h4>Namespaces</h4><p class="muted" style="margin:0">isolation</p></div>
+      <div class="card"><h4>cgroups</h4><p class="muted" style="margin:0">limit resources</p></div>
+      <div class="card"><h4>Image → Container</h4><p class="muted" style="margin:0">app + deps</p></div>
+    </div>
+    <div class="callout blue"><b>CNI</b> (container network interface) is the plugin standard that connects containers to networks.</div>
+
+    <h3>Docker object model</h3>
+    <div class="grid g4">
+      <div class="card"><h4>Image</h4><p class="muted" style="margin:0">read-only template</p></div>
+      <div class="card"><h4>Container</h4><p class="muted" style="margin:0">running image</p></div>
+      <div class="card"><h4>Volume</h4><p class="muted" style="margin:0">persistent data</p></div>
+      <div class="card"><h4>Network</h4><p class="muted" style="margin:0">bridge/NAT</p></div>
+    </div>
+    <div class="callout green"><b>Dockerfile: FROM → base, RUN → build, COPY → files, EXPOSE → port, CMD → runtime command.</b> Default network = bridge/NAT.</div>
+
+    <h3>Kubernetes objects</h3>
+    <div class="grid g4">
+      <div class="card"><h4>Node</h4><p class="muted" style="margin:0">worker machine</p></div>
+      <div class="card"><h4>Pod</h4><p class="muted" style="margin:0">smallest unit</p></div>
+      <div class="card"><h4>Service</h4><p class="muted" style="margin:0">stable endpoint</p></div>
+      <div class="card"><h4>Deployment</h4><p class="muted" style="margin:0">desired replicas</p></div>
+    </div>
+    <div class="callout red"><b>Docker = runtime; K8s = orchestration. Pods run apps, Services expose them (stable VIP), Deployments maintain count. Control plane decides; workers run.</b></div>
+
+    <h3>K8s networking &amp; commands</h3>
+    <div class="grid g3">
+      <div class="card"><h4>CNI</h4><p class="muted" style="margin:0">pod networking</p></div>
+      <div class="card"><h4>Service</h4><p class="muted" style="margin:0">clusterIP</p></div>
+      <div class="card"><h4>Ingress</h4><p class="muted" style="margin:0">external L7</p></div>
+    </div>
+    <pre class="cmd">docker build -t myapp .
+docker run -d -p 8080:80 myapp
+docker ps
+docker exec -it &lt;id&gt; /bin/bash
+docker logs &lt;id&gt;
+
+kubectl get nodes
+kubectl get pods -A
+kubectl get services
+kubectl apply -f deployment.yaml
+kubectl scale deploy app --replicas=5
+</pre>
+  </section>
+
+  <!-- 4. NETWORK VIRTUALIZATION -->
+  <section class="panel" v-show="sec==='net'" id="net">
+    <h2>🕸️ Network Virtualization — VRF &amp; VRF-Lite</h2>
+    <p class="lead"><b>VRF</b> = multiple isolated routing tables on one router (own RIB, CEF/FIB, interfaces, protocol process). <b>VRF-lite</b> = the same isolation <b>without MPLS/MP-BGP</b>.</p>
+
+    <h3>VRF what-is-isolated</h3>
+    <div class="grid g4">
+      <div class="card"><h4>RIB</h4><p class="muted" style="margin:0">routes</p></div>
+      <div class="card"><h4>CEF/FIB</h4><p class="muted" style="margin:0">forwarding</p></div>
+      <div class="card"><h4>Interfaces</h4><p class="muted" style="margin:0">membership</p></div>
+      <div class="card"><h4>Protocol</h4><p class="muted" style="margin:0">per-VRF</p></div>
+    </div>
+
+    <h3>RD vs RT picker (the core trap)</h3>
+    <div class="grid g2">
+      <div class="proto-cell" :class="{sel:rdPick==='rd'}" @click="rdPick='rd'"><div class="pn">RD</div><div class="pd">route DISTINGUISHER — uniqueness in MP-BGP</div></div>
+      <div class="proto-cell" :class="{sel:rdPick==='rt'}" @click="rdPick='rt'"><div class="pn">RT</div><div class="pd">route TARGET — membership / who shares</div></div>
+    </div>
+    <div class="verdict" :class="rdVerdict.cls">{{ rdVerdict.text }}</div>
+
+    <h3>VRF-lite vs L3VPN (memorize)</h3>
+    <table>
+      <tr><th>Aspect</th><th>VRF-lite</th><th>MPLS L3VPN</th></tr>
+      <tr><td>MPLS</td><td>no</td><td>yes</td></tr>
+      <tr><td>MP-BGP</td><td>no</td><td>yes</td></tr>
+      <tr><td>Labels</td><td>none</td><td>two-label stack</td></tr>
+      <tr><td>Scale</td><td>small</td><td>large</td></tr>
+      <tr><td>Scope</td><td>single site</td><td>WAN-wide</td></tr>
+    </table>
+    <div class="callout red"><b>VRF-lite = isolation without MPLS — every hop must carry the same VRFs on the same links. Cloud VPC ≈ the VRF concept (per-tenant isolation).</b></div>
+    <pre class="cmd">ip vrf CUST1
+ rd 65000:100
+!
+interface Gi0/1
+ ip vrf forwarding CUST1
+ ip address 10.0.0.1 255.255.255.0
+!
+router bgp 65000
+ address-family ipv4 vrf CUST1
+!
+show ip vrf
+show ip route vrf CUST1
+show ip cef vrf CUST1
+ping vrf CUST1 10.0.0.2
+</pre>
+  </section>
+
+  <!-- 5. CLOUD MODELS -->
+  <section class="panel" v-show="sec==='cloud'" id="cloud">
+    <h2>🌍 Cloud Deployment Models</h2>
+    <p class="lead">Where the infrastructure runs and who owns it: <b>public, private, hybrid</b>.</p>
+
+    <h3>Model picker</h3>
+    <div class="grid g3">
+      <div class="proto-cell" :class="{sel:cloudPick==='public'}" @click="cloudPick='public'"><div class="pn">Public</div><div class="pd">shared · provider · opex</div></div>
+      <div class="proto-cell" :class="{sel:cloudPick==='private'}" @click="cloudPick='private'"><div class="pn">Private</div><div class="pd">dedicated · on-prem · capex</div></div>
+      <div class="proto-cell" :class="{sel:cloudPick==='hybrid'}" @click="cloudPick='hybrid'"><div class="pn">Hybrid</div><div class="pd">private + public</div></div>
+    </div>
+    <div class="verdict" :class="cloudVerdict.cls">{{ cloudVerdict.text }}</div>
+
+    <h3>Public vs private comparison</h3>
+    <table>
+      <tr><th>Aspect</th><th>Public</th><th>Private</th></tr>
+      <tr><td>Owner</td><td>provider</td><td>you</td></tr>
+      <tr><td>Tenancy</td><td>shared</td><td>dedicated</td></tr>
+      <tr><td>Cost</td><td>opex</td><td>capex</td></tr>
+      <tr><td>Control</td><td>limited</td><td>full</td></tr>
+      <tr><td>Scale</td><td>elastic</td><td>limited</td></tr>
+      <tr><td>Compliance</td><td>harder</td><td>easier</td></tr>
+    </table>
+    <div class="callout red"><b>Hybrid keeps sensitive data on-prem and bursts/DRs to the public cloud. Connectivity: IPsec VPN, Direct Connect/ExpressRoute, SD-WAN.</b></div>
+    <div class="callout blue"><b>Cloud networking: VPC/VNet = the "VRF" of the cloud (per-tenant isolation); security groups = L3/L4 filters.</b></div>
+  </section>
+
+  <!-- 6. CLOUD SERVICES -->
+  <section class="panel" v-show="sec==='svc'" id="svc">
+    <h2>🧩 Cloud Service Models — IaaS · PaaS · SaaS</h2>
+    <p class="lead">What <b>you manage</b> vs the provider. Control decreases as you go up: <b>IaaS → PaaS → SaaS</b>.</p>
+
+    <h3>Service picker (responsibility split — memorize)</h3>
+    <div class="grid g3">
+      <div class="proto-cell" :class="{sel:svcPick==='iaas'}" @click="svcPick='iaas'"><div class="pn">IaaS</div><div class="pd">EC2 · VPC · S3 — you: OS+app+data</div></div>
+      <div class="proto-cell" :class="{sel:svcPick==='paas'}" @click="svcPick='paas'"><div class="pn">PaaS</div><div class="pd">App Service · Beanstalk · managed DB — you: app+data</div></div>
+      <div class="proto-cell" :class="{sel:svcPick==='saas'}" @click="svcPick='saas'"><div class="pn">SaaS</div><div class="pd">Office 365 · Salesforce · Webex — you: data+users</div></div>
+    </div>
+    <div class="verdict" :class="svcVerdict.cls">{{ svcVerdict.text }}</div>
+
+    <h3>Control ladder</h3>
+    <table>
+      <tr><th>Model</th><th>You manage</th><th>Example</th><th>Control</th></tr>
+      <tr><td>IaaS</td><td>OS + app + data</td><td>EC2, Azure VM, VPC, S3</td><td>most</td></tr>
+      <tr><td>PaaS</td><td>app + data</td><td>App Service, Beanstalk, managed DB</td><td>middle</td></tr>
+      <tr><td>SaaS</td><td>data + users</td><td>Office 365, Salesforce, Webex</td><td>least</td></tr>
+    </table>
+    <div class="callout red"><b>IaaS = most control (lift-and-shift, you patch the OS); SaaS = least control (rent the app, provider-managed). PaaS sits between.</b></div>
+  </section>
+
+  <!-- 7. COMMANDS -->
+  <section class="panel" v-show="sec==='cmds'" id="cmds">
+    <h2>⌨️ Commands</h2>
+    <div class="row-fn">
+      <button class="btn" v-for="c in commands" :key="c.key" :class="{primary:activeCmd===c.key}" @click="activeCmd=c.key">{{ c.label }}</button>
+    </div>
+    <pre class="cmd">{{ activeCommand.show }}</pre>
+  </section>
+
+  <!-- 8. TRAPS -->
+  <section class="panel" v-show="sec==='traps'" id="traps">
+    <h2>⚠️ Common Traps</h2>
+    <div v-for="t in traps" :key="t" class="trap-item"><span class="trap-ico">!</span><div>{{ t }}</div></div>
+  </section>
+
+  <!-- 9. QUIZ -->
+  <section class="panel" v-show="sec==='quiz'" id="quiz">
+    <h2>📝 Quiz ({{ quizQuestions.length }})</h2>
+    <div v-for="(q,qi) in quizQuestions" :key="qi" class="card" style="margin:12px 0">
+      <div style="font-weight:700;margin-bottom:8px">{{ qi+1 }}. {{ q.q }}</div>
+      <div v-for="(o,oi) in q.opts" :key="oi"
+           class="opt" :class="{sel:q.ans===oi}"
+           @click="q.ans=oi">
+        <span class="letter">{{ String.fromCharCode(65+oi) }}</span>{{ o.text }}
+      </div>
+    </div>
+    <div class="row-fn">
+      <button class="btn primary" @click="submitQuiz()" :disabled="!allQuizAnswered">Submit answers</button>
+      <button class="btn" @click="resetQuiz()">Reset</button>
+      <span class="muted" v-if="quizDone" style="font-weight:700">Score: {{ quizScore }} / {{ quizQuestions.length }}
+        ({{ Math.round(quizScore/quizQuestions.length*100) }}%)</span>
+    </div>
+    <div class="verdict" :class="quizDone ? (quizScore===quizQuestions.length?'ok':'info') : 'info'" v-if="quizDone">
+      {{ quizScore===quizQuestions.length ? '🎉 Perfect! All ' + quizQuestions.length + ' correct.' : 'Better luck next time — review the traps section.' }}
+    </div>
+  </section>
+
+  <!-- 10. CHECKLIST -->
+  <section class="panel" v-show="sec==='checklist'" id="checklist">
+    <h2>✅ Study Checklist</h2>
+    <p class="muted" style="margin-bottom:10px">{{ doneCount }} / {{ checklist.length }} complete</p>
+    <div v-for="(c,i) in checklist" :key="i" class="chk-item" :class="{done:c.done}" @click="toggleDone(i)">
+      <span class="chk-box">{{ c.done ? '✓' : '' }}</span>{{ c.t }}
+    </div>
+  </section>
+
+</div>
+
+<script src="../vue.global.prod.js"></script>
+<script>
+(() => {
+  const { createApp, ref, computed, reactive } = Vue;
+  const LS = {
+    theme: 'ccnp.cloud.theme', done: 'ccnp.cloud.done',
+    quiz: 'ccnp.cloud.quiz'
+  };
+  function loadJSON(key, fb) {
+    try { const v = JSON.parse(localStorage.getItem(key)); return (v === null || v === undefined) ? fb : v; }
+    catch (e) { return fb; }
+  }
+  function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+  createApp({
+    setup() {
+      const theme = ref(loadJSON(LS.theme, 'dark'));
+      const sec = ref('intro');
+
+      /* ---------- SECTION NAV ---------- */
+      const sections = [
+        { id: 'intro', label: 'Overview', icon: '☁️' },
+        { id: 'server', label: 'VMs & Hypervisors', icon: '🖥️' },
+        { id: 'cont', label: 'Containers', icon: '🐳' },
+        { id: 'net', label: 'VRF', icon: '🕸️' },
+        { id: 'cloud', label: 'Cloud Models', icon: '🌍' },
+        { id: 'svc', label: 'IaaS/PaaS/SaaS', icon: '🧩' },
+        { id: 'cmds', label: 'Commands', icon: '⌨️' },
+        { id: 'traps', label: 'Traps', icon: '⚠️' },
+        { id: 'quiz', label: 'Quiz', icon: '📝' },
+        { id: 'checklist', label: 'Checklist', icon: '✅' }
+      ];
+
+      /* ---------- HYPERVISOR ---------- */
+      const hvPick = ref('t1');
+      const hvVerdict = computed(() => {
+        if (hvPick.value === 't1') return { cls: 'info', text: 'Type 1 (bare-metal) — runs directly on hardware (ESXi, Hyper-V, KVM). Near-native performance; the datacenter/cloud standard.' };
+        return { cls: 'info', text: 'Type 2 (hosted) — runs on top of an OS (VirtualBox, VMware Workstation). Lower performance; good for desktop/lab.' };
+      });
+
+      /* ---------- RD vs RT ---------- */
+      const rdPick = ref('rd');
+      const rdVerdict = computed(() => {
+        if (rdPick.value === 'rd') return { cls: 'info', text: 'RD (route distinguisher) — gives each VRF a UNIQUE identity so overlapping routes are valid in MP-BGP.' };
+        return { cls: 'info', text: 'RT (route target) — controls MEMBERSHIP: which VRFs import/export and share routes. RT = who shares.' };
+      });
+
+      /* ---------- CLOUD MODEL ---------- */
+      const cloudPick = ref('hybrid');
+      const cloudVerdict = computed(() => {
+        if (cloudPick.value === 'public') return { cls: 'info', text: 'Public — shared, provider-owned (AWS/Azure/GCP), pay-as-you-go (opex), elastic, multi-tenant.' };
+        if (cloudPick.value === 'private') return { cls: 'info', text: 'Private — dedicated, on-prem (VMware/OpenStack), capex, full control. Wins on compliance/latency.' };
+        return { cls: 'info', text: 'Hybrid — private + public in one model. Sensitive stays on-prem; bursts/DR go public. Connectivity via VPN/Direct Connect/ExpressRoute/SD-WAN.' };
+      });
+
+      /* ---------- SERVICE MODEL ---------- */
+      const svcPick = ref('iaas');
+      const svcVerdict = computed(() => {
+        if (svcPick.value === 'iaas') return { cls: 'info', text: 'IaaS — raw infra (EC2, VPC, S3). You manage OS + app + data above the hypervisor. MOST control.' };
+        if (svcPick.value === 'paas') return { cls: 'info', text: 'PaaS — managed platform (App Service, managed DB). You manage app + data; provider runs infra + OS + runtime. MIDDLE control.' };
+        return { cls: 'info', text: 'SaaS — full app (Office 365, Salesforce). You manage data + users only. LEAST control.' };
+      });
+
+      /* ---------- COMMANDS ---------- */
+      const commands = [
+        {
+          key: 'docker', label: 'Docker',
+          show: "docker build -t myapp .\ndocker run -d -p 8080:80 myapp\ndocker ps\ndocker exec -it <id> /bin/bash\ndocker logs <id>\ndocker pull image\ndocker stop <id> && docker rm <id>"
+        },
+        {
+          key: 'k8s', label: 'Kubernetes',
+          show: "kubectl get nodes\nkubectl get pods -A\nkubectl get services\nkubectl get namespaces\nkubectl apply -f deployment.yaml\nkubectl describe pod <name>\nkubectl logs <pod>\nkubectl scale deploy app --replicas=5"
+        },
+        {
+          key: 'vrf', label: 'VRF',
+          show: "ip vrf CUST1\n rd 65000:100\n!\ninterface Gi0/1\n ip vrf forwarding CUST1\n ip address 10.0.0.1 255.255.255.0\n!\nrouter bgp 65000\n address-family ipv4 vrf CUST1\n!\nshow ip vrf\nshow ip route vrf CUST1\nshow ip cef vrf CUST1\nshow bgp vpnv4 vrf CUST1\nping vrf CUST1 10.0.0.2"
+        },
+        {
+          key: 'esx', label: 'Hypervisor/Cloud',
+          show: "esxcli vm process list\nesxcli network vswitch standard list\nshow vm-host ...\n\n! cloud (azure/aws CLI)\naz vm list\naws ec2 describe-instances\nvpc / subnet / security group management"
+        }
+      ];
+      const activeCmd = ref(commands[0].key);
+      const activeCommand = computed(() => commands.find(c => c.key === activeCmd.value));
+
+      /* ---------- TRAPS ---------- */
+      const traps = [
+        'VM = full guest OS on virtual hardware; VM = OWN kernel, container = SHARED kernel.',
+        'Type 1 hypervisor = bare-metal (ESXi/Hyper-V/KVM), datacenter standard; Type 2 = hosted (VirtualBox/Workstation).',
+        'Virtual appliances: CSR1000v (router), vWLC (wireless), ASAv (firewall), vManage/vSmart (SD-WAN) — all VMs.',
+        'Containers: namespaces isolate, cgroups limit; CNI connects containers to networks.',
+        'Docker objects = image, container, volume, network; Dockerfile = FROM/RUN/COPY/EXPOSE/CMD; default network bridge/NAT.',
+        'Docker = runtime; Kubernetes = orchestration. Pod = unit, Service = stable endpoint, Deployment = replicas.',
+        'K8s networking: CNI (pods), Service (clusterIP), Ingress (external L7); control plane decides, workers run.',
+        'VRF isolates RIB + FIB/CEF + interfaces + protocol — separate routing tables on one router.',
+        'RD = uniqueness (identity in MP-BGP); RT = membership (who shares). Only needed for MPLS VPNs.',
+        'VRF-lite = isolation WITHOUT MPLS/MP-BGP — each hop must carry the same VRFs; small/single-site scale.',
+        'ip vrf forwarding CLEARS the IP address — reapply it.',
+        'Public cloud = shared + provider-owned (opex); Private = dedicated + on-prem (capex); Hybrid = both.',
+        'Cloud VPC/VNet = the "VRF" of the cloud; security groups = L3/L4 filters.',
+        'Hybrid keeps sensitive data on-prem; bursts/DR go public; connectivity via VPN/Direct Connect/ExpressRoute/SD-WAN.',
+        'IaaS = you manage OS+app+data (most control); PaaS = app+data (middle); SaaS = data+users (least control).',
+        'SaaS examples: Office 365, Salesforce, Webex; PaaS: App Service, managed DB; IaaS: EC2, VPC, S3.'
+      ];
+
+      /* ---------- QUIZ ---------- */
+      const quizRaw = [
+        { q: 'A VM differs from a container because the VM has:', opts: [{ text: 'its own OS kernel' }, { text: 'a shared host kernel' }, { text: 'no hypervisor' }, { text: 'no vNIC' }], correct: 0 },
+        { q: 'A Type 1 hypervisor (bare-metal) example is:', opts: [{ text: 'ESXi' }, { text: 'VirtualBox' }, { text: 'VMware Workstation' }, { text: 'a guest OS' }], correct: 0 },
+        { q: 'A Type 2 host hypervisor example is:', opts: [{ text: 'VirtualBox' }, { text: 'KVM on bare metal' }, { text: 'ESXi' }, { text: 'Hyper-V on bare metal' }], correct: 0 },
+        { q: 'Containers achieve isolation with ___ and resource limits with ___:', opts: [{ text: 'namespaces / cgroups' }, { text: 'cgroups / namespaces' }, { text: 'VLANs / VRFs' }, { text: 'hypervisor / kernel' }], correct: 0 },
+        { q: 'Which is the standard for connecting containers to networks?', opts: [{ text: 'CNI' }, { text: 'OSPF' }, { text: 'NETCONF' }, { text: 'VXLAN alone' }], correct: 0 },
+        { q: 'Docker is best described as a:', opts: [{ text: 'container runtime (build/run images)' }, { text: 'container orchestrator' }, { text: 'hypervisor' }, { text: 'cloud service model' }], correct: 0 },
+        { q: 'Kubernetes is best described as a:', opts: [{ text: 'container orchestrator (schedules/scales/heals)' }, { text: 'container runtime' }, { text: 'hypervisor' }, { text: 'data format' }], correct: 0 },
+        { q: 'In Kubernetes, the smallest deployable unit is a:', opts: [{ text: 'pod' }, { text: 'node' }, { text: 'service' }, { text: 'namespace' }], correct: 0 },
+        { q: 'In Kubernetes, which object provides a stable network endpoint for apps?', opts: [{ text: 'Service' }, { text: 'Pod' }, { text: 'Deployment' }, { text: 'kubelet' }], correct: 0 },
+        { q: 'A VRF isolates each of these EXCEPT:', opts: [{ text: 'the physical switch fabric port roles' }, { text: 'the routing table (RIB)' }, { text: 'the CEF/FIB' }, { text: 'interfaces' }], correct: 0 },
+        { q: 'The route distinguisher (RD) provides:', opts: [{ text: 'uniqueness/identity for overlapping routes' }, { text: 'route membership (who shares)' }, { text: 'QoS marking' }, { text: 'encapsulation' }], correct: 0 },
+        { q: 'VRF-lite provides isolation:', opts: [{ text: 'without MPLS/MP-BGP' }, { text: 'only with two-label MPLS' }, { text: 'only across a WAN core' }, { text: 'using EVPN only' }], correct: 0 },
+        { q: 'A public cloud costs mostly as ___ and a private cloud as ___:', opts: [{ text: 'opex / capex' }, { text: 'capex / opex' }, { text: 'subscription / free' }, { text: 'rent / metered' }], correct: 0 },
+        { q: 'In a hybrid cloud, sensitive data typically:', opts: [{ text: 'stays on-premises' }, { text: 'always runs in the public cloud' }, { text: 'is erased' }, { text: 'has no connectivity' }], correct: 0 },
+        { q: 'Which connects a campus to a cloud provider with a private link?', opts: [{ text: 'Direct Connect / ExpressRoute' }, { text: 'a serial console' }, { text: 'an unencrypted broadcast' }, { text: 'a guest shell' }], correct: 0 },
+        { q: 'You manage OS + app + data in which model?', opts: [{ text: 'IaaS' }, { text: 'PaaS' }, { text: 'SaaS' }, { text: 'nothing above' }], correct: 0 },
+        { q: 'You manage ONLY data + users in which model?', opts: [{ text: 'SaaS' }, { text: 'IaaS' }, { text: 'PaaS' }, { text: 'all three equally' }], correct: 0 },
+        { q: 'Which has the MOST infrastructure control?', opts: [{ text: 'IaaS' }, { text: 'PaaS' }, { text: 'SaaS' }, { text: 'all are equal' }], correct: 0 }
+      ];
+      const quizQuestions = reactive(quizRaw.map(q => ({ ...q, ans: null })));
+      const quizDone = ref(false);
+      const quizScore = ref(loadJSON(LS.quiz, 0) || 0);
+      const allQuizAnswered = computed(() => quizQuestions.every(q => q.ans !== null));
+      function submitQuiz() {
+        if (!allQuizAnswered.value) return;
+        quizScore.value = quizQuestions.filter((q, i) => q.ans === q.correct).length;
+        quizDone.value = true;
+        save(LS.quiz, quizScore.value);
+      }
+      function resetQuiz() {
+        quizQuestions.forEach(q => q.ans = null);
+        quizDone.value = false;
+        quizScore.value = 0;
+        localStorage.removeItem(LS.quiz);
+      }
+
+      /* ---------- CHECKLIST ---------- */
+      const checklistRoot = loadJSON(LS.done, [
+        { t: 'VM = full guest OS on virtual hardware; virtual appliances CSR1000v/vWLC/ASAv; own kernel vs shared', done: false },
+        { t: 'Hypervisor Type 1 = bare-metal (ESXi/Hyper-V/KVM); Type 2 = hosted (VirtualBox/Workstation)', done: false },
+        { t: 'Containers = namespaces (isolate) + cgroups (limit), shared kernel; CNI standard for networking', done: false },
+        { t: 'Docker objects image/container/volume/network; Dockerfile FROM/RUN/COPY/EXPOSE/CMD; bridge/NAT default', done: false },
+        { t: 'K8s = orchestration; nodes/pods/services/deployments/namespaces; CNI + Service + Ingress', done: false },
+        { t: 'VRF isolates RIB/FIB/interfaces/protocol; RD = identity, RT = membership', done: false },
+        { t: 'VRF-lite = isolation without MPLS/MP-BGP; every hop carries same VRFs; small/single-site', done: false },
+        { t: 'Public = shared/provider/opex; Private = dedicated/on-prem/capex; Hybrid = both with VPN/Direct/ExpressRoute', done: false },
+        { t: 'Cloud VPC/VNet = VRF concept; security groups = L3/L4 filters; IaaS/PaaS/SaaS responsibility split', done: false }
+      ]);
+      const checklist = reactive(checklistRoot);
+      const doneCount = computed(() => checklist.filter(c => c.done).length);
+      function saveChecklist() { save(LS.done, checklistRoot); }
+      function toggleDone(i) { checklistRoot[i].done = !checklistRoot[i].done; saveChecklist(); }
+
+      return {
+        theme, sec, sections,
+        hvPick, hvVerdict,
+        rdPick, rdVerdict,
+        cloudPick, cloudVerdict,
+        svcPick, svcVerdict,
+        commands, activeCmd, activeCommand,
+        traps,
+        quizQuestions, quizDone, quizScore, allQuizAnswered, submitQuiz, resetQuiz,
+        checklist, doneCount, saveChecklist, toggleDone
+      };
+    }
+  }).mount('#app');
+})();
+</script>
+</body>
+</html>

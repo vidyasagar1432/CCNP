@@ -485,7 +485,7 @@
           "baseModelId": "opencode/big-pickle",
           "effort": null
         },
-        "defaultMode": "auto"
+        "defaultMode": "default"
       }
     },
     "debugFullFrames": true,
@@ -727,15 +727,6 @@
     {
       "providerId": "20f1e404-0006-478e-803d-e523437c9b10",
       "info": {
-        "id": "openrouter/anthropic/claude-opus-4.7-fast",
-        "displayName": "OpenRouter/Claude Opus 4.7 (Fast)"
-      },
-      "configuredModelId": "ce8a570b-3ae4-4932-859f-a9d15f67513b",
-      "configuredAt": 1787901353381
-    },
-    {
-      "providerId": "20f1e404-0006-478e-803d-e523437c9b10",
-      "info": {
         "id": "openrouter/anthropic/claude-opus-4.8",
         "displayName": "OpenRouter/Claude Opus 4.8"
       },
@@ -745,29 +736,11 @@
     {
       "providerId": "20f1e404-0006-478e-803d-e523437c9b10",
       "info": {
-        "id": "openrouter/anthropic/claude-opus-4.8-fast",
-        "displayName": "OpenRouter/Claude Opus 4.8 (Fast)"
-      },
-      "configuredModelId": "c44f85d6-465f-4f5c-b7ae-fef5e69be8a7",
-      "configuredAt": 1787901353385
-    },
-    {
-      "providerId": "20f1e404-0006-478e-803d-e523437c9b10",
-      "info": {
         "id": "openrouter/anthropic/claude-opus-5",
         "displayName": "OpenRouter/Claude Opus 5"
       },
       "configuredModelId": "9b67e582-5311-4d3e-8fa5-c57862bab617",
       "configuredAt": 1787901353387
-    },
-    {
-      "providerId": "20f1e404-0006-478e-803d-e523437c9b10",
-      "info": {
-        "id": "openrouter/anthropic/claude-opus-5-fast",
-        "displayName": "OpenRouter/Claude Opus 5 (Fast)"
-      },
-      "configuredModelId": "2591efe8-9d09-4779-b568-cd1ecb0cb65e",
-      "configuredAt": 1787901353389
     },
     {
       "providerId": "20f1e404-0006-478e-803d-e523437c9b10",
@@ -2055,15 +2028,6 @@
       },
       "configuredModelId": "67ff82b2-14b1-4e40-8d74-bfd2320da40d",
       "configuredAt": 1787901353626
-    },
-    {
-      "providerId": "20f1e404-0006-478e-803d-e523437c9b10",
-      "info": {
-        "id": "openrouter/kwaipilot/kat-coder-air-v2.5",
-        "displayName": "OpenRouter/KAT-Coder-Air V2.5"
-      },
-      "configuredModelId": "67fe442c-82ea-41a1-9519-a14a2490f3b1",
-      "configuredAt": 1787901353628
     },
     {
       "providerId": "20f1e404-0006-478e-803d-e523437c9b10",
@@ -3810,6 +3774,24 @@
       },
       "configuredModelId": "8e635264-cd25-4d42-bc88-37a9dfde72ba",
       "configuredAt": 1787939068789
+    },
+    {
+      "providerId": "20f1e404-0006-478e-803d-e523437c9b10",
+      "info": {
+        "id": "openrouter/ibm-granite/granite-4.2-8b",
+        "displayName": "OpenRouter/Granite 4.2 8B"
+      },
+      "configuredModelId": "73d343f8-e78a-48a4-853e-a62747c87b47",
+      "configuredAt": 1788284621765
+    },
+    {
+      "providerId": "20f1e404-0006-478e-803d-e523437c9b10",
+      "info": {
+        "id": "openrouter/inception/mercury-2.5-preview",
+        "displayName": "OpenRouter/Mercury 2.5 Preview"
+      },
+      "configuredModelId": "f5fa257f-b0c4-4015-b303-460d65484467",
+      "configuredAt": 1788284621775
     }
   ],
   "backends": {
