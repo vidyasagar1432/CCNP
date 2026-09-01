@@ -2,12 +2,13 @@
 
 This project turns the `.md` study notes into flip-card decks. Each deck is a
 small JSON file saved **next to its `.md` file**. A build script bundles all of
-them into `decks.js`, which `index.html` loads (works by double-clicking, no
-server needed).
+them into `decks.js`, which `flashcards.html` loads (works by double-clicking,
+no server needed).
 
 ```
 CCNP/
-  index.html            app (already exists)
+  index.html            study hub — unified entry point to every level page
+  flashcards.html       app (already exists)
   decks.js              generated bundle (run build-decks.py)
   build-decks.py        bundles every Level*/<topic>.json → decks.js
   00. MOC - CCNP Study Map.md   top-level study planner / map of content
@@ -115,8 +116,8 @@ python3 -c "import json; json.load(open('Level 04 - Ethernet & Switching/01. MAC
 python3 build-decks.py
 ```
 
-Then double-click `index.html` — the new topic should appear with the right
-card count.
+Then double-click `index.html` (or `flashcards.html` for the flashcards app) —
+the new topic should appear with the right card count.
 
 ---
 
@@ -401,7 +402,7 @@ at the end).
 several `.md` files from the *same* level. Ask for one JSON file per attached note
 (all from that level, so `levelTitle` is identical). Review the output with
 `python3 build-decks.py`, which reports the level/topic/card totals, and spot-check
-a few decks in `index.html`.
+a few decks in `flashcards.html`.
 
 ---
 

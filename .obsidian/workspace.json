@@ -37,22 +37,6 @@
           }
         ],
         "currentTab": 1
-      },
-      {
-        "id": "00800c293e289829",
-        "type": "tabs",
-        "children": [
-          {
-            "id": "2d9ee01c88a858a6",
-            "type": "leaf",
-            "state": {
-              "type": "copilot-agent-chat-view",
-              "state": {},
-              "icon": "copilot-agent",
-              "title": "Copilot Agent"
-            }
-          }
-        ]
       }
     ],
     "direction": "vertical"
@@ -231,8 +215,9 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "7d89de05ca9fb5db",
+  "active": "238d811bb94942b3",
   "lastOpenFiles": [
+    "flashcards.html",
     "copilot/copilot-conversations/agent__create_a_single_html_file_in_Level_11_EIGRP_that@20260829_231542.md",
     "Notebook/CCNP_ENCOR_Routing_Fundamentals_Final_Notes.md",
     "Level 30 - Labs/How Labs Work.html",
