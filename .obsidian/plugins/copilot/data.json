@@ -511,6 +511,14 @@
           "binarySource": "managed",
           "probeSessionId": "ses_f94465f56ffeSoGT0Of1njwsBY"
         }
+      },
+      "b075a940-2170-453b-84fc-1297c35cccd3": {
+        "opencode": {
+          "binaryPath": "/home/sagar/.local/bin/opencode",
+          "binaryVersion": "1.18.27",
+          "binarySource": "custom",
+          "probeSessionId": "ses_f91eb5dc9ffeE85aiOAqbtAVyh"
+        }
       }
     }
   },
