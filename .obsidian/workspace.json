@@ -217,6 +217,13 @@
   },
   "active": "238d811bb94942b3",
   "lastOpenFiles": [
+    "copilot/skills/openartifacts-publish/SKILL.md",
+    "copilot/skills/openartifacts-publish/openartifacts-publish.ps1",
+    "copilot/skills/openartifacts-publish/openartifacts-publish.cmd",
+    "copilot/skills/openartifacts-publish/openartifacts-publish.sh",
+    "copilot/skills/openartifacts-publish/themes/research-memo.md",
+    "copilot/skills/openartifacts-publish/themes",
+    "copilot/skills/openartifacts-publish",
     "flashcards.html",
     "copilot/copilot-conversations/agent__create_a_single_html_file_in_Level_11_EIGRP_that@20260829_231542.md",
     "Notebook/CCNP_ENCOR_Routing_Fundamentals_Final_Notes.md",
@@ -224,12 +231,6 @@
     "Level 29 - Troubleshooting/How Troubleshooting Works.html",
     "Level 28 - Cisco IOS and IOS XE/How Cisco IOS and IOS XE Works.html",
     "Level 27 - High Availability/How High Availability Works.html",
-    "Level 26 - Monitoring & Telemetry/How Monitoring & Telemetry Works.html",
-    "Level 25 - Virtualization & Cloud/How Virtualization & Cloud Works.html",
-    "Level 24 - SDN & Automation/How SDN and Automation Works.html",
-    "Level 23 - Enterprise WAN/How Enterprise WAN Works.html",
-    "Level 22 - Wireless/How Wireless Works.html",
-    "Level 21 - QoS/How QoS Works.html",
     "Notebook/Routing Fundamentals.md",
     "Notebook/Routing_Fundamentals_Final.md",
     "Level 09 - Routing Fundamentals/Routing Fundamentals Overview.md",
@@ -251,7 +252,6 @@
     "Glossary/Forwarding.md",
     "Glossary/Dynamic Routing.md",
     "Glossary/Git.md",
-    "Glossary/Gratuitous ARP.md",
-    "Glossary/Glossary.md"
+    "Glossary/Gratuitous ARP.md"
   ]
 }
